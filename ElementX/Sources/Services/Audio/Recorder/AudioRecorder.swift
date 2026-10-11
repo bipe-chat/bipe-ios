@@ -14,6 +14,7 @@ import UIKit
 
 private nonisolated enum InternalAudioRecorderState: Equatable {
     case recording
+    case paused
     case suspended
     case stopped
     case error(AudioRecorderError)
@@ -42,9 +43,12 @@ nonisolated class AudioRecorder: AudioRecorderProtocol, @unchecked Sendable {
     
     private(set) var audioFileURL: URL?
     var currentTime: TimeInterval = .zero
+    /// A paused recording still counts as recording: the file and the engine stay open.
     var isRecording: Bool {
-        audioEngine?.isRunning ?? false
+        (audioEngine?.isRunning ?? false) || isPaused
     }
+    
+    private(set) var isPaused = false
     
     private let dispatchQueue = DispatchQueue(label: "io.element.elementx.audio_recorder", qos: .userInitiated)
     private var stopped = false
@@ -73,6 +77,22 @@ nonisolated class AudioRecorder: AudioRecorderProtocol, @unchecked Sendable {
             setInternalState(.recording)
         case .failure(let error):
             setInternalState(.error(error))
+        }
+    }
+    
+    func pauseRecording() async {
+        await withCheckedContinuation { continuation in
+            pauseRecording {
+                continuation.resume()
+            }
+        }
+    }
+    
+    func resumeRecording() async {
+        await withCheckedContinuation { continuation in
+            resumeRecording {
+                continuation.resume()
+            }
         }
     }
     
@@ -225,6 +245,37 @@ nonisolated class AudioRecorder: AudioRecorderProtocol, @unchecked Sendable {
         }
     }
     
+    private func pauseRecording(completion: @escaping @Sendable () -> Void) {
+        dispatchQueue.async { [weak self] in
+            defer {
+                completion()
+            }
+            guard let self, let engine = audioEngine, engine.isRunning else { return }
+            engine.pause()
+            isPaused = true
+            setInternalState(.paused)
+        }
+    }
+    
+    private func resumeRecording(completion: @escaping @Sendable () -> Void) {
+        dispatchQueue.async { [weak self] in
+            defer {
+                completion()
+            }
+            guard let self, isPaused, let engine = audioEngine else { return }
+            isPaused = false
+            do {
+                try engine.start()
+                // Not `setInternalState(.recording)`: `.didStartRecording` would start a new recorder state and drop the waveform.
+                internalState = .recording
+                actionsSubject.send(.didResumeRecording)
+            } catch {
+                MXLog.error("audio recording failed to resume. \(error)")
+                setInternalState(.error(.audioEngineFailure))
+            }
+        }
+    }
+    
     private func stopRecording(completion: @escaping @Sendable () -> Void) {
         dispatchQueue.async { [weak self] in
             defer {
@@ -249,6 +300,7 @@ nonisolated class AudioRecorder: AudioRecorderProtocol, @unchecked Sendable {
         }
         audioFile = nil // this will close the file
         audioEngine = nil
+        isPaused = false
         releaseAudioSession()
     }
     
@@ -415,6 +467,8 @@ nonisolated class AudioRecorder: AudioRecorderProtocol, @unchecked Sendable {
             switch internalState {
             case .recording:
                 actionsSubject.send(.didStartRecording)
+            case .paused:
+                actionsSubject.send(.didPauseRecording)
             case .suspended:
                 break
             case .stopped:

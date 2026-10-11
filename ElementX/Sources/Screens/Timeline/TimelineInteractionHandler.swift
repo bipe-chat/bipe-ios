@@ -7,6 +7,7 @@
 //
 
 import Combine
+import ProseioKit
 import UIKit
 
 enum TimelineInteractionHandlerAction {
@@ -59,6 +60,8 @@ class TimelineInteractionHandler {
     }
     
     private var resumeVoiceMessagePlaybackAfterScrubbing = false
+    /// Proseio: the sender-side transcript of the recording in preview.
+    private var voiceTranscriptDraft: VoiceTranscriptDraft?
     
     /// The voice message playback that was last asked for, and whether the player has begun it.
     private enum VoiceMessagePlayback {
@@ -343,7 +346,13 @@ class TimelineInteractionHandler {
             audioRecordState.attachAudioRecorder(audioRecorder)
             actionsSubject.send(.composer(action: .setMode(mode: .recordVoiceMessage(state: audioRecordState))))
         case .didStopRecording(let previewAudioPlayerState, let url):
-            actionsSubject.send(.composer(action: .setMode(mode: .previewVoiceMessage(state: previewAudioPlayerState, waveform: .url(url), isUploading: false))))
+            discardVoiceTranscriptDraft()
+            let transcriptDraft = VoiceTranscriptDraft(fileURL: url)
+            voiceTranscriptDraft = transcriptDraft
+            actionsSubject.send(.composer(action: .setMode(mode: .previewVoiceMessage(state: previewAudioPlayerState,
+                                                                                      waveform: .url(url),
+                                                                                      isUploading: false,
+                                                                                      transcript: transcriptDraft))))
             voiceMessageRecorderObserver = nil
         case .didFailWithError(let error):
             switch error {
@@ -367,6 +376,14 @@ class TimelineInteractionHandler {
         await voiceMessageRecorder.startRecording()
     }
     
+    func pauseRecordingVoiceMessage() async {
+        await voiceMessageRecorder.pauseRecording()
+    }
+    
+    func resumeRecordingVoiceMessage() async {
+        await voiceMessageRecorder.resumeRecording()
+    }
+    
     func stopRecordingVoiceMessage() async {
         await voiceMessageRecorder.stopRecording()
     }
@@ -380,6 +397,7 @@ class TimelineInteractionHandler {
     func cancelRecordingVoiceMessage() async {
         await voiceMessageRecorder.cancelRecording()
         voiceMessageRecorderObserver = nil
+        discardVoiceTranscriptDraft()
         actionsSubject.send(.composer(action: .setMode(mode: .default)))
     }
     
@@ -391,7 +409,13 @@ class TimelineInteractionHandler {
         }
         
         voiceMessageRecorderObserver = nil
+        discardVoiceTranscriptDraft()
         actionsSubject.send(.composer(action: .setMode(mode: .default)))
+    }
+    
+    private func discardVoiceTranscriptDraft() {
+        voiceTranscriptDraft?.cancel()
+        voiceTranscriptDraft = nil
     }
     
     func sendCurrentVoiceMessage() async {
@@ -406,15 +430,24 @@ class TimelineInteractionHandler {
                                        messageType: .VoiceMessage,
                                        startsThread: nil)
         
-        actionsSubject.send(.composer(action: .setMode(mode: .previewVoiceMessage(state: audioPlayerState, waveform: .url(recordingURL), isUploading: true))))
+        actionsSubject.send(.composer(action: .setMode(mode: .previewVoiceMessage(state: audioPlayerState,
+                                                                                  waveform: .url(recordingURL),
+                                                                                  isUploading: true,
+                                                                                  transcript: voiceTranscriptDraft))))
         await voiceMessageRecorder.stopPlayback()
         
-        switch await voiceMessageRecorder.sendVoiceMessage(timelineController: timelineController, audioConverter: AudioConverter()) {
+        // A transcript still in progress is dropped: sending never waits for it.
+        switch await voiceMessageRecorder.sendVoiceMessage(timelineController: timelineController,
+                                                           audioConverter: AudioConverter(),
+                                                           caption: voiceTranscriptDraft?.caption) {
         case .success:
             await deleteCurrentVoiceMessage()
         case .failure(let error):
             MXLog.error("failed to send the voice message. \(error)")
-            actionsSubject.send(.composer(action: .setMode(mode: .previewVoiceMessage(state: audioPlayerState, waveform: .url(recordingURL), isUploading: false))))
+            actionsSubject.send(.composer(action: .setMode(mode: .previewVoiceMessage(state: audioPlayerState,
+                                                                                      waveform: .url(recordingURL),
+                                                                                      isUploading: false,
+                                                                                      transcript: voiceTranscriptDraft))))
             actionsSubject.send(.displayErrorToast(L10n.errorFailedUploadingVoiceMessage))
         }
     }

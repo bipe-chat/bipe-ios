@@ -487,6 +487,10 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
         case .startRecording:
             state.bindings.composerFormattingEnabled = false
             actionsSubject.send(.voiceMessage(.startRecording))
+        case .pauseRecording:
+            actionsSubject.send(.voiceMessage(.pauseRecording))
+        case .resumeRecording:
+            actionsSubject.send(.voiceMessage(.resumeRecording))
         case .stopRecording:
             actionsSubject.send(.voiceMessage(.stopRecording))
         case .cancelRecording:

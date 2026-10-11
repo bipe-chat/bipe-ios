@@ -20,6 +20,8 @@ class AudioRecorderState: ObservableObject, Identifiable {
     let id = UUID()
     
     @Published private(set) var recordingState: AudioRecorderRecordingState = .stopped
+    /// Proseio: the sender paused the recording and can resume it (proseio/docs/audio.md).
+    @Published private(set) var isPaused = false
     @Published private(set) var duration = 0.0
     @Published private(set) var waveformSamples: [Float] = []
     
@@ -71,12 +73,21 @@ class AudioRecorderState: ObservableObject, Identifiable {
         case .didStartRecording:
             startPublishUpdates()
             recordingState = .recording
+            isPaused = false
+        case .didPauseRecording:
+            stopPublishUpdates()
+            isPaused = true
+        case .didResumeRecording:
+            startPublishUpdates()
+            isPaused = false
         case .didStopRecording:
             stopPublishUpdates()
             recordingState = .stopped
+            isPaused = false
         case .didFailWithError:
             stopPublishUpdates()
             recordingState = .stopped
+            isPaused = false
         }
     }
     

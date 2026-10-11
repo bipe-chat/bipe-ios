@@ -22,6 +22,8 @@ nonisolated enum AudioRecorderError: Error, Equatable {
 nonisolated enum AudioRecorderAction {
     case didStartRecording
     case didStopRecording
+    case didPauseRecording
+    case didResumeRecording
     case didFailWithError(error: AudioRecorderError)
 }
 
@@ -29,9 +31,12 @@ nonisolated protocol AudioRecorderProtocol: AnyObject, Sendable {
     var actions: AnyPublisher<AudioRecorderAction, Never> { get }
     var currentTime: TimeInterval { get }
     var isRecording: Bool { get }
+    var isPaused: Bool { get }
     var audioFileURL: URL? { get }
     
     func record(audioFileURL: URL) async
+    func pauseRecording() async
+    func resumeRecording() async
     func stopRecording() async
     func deleteRecording() async
     func averagePower() -> Float

@@ -282,12 +282,23 @@ struct ComposerToolbar: View {
                 voiceMessageTrashButton
                     .scaledPadding(.vertical, buttonVerticalPadding, relativeTo: .compound.headingLG)
                 VoiceMessageRecordingComposer(recorderState: state)
+                ProseioRecordingPauseButton(recorderState: state) {
+                    context.send(viewAction: .voiceMessage(.pauseRecording))
+                } resume: {
+                    context.send(viewAction: .voiceMessage(.resumeRecording))
+                }
+                .scaledPadding(.vertical, buttonVerticalPadding, relativeTo: .compound.headingLG)
             }
-        case .previewVoiceMessage(let state, let waveform, let isUploading):
-            topBarLayout {
-                voiceMessageTrashButton
-                    .scaledPadding(.vertical, buttonVerticalPadding, relativeTo: .compound.headingLG)
-                voiceMessagePreviewComposer(audioPlayerState: state, waveform: waveform)
+        case .previewVoiceMessage(let state, let waveform, let isUploading, let transcript):
+            VStack(alignment: .leading, spacing: 8) {
+                if let transcript {
+                    ProseioVoiceTranscriptEditor(draft: transcript)
+                }
+                topBarLayout {
+                    voiceMessageTrashButton
+                        .scaledPadding(.vertical, buttonVerticalPadding, relativeTo: .compound.headingLG)
+                    voiceMessagePreviewComposer(audioPlayerState: state, waveform: waveform)
+                }
             }
             .disabled(isUploading)
         default:

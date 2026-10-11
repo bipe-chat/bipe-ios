@@ -174,12 +174,13 @@ struct TimelineControllerMockConfiguration {
             return .success(())
         }
         
-        sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure = { [weak self, timelineProxy] url, audioInfo, waveform, requestHandle in
+        sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure = { [weak self, timelineProxy] url, audioInfo, waveform, caption, requestHandle in
             self?.callbacks.send(.messageSentOrEdited)
             if let timelineProxy {
                 return await timelineProxy.sendVoiceMessage(url: url,
                                                             audioInfo: audioInfo,
                                                             waveform: waveform,
+                                                            caption: caption,
                                                             requestHandle: requestHandle).mapError(TimelineControllerError.timelineProxyError)
             }
             return .success(())

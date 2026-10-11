@@ -8,11 +8,14 @@
 
 import Compound
 import MatrixRustSDK
+import ProseioKit
 import SwiftUI
 import WysiwygComposer
 
 enum ComposerToolbarVoiceMessageAction {
     case startRecording
+    case pauseRecording
+    case resumeRecording
     case stopRecording
     case cancelRecording
     case deleteRecording
@@ -85,7 +88,7 @@ struct ComposerToolbarViewState: BindableState {
     
     var isUploading: Bool {
         switch composerMode {
-        case .previewVoiceMessage(_, _, let isUploading):
+        case .previewVoiceMessage(_, _, let isUploading, _):
             return isUploading
         default:
             return false
@@ -333,7 +336,8 @@ enum ComposerMode: Equatable {
     case reply(eventID: String, replyDetails: TimelineItemReplyDetails, isThread: Bool)
     case edit(originalEventOrTransactionID: TimelineItemIdentifier.EventOrTransactionID, type: EditType)
     case recordVoiceMessage(state: AudioRecorderState)
-    case previewVoiceMessage(state: AudioPlayerState, waveform: WaveformSource, isUploading: Bool)
+    /// Proseio: `transcript` is the sender-side transcript the sender can correct before sending.
+    case previewVoiceMessage(state: AudioPlayerState, waveform: WaveformSource, isUploading: Bool, transcript: VoiceTranscriptDraft? = nil)
     
     var isEdit: Bool {
         switch self {

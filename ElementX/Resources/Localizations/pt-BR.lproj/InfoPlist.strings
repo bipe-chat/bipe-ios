@@ -4,3 +4,4 @@
 "NSLocationWhenInUseUsageDescription" = "Conceda o acesso à localização para que o Element X possa compartilhar a sua localização.";
 "NSMicrophoneUsageDescription" = "Para gravar e enviar mensagens de aúdio, o Element X precisa de acesso ao microfone.";
 "NSPhotoLibraryUsageDescription" = "Permite salvar fotos e vídeos para sua galeria.";
+"NSSpeechRecognitionUsageDescription" = "O Proseio transcreve suas mensagens de voz neste celular para você conferir o texto antes de enviar. O áudio não sai do celular.";

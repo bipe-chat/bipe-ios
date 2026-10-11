@@ -1430,6 +1430,11 @@ nonisolated class AudioRecorderMock: AudioRecorderProtocol, @unchecked Sendable 
         set(value) { underlyingIsRecording = value }
     }
     nonisolated(unsafe) var underlyingIsRecording: Bool!
+    var isPaused: Bool {
+        get { return underlyingIsPaused }
+        set(value) { underlyingIsPaused = value }
+    }
+    nonisolated(unsafe) var underlyingIsPaused: Bool!
     nonisolated(unsafe) var audioFileURL: URL?
 
     //MARK: - record
@@ -1462,6 +1467,40 @@ nonisolated class AudioRecorderMock: AudioRecorderProtocol, @unchecked Sendable 
         recordAudioFileURLReceivedAudioFileURL = audioFileURL
         recordAudioFileURLReceivedInvocationsLock.withLock { recordAudioFileURLUnderlyingReceivedInvocations.append(audioFileURL) }
         await recordAudioFileURLClosure?(audioFileURL)
+    }
+    //MARK: - pauseRecording
+
+    private let pauseRecordingCallsCountLock = NSLock()
+    private nonisolated(unsafe) var pauseRecordingUnderlyingCallsCount = 0
+    var pauseRecordingCallsCount: Int {
+        get { pauseRecordingCallsCountLock.withLock { pauseRecordingUnderlyingCallsCount } }
+        set { pauseRecordingCallsCountLock.withLock { pauseRecordingUnderlyingCallsCount = newValue } }
+    }
+    var pauseRecordingCalled: Bool {
+        return pauseRecordingCallsCount > 0
+    }
+    nonisolated(unsafe) var pauseRecordingClosure: (() async -> Void)?
+
+    @concurrent func pauseRecording() async {
+        pauseRecordingCallsCountLock.withLock { pauseRecordingUnderlyingCallsCount += 1 }
+        await pauseRecordingClosure?()
+    }
+    //MARK: - resumeRecording
+
+    private let resumeRecordingCallsCountLock = NSLock()
+    private nonisolated(unsafe) var resumeRecordingUnderlyingCallsCount = 0
+    var resumeRecordingCallsCount: Int {
+        get { resumeRecordingCallsCountLock.withLock { resumeRecordingUnderlyingCallsCount } }
+        set { resumeRecordingCallsCountLock.withLock { resumeRecordingUnderlyingCallsCount = newValue } }
+    }
+    var resumeRecordingCalled: Bool {
+        return resumeRecordingCallsCount > 0
+    }
+    nonisolated(unsafe) var resumeRecordingClosure: (() async -> Void)?
+
+    @concurrent func resumeRecording() async {
+        resumeRecordingCallsCountLock.withLock { resumeRecordingUnderlyingCallsCount += 1 }
+        await resumeRecordingClosure?()
     }
     //MARK: - stopRecording
 
@@ -12937,30 +12976,30 @@ nonisolated class TimelineControllerMock: TimelineControllerProtocol, @unchecked
     }
     //MARK: - sendVoiceMessage
 
-    private let sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount = 0
-    var sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCount: Int {
-        get { sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount } }
-        set { sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount = newValue } }
+    private let sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount = 0
+    var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCount: Int {
+        get { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount } }
+        set { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount = newValue } }
     }
-    var sendVoiceMessageUrlAudioInfoWaveformRequestHandleCalled: Bool {
-        return sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCount > 0
+    var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCalled: Bool {
+        return sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCount > 0
     }
 
-    private let sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValueLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingReturnValue: Result<Void, TimelineControllerError>!
-    var sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValue: Result<Void, TimelineControllerError>! {
-        get { sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingReturnValue } }
-        set { sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingReturnValue = newValue } }
+    private let sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValueLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingReturnValue: Result<Void, TimelineControllerError>!
+    var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValue: Result<Void, TimelineControllerError>! {
+        get { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingReturnValue } }
+        set { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingReturnValue = newValue } }
     }
-    nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure: ((URL, AudioInfo, [Float], @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineControllerError>)?
+    nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure: ((URL, AudioInfo, [Float], String?, @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineControllerError>)?
 
-    @concurrent func sendVoiceMessage(url: URL, audioInfo: AudioInfo, waveform: [Float], requestHandle: @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineControllerError> {
-        sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount += 1 }
-        if let sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure = sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure {
-            return await sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure(url, audioInfo, waveform, requestHandle)
+    @concurrent func sendVoiceMessage(url: URL, audioInfo: AudioInfo, waveform: [Float], caption: String?, requestHandle: @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineControllerError> {
+        sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount += 1 }
+        if let sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure = sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure {
+            return await sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure(url, audioInfo, waveform, caption, requestHandle)
         } else {
-            return sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValue
+            return sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValue
         }
     }
     //MARK: - sendGallery
@@ -13818,30 +13857,30 @@ nonisolated class TimelineProxyMock: TimelineProxyProtocol, @unchecked Sendable 
     }
     //MARK: - sendVoiceMessage
 
-    private let sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount = 0
-    var sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCount: Int {
-        get { sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount } }
-        set { sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount = newValue } }
+    private let sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount = 0
+    var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCount: Int {
+        get { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount } }
+        set { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount = newValue } }
     }
-    var sendVoiceMessageUrlAudioInfoWaveformRequestHandleCalled: Bool {
-        return sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCount > 0
+    var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCalled: Bool {
+        return sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCount > 0
     }
 
-    private let sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValueLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingReturnValue: Result<Void, TimelineProxyError>!
-    var sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValue: Result<Void, TimelineProxyError>! {
-        get { sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingReturnValue } }
-        set { sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingReturnValue = newValue } }
+    private let sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValueLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingReturnValue: Result<Void, TimelineProxyError>!
+    var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValue: Result<Void, TimelineProxyError>! {
+        get { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingReturnValue } }
+        set { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValueLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingReturnValue = newValue } }
     }
-    nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure: ((URL, AudioInfo, [Float], @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineProxyError>)?
+    nonisolated(unsafe) var sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure: ((URL, AudioInfo, [Float], String?, @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineProxyError>)?
 
-    @concurrent func sendVoiceMessage(url: URL, audioInfo: AudioInfo, waveform: [Float], requestHandle: @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineProxyError> {
-        sendVoiceMessageUrlAudioInfoWaveformRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformRequestHandleUnderlyingCallsCount += 1 }
-        if let sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure = sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure {
-            return await sendVoiceMessageUrlAudioInfoWaveformRequestHandleClosure(url, audioInfo, waveform, requestHandle)
+    @concurrent func sendVoiceMessage(url: URL, audioInfo: AudioInfo, waveform: [Float], caption: String?, requestHandle: @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineProxyError> {
+        sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleCallsCountLock.withLock { sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleUnderlyingCallsCount += 1 }
+        if let sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure = sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure {
+            return await sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleClosure(url, audioInfo, waveform, caption, requestHandle)
         } else {
-            return sendVoiceMessageUrlAudioInfoWaveformRequestHandleReturnValue
+            return sendVoiceMessageUrlAudioInfoWaveformCaptionRequestHandleReturnValue
         }
     }
     //MARK: - sendGallery
@@ -15538,46 +15577,80 @@ nonisolated class VoiceMessageRecorderMock: VoiceMessageRecorderProtocol, @unche
         deleteRecordingCallsCountLock.withLock { deleteRecordingUnderlyingCallsCount += 1 }
         await deleteRecordingClosure?()
     }
+    //MARK: - pauseRecording
+
+    private let pauseRecordingCallsCountLock = NSLock()
+    private nonisolated(unsafe) var pauseRecordingUnderlyingCallsCount = 0
+    var pauseRecordingCallsCount: Int {
+        get { pauseRecordingCallsCountLock.withLock { pauseRecordingUnderlyingCallsCount } }
+        set { pauseRecordingCallsCountLock.withLock { pauseRecordingUnderlyingCallsCount = newValue } }
+    }
+    var pauseRecordingCalled: Bool {
+        return pauseRecordingCallsCount > 0
+    }
+    nonisolated(unsafe) var pauseRecordingClosure: (() async -> Void)?
+
+    @concurrent func pauseRecording() async {
+        pauseRecordingCallsCountLock.withLock { pauseRecordingUnderlyingCallsCount += 1 }
+        await pauseRecordingClosure?()
+    }
+    //MARK: - resumeRecording
+
+    private let resumeRecordingCallsCountLock = NSLock()
+    private nonisolated(unsafe) var resumeRecordingUnderlyingCallsCount = 0
+    var resumeRecordingCallsCount: Int {
+        get { resumeRecordingCallsCountLock.withLock { resumeRecordingUnderlyingCallsCount } }
+        set { resumeRecordingCallsCountLock.withLock { resumeRecordingUnderlyingCallsCount = newValue } }
+    }
+    var resumeRecordingCalled: Bool {
+        return resumeRecordingCallsCount > 0
+    }
+    nonisolated(unsafe) var resumeRecordingClosure: (() async -> Void)?
+
+    @concurrent func resumeRecording() async {
+        resumeRecordingCallsCountLock.withLock { resumeRecordingUnderlyingCallsCount += 1 }
+        await resumeRecordingClosure?()
+    }
     //MARK: - sendVoiceMessage
 
-    private let sendVoiceMessageTimelineControllerAudioConverterCallsCountLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterUnderlyingCallsCount = 0
-    var sendVoiceMessageTimelineControllerAudioConverterCallsCount: Int {
-        get { sendVoiceMessageTimelineControllerAudioConverterCallsCountLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingCallsCount } }
-        set { sendVoiceMessageTimelineControllerAudioConverterCallsCountLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingCallsCount = newValue } }
+    private let sendVoiceMessageTimelineControllerAudioConverterCaptionCallsCountLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingCallsCount = 0
+    var sendVoiceMessageTimelineControllerAudioConverterCaptionCallsCount: Int {
+        get { sendVoiceMessageTimelineControllerAudioConverterCaptionCallsCountLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingCallsCount } }
+        set { sendVoiceMessageTimelineControllerAudioConverterCaptionCallsCountLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingCallsCount = newValue } }
     }
-    var sendVoiceMessageTimelineControllerAudioConverterCalled: Bool {
-        return sendVoiceMessageTimelineControllerAudioConverterCallsCount > 0
+    var sendVoiceMessageTimelineControllerAudioConverterCaptionCalled: Bool {
+        return sendVoiceMessageTimelineControllerAudioConverterCaptionCallsCount > 0
     }
-    private let sendVoiceMessageTimelineControllerAudioConverterReceivedArgumentsLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterUnderlyingReceivedArguments: (timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol)?
-    var sendVoiceMessageTimelineControllerAudioConverterReceivedArguments: (timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol)? {
-        get { sendVoiceMessageTimelineControllerAudioConverterReceivedArgumentsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingReceivedArguments } }
-        set { sendVoiceMessageTimelineControllerAudioConverterReceivedArgumentsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingReceivedArguments = newValue } }
+    private let sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedArgumentsLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReceivedArguments: (timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol, caption: String?)?
+    var sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedArguments: (timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol, caption: String?)? {
+        get { sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedArgumentsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReceivedArguments } }
+        set { sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedArgumentsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReceivedArguments = newValue } }
     }
-    private let sendVoiceMessageTimelineControllerAudioConverterReceivedInvocationsLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterUnderlyingReceivedInvocations: [(timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol)] = []
-    var sendVoiceMessageTimelineControllerAudioConverterReceivedInvocations: [(timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol)] {
-        get { sendVoiceMessageTimelineControllerAudioConverterReceivedInvocationsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingReceivedInvocations } }
-        set { sendVoiceMessageTimelineControllerAudioConverterReceivedInvocationsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingReceivedInvocations = newValue } }
+    private let sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedInvocationsLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReceivedInvocations: [(timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol, caption: String?)] = []
+    var sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedInvocations: [(timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol, caption: String?)] {
+        get { sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedInvocationsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReceivedInvocations } }
+        set { sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedInvocationsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReceivedInvocations = newValue } }
     }
 
-    private let sendVoiceMessageTimelineControllerAudioConverterReturnValueLock = NSLock()
-    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterUnderlyingReturnValue: Result<Void, VoiceMessageRecorderError>!
-    var sendVoiceMessageTimelineControllerAudioConverterReturnValue: Result<Void, VoiceMessageRecorderError>! {
-        get { sendVoiceMessageTimelineControllerAudioConverterReturnValueLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingReturnValue } }
-        set { sendVoiceMessageTimelineControllerAudioConverterReturnValueLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingReturnValue = newValue } }
+    private let sendVoiceMessageTimelineControllerAudioConverterCaptionReturnValueLock = NSLock()
+    private nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReturnValue: Result<Void, VoiceMessageRecorderError>!
+    var sendVoiceMessageTimelineControllerAudioConverterCaptionReturnValue: Result<Void, VoiceMessageRecorderError>! {
+        get { sendVoiceMessageTimelineControllerAudioConverterCaptionReturnValueLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReturnValue } }
+        set { sendVoiceMessageTimelineControllerAudioConverterCaptionReturnValueLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReturnValue = newValue } }
     }
-    nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterClosure: ((TimelineControllerProtocol, AudioConverterProtocol) async -> Result<Void, VoiceMessageRecorderError>)?
+    nonisolated(unsafe) var sendVoiceMessageTimelineControllerAudioConverterCaptionClosure: ((TimelineControllerProtocol, AudioConverterProtocol, String?) async -> Result<Void, VoiceMessageRecorderError>)?
 
-    @concurrent func sendVoiceMessage(timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol) async -> Result<Void, VoiceMessageRecorderError> {
-        sendVoiceMessageTimelineControllerAudioConverterCallsCountLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingCallsCount += 1 }
-        sendVoiceMessageTimelineControllerAudioConverterReceivedArguments = (timelineController: timelineController, audioConverter: audioConverter)
-        sendVoiceMessageTimelineControllerAudioConverterReceivedInvocationsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterUnderlyingReceivedInvocations.append((timelineController: timelineController, audioConverter: audioConverter)) }
-        if let sendVoiceMessageTimelineControllerAudioConverterClosure = sendVoiceMessageTimelineControllerAudioConverterClosure {
-            return await sendVoiceMessageTimelineControllerAudioConverterClosure(timelineController, audioConverter)
+    @concurrent func sendVoiceMessage(timelineController: TimelineControllerProtocol, audioConverter: AudioConverterProtocol, caption: String?) async -> Result<Void, VoiceMessageRecorderError> {
+        sendVoiceMessageTimelineControllerAudioConverterCaptionCallsCountLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingCallsCount += 1 }
+        sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedArguments = (timelineController: timelineController, audioConverter: audioConverter, caption: caption)
+        sendVoiceMessageTimelineControllerAudioConverterCaptionReceivedInvocationsLock.withLock { sendVoiceMessageTimelineControllerAudioConverterCaptionUnderlyingReceivedInvocations.append((timelineController: timelineController, audioConverter: audioConverter, caption: caption)) }
+        if let sendVoiceMessageTimelineControllerAudioConverterCaptionClosure = sendVoiceMessageTimelineControllerAudioConverterCaptionClosure {
+            return await sendVoiceMessageTimelineControllerAudioConverterCaptionClosure(timelineController, audioConverter, caption)
         } else {
-            return sendVoiceMessageTimelineControllerAudioConverterReturnValue
+            return sendVoiceMessageTimelineControllerAudioConverterCaptionReturnValue
         }
     }
 }

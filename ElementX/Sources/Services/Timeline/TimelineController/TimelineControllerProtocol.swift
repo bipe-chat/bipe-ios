@@ -142,6 +142,7 @@ protocol TimelineControllerProtocol: Sendable {
     func sendVoiceMessage(url: URL,
                           audioInfo: AudioInfo,
                           waveform: [Float],
+                          caption: String?,
                           requestHandle: @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineControllerError>
     
     func sendGallery(itemInfos: [GalleryItemInfo],

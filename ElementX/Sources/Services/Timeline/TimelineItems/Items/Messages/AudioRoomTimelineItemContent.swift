@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import ProseioKit
 import UIKit
 import UniformTypeIdentifiers
 
@@ -20,4 +21,6 @@ nonisolated struct AudioRoomTimelineItemContent: Hashable {
     let source: MediaSourceProxy?
     let fileSize: UInt?
     let contentType: UTType?
+    /// Proseio: scam pattern warning for an incoming voice message transcript (security rule 9).
+    var proseioScamWarning: ScamWarningKind?
 }

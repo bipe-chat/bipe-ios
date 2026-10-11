@@ -415,6 +415,10 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
                 await mediaPlayerProvider.detachAllStates(except: nil)
                 await timelineInteractionHandler.startRecordingVoiceMessage()
             }
+        case .pauseRecording:
+            Task { await timelineInteractionHandler.pauseRecordingVoiceMessage() }
+        case .resumeRecording:
+            Task { await timelineInteractionHandler.resumeRecordingVoiceMessage() }
         case .stopRecording:
             Task { await timelineInteractionHandler.stopRecordingVoiceMessage() }
         case .cancelRecording:

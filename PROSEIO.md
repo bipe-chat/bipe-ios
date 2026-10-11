@@ -79,6 +79,13 @@ Not done (needs the domain, Apple team or brand):
 - Element Classic migration settings in `app.yml`
 - Final app icon artwork, onboarding copy
 
+## Voice messages (proseio/docs/audio.md, ADR 0023)
+
+- **Transcript:** `VoiceTranscriber` and `VoiceTranscriptDraft` in ProseioKit. On-device Apple Speech only; no model, no transcript. The draft starts in `TimelineInteractionHandler` when a recording stops, rides in `ComposerMode.previewVoiceMessage(transcript:)`, and goes out as the event caption through `sendVoiceMessage(caption:)` on the recorder, controller and proxy.
+- **Display and scam check:** `ProseioVoiceTranscriptView` under `VoiceMessageRoomTimelineView`; `RoomTimelineItemFactory.proseioAddingScamWarning(to: AudioRoomTimelineItemContent…)`.
+- **Pause and resume recording:** `AudioRecorder.pauseRecording()` / `resumeRecording()` pause the engine and keep the file open. Resume sends `.didResumeRecording`, not `.didStartRecording`, so the waveform survives. `ProseioRecordingPauseButton` in the composer.
+- Sourcery is not installed on the dev Mac. The mock changes for these protocols were made by hand in `GeneratedMocks.swift` in Sourcery's pattern. A Sourcery run must give the same result.
+
 ## Design tokens
 
 - Compound tokens come from the Proseio fork **michellzappa/compound-design-tokens** (local clone `~/Dev/Proseio/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.

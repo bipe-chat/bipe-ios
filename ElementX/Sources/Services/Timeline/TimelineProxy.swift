@@ -428,12 +428,14 @@ final class TimelineProxy: TimelineProxyProtocol {
     func sendVoiceMessage(url: URL,
                           audioInfo: AudioInfo,
                           waveform: [Float],
+                          caption: String?,
                           requestHandle: @MainActor (SendAttachmentJoinHandleProtocol) -> Void) async -> Result<Void, TimelineProxyError> {
         MXLog.info("Sending voice message")
         
         do {
+            // Proseio: the caption carries the sender-side transcript (proseio/docs/audio.md).
             let handle = try timeline.sendVoiceMessage(params: .init(source: .file(filename: url.path(percentEncoded: false)),
-                                                                     caption: nil,
+                                                                     caption: caption,
                                                                      formattedCaption: nil,
                                                                      mentions: nil,
                                                                      inReplyTo: nil),

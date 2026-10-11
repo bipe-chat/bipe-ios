@@ -301,7 +301,7 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                      isEditable: eventItemProxy.isEditable,
                                      canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                                      sender: eventItemProxy.sender,
-                                     content: buildAudioTimelineItemContent(audioMessageContent),
+                                     content: proseioAddingScamWarning(to: buildAudioTimelineItemContent(audioMessageContent), eventItemProxy, isOutgoing),
                                      properties: .init(replyDetails: buildTimelineItemReplyDetails(messageLikeContent.inReplyTo),
                                                        isThreaded: messageLikeContent.threadRoot != nil,
                                                        threadSummary: buildTimelineItemThreadSummary(messageLikeContent.threadSummary),
@@ -654,6 +654,16 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         guard !isOutgoing, let eventID = eventItemProxy.id.eventID else { return content }
         var content = content
         content.proseioScamWarning = ScamDetector.warningKind(for: content.body, eventID: eventID)
+        return content
+    }
+    
+    /// Proseio: the same check on the transcript of an incoming voice message (proseio/docs/audio.md).
+    private func proseioAddingScamWarning(to content: AudioRoomTimelineItemContent,
+                                          _ eventItemProxy: EventTimelineItemProxy,
+                                          _ isOutgoing: Bool) -> AudioRoomTimelineItemContent {
+        guard !isOutgoing, let eventID = eventItemProxy.id.eventID, let transcript = content.caption else { return content }
+        var content = content
+        content.proseioScamWarning = ScamDetector.warningKind(for: transcript, eventID: eventID)
         return content
     }
     

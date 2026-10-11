@@ -68,6 +68,14 @@ class VoiceMessageRecorder: VoiceMessageRecorderProtocol {
         await audioRecorder.stopRecording()
     }
     
+    func pauseRecording() async {
+        await audioRecorder.pauseRecording()
+    }
+    
+    func resumeRecording() async {
+        await audioRecorder.resumeRecording()
+    }
+    
     func cancelRecording() async {
         MXLog.info("Cancel recording.")
         recordingCancelled = true
@@ -144,7 +152,8 @@ class VoiceMessageRecorder: VoiceMessageRecorderProtocol {
     }
     
     func sendVoiceMessage(timelineController: TimelineControllerProtocol,
-                          audioConverter: AudioConverterProtocol) async -> Result<Void, VoiceMessageRecorderError> {
+                          audioConverter: AudioConverterProtocol,
+                          caption: String?) async -> Result<Void, VoiceMessageRecorderError> {
         guard let url = audioRecorder.audioFileURL else {
             return .failure(VoiceMessageRecorderError.missingRecordingFile)
         }
@@ -178,7 +187,8 @@ class VoiceMessageRecorder: VoiceMessageRecorderProtocol {
         
         let result = await timelineController.sendVoiceMessage(url: oggFile,
                                                                audioInfo: audioInfo,
-                                                               waveform: waveform) { _ in }
+                                                               waveform: waveform,
+                                                               caption: caption) { _ in }
         
         if case .failure(let error) = result {
             MXLog.error("Failed to send the voice message. \(error)")
@@ -225,6 +235,8 @@ class VoiceMessageRecorder: VoiceMessageRecorderProtocol {
                     actionsSubject.send(.didStopRecording(previewState: previewAudioPlayerState, url: recordingURL))
                 }
             }
+        case .didPauseRecording, .didResumeRecording:
+            break
         case .didFailWithError(let error):
             MXLog.info("audio recorder did failed with error: \(error)")
             actionsSubject.send(.didFailWithError(error: .audioRecorderError(error)))
