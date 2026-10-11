@@ -392,8 +392,17 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         var rooms = [HomeScreenRoom]()
         let seenInvites = userSettings.app.seenInvites
+        // Proseio: DM invites are requests (usernames.md "First contact"). They only show under the Pedidos filter.
+        // The SDK has no cheap "shares a joined room" check, so every DM invite counts as a request.
+        let showsRequests = state.bindings.filtersState.isFilterActive(.invites)
+        var requestCount = 0
         
         for summary in roomSummaryProvider.roomListPublisher.value {
+            if !showsRequests, summary.isDirect, summary.joinRequestType?.isInvite == true {
+                requestCount += 1
+                continue
+            }
+            
             let room = HomeScreenRoom(summary: summary,
                                       showAllActivity: userSettings.app.showAllRoomListActivity,
                                       seenInvites: seenInvites)
@@ -401,6 +410,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         }
         
         state.rooms = rooms
+        state.proseioRequestCount = requestCount
     }
     
     private func markRoomAsFavourite(_ roomID: String, isFavourite: Bool) async {

@@ -179,4 +179,24 @@ public enum ProseioStrings {
     public static func linkHandleNotFound(_ p1: String) -> String {
         String(format: NSLocalizedString("proseio_link_handle_not_found", tableName: "Proseio", bundle: .module, comment: ""), p1)
     }
+
+    public static var requestsTitle: String { NSLocalizedString("proseio_requests_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var requestsRowBody: String { NSLocalizedString("proseio_requests_row_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var requestUnverifiedBody: String { NSLocalizedString("proseio_request_unverified_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningTitle: String { NSLocalizedString("proseio_scam_warning_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningPixKey: String { NSLocalizedString("proseio_scam_warning_pix_key", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningPixCode: String { NSLocalizedString("proseio_scam_warning_pix_code", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningBoleto: String { NSLocalizedString("proseio_scam_warning_boleto", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningReceipt: String { NSLocalizedString("proseio_scam_warning_receipt", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningNewNumber: String { NSLocalizedString("proseio_scam_warning_new_number", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningUrgency: String { NSLocalizedString("proseio_scam_warning_urgency", tableName: "Proseio", bundle: .module, comment: "") }
 }

@@ -10,6 +10,7 @@ import Combine
 import Foundation
 import MatrixRustSDK
 import OrderedCollections
+import ProseioKit
 
 enum RoomListFilter: Int, CaseIterable, Identifiable {
     var id: Int {
@@ -41,7 +42,7 @@ enum RoomListFilter: Int, CaseIterable, Identifiable {
         case .favourites:
             return L10n.screenRoomlistFilterFavourites
         case .invites:
-            return L10n.screenRoomlistFilterInvites
+            return ProseioStrings.requestsTitle // Proseio: invites are message requests.
         case .lowPriority:
             return L10n.screenRoomlistFilterLowPriority
         }

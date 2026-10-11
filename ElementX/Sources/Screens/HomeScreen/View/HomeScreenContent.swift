@@ -121,6 +121,12 @@ struct HomeScreenContent: View {
                     RoomListFiltersView(state: $context.filtersState)
                 }
                 
+                if context.viewState.shouldShowProseioRequestsRow {
+                    ProseioRequestsRow(count: context.viewState.proseioRequestCount) {
+                        context.filtersState.activateFilter(.invites)
+                    }
+                }
+                
                 if case let .show(state) = context.viewState.securityBannerMode {
                     HomeScreenRecoveryKeyConfirmationBanner(state: state, context: context)
                 } else if context.viewState.shouldShowNewSoundBanner {

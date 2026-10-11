@@ -7,6 +7,7 @@
 //
 
 import MatrixRustSDK
+import ProseioKit
 import UIKit
 import UniformTypeIdentifiers
 
@@ -205,7 +206,7 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                              canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                              shouldBoost: eventItemProxy.shouldBoost,
                              sender: eventItemProxy.sender,
-                             content: buildTextTimelineItemContent(textMessageContent),
+                             content: proseioAddingScamWarning(to: buildTextTimelineItemContent(textMessageContent), eventItemProxy, isOutgoing),
                              properties: .init(replyDetails: buildTimelineItemReplyDetails(messageLikeContent.inReplyTo),
                                                isThreaded: messageLikeContent.threadRoot != nil,
                                                threadSummary: buildTimelineItemThreadSummary(messageLikeContent.threadSummary),
@@ -644,6 +645,16 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         let formattedBody = (htmlBody != nil ? attributedStringBuilder.fromHTML(htmlBody) : attributedStringBuilder.fromPlain(messageContent.body))
         
         return .init(body: messageContent.body, formattedBody: formattedBody, formattedBodyHTMLString: htmlBody)
+    }
+    
+    /// Proseio: scam pattern check for incoming text. Runs off the main thread (TimelineController builds items in a detached task).
+    private func proseioAddingScamWarning(to content: TextRoomTimelineItemContent,
+                                          _ eventItemProxy: EventTimelineItemProxy,
+                                          _ isOutgoing: Bool) -> TextRoomTimelineItemContent {
+        guard !isOutgoing, let eventID = eventItemProxy.id.eventID else { return content }
+        var content = content
+        content.proseioScamWarning = ScamDetector.warningKind(for: content.body, eventID: eventID)
+        return content
     }
     
     private func buildAudioTimelineItemContent(_ messageContent: AudioMessageContent) -> AudioRoomTimelineItemContent {

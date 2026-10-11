@@ -108,6 +108,13 @@ struct HomeScreenViewState: BindableState {
     
     var hasPendingInvitations = false
     
+    /// Proseio: DM invites kept out of the chat list, shown behind the Pedidos row.
+    var proseioRequestCount = 0
+    
+    var shouldShowProseioRequestsRow: Bool {
+        proseioRequestCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && roomListMode == .rooms
+    }
+    
     var selectedRoomID: String?
     
     var hideInviteAvatars = false

@@ -47,6 +47,12 @@ struct TextRoomTimelineView: View, TextBasedRoomTimelineViewProtocol {
                     .frame(maxWidth: TimelineMediaFrame.maxLinkPreviewWidth)
                     .padding(.bottom, 16)
                 }
+
+                if let scamWarning = timelineItem.content.proseioScamWarning {
+                    ProseioScamWarningView(kind: scamWarning)
+                        .frame(maxWidth: TimelineMediaFrame.maxLinkPreviewWidth)
+                        .padding(.bottom, 16) // Proseio: room for the timestamp, like the link previews above.
+                }
             }
         }
         .task { await fetchLinkPreviews() }

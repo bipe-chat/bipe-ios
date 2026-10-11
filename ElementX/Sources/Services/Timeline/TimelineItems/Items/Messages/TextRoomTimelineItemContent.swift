@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import ProseioKit
 import UIKit
 
 nonisolated struct TextRoomTimelineItemContent: Hashable {
@@ -13,4 +14,6 @@ nonisolated struct TextRoomTimelineItemContent: Hashable {
     var formattedBody: AttributedString?
     /// The original textual representation of the formatted body directly from the event (usually HTML code)
     var formattedBodyHTMLString: String?
+    /// Proseio: scam pattern warning for an incoming message (security rule 9).
+    var proseioScamWarning: ScamWarningKind?
 }

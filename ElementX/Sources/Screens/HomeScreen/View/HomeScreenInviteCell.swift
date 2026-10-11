@@ -8,10 +8,12 @@
 
 import Combine
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct HomeScreenInviteCell: View {
     @Environment(\.dynamicTypeSize) var dynamicTypeSize
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     let room: HomeScreenRoom
     let context: HomeScreenViewModel.Context
@@ -135,11 +137,11 @@ struct HomeScreenInviteCell: View {
     }
     
     private var title: String {
-        room.name
+        proseioHandleResolver?.displayText(for: room.name) ?? room.name
     }
     
     private var subtitle: String? {
-        room.isDirect ? room.inviter?.id : nil
+        room.isDirect ? room.inviter.map { proseioHandleResolver?.displayText(for: $0.id) ?? $0.id } : nil
     }
     
     @ViewBuilder
