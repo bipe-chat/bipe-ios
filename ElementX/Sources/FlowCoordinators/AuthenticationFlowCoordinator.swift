@@ -7,6 +7,7 @@
 //
 
 import Combine
+import ProseioKit
 import SwiftState
 import SwiftUI
 
@@ -41,6 +42,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         /// The screen to login with a password.
         case loginScreen
         
+        /// Proseio: invite-based sign-up through the Proseio API.
+        case proseioSignupScreen
+        
         /// The screen to report an error.
         case bugReportFlow
         /// The screen to toggle feature flags.
@@ -71,6 +75,11 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         case continueWithPassword
         /// The password login was aborted.
         case cancelledPasswordLogin(previousState: State)
+        
+        /// Proseio: show the invite sign-up screen.
+        case proseioSignup
+        /// Proseio: the invite sign-up was aborted.
+        case cancelledProseioSignup
         
         /// The user encountered a problem.
         case reportProblem
@@ -155,6 +164,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             navigationStackCoordinator.popToRoot(animated: animated)
         case .loginScreen:
             navigationStackCoordinator.popToRoot(animated: animated)
+        case .proseioSignupScreen:
+            navigationStackCoordinator.popToRoot(animated: animated)
         case .bugReportFlow:
             navigationStackCoordinator.setSheetCoordinator(nil)
         case .developerOptions:
@@ -211,6 +222,13 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         stateMachine.addRoutes(event: .cancelledPasswordLogin(previousState: .serverSelectionScreen), transitions: [.loginScreen => .serverSelectionScreen])
         stateMachine.addRoutes(event: .cancelledPasswordLogin(previousState: .startScreen), transitions: [.loginScreen => .startScreen])
         
+        // Proseio Sign-up
+        
+        stateMachine.addRoutes(event: .proseioSignup, transitions: [.startScreen => .proseioSignupScreen]) { [weak self] _ in
+            self?.showProseioSignupScreen()
+        }
+        stateMachine.addRoutes(event: .cancelledProseioSignup, transitions: [.proseioSignupScreen => .startScreen])
+        
         // Bug Report
         
         stateMachine.addRoutes(event: .reportProblem, transitions: [.startScreen => .bugReportFlow]) { [weak self] _ in
@@ -230,7 +248,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         stateMachine.addRoutes(event: .signedIn, transitions: [.qrCodeLoginScreen => .complete,
                                                                .serverSelectionScreen => .complete, // OAuth authentication
                                                                .startScreen => .complete, // Direct OAuth authentication
-                                                               .loginScreen => .complete]) { [weak self] context in
+                                                               .loginScreen => .complete,
+                                                               .proseioSignupScreen => .complete]) { [weak self] context in
             guard let userSession = context.userInfo as? UserSessionProtocol else { fatalError("The user session wasn't included in the context") }
             self?.userHasSignedIn(userSession: userSession)
         }
@@ -279,7 +298,11 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 case .login:
                     stateMachine.tryEvent(.selectServer(.login))
                 case .register:
-                    stateMachine.tryEvent(.selectServer(.register))
+                    if appSettings.usesProseioSignup {
+                        stateMachine.tryEvent(.proseioSignup)
+                    } else {
+                        stateMachine.tryEvent(.selectServer(.register))
+                    }
                     
                 case .loginDirectlyWithOAuth(let oAuthData, let window):
                     showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
@@ -416,6 +439,29 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationStackCoordinator.push(coordinator) { [weak self] in
             self?.stateMachine.tryEvent(.cancelledPasswordLogin(previousState: fromState))
+        }
+    }
+    
+    // MARK: - Proseio Sign-up
+    
+    private func showProseioSignupScreen() {
+        let parameters = ProseioSignupScreenCoordinatorParameters(apiClient: ProseioAPIClient(baseURL: appSettings.proseioAPIBaseURL),
+                                                                  authenticationService: authenticationService,
+                                                                  serverNameOrBaseURL: appSettings.defaultAccountProvider.serverNameOrBaseURL,
+                                                                  userIndicatorController: userIndicatorController)
+        let coordinator = ProseioSignupScreenCoordinator(parameters: parameters)
+        
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .continueWithOAuth(let oAuthData, let window):
+                    self?.showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
+                }
+            }
+            .store(in: &cancellables)
+        
+        navigationStackCoordinator.push(coordinator) { [weak self] in
+            self?.stateMachine.tryEvent(.cancelledProseioSignup)
         }
     }
     

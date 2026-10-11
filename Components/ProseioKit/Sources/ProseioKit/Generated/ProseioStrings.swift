@@ -79,4 +79,84 @@ public enum ProseioStrings {
     public static var settingsLanguage: String { NSLocalizedString("proseio_settings_language", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var settingsLanguageFooter: String { NSLocalizedString("proseio_settings_language_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupTitle: String { NSLocalizedString("proseio_signup_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupHeader: String { NSLocalizedString("proseio_signup_header", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupInviteCode: String { NSLocalizedString("proseio_signup_invite_code", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupEmail: String { NSLocalizedString("proseio_signup_email", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupEmailFooter: String { NSLocalizedString("proseio_signup_email_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupEmailInvalid: String { NSLocalizedString("proseio_signup_email_invalid", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupPassword: String { NSLocalizedString("proseio_signup_password", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func signupPasswordFooter(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_signup_password_footer", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var signupPasswordConfirm: String { NSLocalizedString("proseio_signup_password_confirm", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupPasswordMismatch: String { NSLocalizedString("proseio_signup_password_mismatch", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupHandle: String { NSLocalizedString("proseio_signup_handle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupHandleFooter: String { NSLocalizedString("proseio_signup_handle_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupDisplayName: String { NSLocalizedString("proseio_signup_display_name", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupSubmit: String { NSLocalizedString("proseio_signup_submit", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupSuccess: String { NSLocalizedString("proseio_signup_success", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var handlePlaceholder: String { NSLocalizedString("proseio_handle_placeholder", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var handleChecking: String { NSLocalizedString("proseio_handle_checking", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var handleAvailable: String { NSLocalizedString("proseio_handle_available", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func handleTooShort(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_handle_too_short", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func handleTooLong(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_handle_too_long", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var handleInvalidCharacters: String { NSLocalizedString("proseio_handle_invalid_characters", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var handleReserved: String { NSLocalizedString("proseio_handle_reserved", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var handleTaken: String { NSLocalizedString("proseio_handle_taken", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func handleCooldownUntil(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_handle_cooldown_until", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var handleSaved: String { NSLocalizedString("proseio_handle_saved", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var handleScreenFooter: String { NSLocalizedString("proseio_handle_screen_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var settingsHandle: String { NSLocalizedString("proseio_settings_handle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var settingsHandleNone: String { NSLocalizedString("proseio_settings_handle_none", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorInviteInvalid: String { NSLocalizedString("proseio_error_invite_invalid", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorEmailTaken: String { NSLocalizedString("proseio_error_email_taken", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorPasswordWeak: String { NSLocalizedString("proseio_error_password_weak", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorHandleCooldown: String { NSLocalizedString("proseio_error_handle_cooldown", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorRateLimited: String { NSLocalizedString("proseio_error_rate_limited", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorUnauthorized: String { NSLocalizedString("proseio_error_unauthorized", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorNetwork: String { NSLocalizedString("proseio_error_network", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorGeneric: String { NSLocalizedString("proseio_error_generic", tableName: "Proseio", bundle: .module, comment: "") }
 }

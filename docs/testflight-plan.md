@@ -55,7 +55,16 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 - Published 11 Oct 2026: `https://proseio.com.br/privacidade` and `/termos` (pt-BR, English under `/en/`), contact contact@envisioning.com. Legal review still advisable before public launch.
 - Reviewer access: a single-use registration token (60 days) is in MZ's Keychain as `proseio-review-token`. In the Beta App Review notes: "Choose Create account, then use this registration token: <token>". The reviewer creates their own account.
 
-## Draft Beta App Information (DRAFT, humanizer pass pending)
+## App Store Connect record (11 October 2026)
+
+- Created by me in the browser: "Proseio", Apple ID `6821694616`, iOS, primary language Portuguese (Brazil), bundle `br.com.proseio.app.dev`, SKU `proseio-dev`, Full Access.
+- Test Information saved: description (below), feedback email, marketing URL `https://proseio.com.br`, privacy URL `/privacidade`, review notes without the token.
+- Beta App Review contact: MZ (saved 11 Oct 2026).
+- Still empty: the token at the end of the review notes. MZ pastes it.
+- Export compliance: no non-exempt encryption (MZ, 11 Oct 2026). `ITSAppUsesNonExemptEncryption = false` in `target.yml` answers it per build.
+- First upload: build `202610111832`, 11 Oct 2026.
+
+## Beta App Information (as saved)
 
 - **Beta App Description (pt-BR):** Proseio é um aplicativo de mensagens brasileiro, com servidores no Brasil e conversas privadas criptografadas de ponta a ponta. Nesta fase de testes, o acesso é só por convite.
 - **What to Test:** criar conta com o código de convite, enviar mensagens e fotos, criar um grupo, fazer uma chamada de voz.

@@ -232,6 +232,14 @@ final nonisolated class AppSettings: @unchecked Sendable {
         pushGatewayBaseURL.appending(path: "_matrix/push/v1/notify")
     }
     
+    /// Proseio API (sign-up, handles). Contract: proseio-shared/api/openapi.yaml.
+    private(set) var proseioAPIBaseURL: URL = "https://api.proseio.com.br" // Proseio
+    /// Proseio: "Create account" for this provider opens the invite sign-up screen instead of MAS registration.
+    private(set) var proseioSignupServerName = "proseio.com.br"
+    var usesProseioSignup: Bool {
+        defaultAccountProvider.serverNameOrBaseURL == proseioSignupServerName
+    }
+    
     @UserPreference(defaultValue: true)
     var enableNotifications: Bool
     

@@ -7,6 +7,7 @@
 //
 
 import Combine
+import ProseioKit
 import SwiftUI
 
 typealias SettingsScreenViewModelType = StateStoreViewModelV2<SettingsScreenViewState, SettingsScreenViewAction>
@@ -33,6 +34,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
                                            showAddAccountButton: userSettings.app.multiAccountEnabled,
                                            showAccountDeactivation: userSession.clientProxy.canDeactivateAccount,
                                            showDeveloperOptions: userSettings.app.developerOptionsEnabled,
+                                           showProseioHandle: userSession.clientProxy.userIDServerName == userSettings.app.proseioSignupServerName,
                                            showAnalyticsSettings: userSettings.app.canPromptForAnalytics,
                                            isBugReportServiceEnabled: isBugReportServiceEnabled,
                                            navigationBarVisibility: isInSecondaryWindow ? .hidden : .automatic,
@@ -147,6 +149,23 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             userSettings.app.developerOptionsEnabled.toggle()
         case .developerOptions:
             actionsSubject.send(.developerOptions)
+            
+        case .proseioHandle:
+            actionsSubject.send(.proseioHandle)
+        case .proseioLoadHandle:
+            Task { await loadProseioHandle() }
+        }
+    }
+    
+    // MARK: - Proseio
+    
+    private func loadProseioHandle() async {
+        guard state.showProseioHandle, let accessToken = clientProxy.accessToken else { return }
+        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+        do {
+            state.proseioHandle = try await apiClient.myHandle(accessToken: accessToken).handle
+        } catch {
+            MXLog.error("Proseio handle load failed: \(error)")
         }
     }
     

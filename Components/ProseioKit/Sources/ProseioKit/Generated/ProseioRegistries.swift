@@ -192,4 +192,9 @@ public enum ProseioRegistries {
         "pagamento efetuado",
         "id da transacao",
     ]
+
+    /// Username (handle) rules. The server is the authority; clients check early for feedback.
+    public static let handleMinLength = 3
+    public static let handleMaxLength = 30
+    public static let handlePattern = "^[a-z0-9](?:[a-z0-9_]|\\.(?!\\.))*[a-z0-9_]$"
 }

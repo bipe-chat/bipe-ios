@@ -7,6 +7,7 @@
 //
 
 import Combine
+import ProseioKit
 import SwiftUI
 
 enum SettingsFlowCoordinatorAction {
@@ -134,11 +135,29 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     
                 case .developerOptions:
                     presentDeveloperOptions()
+                    
+                case .proseioHandle:
+                    presentProseioHandleScreen()
                 }
             }
             .store(in: &cancellables)
         
         navigationStackCoordinator.setRootCoordinator(settingsScreenCoordinator, animated: animated)
+    }
+    
+    private func presentProseioHandleScreen() {
+        let coordinator = ProseioHandleScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                           clientProxy: flowParameters.userSession.clientProxy,
+                                                                           userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .done:
+                    self?.navigationStackCoordinator.pop()
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
     }
     
     private func presentLabs() {

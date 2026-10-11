@@ -34,6 +34,8 @@ enum SettingsScreenViewModelAction {
     case about
     
     case developerOptions
+    
+    case proseioHandle
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -50,6 +52,9 @@ struct SettingsScreenViewState: BindableState {
     var accountProfileURL: URL?
     var showAccountDeactivation: Bool
     var showDeveloperOptions: Bool
+    /// Proseio: the username row (Proseio accounts only) and the current handle.
+    var showProseioHandle = false
+    var proseioHandle: String?
     
     var securitySectionMode = SettingsScreenSecuritySectionMode.none
     var showSecuritySectionBadge = false
@@ -125,6 +130,9 @@ enum SettingsScreenViewAction {
     
     case enableDeveloperOptions
     case developerOptions
+    
+    case proseioHandle
+    case proseioLoadHandle
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

@@ -121,6 +121,9 @@ protocol ClientProxyProtocol: AnyObject {
     
     var deviceID: String? { get }
     
+    /// Proseio: bearer token for the Proseio API. Never log it.
+    var accessToken: String? { get }
+    
     var homeserver: String { get }
     
     var canDeactivateAccount: Bool { get }

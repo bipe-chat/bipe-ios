@@ -2418,6 +2418,7 @@ nonisolated class ClientProxyMock: ClientProxyProtocol, @unchecked Sendable {
     }
     nonisolated(unsafe) var underlyingUserID: String!
     nonisolated(unsafe) var deviceID: String?
+    nonisolated(unsafe) var accessToken: String?
     var homeserver: String {
         get { return underlyingHomeserver }
         set(value) { underlyingHomeserver = value }

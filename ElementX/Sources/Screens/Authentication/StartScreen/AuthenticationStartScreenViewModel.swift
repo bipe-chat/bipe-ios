@@ -50,7 +50,7 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
             // We don't show the create account button when custom providers are disallowed.
             // The assumption here being that if you're running a custom app, your users will already be created.
             AuthenticationStartScreenViewState(serverNameOrBaseURL: appSettings.accountProviders.count == 1 ? appSettings.accountProviders[0].serverNameOrBaseURL : nil,
-                                               showCreateAccountButton: false,
+                                               showCreateAccountButton: appSettings.usesProseioSignup, // Proseio: invite sign-up
                                                showQRCodeLoginButton: isQRCodeScanningSupported,
                                                classicAppMode: isClassicAppAccountAllowed ? authenticationService.classicAppAccount.map { .welcomeBack($0) } : nil,
                                                hideBrandChrome: appSettings.hideBrandChrome)

@@ -180,6 +180,16 @@ struct SettingsScreen: View {
                     kind: .picker(selection: $context.appAppearance,
                                   items: AppAppearance.allCases.map { (title: $0.name, tag: $0) }))
             
+            if context.viewState.showProseioHandle {
+                ListRow(label: .default(title: ProseioStrings.settingsHandle,
+                                        icon: \.userProfile),
+                        details: .title(context.viewState.proseioHandle.map { "@\($0)" } ?? ProseioStrings.settingsHandleNone),
+                        kind: .navigationLink {
+                            context.send(viewAction: .proseioHandle)
+                        })
+                        .onAppear { context.send(viewAction: .proseioLoadHandle) }
+            }
+            
             // Proseio: pt-BR / en switch lives in iOS per-app language settings.
             ListRow(label: .default(title: ProseioStrings.settingsLanguage,
                                     description: ProseioStrings.settingsLanguageFooter,

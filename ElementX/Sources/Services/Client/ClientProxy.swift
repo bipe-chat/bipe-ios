@@ -334,6 +334,15 @@ class ClientProxy: ClientProxyProtocol {
         }
     }
     
+    var accessToken: String? {
+        do {
+            return try client.session().accessToken
+        } catch {
+            MXLog.error("Failed retrieving the session with error: \(error)")
+            return nil
+        }
+    }
+    
     var homeserver: String {
         client.homeserver()
     }

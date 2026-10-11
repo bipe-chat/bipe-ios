@@ -42,6 +42,8 @@ enum SettingsScreenCoordinatorAction {
     case about
     
     case developerOptions
+    
+    case proseioHandle
 }
 
 final class SettingsScreenCoordinator: CoordinatorProtocol {
@@ -111,6 +113,9 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     
                 case .developerOptions:
                     actionsSubject.send(.developerOptions)
+                    
+                case .proseioHandle:
+                    actionsSubject.send(.proseioHandle)
                 }
             }
             .store(in: &cancellables)
