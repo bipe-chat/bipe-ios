@@ -406,3 +406,7 @@ Skill clash this file? This file win. Build settings, entitlements, Info.plist k
 | `localazy.json` | Localazy translation config |
 | `codecov.yml` | Codecov config |
 | `.periphery.yml` | Periphery dead-code detection |
+
+## Decisions
+
+Product and architecture decisions for all Proseio repos are ADRs in the umbrella repo: `../proseio/docs/adr/` (index: `README.md`). Check them before changing a decided behaviour. A new decision gets an ADR there, not a note in this repo.
