@@ -49,7 +49,6 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
                 self?.state.handleStatus = status
             }
         case .clearFieldErrors:
-            state.inviteCodeError = nil
             state.emailError = nil
             state.passwordError = nil
         case .submit:
@@ -73,8 +72,7 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
         let email = state.bindings.email.trimmingCharacters(in: .whitespacesAndNewlines)
         let handle = ProseioHandle.sanitize(state.bindings.handle)
         let displayName = state.bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let request = ProseioSignupRequest(inviteCode: state.bindings.inviteCode.trimmingCharacters(in: .whitespacesAndNewlines),
-                                           email: email,
+        let request = ProseioSignupRequest(email: email,
                                            password: state.bindings.password,
                                            handle: handle.isEmpty ? nil : handle,
                                            displayName: displayName.isEmpty ? nil : displayName)
@@ -127,9 +125,6 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
 
         if case .server(let code, _, _) = error {
             switch code {
-            case .inviteInvalid:
-                state.inviteCodeError = message
-                return
             case .emailTaken:
                 state.emailError = message
                 return

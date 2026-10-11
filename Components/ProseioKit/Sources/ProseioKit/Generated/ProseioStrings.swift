@@ -84,8 +84,6 @@ public enum ProseioStrings {
 
     public static var signupHeader: String { NSLocalizedString("proseio_signup_header", tableName: "Proseio", bundle: .module, comment: "") }
 
-    public static var signupInviteCode: String { NSLocalizedString("proseio_signup_invite_code", tableName: "Proseio", bundle: .module, comment: "") }
-
     public static var signupEmail: String { NSLocalizedString("proseio_signup_email", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var signupEmailFooter: String { NSLocalizedString("proseio_signup_email_footer", tableName: "Proseio", bundle: .module, comment: "") }

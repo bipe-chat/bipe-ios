@@ -12,7 +12,7 @@ struct ProseioSignupScreen: View {
     @Bindable var context: ProseioSignupScreenViewModel.Context
 
     private enum Field: Hashable {
-        case inviteCode, email, password, passwordConfirmation, handle, displayName
+        case email, password, passwordConfirmation, handle, displayName
     }
 
     @FocusState private var focusedField: Field?
@@ -39,7 +39,6 @@ struct ProseioSignupScreen: View {
             context.send(viewAction: .updateWindow(window))
         }
         .onChange(of: context.handle) { context.send(viewAction: .handleChanged) }
-        .onChange(of: context.inviteCode) { context.send(viewAction: .clearFieldErrors) }
         .onChange(of: context.email) { context.send(viewAction: .clearFieldErrors) }
         .onChange(of: context.password) { context.send(viewAction: .clearFieldErrors) }
     }
@@ -71,16 +70,6 @@ struct ProseioSignupScreen: View {
     
     private var fields: some View {
         VStack(alignment: .leading, spacing: 20) {
-            TextField(text: $context.inviteCode) { placeholder("") }
-                .focused($focusedField, equals: .inviteCode)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupInviteCode,
-                                          footerText: context.viewState.inviteCodeError,
-                                          state: context.viewState.inviteCodeError == nil ? .default : .error))
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .submitLabel(.next)
-                .onSubmit { focusedField = .email }
-
             TextField(text: $context.email) { placeholder("") }
                 .focused($focusedField, equals: .email)
                 .textFieldStyle(.compound(labelText: ProseioStrings.signupEmail,

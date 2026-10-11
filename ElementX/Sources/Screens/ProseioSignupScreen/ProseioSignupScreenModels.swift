@@ -25,7 +25,6 @@ struct ProseioSignupScreenViewState: BindableState {
     /// The API created the account. Submitting again only restarts the login.
     var isAccountCreated = false
 
-    var inviteCodeError: String?
     var emailError: String?
     var passwordError: String?
     var handleError: String?
@@ -46,8 +45,7 @@ struct ProseioSignupScreenViewState: BindableState {
 
     var canSubmit: Bool {
         if isAccountCreated { return true }
-        return !bindings.inviteCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && ProseioSignupRules.isPlausibleEmail(bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
+        return ProseioSignupRules.isPlausibleEmail(bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
             && ProseioSignupRules.isValidPassword(bindings.password)
             && bindings.password == bindings.passwordConfirmation
             && !handleStatus.isBlocking
@@ -55,7 +53,6 @@ struct ProseioSignupScreenViewState: BindableState {
 }
 
 struct ProseioSignupScreenViewStateBindings {
-    var inviteCode = ""
     var email = ""
     var password = ""
     var passwordConfirmation = ""

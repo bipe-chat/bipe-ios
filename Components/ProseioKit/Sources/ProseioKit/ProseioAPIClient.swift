@@ -151,13 +151,14 @@ public struct ProseioAPIClient: Sendable {
 // MARK: - Models
 
 public struct ProseioSignupRequest: Encodable, Sendable, CustomStringConvertible {
-    public let inviteCode: String
+    /// Optional while the server runs open sign-up (beta).
+    public let inviteCode: String?
     public let email: String
     public let password: String
     public let handle: String?
     public let displayName: String?
 
-    public init(inviteCode: String, email: String, password: String, handle: String?, displayName: String?) {
+    public init(inviteCode: String? = nil, email: String, password: String, handle: String?, displayName: String?) {
         self.inviteCode = inviteCode
         self.email = email
         self.password = password
