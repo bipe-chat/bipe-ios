@@ -267,6 +267,8 @@ public struct ProseioInvite: Decodable, Sendable, Identifiable, Equatable {
 public struct ProseioMyInvites: Decodable, Sendable {
     public let quota: Int
     public let available: Int
+    /// Only when `available` is 0: when the next slot comes back.
+    public let nextAvailableAt: Date?
     public let invites: [ProseioInvite]
 }
 

@@ -279,4 +279,20 @@ public enum ProseioStrings {
     public static var trustStepGovbrBody: String { NSLocalizedString("proseio_trust_step_govbr_body", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var trustComingSoon: String { NSLocalizedString("proseio_trust_coming_soon", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func invitesNext(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_invites_next", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var voiceTranscriptTitle: String { NSLocalizedString("proseio_voice_transcript_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var voiceTranscribing: String { NSLocalizedString("proseio_voice_transcribing", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var voiceTranscriptPlaceholder: String { NSLocalizedString("proseio_voice_transcript_placeholder", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var voiceTranscriptUnavailable: String { NSLocalizedString("proseio_voice_transcript_unavailable", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var actionShowMore: String { NSLocalizedString("proseio_action_show_more", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var actionShowLess: String { NSLocalizedString("proseio_action_show_less", tableName: "Proseio", bundle: .module, comment: "") }
 }

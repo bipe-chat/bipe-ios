@@ -54,6 +54,7 @@ class ProseioInvitesScreenViewModel: ProseioInvitesScreenViewModelType, ProseioI
             }
             state.quota = myInvites.quota
             state.available = myInvites.available
+            state.nextAvailableAt = myInvites.nextAvailableAt
             state.invites = myInvites.invites
         } catch {
             MXLog.error("Proseio invites load failed: \(error)")

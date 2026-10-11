@@ -21,9 +21,7 @@ struct ProseioInvitesScreen: View {
                         kind: .button { context.send(viewAction: .create) })
                     .disabled(!context.viewState.canCreate)
             } footer: {
-                Text(context.viewState.available == 0 && !context.viewState.isLoading
-                    ? ProseioStrings.invitesNoneLeft
-                    : ProseioStrings.invitesExplainer)
+                Text(context.viewState.footer)
                     .compoundListSectionFooter()
             }
             

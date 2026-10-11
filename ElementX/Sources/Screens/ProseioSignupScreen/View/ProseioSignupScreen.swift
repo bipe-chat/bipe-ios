@@ -119,15 +119,27 @@ struct ProseioSignupScreen: View {
                 .submitLabel(.next)
                 .onSubmit { focusedField = .inviteCode }
 
-            TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
-                .focused($focusedField, equals: .inviteCode)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupInviteCode,
-                                          footerText: context.viewState.inviteCodeFooter,
-                                          state: context.viewState.inviteCodeFooter == nil ? .default : .error))
-                .textInputAutocapitalization(.characters)
-                .autocorrectionDisabled()
-                .submitLabel(.done)
-                .onSubmit(submit)
+            VStack(alignment: .leading, spacing: 8) {
+                TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
+                    .focused($focusedField, equals: .inviteCode)
+                    .textFieldStyle(.compound(labelText: ProseioStrings.signupInviteCode,
+                                              footerText: context.viewState.inviteCodeFooter,
+                                              state: context.viewState.inviteCodeFooter == nil ? .default : .error))
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+                    .onSubmit(submit)
+                
+                // PasteButton reads the clipboard without the system paste prompt. It takes a link or a whole message.
+                if context.viewState.inviteCode == nil {
+                    PasteButton(payloadType: String.self) { strings in
+                        guard let code = strings.lazy.compactMap(ProseioInviteCode.init).first else { return }
+                        context.inviteCode = code.value
+                    }
+                    .labelStyle(.titleAndIcon)
+                    .buttonBorderShape(.capsule)
+                }
+            }
         }
     }
 

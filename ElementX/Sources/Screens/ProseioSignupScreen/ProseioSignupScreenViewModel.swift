@@ -58,6 +58,11 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
         case .inviteCodeChanged:
             state.inviteCodeError = nil
             state.inviterHandle = nil
+            // A pasted link or message becomes the bare code; a complete code shows who invited.
+            if let code = state.inviteCode {
+                if state.bindings.inviteCode != code.value { state.bindings.inviteCode = code.value }
+                Task { await loadInvitePreview(code) }
+            }
         case .clearFieldErrors:
             state.emailError = nil
             state.passwordError = nil

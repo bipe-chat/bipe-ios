@@ -9,8 +9,8 @@ import Foundation
 /// Invite links: `https://proseio.com.br/convite/XXXX-XXXX-XXXX`. The web page there explains how to install;
 /// the app opens it as a universal link and pre-fills the sign-up code.
 public nonisolated enum ProseioInviteLink {
-    /// Same alphabet as proseio-api `newInviteCode()`: no 0/O, 1/I/L.
-    private static let alphabet = Set("ABCDEFGHJKMNPQRSTUVWXYZ23456789")
+    /// Rule and cases: proseio-shared/test-vectors/invite-codes.json. The API and Android use the same pattern.
+    private static let pattern = try? NSRegularExpression(pattern: #"(?<![A-Z0-9])([A-HJKMNP-Z2-9]{4})[ \-\u2010-\u2014\u2212]?([A-HJKMNP-Z2-9]{4})[ \-\u2010-\u2014\u2212]?([A-HJKMNP-Z2-9]{4})(?![A-Z0-9])"#)
 
     /// The invite code in a link, normalised, or `nil` when the URL is not an invite link.
     public static func code(from url: URL) -> String? {
@@ -23,12 +23,13 @@ public nonisolated enum ProseioInviteLink {
         return normalizedCode(components[1])
     }
 
-    /// `XXXX-XXXX-XXXX` from what a user typed or pasted: ignores case, spaces and dashes. `nil` when it cannot be a code.
+    /// `XXXX-XXXX-XXXX` from anything a user typed or pasted: a code, an invite link or a whole message. `nil` when it holds no code.
     public static func normalizedCode(_ raw: String) -> String? {
-        let characters = raw.uppercased().filter { !$0.isWhitespace && $0 != "-" }
-        guard characters.count == 12, characters.allSatisfy(alphabet.contains) else { return nil }
-        let chars = Array(characters)
-        return "\(String(chars[0..<4]))-\(String(chars[4..<8]))-\(String(chars[8..<12]))"
+        let text = String(raw.prefix(2048)).uppercased()
+        let range = NSRange(text.startIndex..., in: text)
+        guard let match = pattern?.firstMatch(in: text, range: range) else { return nil }
+        let groups = (1...3).compactMap { Range(match.range(at: $0), in: text).map { String(text[$0]) } }
+        return groups.count == 3 ? groups.joined(separator: "-") : nil
     }
 }
 

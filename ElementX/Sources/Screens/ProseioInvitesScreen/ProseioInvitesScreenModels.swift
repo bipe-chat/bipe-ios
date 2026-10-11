@@ -15,6 +15,7 @@ struct ProseioInvitesScreenViewState: BindableState {
     var isLoading = true
     var quota = 0
     var available = 0
+    var nextAvailableAt: Date?
     var invites: [ProseioInvite] = []
     /// Links for invites created on this device in this session. The server keeps only a hash of each code.
     var shareURLs: [String: URL] = [:]
@@ -23,6 +24,12 @@ struct ProseioInvitesScreenViewState: BindableState {
     
     var canCreate: Bool {
         !isLoading && available > 0
+    }
+    
+    var footer: String {
+        guard !isLoading, available == 0 else { return ProseioStrings.invitesExplainer }
+        guard let nextAvailableAt else { return ProseioStrings.invitesNoneLeft }
+        return "\(ProseioStrings.invitesNoneLeft) \(ProseioStrings.invitesNext(nextAvailableAt.formatted(date: .abbreviated, time: .shortened)))"
     }
 }
 
