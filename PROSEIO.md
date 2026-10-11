@@ -29,6 +29,24 @@ Device builds (signed, automatic provisioning with the Centaur Labs team):
 xcodebuild -project ElementX.xcodeproj -scheme ElementX -configuration Debug -destination 'platform=iOS,name=MZ Air' -allowProvisioningUpdates build
 ```
 
+### Ad-hoc build signed as CENTAUR LABS OU
+
+Development builds carry the developer's personal certificate (Apple always issues development certificates to a person, even in a company team). For a build signed **"Apple Distribution: CENTAUR LABS OU"**, archive and export ad hoc:
+
+```bash
+xcodebuild archive -project ElementX.xcodeproj -scheme ElementX -configuration Release -destination 'generic/platform=iOS' -archivePath build/Proseio.xcarchive -allowProvisioningUpdates
+```
+
+```bash
+xcodebuild -exportArchive -archivePath build/Proseio.xcarchive -exportOptionsPlist Tools/Proseio/ExportAdHoc.plist -exportPath build/adhoc -allowProvisioningUpdates
+```
+
+```bash
+xcrun devicectl device install app --device <UDID> build/adhoc/ElementX.ipa
+```
+
+Devices must be registered in the Centaur Labs team (automatic signing does this for connected devices).
+
 ## Signing
 
 - **Dev builds use the Centaur Labs team (`992N457T8D`)** with bundle ID `br.com.proseio.app.dev` and app group `group.br.com.proseio.dev`. Approved by MZ on 11 October 2026.
@@ -56,7 +74,7 @@ Not done (needs the domain, Apple team or brand):
 
 ## Design tokens
 
-- Compound tokens come from the Proseio fork **michellzappa/compound-design-tokens** (local clone `~/Dev/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
+- Compound tokens come from the Proseio fork **michellzappa/compound-design-tokens** (local clone `~/Dev/Proseio/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
 - `Tools/XcodeGen/mirrors.json` maps Element's URL to the fork for every package. `postGenCommand.sh` copies it into the workspace on each `xcodegen`.
 - `compound-ios/Package.swift` pins the fork's version tag (`exact:`). Bump it when the fork gets a new tag.
 - `ORGANIZATIONNAME` in `project.yml` (file headers)

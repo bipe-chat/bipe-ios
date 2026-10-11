@@ -16,7 +16,7 @@ public enum ProseioStrings {
     public static let bannerUnverifiedTitle = "Conta não verificada"
 
     public static func bannerUnverifiedBody(_ p1: String) -> String {
-        "Criada há \(p1) dias. Não está nos seus contatos."
+        "Conta criada há \(p1). Não está nos seus contatos."
     }
 
     public static let bannerExternal = "Conta de fora do Proseio. Não conseguimos verificar esta pessoa."
@@ -40,4 +40,36 @@ public enum ProseioStrings {
     }
 
     public static let deviceApprovalNeverForOthers = "O Proseio nunca pede para você aprovar um login de outra pessoa."
+
+    public static let badgeVerifiedContact = "Contato confirmado pessoalmente"
+
+    public static let badgeSuspendedBody = "Esta conta entrou em um aparelho novo. A verificação volta quando a pessoa confirmar a identidade nele."
+
+    public static let warningNicknameConfirmTitle = "Confirme quem é esta pessoa"
+
+    public static func warningNicknameConfirmBody(_ p1: String, _ p2: String) -> String {
+        "Você salvou este contato como \(p1). A conta está verificada como \(p2). É a mesma pessoa?"
+    }
+
+    public static let actionNicknameConfirmYes = "Sim, é a mesma pessoa"
+
+    public static let actionNicknameConfirmUnsure = "Não tenho certeza"
+
+    public static func pauseCountdown(_ p1: String) -> String {
+        "Aguarde \(p1) s"
+    }
+
+    public static func pixCardBankName(_ p1: String) -> String {
+        "Seu banco vai mostrar o nome \(p1). Se aparecer outro nome, não pague."
+    }
+
+    public static let warningNameLookalikeEmoji = "Este emoji não pode ficar ao lado do nome. Ele parece um selo de verificação."
+
+    public static let actionScamVictim = "Fui vítima de golpe"
+
+    public static let scamVictimBody = "Fale com o seu banco agora e peça a devolução pelo MED. Quanto antes, maior a chance de recuperar o dinheiro."
+
+    public static let chargeStatusPaid = "Pago"
+
+    public static let chargeStatusPending = "Pendente"
 }
