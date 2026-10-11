@@ -1,7 +1,7 @@
-"NSCameraUsageDescription" = "Parar tirar fotos ou gravar vídeos e enviá-los como mensagem, o Element X precisa de acesso à câmera.";
+"NSCameraUsageDescription" = "Para tirar fotos ou gravar vídeos e enviá-los como mensagem, o Proseio precisa de acesso à câmera.";
 "NSFaceIDUsageDescription" = "O Face ID é usado para acessar o seu app.";
-"NSLocationAlwaysAndWhenInUseUsageDescription" = "To share your location live in chats, location access is needed when the app is in the background.";
-"NSLocationWhenInUseUsageDescription" = "Conceda o acesso à localização para que o Element X possa compartilhar a sua localização.";
-"NSMicrophoneUsageDescription" = "Para gravar e enviar mensagens de aúdio, o Element X precisa de acesso ao microfone.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Para compartilhar sua localização em tempo real nas conversas, o Proseio precisa de acesso à localização quando o app está em segundo plano.";
+"NSLocationWhenInUseUsageDescription" = "Conceda o acesso à localização para que o Proseio possa compartilhar a sua localização.";
+"NSMicrophoneUsageDescription" = "Para gravar e enviar mensagens de áudio, o Proseio precisa de acesso ao microfone.";
 "NSPhotoLibraryUsageDescription" = "Permite salvar fotos e vídeos para sua galeria.";
 "NSSpeechRecognitionUsageDescription" = "O Proseio transcreve suas mensagens de voz neste celular para você conferir o texto antes de enviar. O áudio não sai do celular.";
