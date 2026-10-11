@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import ProseioKit
 import SwiftUI
 
 enum SettingsScreenViewModelAction {
@@ -56,6 +57,14 @@ struct SettingsScreenViewState: BindableState {
     /// Proseio: the username row (Proseio accounts only) and the current handle.
     var showProseioHandle = false
     var proseioHandle: String?
+    
+    /// Proseio: the "Perfil de confiança" card. Same visibility as the username row.
+    var proseioTrustProfile: ProseioTrustProfile? {
+        guard showProseioHandle else { return nil }
+        return ProseioTrustProfile(displayName: userProfile.displayName,
+                                   hasAvatar: userProfile.avatarURL != nil,
+                                   handle: proseioHandle)
+    }
     
     var securitySectionMode = SettingsScreenSecuritySectionMode.none
     var showSecuritySectionBadge = false

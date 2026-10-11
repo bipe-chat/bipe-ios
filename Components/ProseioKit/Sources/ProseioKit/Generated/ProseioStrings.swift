@@ -243,4 +243,40 @@ public enum ProseioStrings {
     public static var invitesChat: String { NSLocalizedString("proseio_invites_chat", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var errorInviteQuota: String { NSLocalizedString("proseio_error_invite_quota", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustTitle: String { NSLocalizedString("proseio_trust_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func trustProgress(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("proseio_trust_progress", tableName: "Proseio", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static var trustFooter: String { NSLocalizedString("proseio_trust_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepAccount: String { NSLocalizedString("proseio_trust_step_account", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepAccountBody: String { NSLocalizedString("proseio_trust_step_account_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepProfile: String { NSLocalizedString("proseio_trust_step_profile", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepProfileBody: String { NSLocalizedString("proseio_trust_step_profile_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepProfileAddName: String { NSLocalizedString("proseio_trust_step_profile_add_name", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepProfileAddHandle: String { NSLocalizedString("proseio_trust_step_profile_add_handle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepProfileAddPhoto: String { NSLocalizedString("proseio_trust_step_profile_add_photo", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepEmail: String { NSLocalizedString("proseio_trust_step_email", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepEmailBody: String { NSLocalizedString("proseio_trust_step_email_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepPix: String { NSLocalizedString("proseio_trust_step_pix", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepPixBody: String { NSLocalizedString("proseio_trust_step_pix_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepGovbr: String { NSLocalizedString("proseio_trust_step_govbr", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustStepGovbrBody: String { NSLocalizedString("proseio_trust_step_govbr_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var trustComingSoon: String { NSLocalizedString("proseio_trust_coming_soon", tableName: "Proseio", bundle: .module, comment: "") }
 }

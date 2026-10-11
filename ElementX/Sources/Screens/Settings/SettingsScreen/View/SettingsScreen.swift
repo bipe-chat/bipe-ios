@@ -20,6 +20,10 @@ struct SettingsScreen: View {
         Form {
             userSection
             
+            if let trustProfile = context.viewState.proseioTrustProfile {
+                ProseioTrustProfileSection(profile: trustProfile) { context.send(viewAction: $0) }
+            }
+            
             if context.viewState.showAddAccountButton {
                 addAccountSection
             }
@@ -31,6 +35,8 @@ struct SettingsScreen: View {
             appSettingsSection
         }
         .compoundList()
+        // Proseio: reloads the handle on first show and after returning from a pushed screen.
+        .onAppear { context.send(viewAction: .proseioLoadHandle) }
         .navigationTitle(L10n.commonSettings)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)
@@ -188,7 +194,6 @@ struct SettingsScreen: View {
                         kind: .navigationLink {
                             context.send(viewAction: .proseioHandle)
                         })
-                        .onAppear { context.send(viewAction: .proseioLoadHandle) }
                 
                 ListRow(label: .default(title: ProseioStrings.invitesTitle,
                                         icon: \.userAdd),

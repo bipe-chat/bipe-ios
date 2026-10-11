@@ -205,6 +205,7 @@
 		1C9BB74711E5F24C77B7FED0 /* RoomMembersListScreenCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AEA0B743847CFA5B3C38EE4 /* RoomMembersListScreenCoordinator.swift */; };
 		1CA094038D4D036A6F0A1314 /* VoiceMessageTrashButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF84AA68B2B7584D9275769 /* VoiceMessageTrashButton.swift */; };
 		1CA6E1843E1B3680544EB584 /* GalleryRoomTimelineItemContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35A5AB4E2E5CA98F99BFC552 /* GalleryRoomTimelineItemContent.swift */; };
+		1CEEAEA2EEBDB8C5812EB35A /* ProseioTrustProfileSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1033999A4235F30FD983DF2E /* ProseioTrustProfileSection.swift */; };
 		1CF975943A3048FCF3723D46 /* preview_avatar_user.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 94A561C542596126DAE211AD /* preview_avatar_user.jpg */; };
 		1D2D713A5A269072D103AE37 /* CLLocationManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46D6DD4B4AB17E1D45092E /* CLLocationManagerProtocol.swift */; };
 		1D5DC685CED904386C89B7DA /* NSRegularExpresion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BAC0F6C9644336E9567EE6 /* NSRegularExpresion.swift */; };
@@ -1902,6 +1903,7 @@
 		0FA60F848D1C14F873F9621A /* RoomMemberDetailsScreenCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomMemberDetailsScreenCoordinator.swift; sourceTree = "<group>"; };
 		0FD22AEFFA20065494ED2333 /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
 		100DA305FE28BB3B6AEDE1FD /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
+		1033999A4235F30FD983DF2E /* ProseioTrustProfileSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProseioTrustProfileSection.swift; sourceTree = "<group>"; };
 		104B7747499487538483FEAF /* SpacesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacesScreen.swift; sourceTree = "<group>"; };
 		1059E2AE7878CF7820592637 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		105B2A8426404EF66F00CFDB /* RoomTimelineItemFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomTimelineItemFactory.swift; sourceTree = "<group>"; };
@@ -3863,6 +3865,7 @@
 		26C16326BCCCED74A85A0F48 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				1033999A4235F30FD983DF2E /* ProseioTrustProfileSection.swift */,
 				3CFD5EB0B0EEA4549FB49784 /* SettingsScreen.swift */,
 				06775BFC4D00C62B7E1353A8 /* SettingsScreenUserStatusPickerView.swift */,
 				4C816902BB6F450B4225B90C /* SettingsScreenUserStatusRow.swift */,
@@ -9305,6 +9308,7 @@
 				E2A88FAACCD6C97CB6068458 /* ProseioSignupScreenModels.swift in Sources */,
 				83EE475CE6C7849E6200FD85 /* ProseioSignupScreenViewModel.swift in Sources */,
 				F0936ECF04662834BAAA3183 /* ProseioSignupScreenViewModelProtocol.swift in Sources */,
+				1CEEAEA2EEBDB8C5812EB35A /* ProseioTrustProfileSection.swift in Sources */,
 				AB70CC2212156C6E22F4C0B9 /* ProseioUnverifiedRequestCard.swift in Sources */,
 				2835FD52F3F618D07F799B3D /* Publisher.swift in Sources */,
 				A4CCFCD320600E27AF60EAC9 /* QRCodeErrorView.swift in Sources */,
