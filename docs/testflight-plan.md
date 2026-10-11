@@ -69,3 +69,10 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 - **Beta App Description (pt-BR):** Proseio é um aplicativo de mensagens brasileiro, com servidores no Brasil e conversas privadas criptografadas de ponta a ponta. Nesta fase de testes, o acesso é só por convite.
 - **What to Test:** criar conta com o código de convite, enviar mensagens e fotos, criar um grupo, fazer uma chamada de voz.
 - **Feedback email:** contact@envisioning.com
+
+## Status (11 October 2026, evening)
+
+- Groups: internal "Equipe" (needed first: App Store Connect hides External Testing until an internal group exists) and external "Amigos".
+- Build `202610112038` (open sign-up, no invite code) submitted for Beta App Review in Amigos. Sign-in not required: the reviewer creates an account.
+- Public link: https://testflight.apple.com/join/KUnUX9Mz, open to anyone, limit 100. It works after Apple approves the build.
+- Review notes: no code, create two accounts to test chat. Old MAS reviewer token and the API reviewer invite are revoked.
