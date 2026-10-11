@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Archive a Release build and upload it to App Store Connect (TestFlight) with the Centaur Labs team.
-# Needs: the "Proseio Beta" app record for br.com.proseio.app.dev, and an Apple account signed in to Xcode on this Mac.
+# Needs: the "Proseio" app record for br.com.proseio.app.dev, and an Apple account signed in to Xcode on this Mac.
 # Usage (repo root): Tools/Proseio/testflight.sh [extra xcodebuild settings]
 set -euo pipefail
 cd "$(dirname "$0")/../.."

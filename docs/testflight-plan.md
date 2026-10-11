@@ -6,14 +6,14 @@ Goal: friends install Proseio on iPhone and use `proseio.com.br` during the 11-d
 
 - **Team:** Centaur Labs OU (`992N457T8D`) until Proseio has its own Apple organisation account.
 - **Bundle ID:** `br.com.proseio.app.dev` (already registered under Centaur). The production ID `br.com.proseio.app` stays unregistered.
-- **App Store Connect record name: "Proseio Beta"**, not "Proseio". App names are unique on the App Store; keep "Proseio" free for the production app under Proseio's own account.
+- **App Store Connect record name: "Proseio"** (MZ, 11 Oct 2026). The record sits under Centaur for now; it moves to Proseio's own account later through Apple's app transfer.
 - **Testers:** friends are **external testers** through a **public TestFlight link**. External testing needs Beta App Review for the first build of each version. Internal testing (no review) is only for App Store Connect users of the Centaur team.
 
 ## Blockers before the first upload
 
 | # | Item | Owner | Why |
 |---|---|---|---|
-| 1 | Create the App Store Connect app record "Proseio Beta" for `br.com.proseio.app.dev`, primary language pt-BR | MZ (Centaur account) | Creating records and accepting agreements is the account holder's step |
+| 1 | Create the App Store Connect app record "Proseio" for `br.com.proseio.app.dev`, primary language pt-BR | MZ (Centaur account) | Creating records and accepting agreements is the account holder's step |
 | 2 | Beta App Information: description, feedback email, privacy policy URL, test-account sign-in details for the reviewer | MZ + me (text drafted by me) | Required for external testing review |
 | 3 | **Privacy policy page** at `https://proseio.com.br/privacidade` (the app already links there) | Me (page), MZ (approve copy) | Reviewers and testers need a reachable policy |
 | 4 | **Reviewer account:** a demo account on `proseio.com.br` with credentials given to Apple | Me (issue a token; account created by MZ) | Sign-up is invite-only; review fails without a way in |
