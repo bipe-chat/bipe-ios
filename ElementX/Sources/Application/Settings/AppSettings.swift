@@ -409,7 +409,8 @@ final nonisolated class AppSettings: @unchecked Sendable {
     var mentionsFilterEnabled: Bool
     
     /// Configuration to enable only signed device isolation mode for  crypto. In this mode only devices signed by their owner will be considered in e2ee rooms.
-    @UserPreference(defaultValue: false)
+    /// Proseio: on by default, so a server-added device never receives room keys (proseio docs/security.md, E2EE rules).
+    @UserPreference(defaultValue: true)
     var enableOnlySignedDeviceIsolationMode: Bool
     
     @UserPreference(defaultValue: false)
