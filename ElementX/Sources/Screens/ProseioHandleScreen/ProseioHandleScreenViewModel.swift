@@ -13,6 +13,7 @@ typealias ProseioHandleScreenViewModelType = StateStoreViewModelV2<ProseioHandle
 class ProseioHandleScreenViewModel: ProseioHandleScreenViewModelType, ProseioHandleScreenViewModelProtocol {
     private let apiClient: ProseioAPIClient
     private let clientProxy: ClientProxyProtocol
+    private let handleResolver: ProseioHandleResolver?
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let handleChecker: ProseioHandleAvailabilityChecker
     
@@ -23,9 +24,11 @@ class ProseioHandleScreenViewModel: ProseioHandleScreenViewModelType, ProseioHan
     
     init(apiClient: ProseioAPIClient,
          clientProxy: ClientProxyProtocol,
+         handleResolver: ProseioHandleResolver? = nil,
          userIndicatorController: UserIndicatorControllerProtocol) {
         self.apiClient = apiClient
         self.clientProxy = clientProxy
+        self.handleResolver = handleResolver
         self.userIndicatorController = userIndicatorController
         handleChecker = ProseioHandleAvailabilityChecker(apiClient: apiClient)
         
@@ -102,6 +105,7 @@ class ProseioHandleScreenViewModel: ProseioHandleScreenViewModelType, ProseioHan
         state.changeableAt = myHandle.changeableAt
         state.bindings.handle = myHandle.handle ?? ""
         state.handleStatus = .empty
+        handleResolver?.store(handle: myHandle.handle, for: myHandle.userId)
     }
     
     private func show(_ error: ProseioAPIError) {

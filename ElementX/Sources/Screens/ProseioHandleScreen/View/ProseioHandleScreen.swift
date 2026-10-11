@@ -14,18 +14,12 @@ struct ProseioHandleScreen: View {
     
     var body: some View {
         ScrollView {
-            TextField(text: $context.handle) {
-                Text(ProseioStrings.handlePlaceholder).foregroundColor(.compound.textSecondary)
+            VStack(spacing: 32) {
+                handleField
+                if let handle = context.viewState.currentHandle {
+                    profileLinkSection(handle: handle)
+                }
             }
-            .focused($isFocused)
-            .textFieldStyle(.compound(labelText: ProseioStrings.settingsHandle,
-                                      footerText: context.viewState.footer,
-                                      state: context.viewState.fieldState))
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .submitLabel(.done)
-            .onSubmit(save)
-            .disabled(context.viewState.isLoading || context.viewState.isInCooldown)
             .readableFrame()
             .padding(16)
         }
@@ -40,6 +34,40 @@ struct ProseioHandleScreen: View {
         }
         .alert(item: $context.alertInfo)
         .onChange(of: context.handle) { context.send(viewAction: .handleChanged) }
+    }
+    
+    private var handleField: some View {
+        TextField(text: $context.handle) {
+                Text(ProseioStrings.handlePlaceholder).foregroundColor(.compound.textSecondary)
+            }
+            .focused($isFocused)
+            .textFieldStyle(.compound(labelText: ProseioStrings.settingsHandle,
+                                      footerText: context.viewState.footer,
+                                      state: context.viewState.fieldState))
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .submitLabel(.done)
+            .onSubmit(save)
+            .disabled(context.viewState.isLoading || context.viewState.isInCooldown)
+    }
+    
+    /// The user's own profile link: QR code and share button.
+    @ViewBuilder
+    private func profileLinkSection(handle: String) -> some View {
+        if let url = ProseioProfileLink.url(handle: handle) {
+            VStack(spacing: 16) {
+                ProseioQRCodeView(url: url)
+                    .frame(maxWidth: 220)
+                Text(ProseioStrings.profileQrFooter)
+                    .font(.compound.bodySM)
+                    .foregroundStyle(.compound.textSecondary)
+                    .multilineTextAlignment(.center)
+                ShareLink(item: url) {
+                    Label(ProseioStrings.profileShare, icon: \.shareIos)
+                }
+                .buttonStyle(.compound(.secondary, size: .medium))
+            }
+        }
     }
     
     private func save() {

@@ -8,6 +8,7 @@
 
 import Combine
 import Foundation
+import ProseioKit
 
 class UserSession: UserSessionProtocol {
     private var cancellables = Set<AnyCancellable>()
@@ -22,6 +23,7 @@ class UserSession: UserSessionProtocol {
     let liveLocationManager: LiveLocationManagerProtocol
     /// Scans media content, `nil` when no content scanner is configured for the server.
     let contentScannerService: ContentScannerServiceProtocol?
+    let proseioHandleResolver: ProseioHandleResolver?
     
     let callbacks = PassthroughSubject<UserSessionCallback, Never>()
     
@@ -34,13 +36,15 @@ class UserSession: UserSessionProtocol {
          userSettings: UserSettings,
          mediaProvider: MediaProviderProtocol,
          voiceMessageMediaManager: VoiceMessageMediaManagerProtocol,
-         liveLocationManager: LiveLocationManagerProtocol) {
+         liveLocationManager: LiveLocationManagerProtocol,
+         proseioHandleResolver: ProseioHandleResolver? = nil) {
         self.clientProxy = clientProxy
         self.userSettings = userSettings
         
         self.mediaProvider = mediaProvider
         self.voiceMessageMediaManager = voiceMessageMediaManager
         self.liveLocationManager = liveLocationManager
+        self.proseioHandleResolver = proseioHandleResolver
         contentScannerService = clientProxy.contentScanner.map(ContentScannerService.init)
         
         authErrorCancellable = clientProxy.actionsPublisher

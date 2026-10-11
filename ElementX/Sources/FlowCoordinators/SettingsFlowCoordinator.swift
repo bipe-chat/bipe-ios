@@ -148,6 +148,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     private func presentProseioHandleScreen() {
         let coordinator = ProseioHandleScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
                                                                            clientProxy: flowParameters.userSession.clientProxy,
+                                                                           handleResolver: flowParameters.userSession.proseioHandleResolver,
                                                                            userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in

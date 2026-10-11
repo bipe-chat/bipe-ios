@@ -593,6 +593,7 @@
 		5D586C5CED7B7B086C61B84A /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = 7E8600FD98955C620F83BFBA /* MapLibre */; };
 		5D99F63CC88BB29383019FC6 /* ShareExtensionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAC01A97A43BE07B9E94E43 /* ShareExtensionModels.swift */; };
 		5DD85A0FE3D85AEC3C7EFE36 /* DeveloperOptionsScreenCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7C7CFA6B2A62A685FF6CE3 /* DeveloperOptionsScreenCoordinator.swift */; };
+		5DE74921958A0DADB2F659BE /* ProseioEnvironmentCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2C8C01D08972DA918D4BBE /* ProseioEnvironmentCoordinator.swift */; };
 		5DFC2A889D3B39DD47AC63A8 /* PillUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C537DE821FED94D23467B6C4 /* PillUtilities.swift */; };
 		5E597B9959BDAE7A67DBD5B2 /* LinkMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C78111573987B1D79ED0868 /* LinkMetadataProvider.swift */; };
 		5E67990F98AF11563EA50080 /* SettingsScreenUserStatusPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06775BFC4D00C62B7E1353A8 /* SettingsScreenUserStatusPickerView.swift */; };
@@ -2660,6 +2661,7 @@
 		9A34D9BCA1A7D9A56E1EAF1D /* ManageRoomMemberSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageRoomMemberSheetViewModel.swift; sourceTree = "<group>"; };
 		9A68BCE6438873D2661D93D0 /* BugReportServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportServiceProtocol.swift; sourceTree = "<group>"; };
 		9AA3AF94A06D319BB37E52DA /* TimelineItemFactoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineItemFactoryTests.swift; sourceTree = "<group>"; };
+		9B2C8C01D08972DA918D4BBE /* ProseioEnvironmentCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProseioEnvironmentCoordinator.swift; sourceTree = "<group>"; };
 		9B6572E6EF5D5F4B0C338A40 /* PinnedEventsTimelineScreenModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedEventsTimelineScreenModels.swift; sourceTree = "<group>"; };
 		9B663BE498BB39EADC24025D /* SettingsScreenModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreenModels.swift; sourceTree = "<group>"; };
 		9B67DF223EEB8DCAF178A1D4 /* AnalyticsPromptScreenCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsPromptScreenCoordinator.swift; sourceTree = "<group>"; };
@@ -5438,6 +5440,7 @@
 				9A22A05E472533ED3C5A31B3 /* NavigationModule.swift */,
 				CA28F29C9F93E93CC3C2C715 /* NavigationRootCoordinator.swift */,
 				2C39B1D3FC8CF41D6C3B054F /* NavigationTabCoordinator.swift */,
+				9B2C8C01D08972DA918D4BBE /* ProseioEnvironmentCoordinator.swift */,
 			);
 			path = Navigation;
 			sourceTree = "<group>";
@@ -9244,6 +9247,7 @@
 				69DE29C3E3180BB17D840690 /* ProgressCursorModifier.swift in Sources */,
 				C7ABEBECDC513F7887DACF66 /* ProgressMaskModifier.swift in Sources */,
 				9B356742E035D90A8BB5CABE /* ProposedViewSize.swift in Sources */,
+				5DE74921958A0DADB2F659BE /* ProseioEnvironmentCoordinator.swift in Sources */,
 				B830709EF6F723B6DF419AEF /* ProseioHandleScreen.swift in Sources */,
 				ABD3D0C2AA013BF71F974B11 /* ProseioHandleScreenCoordinator.swift in Sources */,
 				4BBCB71AC358B8722E05C6BE /* ProseioHandleScreenModels.swift in Sources */,

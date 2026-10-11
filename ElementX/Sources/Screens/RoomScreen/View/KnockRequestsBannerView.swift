@@ -7,6 +7,7 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct KnockRequestInfo: Equatable {
@@ -54,6 +55,11 @@ private struct SingleKnockRequestBannerContent: View {
     let onAccept: (@MainActor (String) -> Void)?
     let onViewAll: @MainActor () -> Void
     var mediaProvider: MediaProviderProtocol?
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    
+    private var displayedUserID: String {
+        proseioHandleResolver?.displayText(for: request.userID) ?? request.userID
+    }
     
     var body: some View {
         VStack(spacing: 14) {
@@ -77,7 +83,7 @@ private struct SingleKnockRequestBannerContent: View {
                                 avatarSize: .user(on: .knockingUserBanner), mediaProvider: mediaProvider)
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 0) {
-                    Text(L10n.screenRoomSingleKnockRequestTitle(request.displayName ?? request.userID))
+                    Text(L10n.screenRoomSingleKnockRequestTitle(request.displayName ?? displayedUserID))
                         .lineLimit(2)
                         .font(.compound.bodyMDSemibold)
                         .foregroundStyle(.compound.textPrimary)
@@ -85,7 +91,7 @@ private struct SingleKnockRequestBannerContent: View {
                     KnockRequestsBannerDismissButton(onDismiss: onDismiss)
                 }
                 if request.displayName != nil {
-                    Text(request.userID)
+                    Text(displayedUserID)
                         .lineLimit(2)
                         .font(.compound.bodySM)
                         .foregroundStyle(.compound.textSecondary)
@@ -121,6 +127,7 @@ private struct MultipleKnockRequestsBannerContent: View {
     let onDismiss: @MainActor () -> Void
     let onViewAll: @MainActor () -> Void
     var mediaProvider: MediaProviderProtocol?
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     private var avatars: [StackedAvatarInfo] {
         requests
@@ -133,7 +140,7 @@ private struct MultipleKnockRequestsBannerContent: View {
             return ""
         }
         
-        let string = first.displayName ?? first.userID
+        let string = first.displayName ?? proseioHandleResolver?.displayText(for: first.userID) ?? first.userID
         return L10n.tr("Localizable", "screen_room_multiple_knock_requests_title", string, avatars.count - 1)
     }
     

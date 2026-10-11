@@ -7,10 +7,13 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct UserProfileScreen: View {
     @Bindable var context: UserProfileScreenViewModel.Context
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @State private var isPresentingProseioQRCode = false
     
     var body: some View {
         Form {
@@ -29,6 +32,12 @@ struct UserProfileScreen: View {
         }
         .track(screen: .User)
         .interactiveQuickLook(item: $context.mediaPreviewItem, allowEditing: false)
+        .sheet(isPresented: $isPresentingProseioQRCode) {
+            if let handle = proseioHandleResolver?.handle(for: context.viewState.userID) {
+                ProseioProfileQRCodeSheet(handle: handle)
+                    .presentationDetents([.large])
+            }
+        }
     }
     
     // MARK: - Private
@@ -84,10 +93,19 @@ struct UserProfileScreen: View {
             }
             
             if let permalink = context.viewState.permalink {
-                ShareLink(item: permalink) {
+                ShareLink(item: proseioHandleResolver?.shareURL(for: permalink) ?? permalink) {
                     CompoundIcon(\.shareIos)
                 }
                 .buttonStyle(FormActionButtonStyle(title: L10n.actionShare))
+            }
+            
+            if context.viewState.isOwnUser, proseioHandleResolver?.handle(for: context.viewState.userID) != nil {
+                Button {
+                    isPresentingProseioQRCode = true
+                } label: {
+                    CompoundIcon(\.qrCode)
+                }
+                .buttonStyle(FormActionButtonStyle(title: ProseioStrings.profileQrAction))
             }
         }
     }

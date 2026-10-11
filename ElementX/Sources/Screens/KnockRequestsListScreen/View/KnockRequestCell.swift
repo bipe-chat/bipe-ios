@@ -15,6 +15,7 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct KnockRequestCellInfo: Equatable {
@@ -32,6 +33,11 @@ struct KnockRequestCell: View {
     let onAccept: (@MainActor (String) -> Void)?
     let onDecline: (@MainActor (String) -> Void)?
     let onDeclineAndBan: (@MainActor (String) -> Void)?
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    
+    private var displayedUserID: String {
+        proseioHandleResolver?.displayText(for: cellInfo.userID) ?? cellInfo.userID
+    }
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
@@ -62,7 +68,7 @@ struct KnockRequestCell: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 0) {
-                Text(cellInfo.displayName ?? cellInfo.userID)
+                Text(cellInfo.displayName ?? displayedUserID)
                     .font(.compound.bodyLGSemibold)
                     .foregroundStyle(.compound.textPrimary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -73,7 +79,7 @@ struct KnockRequestCell: View {
                 }
             }
             if cellInfo.displayName != nil {
-                Text(cellInfo.userID)
+                Text(displayedUserID)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textSecondary)
             }

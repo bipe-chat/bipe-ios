@@ -14,6 +14,7 @@ import SwiftUI
 struct SettingsScreen: View {
     @Bindable var context: SettingsScreenViewModel.Context
     @Environment(\.openURL) private var openURL
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     var body: some View {
         Form {
@@ -62,7 +63,7 @@ struct SettingsScreen: View {
                                 .font(.compound.headingMD)
                                 .foregroundColor(.compound.textPrimary)
                             
-                            Text(context.viewState.userProfile.id)
+                            Text(proseioHandleResolver?.displayText(for: context.viewState.userProfile.id) ?? context.viewState.userProfile.id)
                                 .font(.compound.bodySM)
                                 .foregroundColor(.compound.textSecondary)
                         }

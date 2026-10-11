@@ -8,6 +8,7 @@
 
 import Compound
 import Flow
+import ProseioKit
 import SwiftUI
 
 struct AvatarHeaderView<Footer: View>: View {
@@ -33,6 +34,7 @@ struct AvatarHeaderView<Footer: View>: View {
     private let mediaProvider: MediaProviderProtocol?
     private var onAvatarTap: ((URL) -> Void)?
     @ViewBuilder private var footer: () -> Footer
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     init(room: RoomDetails,
          avatarSize: Avatars.Size,
@@ -144,7 +146,7 @@ struct AvatarHeaderView<Footer: View>: View {
             avatar
             
             VStack(spacing: 12) {
-                Text(title)
+                Text(proseioHandleResolver?.displayText(for: title) ?? title)
                     .foregroundStyle(.compound.textPrimary)
                     .font(.compound.headingMDBold)
                     .multilineTextAlignment(.center)
@@ -162,7 +164,7 @@ struct AvatarHeaderView<Footer: View>: View {
                 }
                 
                 if let subtitle {
-                    Text(subtitle)
+                    Text(proseioHandleResolver?.displayText(for: subtitle) ?? subtitle)
                         .foregroundStyle(.compound.textSecondary)
                         .font(.compound.bodyLG)
                         .multilineTextAlignment(.center)

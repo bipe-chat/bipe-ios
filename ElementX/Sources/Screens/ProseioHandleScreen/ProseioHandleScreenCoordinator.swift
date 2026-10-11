@@ -11,6 +11,7 @@ import SwiftUI
 struct ProseioHandleScreenCoordinatorParameters {
     let apiClient: ProseioAPIClient
     let clientProxy: ClientProxyProtocol
+    let handleResolver: ProseioHandleResolver?
     let userIndicatorController: UserIndicatorControllerProtocol
 }
 
@@ -31,6 +32,7 @@ final class ProseioHandleScreenCoordinator: CoordinatorProtocol {
     init(parameters: ProseioHandleScreenCoordinatorParameters) {
         viewModel = ProseioHandleScreenViewModel(apiClient: parameters.apiClient,
                                                  clientProxy: parameters.clientProxy,
+                                                 handleResolver: parameters.handleResolver,
                                                  userIndicatorController: parameters.userIndicatorController)
     }
     

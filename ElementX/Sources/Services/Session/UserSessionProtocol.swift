@@ -8,6 +8,7 @@
 
 import Combine
 import Foundation
+import ProseioKit
 
 enum UserSessionCallback {
     case didReceiveAuthError(isSoftLogout: Bool)
@@ -28,6 +29,8 @@ protocol UserSessionProtocol: Sendable {
     var liveLocationManager: LiveLocationManagerProtocol { get }
     /// Scans media content, `nil` when no content scanner is configured for the server.
     var contentScannerService: ContentScannerServiceProtocol? { get }
+    /// Proseio: Matrix ID to handle. `nil` for accounts outside the Proseio server.
+    var proseioHandleResolver: ProseioHandleResolver? { get }
     
     var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> { get }
     

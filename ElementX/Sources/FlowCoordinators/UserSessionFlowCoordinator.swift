@@ -10,6 +10,7 @@ import AVKit
 import Combine
 import Compound
 import ElementCall
+import ProseioKit
 import SwiftState
 import SwiftUI
 
@@ -85,7 +86,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                           userSettings: flowParameters.userSession.userSettings)
         
         navigationTabCoordinator = NavigationTabCoordinator()
-        navigationRootCoordinator.setRootCoordinator(navigationTabCoordinator)
+        navigationRootCoordinator.setRootCoordinator(ProseioEnvironmentCoordinator(wrapping: navigationTabCoordinator,
+                                                                                   handleResolver: flowParameters.userSession.proseioHandleResolver))
         
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
@@ -170,6 +172,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             if navigationTabCoordinator.selectedTab != .chats {
                 navigationTabCoordinator.selectedTab = .chats
             }
+        case .proseioHandle(let handle):
+            Task { await openProseioHandle(handle, animated: animated) }
         case .search:
             // Switch to the dedicated search tab when it's available (iOS 26 + flag), otherwise ignore.
             if searchTabNavigationStackCoordinator != nil {
@@ -204,6 +208,17 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     // MARK: - Private
+    
+    /// Proseio: a `proseio.com.br/@handle` link opens that user's profile.
+    private func openProseioHandle(_ handle: String, animated: Bool) async {
+        let userID = try? await flowParameters.userSession.proseioHandleResolver?.userID(forHandle: handle)
+        guard let userID else {
+            MXLog.info("No user for a Proseio handle link")
+            flowParameters.userIndicatorController.submitIndicator(.init(title: ProseioStrings.linkHandleNotFound(handle)))
+            return
+        }
+        handleAppRoute(.userProfile(userID: userID), animated: animated)
+    }
     
     private func configureStateMachine() {
         stateMachine.addRoutes(event: .start, transitions: [.initial => .tabBar]) { [weak self] _ in

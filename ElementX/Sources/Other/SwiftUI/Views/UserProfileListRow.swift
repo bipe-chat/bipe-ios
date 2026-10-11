@@ -8,6 +8,7 @@
 
 import Compound
 import MatrixRustSDK
+import ProseioKit
 import SwiftUI
 
 struct UserProfileListRow: View {
@@ -16,9 +17,16 @@ struct UserProfileListRow: View {
     let mediaProvider: MediaProviderProtocol?
     
     let kind: ListRow<LoadableAvatarImage, EmptyView, EmptyView, Bool>.Kind<EmptyView, Bool>
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    
+    /// Proseio: "@handle" in place of the Matrix ID when the handle is known.
+    private var displayedUserID: String {
+        proseioHandleResolver?.displayText(for: user.id) ?? user.id
+    }
     
     var isUnknownProfile: Bool {
-        !user.isVerified && membership == nil
+        // Proseio: a known handle proves the account exists.
+        !user.isVerified && membership == nil && displayedUserID == user.id
     }
     
     private var subtitle: String? {
@@ -27,14 +35,14 @@ struct UserProfileListRow: View {
         if let membershipText = membership?.localizedDescription {
             return membershipText
         } else if user.displayName != nil {
-            return user.id
+            return displayedUserID
         } else {
             return nil
         }
     }
     
     var body: some View {
-        ListRow(label: .avatar(title: user.displayName ?? user.id,
+        ListRow(label: .avatar(title: user.displayName ?? displayedUserID,
                                description: subtitle,
                                icon: avatar,
                                role: isUnknownProfile ? .error : nil),

@@ -70,6 +70,14 @@ struct ProseioSignupScreen: View {
     
     private var fields: some View {
         VStack(alignment: .leading, spacing: 20) {
+            TextField(text: $context.displayName) { placeholder("") }
+                .focused($focusedField, equals: .displayName)
+                .textFieldStyle(.compound(labelText: ProseioStrings.signupDisplayName,
+                                          footerText: ProseioStrings.signupDisplayNameFooter))
+                .textContentType(.name)
+                .submitLabel(.next)
+                .onSubmit { focusedField = .email }
+            
             TextField(text: $context.email) { placeholder("") }
                 .focused($focusedField, equals: .email)
                 .textFieldStyle(.compound(labelText: ProseioStrings.signupEmail,
@@ -107,13 +115,6 @@ struct ProseioSignupScreen: View {
                                           state: context.viewState.handleFieldState))
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-                .submitLabel(.next)
-                .onSubmit { focusedField = .displayName }
-
-            TextField(text: $context.displayName) { placeholder("") }
-                .focused($focusedField, equals: .displayName)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupDisplayName))
-                .textContentType(.name)
                 .submitLabel(.done)
                 .onSubmit(submit)
         }

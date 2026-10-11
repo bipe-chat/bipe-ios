@@ -8,6 +8,7 @@
 
 import Combine
 import MatrixRustSDK
+import ProseioKit
 import SwiftUI
 
 typealias StartChatScreenViewModelType = StateStoreViewModel<StartChatScreenViewState, StartChatScreenViewAction>
@@ -164,21 +165,51 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
     private func fetchUsers() {
         guard context.searchQuery.count >= 3 else {
             state.usersSection = .init(type: .suggestions, users: suggestedUsers)
+            state.proseioHandleNotFound = nil
             return
         }
         
         fetchUsersTask = Task {
-            let result = await userDiscoveryService.searchProfiles(with: context.searchQuery)
+            let query = context.searchQuery
+            async let proseioResult = proseioLookUp(query: query)
+            let result = await userDiscoveryService.searchProfiles(with: query)
+            let proseioLookUp = await proseioResult
             
             guard !Task.isCancelled else { return }
             
+            let proseioUsers = proseioLookUp?.profile.map { [$0] } ?? []
+            state.proseioHandleNotFound = proseioLookUp?.profile == nil ? proseioLookUp?.handle : nil
+            
             switch result {
             case .success(let users):
-                state.usersSection = .init(type: .searchResult, users: users)
+                state.usersSection = .init(type: .searchResult, users: proseioUsers + users.filter { user in !proseioUsers.contains { $0.id == user.id } })
             case .failure:
-                break
+                if !proseioUsers.isEmpty {
+                    state.usersSection = .init(type: .searchResult, users: proseioUsers)
+                }
             }
         }
+    }
+    
+    /// Proseio: exact handle lookup (no directory). `nil` when the query is not a handle,
+    /// is the user's own handle, or the lookup failed.
+    private func proseioLookUp(query: String) async -> (handle: String, profile: UserProfile?)? {
+        guard let resolver = userSession.proseioHandleResolver else { return nil }
+        let handle = ProseioHandle.sanitize(query).lowercased()
+        guard ProseioHandle.localProblem(for: handle) == nil else { return nil }
+        
+        let userID: String?
+        do {
+            userID = try await resolver.userID(forHandle: handle)
+        } catch {
+            MXLog.error("Proseio handle lookup failed: \(error)")
+            return nil
+        }
+        guard let userID else { return (handle, nil) }
+        guard userID != userSession.clientProxy.userID else { return nil }
+        
+        let profile = (try? await userSession.clientProxy.profile(for: userID).get()) ?? UserProfile(userID: userID)
+        return (handle, profile)
     }
     
     private func createDirectRoom(user: UserProfile) async {

@@ -7,10 +7,12 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct RoomDetailsScreen: View {
     @Bindable var context: RoomDetailsScreenViewModel.Context
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     @State private var isTopicExpanded = false
     
@@ -93,7 +95,7 @@ struct RoomDetailsScreen: View {
                 case .mute:
                     toggleMuteButton
                 case .share(let permalink):
-                    ShareLink(item: permalink) {
+                    ShareLink(item: proseioHandleResolver?.shareURL(for: permalink) ?? permalink) {
                         CompoundIcon(\.shareIos)
                     }
                     .buttonStyle(FormActionButtonStyle(title: L10n.actionShare))

@@ -7,19 +7,27 @@
 //
 
 import MatrixRustSDK
+import ProseioKit
 import SwiftUI
 
 struct MatrixUserShareLink<Label: View>: View {
+    private let userID: String
     private let permalink: URL?
     private let label: Label
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     init(userID: String, @ViewBuilder label: () -> Label) {
+        self.userID = userID
         self.label = label()
         permalink = try? URL(string: matrixToUserPermalink(userId: userID))
     }
     
     var body: some View {
-        if let permalink {
+        if let profileLink = proseioHandleResolver?.profileLink(for: userID) {
+            ShareLink(item: ProseioStrings.inviteFriendsText(profileLink.absoluteString)) {
+                label
+            }
+        } else if let permalink {
             ShareLink(item: L10n.inviteFriendsText(InfoPlistReader.main.bundleDisplayName, permalink.absoluteString)) {
                 label
             }

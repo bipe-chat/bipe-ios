@@ -10,6 +10,7 @@ import Algorithms
 import Combine
 import MatrixRustSDK
 import OrderedCollections
+import ProseioKit
 import SwiftUI
 
 typealias TimelineViewModelType = StateStoreViewModel<TimelineViewState, TimelineViewAction>
@@ -1053,6 +1054,20 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
     
     // MARK: Pills
     
+    /// Proseio: a mention pill that shows a raw Matrix ID switches to "@handle" once the handle resolves.
+    private func proseioShowHandle(in pillContext: PillContext, userID: String) {
+        guard let resolver = userSession.proseioHandleResolver, resolver.isProseioUserID(userID) else { return }
+        Task { [weak pillContext] in
+            guard let handle = await resolver.resolve(userID),
+                  let pillContext,
+                  case let .mention(isOwnMention, displayText, statusEmoji) = pillContext.viewState,
+                  displayText == userID else {
+                return
+            }
+            pillContext.viewState = .mention(isOwnMention: isOwnMention, displayText: "@\(handle)", statusEmoji: statusEmoji)
+        }
+    }
+    
     private func pillContextUpdater(_ pillContext: PillContext) {
         switch pillContext.data.type {
         case let .user(id):
@@ -1065,7 +1080,7 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
                 pillContext.viewState = .mention(isOwnMention: isOwnMention, displayText: id, statusEmoji: nil)
                 pillContext.cancellable = context.$viewState
                     .compactMap { $0.members[id] }
-                    .sink { [weak pillContext] profile in
+                    .sink { [weak self, weak pillContext] profile in
                         guard let pillContext else {
                             return
                         }
@@ -1073,8 +1088,10 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
                                                          displayText: PillUtilities.userPillDisplayText(username: profile.displayName, userID: id),
                                                          statusEmoji: profile.status.displayed?.emoji)
                         pillContext.cancellable = nil
+                        self?.proseioShowHandle(in: pillContext, userID: id)
                     }
             }
+            proseioShowHandle(in: pillContext, userID: id)
         case .allUsers:
             pillContext.viewState = .mention(isOwnMention: true, displayText: PillUtilities.atRoom, statusEmoji: nil)
         case .event(let room):

@@ -157,4 +157,26 @@ public enum ProseioStrings {
     public static var errorNetwork: String { NSLocalizedString("proseio_error_network", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var errorGeneric: String { NSLocalizedString("proseio_error_generic", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupDisplayNameFooter: String { NSLocalizedString("proseio_signup_display_name_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func startChatHandleNotFound(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_start_chat_handle_not_found", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var profileShare: String { NSLocalizedString("proseio_profile_share", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var profileQrAction: String { NSLocalizedString("proseio_profile_qr_action", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var profileQrTitle: String { NSLocalizedString("proseio_profile_qr_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var profileQrFooter: String { NSLocalizedString("proseio_profile_qr_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func inviteFriendsText(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_invite_friends_text", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func linkHandleNotFound(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_link_handle_not_found", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
 }

@@ -8,6 +8,7 @@
 
 import Foundation
 import MatrixRustSDK
+import ProseioKit
 
 class UserSessionStore: UserSessionStoreProtocol {
     private let keychainController: KeychainControllerProtocol
@@ -123,11 +124,26 @@ class UserSessionStore: UserSessionStoreProtocol {
                                 userSettings: userSettings)
         }
         
+        let proseioHandleResolver = await makeProseioHandleResolver(clientProxy: clientProxy)
+        
         return UserSession(clientProxy: clientProxy,
                            userSettings: userSettings,
                            mediaProvider: mediaProvider,
                            voiceMessageMediaManager: voiceMessageMediaManager,
-                           liveLocationManager: liveLocationManager)
+                           liveLocationManager: liveLocationManager,
+                           proseioHandleResolver: proseioHandleResolver)
+    }
+    
+    /// Proseio: handles exist only for accounts on the Proseio server.
+    private func makeProseioHandleResolver(clientProxy: ClientProxyProtocol) async -> ProseioHandleResolver? {
+        let serverName = appSettings.proseioSignupServerName
+        let apiBaseURL = appSettings.proseioAPIBaseURL
+        return await MainActor.run {
+            guard clientProxy.userIDServerName == serverName else { return nil }
+            return ProseioHandleResolver(apiClient: ProseioAPIClient(baseURL: apiBaseURL), serverName: serverName) { [weak clientProxy] in
+                clientProxy?.accessToken
+            }
+        }
     }
     
     private func restorePreviousLogin(_ credentials: KeychainCredentials, userSettings: UserSettings) async -> Result<ClientProxyProtocol, UserSessionStoreError> {

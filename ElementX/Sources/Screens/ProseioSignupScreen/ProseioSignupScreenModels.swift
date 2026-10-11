@@ -45,7 +45,10 @@ struct ProseioSignupScreenViewState: BindableState {
 
     var canSubmit: Bool {
         if isAccountCreated { return true }
-        return ProseioSignupRules.isPlausibleEmail(bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
+        let displayName = bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !displayName.isEmpty
+            && displayName.count <= ProseioSignupRules.displayNameMaxLength
+            && ProseioSignupRules.isPlausibleEmail(bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
             && ProseioSignupRules.isValidPassword(bindings.password)
             && bindings.password == bindings.passwordConfirmation
             && !handleStatus.isBlocking

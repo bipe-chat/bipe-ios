@@ -15,6 +15,8 @@ import Foundation
 import LocalAuthentication
 import Photos
 
+import ProseioKit
+
 nonisolated class AnalyticsClientMock: AnalyticsClientProtocol, @unchecked Sendable {
     var isRunning: Bool {
         get { return underlyingIsRunning }
@@ -15044,6 +15046,7 @@ nonisolated class UserSessionMock: UserSessionProtocol, @unchecked Sendable {
     }
     nonisolated(unsafe) var underlyingLiveLocationManager: LiveLocationManagerProtocol!
     nonisolated(unsafe) var contentScannerService: ContentScannerServiceProtocol?
+    nonisolated(unsafe) var proseioHandleResolver: ProseioHandleResolver?
     var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> {
         get { return underlyingSessionSecurityStatePublisher }
         set(value) { underlyingSessionSecurityStatePublisher = value }

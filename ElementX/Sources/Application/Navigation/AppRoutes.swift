@@ -8,6 +8,7 @@
 
 import Foundation
 import MatrixRustSDK
+import ProseioKit
 
 // MARK: - Routes
 
@@ -56,6 +57,8 @@ enum AppRoute: Hashable {
     case thread(roomID: String, threadRootEventID: String, focusEventID: String?)
     /// The search screen
     case search
+    /// Proseio: a `proseio.com.br/@handle` link. Resolved to a ``userProfile`` once a session exists.
+    case proseioHandle(String)
     
     /// Whether or not the route should be handled by the authentication flow.
     var isAuthenticationRoute: Bool {
@@ -84,6 +87,7 @@ struct AppRouteURLParser {
     init(appSettings: AppSettings) {
         urlParsers = [
             AppGroupURLParser(),
+            ProseioHandleURLParser(),
             MatrixPermalinkParser(),
             ElementWebURLParser(domains: appSettings.elementWebHosts),
             AccountProvisioningURLParser(domain: appSettings.accountProvisioningHost),
@@ -201,6 +205,13 @@ private struct AccountProvisioningURLParser: URLParser {
         let loginHint = components.queryItems?.first { $0.name == AccountProvisioningParameters.CodingKeys.loginHint.rawValue }?.value
         
         return .accountProvisioningLink(.init(accountProvider: serverName, loginHint: loginHint))
+    }
+}
+
+/// Proseio: the parser for `https://proseio.com.br/@handle` profile links.
+private struct ProseioHandleURLParser: URLParser {
+    func route(from url: URL) -> AppRoute? {
+        ProseioProfileLink.handle(from: url).map(AppRoute.proseioHandle)
     }
 }
 

@@ -7,10 +7,12 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct RoomMemberDetailsScreen: View {
     @ObservedObject var context: RoomMemberDetailsScreenViewModel.Context
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     var body: some View {
         Form {
@@ -120,7 +122,7 @@ struct RoomMemberDetailsScreen: View {
             }
             
             if let permalink = context.viewState.memberDetails?.permalink {
-                ShareLink(item: permalink) {
+                ShareLink(item: proseioHandleResolver?.shareURL(for: permalink) ?? permalink) {
                     CompoundIcon(\.shareIos)
                 }
                 .buttonStyle(FormActionButtonStyle(title: L10n.actionShare))

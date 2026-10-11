@@ -6,6 +6,7 @@
 	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
+		<string>applinks:proseio.com.br</string>
 		<string>applinks:element.io</string>
 		<string>applinks:app.element.io</string>
 		<string>applinks:staging.element.io</string>

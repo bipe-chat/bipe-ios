@@ -7,6 +7,7 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct SendInviteConfirmationView: View {
@@ -15,6 +16,7 @@ struct SendInviteConfirmationView: View {
     let onInvite: () -> Void
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     @State private var sheetHeight: CGFloat = .zero
     private let topPadding: CGFloat = 24
@@ -29,10 +31,11 @@ struct SendInviteConfirmationView: View {
     
     private var subtitle: String {
         let string: String
+        let userID = proseioHandleResolver?.displayText(for: userToInvite.id) ?? userToInvite.id
         if let displayName = userToInvite.displayName {
-            string = L10n.commonNameAndId(displayName, userToInvite.id)
+            string = L10n.commonNameAndId(displayName, userID)
         } else {
-            string = userToInvite.id
+            string = userID
         }
         return if userToInvite.isUnknown {
             L10n.screenBottomSheetCreateDmUnknownUserContent

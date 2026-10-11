@@ -283,7 +283,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         if let route = appRouteURLParser.route(from: url) {
             switch route {
-            case .accountProvisioningLink:
+            case .accountProvisioningLink, .proseioHandle:
                 handleAppRoute(route,
                                windowType: windowType)
             case .oAuthCallback(let url):

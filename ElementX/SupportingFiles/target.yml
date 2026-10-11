@@ -122,6 +122,7 @@ targets:
       properties:
         aps-environment: development
         com.apple.developer.associated-domains:
+        - applinks:proseio.com.br
         - applinks:element.io
         - applinks:app.element.io
         - applinks:staging.element.io
