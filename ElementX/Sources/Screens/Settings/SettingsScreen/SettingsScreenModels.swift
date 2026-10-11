@@ -36,6 +36,7 @@ enum SettingsScreenViewModelAction {
     case developerOptions
     
     case proseioHandle
+    case proseioInvites
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -133,6 +134,7 @@ enum SettingsScreenViewAction {
     
     case proseioHandle
     case proseioLoadHandle
+    case proseioInvites
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

@@ -16,6 +16,8 @@ enum SettingsFlowCoordinatorAction {
     case runLogoutFlow
     /// Logout without a confirmation. The user forgot their PIN.
     case forceLogout
+    /// Proseio: open a user's profile in the chats tab (from the invites screen).
+    case openUserProfile(userID: String)
 }
 
 class SettingsFlowCoordinator: FlowCoordinatorProtocol {
@@ -138,6 +140,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     
                 case .proseioHandle:
                     presentProseioHandleScreen()
+                case .proseioInvites:
+                    presentProseioInvitesScreen()
                 }
             }
             .store(in: &cancellables)
@@ -155,6 +159,21 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .done:
                     self?.navigationStackCoordinator.pop()
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presentProseioInvitesScreen() {
+        let coordinator = ProseioInvitesScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                            clientProxy: flowParameters.userSession.clientProxy,
+                                                                            userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .openUserProfile(let userID):
+                    self?.actionsSubject.send(.openUserProfile(userID: userID))
                 }
             }
             .store(in: &cancellables)

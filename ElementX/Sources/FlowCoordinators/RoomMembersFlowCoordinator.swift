@@ -121,7 +121,7 @@ final class RoomMembersFlowCoordinator: FlowCoordinatorProtocol {
         case .accountProvisioningLink, .oAuthCallback,
              .roomList, .room, .roomDetails, .event,
              .userProfile, .call, .settings, .chatBackupSettings,
-             .share, .transferOwnership, .thread, .search, .proseioHandle:
+             .share, .transferOwnership, .thread, .search, .proseioHandle, .proseioInvite:
             break
         }
     }

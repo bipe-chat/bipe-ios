@@ -189,6 +189,12 @@ struct SettingsScreen: View {
                             context.send(viewAction: .proseioHandle)
                         })
                         .onAppear { context.send(viewAction: .proseioLoadHandle) }
+                
+                ListRow(label: .default(title: ProseioStrings.invitesTitle,
+                                        icon: \.userAdd),
+                        kind: .navigationLink {
+                            context.send(viewAction: .proseioInvites)
+                        })
             }
             
             // Proseio: pt-BR / en switch lives in iOS per-app language settings.

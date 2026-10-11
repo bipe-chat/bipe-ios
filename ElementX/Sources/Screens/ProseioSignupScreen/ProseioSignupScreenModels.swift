@@ -28,6 +28,9 @@ struct ProseioSignupScreenViewState: BindableState {
     var emailError: String?
     var passwordError: String?
     var handleError: String?
+    var inviteCodeError: String?
+    /// The inviter's handle, from the invite preview.
+    var inviterHandle: String?
 
     var bindings = ProseioSignupScreenViewStateBindings()
 
@@ -43,6 +46,19 @@ struct ProseioSignupScreenViewState: BindableState {
         handleError != nil ? .error : handleStatus.textFieldState
     }
 
+    /// The normalised code, or `nil` when the field is empty.
+    var inviteCode: ProseioInviteCode? {
+        ProseioInviteCode(bindings.inviteCode)
+    }
+
+    var isInviteCodeAcceptable: Bool {
+        bindings.inviteCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || inviteCode != nil
+    }
+
+    var inviteCodeFooter: String? {
+        inviteCodeError ?? (isInviteCodeAcceptable ? nil : ProseioStrings.errorInviteInvalid)
+    }
+
     var canSubmit: Bool {
         if isAccountCreated { return true }
         let displayName = bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -52,6 +68,8 @@ struct ProseioSignupScreenViewState: BindableState {
             && ProseioSignupRules.isValidPassword(bindings.password)
             && bindings.password == bindings.passwordConfirmation
             && !handleStatus.isBlocking
+            && isInviteCodeAcceptable
+            && inviteCodeError == nil
     }
 }
 
@@ -61,6 +79,7 @@ struct ProseioSignupScreenViewStateBindings {
     var passwordConfirmation = ""
     var handle = ""
     var displayName = ""
+    var inviteCode = ""
 
     var alertInfo: AlertInfo<ProseioSignupScreenAlertType>?
 }
@@ -72,6 +91,7 @@ enum ProseioSignupScreenAlertType: Hashable {
 enum ProseioSignupScreenViewAction {
     case updateWindow(UIWindow)
     case handleChanged
+    case inviteCodeChanged
     case clearFieldErrors
     case submit
 }

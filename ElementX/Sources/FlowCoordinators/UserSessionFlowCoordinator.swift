@@ -174,6 +174,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .proseioHandle(let handle):
             Task { await openProseioHandle(handle, animated: animated) }
+        case .proseioInvite:
+            flowParameters.userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.inviteAlreadySignedIn))
         case .search:
             // Switch to the dedicated search tab when it's available (iOS 26 + flag), otherwise ignore.
             if searchTabNavigationStackCoordinator != nil {
@@ -390,6 +392,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 }
             case .forceLogout:
                 actionsSubject.send(.forceLogout)
+            case .openUserProfile(let userID):
+                handleAppRoute(.userProfile(userID: userID), animated: true)
             }
         }
         .store(in: &cancellables)

@@ -25,7 +25,8 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
         actionsSubject.eraseToAnyPublisher()
     }
 
-    init(apiClient: ProseioAPIClient,
+    init(inviteCode: ProseioInviteCode? = nil,
+         apiClient: ProseioAPIClient,
          authenticationService: AuthenticationServiceProtocol,
          serverNameOrBaseURL: String,
          userIndicatorController: UserIndicatorControllerProtocol) {
@@ -35,7 +36,13 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
         self.userIndicatorController = userIndicatorController
         handleChecker = ProseioHandleAvailabilityChecker(apiClient: apiClient)
 
-        super.init(initialViewState: ProseioSignupScreenViewState())
+        var initialState = ProseioSignupScreenViewState()
+        initialState.bindings.inviteCode = inviteCode?.value ?? ""
+        super.init(initialViewState: initialState)
+
+        if let inviteCode {
+            Task { await loadInvitePreview(inviteCode) }
+        }
     }
 
     override func process(viewAction: ProseioSignupScreenViewAction) {
@@ -48,6 +55,9 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
             handleChecker.check(state.bindings.handle) { [weak self] status in
                 self?.state.handleStatus = status
             }
+        case .inviteCodeChanged:
+            state.inviteCodeError = nil
+            state.inviterHandle = nil
         case .clearFieldErrors:
             state.emailError = nil
             state.passwordError = nil
@@ -72,7 +82,8 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
         let email = state.bindings.email.trimmingCharacters(in: .whitespacesAndNewlines)
         let handle = ProseioHandle.sanitize(state.bindings.handle)
         let displayName = state.bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let request = ProseioSignupRequest(email: email,
+        let request = ProseioSignupRequest(inviteCode: state.inviteCode?.value,
+                                           email: email,
                                            password: state.bindings.password,
                                            handle: handle.isEmpty ? nil : handle,
                                            displayName: displayName.isEmpty ? nil : displayName)
@@ -93,6 +104,17 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
             MXLog.error("Proseio sign-up failed: \(error)")
             show(error)
             return false
+        }
+    }
+
+    /// Shows who invited the user, or marks a code that no longer works. Failures stay silent: sign-up checks the code again.
+    private func loadInvitePreview(_ code: ProseioInviteCode) async {
+        guard let preview = try? await apiClient.invitePreview(code: code.value) else { return }
+        guard state.inviteCode == code else { return }
+        if preview.valid {
+            state.inviterHandle = preview.inviterHandle
+        } else {
+            state.inviteCodeError = ProseioStrings.errorInviteInvalid
         }
     }
 
@@ -133,6 +155,9 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
                 return
             case .handleTaken, .handleInvalid:
                 state.handleError = message
+                return
+            case .inviteInvalid:
+                state.inviteCodeError = message
                 return
             default:
                 break

@@ -23,6 +23,28 @@ public struct ProseioAPIClient: Sendable {
         try await send(method: "POST", path: ["v1", "signup"], body: request)
     }
 
+    // MARK: - Invites
+
+    /// `GET /v1/invites/{code}`. No auth. Validity and the inviter's handle.
+    public func invitePreview(code: String) async throws(ProseioAPIError) -> ProseioInvitePreview {
+        try await send(method: "GET", path: ["v1", "invites", code], body: Empty?.none)
+    }
+
+    /// `GET /v1/me/invites`.
+    public func myInvites(accessToken: String) async throws(ProseioAPIError) -> ProseioMyInvites {
+        try await send(method: "GET", path: ["v1", "me", "invites"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `POST /v1/me/invites`. The code is returned once.
+    public func createInvite(accessToken: String) async throws(ProseioAPIError) -> ProseioCreatedInvite {
+        try await send(method: "POST", path: ["v1", "me", "invites"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `DELETE /v1/me/invites/{inviteId}`. Revokes a pending invite.
+    public func revokeInvite(id: String, accessToken: String) async throws(ProseioAPIError) {
+        let _: NoContent = try await send(method: "DELETE", path: ["v1", "me", "invites", id], body: Empty?.none, accessToken: accessToken)
+    }
+
     // MARK: - Handles
 
     /// `GET /v1/handles/{handle}/availability`. No auth.
@@ -74,6 +96,9 @@ public struct ProseioAPIClient: Sendable {
     // MARK: - Private
 
     private struct Empty: Encodable { }
+
+    /// Stands in for an empty 204 body.
+    private struct NoContent: Decodable { }
 
     private struct ResolveRequest: Encodable {
         let userIds: [String]
@@ -134,6 +159,10 @@ public struct ProseioAPIClient: Sendable {
             throw .unexpectedResponse(statusCode: httpResponse.statusCode)
         }
 
+        if httpResponse.statusCode == 204, let noContent = NoContent() as? Response {
+            return noContent
+        }
+
         do {
             return try Self.decoder.decode(Response.self, from: data)
         } catch {
@@ -190,6 +219,65 @@ public struct ProseioSignupRequest: Encodable, Sendable, CustomStringConvertible
 public struct ProseioSignupResponse: Decodable, Sendable {
     public let userId: String
     public let handle: String?
+    /// Present when a personal invite was used.
+    public let inviterUserId: String?
+}
+
+public struct ProseioInvitePreview: Decodable, Sendable {
+    public let valid: Bool
+    /// Without @. Only for a valid personal invite whose inviter has a handle.
+    public let inviterHandle: String?
+}
+
+public enum ProseioInviteStatus: String, Decodable, Sendable {
+    case pending, used, expired, revoked
+}
+
+public struct ProseioInvite: Decodable, Sendable, Identifiable, Equatable {
+    public let id: String
+    public let status: ProseioInviteStatus
+    public let createdAt: Date
+    public let expiresAt: Date
+    /// Only when `status` is `used`.
+    public let joinedUserId: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, status, createdAt, expiresAt, joinedUserId
+    }
+
+    public init(id: String, status: ProseioInviteStatus, createdAt: Date, expiresAt: Date, joinedUserId: String?) {
+        self.id = id
+        self.status = status
+        self.createdAt = createdAt
+        self.expiresAt = expiresAt
+        self.joinedUserId = joinedUserId
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        // An unknown status from a newer server must not fail the whole list.
+        status = try ProseioInviteStatus(rawValue: container.decode(String.self, forKey: .status)) ?? .expired
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        expiresAt = try container.decode(Date.self, forKey: .expiresAt)
+        joinedUserId = try container.decodeIfPresent(String.self, forKey: .joinedUserId)
+    }
+}
+
+public struct ProseioMyInvites: Decodable, Sendable {
+    public let quota: Int
+    public let available: Int
+    public let invites: [ProseioInvite]
+}
+
+public struct ProseioCreatedInvite: Decodable, Sendable, CustomStringConvertible {
+    public let id: String
+    public let code: String
+    public let url: URL
+    public let expiresAt: Date
+
+    /// Never prints the code.
+    public var description: String { "ProseioCreatedInvite(\(id))" }
 }
 
 public struct ProseioHandleAvailability: Decodable, Sendable {
@@ -228,6 +316,7 @@ public struct ProseioMyHandle: Decodable, Sendable {
 public enum ProseioAPIErrorCode: String, Sendable {
     case badRequest = "bad_request"
     case inviteInvalid = "invite_invalid"
+    case inviteQuotaExhausted = "invite_quota_exhausted"
     case emailTaken = "email_taken"
     case handleInvalid = "handle_invalid"
     case handleTaken = "handle_taken"
@@ -262,6 +351,7 @@ public enum ProseioAPIError: Error, Sendable, Equatable {
         case .server(let code, let reason, _):
             switch code {
             case .inviteInvalid: ProseioStrings.errorInviteInvalid
+            case .inviteQuotaExhausted: ProseioStrings.errorInviteQuota
             case .emailTaken: ProseioStrings.errorEmailTaken
             case .passwordWeak: ProseioStrings.errorPasswordWeak
             case .handleTaken: ProseioHandleProblem.taken.localizedMessage

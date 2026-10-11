@@ -99,6 +99,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private var cancellables = Set<AnyCancellable>()
     
     private var oAuthPresenter: OAuthAuthenticationPresenter?
+    /// Proseio: the code from an invite link, handed to the next sign-up screen.
+    private var pendingInviteCode: ProseioInviteCode?
     
     // periphery:ignore - retaining purpose
     private var bugReportFlowCoordinator: BugReportFlowCoordinator?
@@ -146,6 +148,13 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             }
             
             stateMachine.tryEvent(.applyProvisioningParameters, userInfo: provisioningParameters)
+        case .proseioInvite(let code):
+            guard appSettings.usesProseioSignup else { return }
+            pendingInviteCode = code
+            if stateMachine.state != .startScreen {
+                clearRoute(animated: animated)
+            }
+            stateMachine.tryEvent(.proseioSignup)
         default:
             fatalError()
         }
@@ -445,7 +454,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     // MARK: - Proseio Sign-up
     
     private func showProseioSignupScreen() {
-        let parameters = ProseioSignupScreenCoordinatorParameters(apiClient: ProseioAPIClient(baseURL: appSettings.proseioAPIBaseURL),
+        let inviteCode = pendingInviteCode
+        pendingInviteCode = nil
+        let parameters = ProseioSignupScreenCoordinatorParameters(inviteCode: inviteCode,
+                                                                  apiClient: ProseioAPIClient(baseURL: appSettings.proseioAPIBaseURL),
                                                                   authenticationService: authenticationService,
                                                                   serverNameOrBaseURL: appSettings.defaultAccountProvider.serverNameOrBaseURL,
                                                                   userIndicatorController: userIndicatorController)

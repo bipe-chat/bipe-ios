@@ -266,6 +266,15 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 authenticationFlowCoordinator.handleAppRoute(appRoute, animated: animated)
                 handled = true
             }
+        case .proseioInvite:
+            // Signed out: sign-up with the code. Signed in: the session flow says the invite is not for this user.
+            if let authenticationFlowCoordinator {
+                authenticationFlowCoordinator.handleAppRoute(appRoute, animated: animated)
+                handled = true
+            } else if let userSessionFlowCoordinator {
+                userSessionFlowCoordinator.handleAppRoute(appRoute, animated: animated)
+                handled = true
+            }
         default:
             if let userSessionFlowCoordinator {
                 userSessionFlowCoordinator.handleAppRoute(appRoute, animated: animated)
@@ -283,7 +292,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         if let route = appRouteURLParser.route(from: url) {
             switch route {
-            case .accountProvisioningLink, .proseioHandle:
+            case .accountProvisioningLink, .proseioHandle, .proseioInvite:
                 handleAppRoute(route,
                                windowType: windowType)
             case .oAuthCallback(let url):

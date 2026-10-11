@@ -199,4 +199,48 @@ public enum ProseioStrings {
     public static var scamWarningNewNumber: String { NSLocalizedString("proseio_scam_warning_new_number", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var scamWarningUrgency: String { NSLocalizedString("proseio_scam_warning_urgency", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var signupInviteCode: String { NSLocalizedString("proseio_signup_invite_code", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func signupInvitedBy(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_signup_invited_by", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var inviteAlreadySignedIn: String { NSLocalizedString("proseio_invite_already_signed_in", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesTitle: String { NSLocalizedString("proseio_invites_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func invitesAvailable(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_invites_available", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var invitesExplainer: String { NSLocalizedString("proseio_invites_explainer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesCreate: String { NSLocalizedString("proseio_invites_create", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func invitesShareMessage(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_invites_share_message", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var invitesNoneLeft: String { NSLocalizedString("proseio_invites_none_left", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesEmpty: String { NSLocalizedString("proseio_invites_empty", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func invitesExpires(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_invites_expires", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var invitesStatusPending: String { NSLocalizedString("proseio_invites_status_pending", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesStatusUsed: String { NSLocalizedString("proseio_invites_status_used", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesStatusExpired: String { NSLocalizedString("proseio_invites_status_expired", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesStatusRevoked: String { NSLocalizedString("proseio_invites_status_revoked", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesRevoke: String { NSLocalizedString("proseio_invites_revoke", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var invitesChat: String { NSLocalizedString("proseio_invites_chat", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorInviteQuota: String { NSLocalizedString("proseio_error_invite_quota", tableName: "Proseio", bundle: .module, comment: "") }
 }

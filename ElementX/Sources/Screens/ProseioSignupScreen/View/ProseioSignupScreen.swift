@@ -12,7 +12,7 @@ struct ProseioSignupScreen: View {
     @Bindable var context: ProseioSignupScreenViewModel.Context
 
     private enum Field: Hashable {
-        case email, password, passwordConfirmation, handle, displayName
+        case email, password, passwordConfirmation, handle, displayName, inviteCode
     }
 
     @FocusState private var focusedField: Field?
@@ -39,6 +39,7 @@ struct ProseioSignupScreen: View {
             context.send(viewAction: .updateWindow(window))
         }
         .onChange(of: context.handle) { context.send(viewAction: .handleChanged) }
+        .onChange(of: context.inviteCode) { context.send(viewAction: .inviteCodeChanged) }
         .onChange(of: context.email) { context.send(viewAction: .clearFieldErrors) }
         .onChange(of: context.password) { context.send(viewAction: .clearFieldErrors) }
     }
@@ -48,7 +49,7 @@ struct ProseioSignupScreen: View {
             BigIcon(icon: \.userProfileSolid)
                 .padding(.bottom, 8)
 
-            Text(ProseioStrings.signupHeader)
+            Text(context.viewState.inviterHandle.map(ProseioStrings.signupInvitedBy) ?? ProseioStrings.signupHeader)
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textSecondary)
@@ -114,6 +115,16 @@ struct ProseioSignupScreen: View {
                                           footerText: context.viewState.handleFooter,
                                           state: context.viewState.handleFieldState))
                 .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.next)
+                .onSubmit { focusedField = .inviteCode }
+
+            TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
+                .focused($focusedField, equals: .inviteCode)
+                .textFieldStyle(.compound(labelText: ProseioStrings.signupInviteCode,
+                                          footerText: context.viewState.inviteCodeFooter,
+                                          state: context.viewState.inviteCodeFooter == nil ? .default : .error))
+                .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
                 .submitLabel(.done)
                 .onSubmit(submit)

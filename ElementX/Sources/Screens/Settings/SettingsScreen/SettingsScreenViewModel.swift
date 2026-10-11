@@ -154,6 +154,8 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             actionsSubject.send(.proseioHandle)
         case .proseioLoadHandle:
             Task { await loadProseioHandle() }
+        case .proseioInvites:
+            actionsSubject.send(.proseioInvites)
         }
     }
     

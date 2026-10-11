@@ -59,6 +59,8 @@ enum AppRoute: Hashable {
     case search
     /// Proseio: a `proseio.com.br/@handle` link. Resolved to a ``userProfile`` once a session exists.
     case proseioHandle(String)
+    /// Proseio: a `proseio.com.br/convite/<code>` invite link. Opens sign-up with the code, or tells a signed-in user it is not for them.
+    case proseioInvite(code: ProseioInviteCode)
     
     /// Whether or not the route should be handled by the authentication flow.
     var isAuthenticationRoute: Bool {
@@ -88,6 +90,7 @@ struct AppRouteURLParser {
         urlParsers = [
             AppGroupURLParser(),
             ProseioHandleURLParser(),
+            ProseioInviteURLParser(),
             MatrixPermalinkParser(),
             ElementWebURLParser(domains: appSettings.elementWebHosts),
             AccountProvisioningURLParser(domain: appSettings.accountProvisioningHost),
@@ -212,6 +215,13 @@ private struct AccountProvisioningURLParser: URLParser {
 private struct ProseioHandleURLParser: URLParser {
     func route(from url: URL) -> AppRoute? {
         ProseioProfileLink.handle(from: url).map(AppRoute.proseioHandle)
+    }
+}
+
+/// Proseio: the parser for `https://proseio.com.br/convite/<code>` invite links.
+private struct ProseioInviteURLParser: URLParser {
+    func route(from url: URL) -> AppRoute? {
+        ProseioInviteLink.code(from: url).flatMap(ProseioInviteCode.init).map { AppRoute.proseioInvite(code: $0) }
     }
 }
 

@@ -9,6 +9,8 @@ import ProseioKit
 import SwiftUI
 
 struct ProseioSignupScreenCoordinatorParameters {
+    /// From an invite link. Pre-fills the code field.
+    var inviteCode: ProseioInviteCode?
     let apiClient: ProseioAPIClient
     let authenticationService: AuthenticationServiceProtocol
     /// The Proseio account provider. Login after sign-up goes there.
@@ -40,7 +42,8 @@ final class ProseioSignupScreenCoordinator: CoordinatorProtocol {
     init(parameters: ProseioSignupScreenCoordinatorParameters) {
         self.parameters = parameters
         
-        viewModel = ProseioSignupScreenViewModel(apiClient: parameters.apiClient,
+        viewModel = ProseioSignupScreenViewModel(inviteCode: parameters.inviteCode,
+                                                 apiClient: parameters.apiClient,
                                                  authenticationService: parameters.authenticationService,
                                                  serverNameOrBaseURL: parameters.serverNameOrBaseURL,
                                                  userIndicatorController: parameters.userIndicatorController)
