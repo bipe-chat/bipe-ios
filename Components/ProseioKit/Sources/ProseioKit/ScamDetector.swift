@@ -52,7 +52,7 @@ public nonisolated enum ScamDetector {
     }()
 
     /// JS `String.prototype.includes`: UTF-16 code units, no grapheme or canonical-equivalence matching.
-    private static func containsCodeUnits(_ text: String, _ substring: String) -> Bool {
+    static func containsCodeUnits(_ text: String, _ substring: String) -> Bool {
         (text as NSString).range(of: substring, options: .literal).location != NSNotFound
     }
 }

@@ -193,6 +193,30 @@ public enum ProseioRegistries {
         "id da transacao",
     ]
 
+    /// Normalised words. A Pix-key match warns only when the normalised message also contains one of them.
+    public static let pixKeyContextWords: [String] = [
+        "pix",
+        "chave",
+    ]
+
+    /// Normalised urgency phrases that make a message the "new number" kind.
+    public static let newNumberPhrases: Set<String> = [
+        "troquei de numero",
+        "numero novo",
+        "esse e meu numero novo",
+        "salva esse numero",
+    ]
+
+    /// Scam warning kind raw values, most actionable first. The first kind whose rule applies wins.
+    public static let scamWarningKindPriority: [String] = [
+        "pixCode",
+        "boleto",
+        "pixKey",
+        "receipt",
+        "newNumber",
+        "urgency",
+    ]
+
     /// Username (handle) rules. The server is the authority; clients check early for feedback.
     public static let handleMinLength = 3
     public static let handleMaxLength = 30

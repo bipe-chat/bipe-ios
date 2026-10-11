@@ -49,31 +49,22 @@ public extension ScamDetector {
     }
 
     /// Picks the most actionable warning from `matchIDs(in:)` output.
+    /// Must match proseio-shared/test-vectors/scam-warnings.json.
     static func warningKind(forMatchIDs matchIDs: [String], message: String) -> ScamWarningKind? {
         let groups = Set(matchIDs.compactMap { $0.split(separator: ":", maxSplits: 1).first.map(String.init) })
-        let phrases = matchIDs.filter { $0.hasPrefix("urgency:") }
+        let phrases = matchIDs.compactMap { $0.hasPrefix("urgency:") ? String($0.dropFirst("urgency:".count)) : nil }
 
-        if groups.contains("pixCopyPastePatterns") {
-            return .pixCode
+        return warningKindPriority.first { kind in
+            switch kind {
+            case .pixCode: groups.contains("pixCopyPastePatterns")
+            case .boleto: groups.contains("boletoPatterns")
+            // A phone number or e-mail alone is normal chat. Warn only when the message also talks about Pix.
+            case .pixKey: groups.contains("pixKeyPatterns") && mentionsPix(message)
+            case .receipt: groups.contains("receipt")
+            case .newNumber: phrases.contains { ProseioRegistries.newNumberPhrases.contains($0) }
+            case .urgency: !phrases.isEmpty
+            }
         }
-        if groups.contains("boletoPatterns") {
-            return .boleto
-        }
-        // A phone number or e-mail alone is normal chat. Warn only when the message also talks about Pix.
-        if groups.contains("pixKeyPatterns"), mentionsPix(message) {
-            return .pixKey
-        }
-        if groups.contains("receipt") {
-            return .receipt
-        }
-        // "troquei de numero", "numero novo", "salva esse numero": the falso parente opener.
-        if phrases.contains(where: { $0.contains("numero") }) {
-            return .newNumber
-        }
-        if !phrases.isEmpty {
-            return .urgency
-        }
-        return nil
     }
 
     // MARK: - Private
@@ -86,8 +77,11 @@ public extension ScamDetector {
     private static let maxCachedEvents = 2000
     private static let warningCache = Mutex<[String: CachedWarning]>([:])
 
+    /// proseio-shared validates that the priority lists every kind once, so `compactMap` drops nothing.
+    private static let warningKindPriority = ProseioRegistries.scamWarningKindPriority.compactMap(ScamWarningKind.init(rawValue:))
+
     private static func mentionsPix(_ message: String) -> Bool {
         let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
-        return normalized.contains("pix") || normalized.contains("chave")
+        return ProseioRegistries.pixKeyContextWords.contains { containsCodeUnits(normalized, $0) }
     }
 }
