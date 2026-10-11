@@ -52,11 +52,11 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 ## Status of my part of #60 (11 October 2026)
 
 - Done: default server `proseio.com.br`, server picker hidden, push gateway pointed at our own host, telemetry off, upload script `Tools/Proseio/testflight.sh`.
-- Drafted, not published: `/privacidade` and `/termos` pages (proseio-infra `compose/site/`). Waiting for MZ: contact email, copy approval (humanizer pass), legal review.
+- Published 11 Oct 2026: `https://proseio.com.br/privacidade` and `/termos` (pt-BR, English under `/en/`), contact contact@envisioning.com. Legal review still advisable before public launch.
 - Reviewer access: a single-use registration token (60 days) is in MZ's Keychain as `proseio-review-token`. In the Beta App Review notes: "Choose Create account, then use this registration token: <token>". The reviewer creates their own account.
 
 ## Draft Beta App Information (DRAFT, humanizer pass pending)
 
 - **Beta App Description (pt-BR):** Proseio é um aplicativo de mensagens brasileiro, com servidores no Brasil e conversas privadas criptografadas de ponta a ponta. Nesta fase de testes, o acesso é só por convite.
 - **What to Test:** criar conta com o código de convite, enviar mensagens e fotos, criar um grupo, fazer uma chamada de voz.
-- **Feedback email:** to be set by MZ.
+- **Feedback email:** contact@envisioning.com
