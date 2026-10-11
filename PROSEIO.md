@@ -39,6 +39,10 @@ xcodebuild -project ElementX.xcodeproj -scheme ElementX -configuration Debug -de
 
 Done: display name, production app name, dev bundle ID and app group, Element's team ID replaced.
 
+- **OAuth login:** redirect is the private-use scheme `<bundle id>:/oauth/callback` (RFC 8252); client URI, logo, terms and privacy URLs moved to `https://proseio.com.br/...` because MAS requires them on the client URI host and requires the scheme to be the reverse of that host. Pages do not exist yet.
+- **Accent colour:** açaí (`#7C2C78` light, `#DA96D4` dark, `#692465` / `#E6AFE0` high contrast) in `accent-color.colorset`. See proseio/docs/design/identity.md.
+- **App icon: PLACEHOLDER** drawn in code (white bubble on açaí). Replace with designer artwork.
+
 Entitlements removed from the fork (they block provisioning outside Element's team):
 - `com.apple.developer.usernotifications.filtering` (NSE). Apple grants it on request only. Without it the NSE cannot silently drop notifications. Request it for Proseio later.
 - Element Classic app group and keychain group in the app entitlements (`group.im.vector`, owned by Element's team).
@@ -48,6 +52,6 @@ Not done (needs the domain, Apple team or brand):
 - `BGTaskSchedulerPermittedIdentifiers` (`io.element.elementx.*`)
 - Element Classic migration settings in `app.yml`
 - Homeserver defaults, OIDC configuration and feature flags in app settings
-- App icon, accent colour, onboarding copy
+- Final app icon artwork, Compound token re-theme (proseio-tokens fork), onboarding copy
 - `ORGANIZATIONNAME` in `project.yml` (file headers)
 - **Telemetry: Sentry (crash reports) and PostHog (analytics), both US services.** Current `Components/Secrets/Secrets.swift` holds `localhost` placeholders, so no data reaches Element's services. Before real users: set the four values to `nil` (disables SDK init and the consent prompt) or point them at Proseio-hosted instances in Brazil. Later: remove the Sentry and PostHog packages from `project.yml` to cut build size.
