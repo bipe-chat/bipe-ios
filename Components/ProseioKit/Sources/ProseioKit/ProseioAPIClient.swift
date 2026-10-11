@@ -54,6 +54,23 @@ public struct ProseioAPIClient: Sendable {
         try await send(method: "PUT", path: ["v1", "me", "handle"], body: SetHandleRequest(handle: handle), accessToken: accessToken)
     }
 
+    // MARK: - Auth
+
+    /// Runs `request` with the token from `accessToken`. On HTTP 401 it reads the token again and retries once,
+    /// because Matrix access tokens are short-lived and the SDK may have refreshed it meanwhile.
+    @MainActor public static func withTokenRetry<T>(accessToken: @MainActor () -> String?,
+                                                    _ request: (String) async throws(ProseioAPIError) -> T) async throws(ProseioAPIError) -> T {
+        guard let token = accessToken() else {
+            throw .server(.unauthorized, reason: nil, statusCode: 401)
+        }
+        do {
+            return try await request(token)
+        } catch {
+            guard error.isUnauthorized, let freshToken = accessToken() else { throw error }
+            return try await request(freshToken)
+        }
+    }
+
     // MARK: - Private
 
     private struct Empty: Encodable { }
@@ -229,6 +246,15 @@ public enum ProseioAPIError: Error, Sendable, Equatable {
     case network
     /// The server answered with something outside the contract.
     case unexpectedResponse(statusCode: Int?)
+
+    /// HTTP 401: the access token was rejected.
+    public var isUnauthorized: Bool {
+        switch self {
+        case .server(_, _, let statusCode): statusCode == 401
+        case .unexpectedResponse(let statusCode): statusCode == 401
+        case .network: false
+        }
+    }
 
     /// User-facing message (pt-BR / en).
     public var localizedMessage: String {

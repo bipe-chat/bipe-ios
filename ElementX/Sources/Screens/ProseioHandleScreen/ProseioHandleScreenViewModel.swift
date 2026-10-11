@@ -60,13 +60,10 @@ class ProseioHandleScreenViewModel: ProseioHandleScreenViewModelType, ProseioHan
     private func loadHandle() async {
         defer { state.isLoading = false }
         
-        guard let accessToken = clientProxy.accessToken else {
-            show(.server(.unauthorized, reason: nil, statusCode: 401))
-            return
-        }
-        
         do {
-            let myHandle = try await apiClient.myHandle(accessToken: accessToken)
+            let myHandle = try await withTokenRetry { [apiClient] (token: String) async throws(ProseioAPIError) -> ProseioMyHandle in
+                try await apiClient.myHandle(accessToken: token)
+            }
             apply(myHandle)
         } catch {
             MXLog.error("Proseio handle load failed: \(error)")
@@ -76,10 +73,6 @@ class ProseioHandleScreenViewModel: ProseioHandleScreenViewModelType, ProseioHan
     
     private func save() async {
         guard state.canSave else { return }
-        guard let accessToken = clientProxy.accessToken else {
-            show(.server(.unauthorized, reason: nil, statusCode: 401))
-            return
-        }
         
         let handle = ProseioHandle.sanitize(state.bindings.handle)
         state.isLoading = true
@@ -90,7 +83,9 @@ class ProseioHandleScreenViewModel: ProseioHandleScreenViewModelType, ProseioHan
         }
         
         do {
-            let myHandle = try await apiClient.setMyHandle(handle, accessToken: accessToken)
+            let myHandle = try await withTokenRetry { [apiClient] (token: String) async throws(ProseioAPIError) -> ProseioMyHandle in
+                try await apiClient.setMyHandle(handle, accessToken: token)
+            }
             apply(myHandle)
             userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.handleSaved, icon: \.checkCircle))
             actionsSubject.send(.done)
@@ -98,6 +93,10 @@ class ProseioHandleScreenViewModel: ProseioHandleScreenViewModelType, ProseioHan
             MXLog.error("Proseio handle change failed: \(error)")
             show(error)
         }
+    }
+    
+    private func withTokenRetry<T>(_ request: (String) async throws(ProseioAPIError) -> T) async throws(ProseioAPIError) -> T {
+        try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }, request)
     }
     
     private func apply(_ myHandle: ProseioMyHandle) {

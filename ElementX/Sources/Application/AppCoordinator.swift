@@ -768,7 +768,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 }
                 .store(in: &cancellables)
             
-            navigationRootCoordinator.setRootCoordinator(coordinator)
+            // Proseio: the notice shows the cached handle instead of the Matrix ID when one is known.
+            navigationRootCoordinator.setRootCoordinator(ProseioEnvironmentCoordinator(wrapping: coordinator,
+                                                                                       handleResolver: userSession.proseioHandleResolver))
         }
     }
     

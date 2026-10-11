@@ -65,9 +65,17 @@ Entitlements removed from the fork (they block provisioning outside Element's te
 - `com.apple.developer.usernotifications.filtering` (NSE). Apple grants it on request only. Without it the NSE cannot silently drop notifications. Request it for Proseio later.
 - Element Classic app group and keychain group in the app entitlements (`group.im.vector`, owned by Element's team).
 
+Element leftovers cleaned up (11 October 2026):
+- **Associated domains:** only `applinks:proseio.com.br`. Element domains, `applinks:matrix.to` and `webcredentials:*.element.io` are gone. matrix.to links inside messages still open in the app: that is URL parsing (`AppRoutes.swift`), not universal links.
+- **Background tasks:** `BGTaskSchedulerPermittedIdentifiers` are `$(BASE_BUNDLE_IDENTIFIER).background.refresh` and `.background.search-backfill`. `AppSettings` derives the same IDs from `InfoPlistReader.main.baseBundleIdentifier`.
+- **Help links:** `encryptionURL`, `deviceVerificationURL`, `chatBackupDetailsURL`, `identityPinningViolationDetailsURL` and `historySharingDetailsURL` are `nil` in `AppSettings`, so their "Learn more" links are hidden (`AttributedString.proseioReplaceLink` in ProseioKit). Set a URL when Proseio has a help page. Terms, privacy and copyright already point at `proseio.com.br`.
+- **Matrix IDs:** the identity-reset warning in member details and the soft-logout notice show the handle when the resolver knows it.
+- **401 retry:** `ProseioAPIClient.withTokenRetry` re-reads the access token once on HTTP 401. The handle resolver and the "Nome de usuário" screen use it.
+
+Left on purpose: `elementWebHosts` and `accountProvisioningHost` (link parsing only), `elementProAppStoreURL` (only shown when a server requires Element Pro), Element Call and SDK URLs, `io.element.elementx.*` dispatch queue and notification IDs (internal, not user-visible).
+
 Not done (needs the domain, Apple team or brand):
-- Associated domains (`applinks:element.io` and others) and `webcredentials` in `ElementX/SupportingFiles/target.yml`
-- `BGTaskSchedulerPermittedIdentifiers` (`io.element.elementx.*`)
+- Help pages on `proseio.com.br` for the hidden "Learn more" links
 - Element Classic migration settings in `app.yml`
 - Final app icon artwork, onboarding copy
 

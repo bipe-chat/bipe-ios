@@ -22,7 +22,7 @@ class SecureBackupScreenViewModel: SecureBackupScreenViewModelType, SecureBackup
     
     init(secureBackupController: SecureBackupControllerProtocol,
          userIndicatorController: UserIndicatorControllerProtocol,
-         chatBackupDetailsURL: URL) {
+         chatBackupDetailsURL: URL?) {
         self.secureBackupController = secureBackupController
         self.userIndicatorController = userIndicatorController
         

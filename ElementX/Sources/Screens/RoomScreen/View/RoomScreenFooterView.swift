@@ -7,6 +7,7 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct RoomScreenFooterView: View {
@@ -56,7 +57,7 @@ struct RoomScreenFooterView: View {
     }
     
     private func pinViolation(member: RoomMemberProxyProtocol,
-                              learnMoreURL: URL) -> some View {
+                              learnMoreURL: URL?) -> some View {
         VStack(spacing: 16) {
             HStack(spacing: 16) {
                 LoadableAvatarImage(url: member.avatarURL,
@@ -86,7 +87,7 @@ struct RoomScreenFooterView: View {
     }
     
     private func verificationViolation(member: RoomMemberProxyProtocol,
-                                       learnMoreURL: URL) -> some View {
+                                       learnMoreURL: URL?) -> some View {
         VStack(spacing: 16) {
             HStack(spacing: 16) {
                 LoadableAvatarImage(url: member.avatarURL,
@@ -115,7 +116,7 @@ struct RoomScreenFooterView: View {
         .padding(.bottom, 8)
     }
     
-    private func pinViolationDescriptionWithLearnMoreLink(displayName: String?, userID: String, url: URL) -> AttributedString {
+    private func pinViolationDescriptionWithLearnMoreLink(displayName: String?, userID: String, url: URL?) -> AttributedString {
         let userIDPlaceholder = "{mxid}"
         let linkPlaceholder = "{link}"
         let displayName = displayName ?? fallbackDisplayName(userID)
@@ -125,14 +126,11 @@ struct RoomScreenFooterView: View {
         userIDString.bold()
         description.replace(userIDPlaceholder, with: userIDString)
         
-        var linkString = AttributedString(L10n.actionLearnMore)
-        linkString.link = url
-        linkString.bold()
-        description.replace(linkPlaceholder, with: linkString)
+        description.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: url)
         return description
     }
     
-    private func verificationViolationDescriptionWithLearnMoreLink(displayName: String?, userID: String, url: URL) -> AttributedString {
+    private func verificationViolationDescriptionWithLearnMoreLink(displayName: String?, userID: String, url: URL?) -> AttributedString {
         let userIDPlaceholder = "{mxid}"
         let linkPlaceholder = "{link}"
         let displayName = displayName ?? fallbackDisplayName(userID)
@@ -142,10 +140,7 @@ struct RoomScreenFooterView: View {
         userIDString.bold()
         description.replace(userIDPlaceholder, with: userIDString)
         
-        var linkString = AttributedString(L10n.actionLearnMore)
-        linkString.link = url
-        linkString.bold()
-        description.replace(linkPlaceholder, with: linkString)
+        description.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: url)
         return description
     }
     

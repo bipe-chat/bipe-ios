@@ -65,11 +65,11 @@ final nonisolated class AppSettings: @unchecked Sendable {
                   copyrightURL: URL,
                   acceptableUseURL: URL,
                   privacyURL: URL,
-                  encryptionURL: URL,
-                  deviceVerificationURL: URL,
-                  chatBackupDetailsURL: URL,
-                  identityPinningViolationDetailsURL: URL,
-                  historySharingDetailsURL: URL,
+                  encryptionURL: URL?,
+                  deviceVerificationURL: URL?,
+                  chatBackupDetailsURL: URL?,
+                  identityPinningViolationDetailsURL: URL?,
+                  historySharingDetailsURL: URL?,
                   elementWebHosts: [String],
                   accountProvisioningHost: String,
                   bugReportApplicationID: String,
@@ -130,9 +130,9 @@ final nonisolated class AppSettings: @unchecked Sendable {
     private(set) var hideBrandChrome = false
     
     /// The task identifier used for background app refresh. Also used in main target's the Info.plist
-    let backgroundAppRefreshTaskIdentifier = "io.element.elementx.background.refresh"
+    var backgroundAppRefreshTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.refresh" } // Proseio: derived from the bundle ID
     /// The task identifier used for the search index backfill. Also used in main target's the Info.plist
-    let searchBackfillTaskIdentifier = "io.element.elementx.background.search-backfill"
+    var searchBackfillTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.search-backfill" } // Proseio: derived from the bundle ID
     
     /// A URL where users can go read more about the app.
     private(set) var websiteURL: URL = "https://proseio.com.br"
@@ -144,16 +144,17 @@ final nonisolated class AppSettings: @unchecked Sendable {
     private(set) var acceptableUseURL: URL = "https://proseio.com.br/termos"
     /// A URL that contains the app's Privacy Policy.
     private(set) var privacyURL: URL = "https://proseio.com.br/privacidade"
+    // Proseio: no help pages yet, so these are nil and the "Learn more" links they feed are hidden.
     /// A URL where users can go read more about encryption in general.
-    private(set) var encryptionURL: URL = "https://element.io/help#encryption"
+    private(set) var encryptionURL: URL?
     /// A URL where users can go read more about device verification..
-    private(set) var deviceVerificationURL: URL = "https://element.io/help#encryption-device-verification"
+    private(set) var deviceVerificationURL: URL?
     /// A URL where users can go read more about the chat backup.
-    private(set) var chatBackupDetailsURL: URL = "https://element.io/help#encryption5"
+    private(set) var chatBackupDetailsURL: URL?
     /// A URL where users can go read more about identity pinning violations
-    private(set) var identityPinningViolationDetailsURL: URL = "https://element.io/help#encryption18"
+    private(set) var identityPinningViolationDetailsURL: URL?
     /// A URL describing how history sharing works
-    private(set) var historySharingDetailsURL: URL = "https://element.io/en/help#e2ee-history-sharing"
+    private(set) var historySharingDetailsURL: URL?
     
     /// Any domains that Element web may be hosted on - used for handling links.
     private(set) var elementWebHosts = ["app.element.io", "staging.element.io", "develop.element.io"]

@@ -151,27 +151,8 @@ public final class ProseioHandleResolver {
         }
     }
 
-    /// Runs `request` with the current token. On HTTP 401 it reads the token again and retries once.
     private func withTokenRetry<T>(_ request: (String) async throws(ProseioAPIError) -> T) async throws(ProseioAPIError) -> T {
-        guard let token = accessToken() else {
-            throw .server(.unauthorized, reason: nil, statusCode: 401)
-        }
-        do {
-            return try await request(token)
-        } catch {
-            guard error.isUnauthorized, let freshToken = accessToken() else { throw error }
-            return try await request(freshToken)
-        }
-    }
-}
-
-private extension ProseioAPIError {
-    var isUnauthorized: Bool {
-        switch self {
-        case .server(_, _, let statusCode): statusCode == 401
-        case .unexpectedResponse(let statusCode): statusCode == 401
-        case .network: false
-        }
+        try await ProseioAPIClient.withTokenRetry(accessToken: accessToken, request)
     }
 }
 

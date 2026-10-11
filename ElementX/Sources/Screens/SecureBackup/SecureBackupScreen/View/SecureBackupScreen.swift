@@ -8,6 +8,7 @@
 
 import Combine
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct SecureBackupScreen: View {
@@ -66,10 +67,7 @@ struct SecureBackupScreen: View {
     private var keyBackupDescriptionWithLearnMoreLink: AttributedString {
         let linkPlaceholder = "{link}"
         var description = AttributedString(L10n.screenChatBackupKeyBackupDescription(linkPlaceholder))
-        var linkString = AttributedString(L10n.actionLearnMore)
-        linkString.link = context.viewState.chatBackupDetailsURL
-        linkString.bold()
-        description.replace(linkPlaceholder, with: linkString)
+        description.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: context.viewState.chatBackupDetailsURL)
         return description
     }
     

@@ -7,6 +7,7 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct SoftLogoutScreen: View {
@@ -16,6 +17,7 @@ struct SoftLogoutScreen: View {
     @FocusState private var isPasswordFocused: Bool
     
     @Bindable var context: SoftLogoutScreenViewModel.Context
+    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
     
     var body: some View {
         ScrollView {
@@ -56,7 +58,9 @@ struct SoftLogoutScreen: View {
                 .foregroundColor(.compound.textPrimary)
                 .accessibilityIdentifier(A11yIdentifiers.softLogoutScreen.title)
             
-            Text(UntranslatedL10n.softLogoutSigninNotice(context.viewState.credentials.homeserverName, context.viewState.credentials.userDisplayName, context.viewState.credentials.userID))
+            Text(UntranslatedL10n.softLogoutSigninNotice(context.viewState.credentials.homeserverName,
+                                                         context.viewState.credentials.userDisplayName,
+                                                         proseioHandleResolver?.displayText(for: context.viewState.credentials.userID) ?? context.viewState.credentials.userID))
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.leading)
                 .foregroundColor(.compound.textPrimary)

@@ -24,7 +24,7 @@ struct IdentityConfirmationScreenViewState: BindableState {
     }
     
     var availableActions: [AvailableActions]?
-    let learnMoreURL: URL
+    let learnMoreURL: URL?
     
     var bindings = IdentityConfirmationScreenBindings()
 }

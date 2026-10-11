@@ -118,8 +118,8 @@ enum RoomScreenFooterViewAction {
 }
 
 enum RoomScreenFooterViewDetails {
-    case pinViolation(member: RoomMemberProxyProtocol, learnMoreURL: URL)
-    case verificationViolation(member: RoomMemberProxyProtocol, learnMoreURL: URL)
+    case pinViolation(member: RoomMemberProxyProtocol, learnMoreURL: URL?)
+    case verificationViolation(member: RoomMemberProxyProtocol, learnMoreURL: URL?)
 }
 
 enum PinnedEventsBannerState: Equatable {

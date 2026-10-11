@@ -53,11 +53,13 @@ struct IdentityConfirmationScreen: View {
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textSecondary)
             
-            Button(L10n.actionLearnMore) {
-                UIApplication.shared.open(context.viewState.learnMoreURL)
+            if let learnMoreURL = context.viewState.learnMoreURL { // Proseio: hidden without a help page
+                Button(L10n.actionLearnMore) {
+                    UIApplication.shared.open(learnMoreURL)
+                }
+                .buttonStyle(.compound(.tertiary, size: .small))
+                .padding(.top, 16)
             }
-            .buttonStyle(.compound(.tertiary, size: .small))
-            .padding(.top, 16)
         }
     }
     

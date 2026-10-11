@@ -4,8 +4,8 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>io.element.elementx.background.refresh</string>
-		<string>io.element.elementx.background.search-backfill</string>
+		<string>$(BASE_BUNDLE_IDENTIFIER).background.refresh</string>
+		<string>$(BASE_BUNDLE_IDENTIFIER).background.search-backfill</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>pt-BR</string>

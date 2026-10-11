@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import ProseioKit
 
 enum SecurityAndPrivacyScreenViewModelAction {
     case displayEditAddressScreen
@@ -162,7 +163,7 @@ struct SecurityAndPrivacyScreenViewState: BindableState {
          historyVisibility: SecurityAndPrivacyHistoryVisibility,
          isSpace: Bool,
          isKnockingEnabled: Bool,
-         historySharingDetailsURL: URL) {
+         historySharingDetailsURL: URL?) {
         self.isKnockingEnabled = isKnockingEnabled
         self.isSpace = isSpace
         
@@ -269,7 +270,7 @@ struct SecurityAndPrivacyScreenStrings {
     let accessSectionFooterString: AttributedString
     let historySectionFooterString: AttributedString
     
-    init(historySharingDetailsURL: URL) {
+    init(historySharingDetailsURL: URL?) {
         let linkPlaceholder = "{link}"
         
         var accessFooterString = AttributedString(L10n.screenSecurityAndPrivacyRoomAccessFooter(linkPlaceholder))
@@ -280,10 +281,7 @@ struct SecurityAndPrivacyScreenStrings {
         accessSectionFooterString = accessFooterString
         
         var historyFooterString = AttributedString(L10n.screenSecurityAndPrivacyRoomHistorySectionFooter(linkPlaceholder))
-        var historyLinkString = AttributedString(L10n.actionLearnMore)
-        historyLinkString.link = historySharingDetailsURL
-        historyLinkString.bold()
-        historyFooterString.replace(linkPlaceholder, with: historyLinkString)
+        historyFooterString.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: historySharingDetailsURL)
         historySectionFooterString = historyFooterString
     }
 }

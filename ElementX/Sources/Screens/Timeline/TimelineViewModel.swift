@@ -1160,9 +1160,10 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
             state.bindings.alertInfo = .init(id: type,
                                              title: message,
                                              primaryButton: .init(title: L10n.actionOk, action: nil),
-                                             secondaryButton: .init(title: L10n.actionLearnMore) { [weak self] in
-                                                 guard let self else { return }
-                                                 appMediator.open(userSettings.app.historySharingDetailsURL)
+                                             secondaryButton: userSettings.app.historySharingDetailsURL.map { url in // Proseio: hidden without a help page
+                                                 AlertInfoButton(title: L10n.actionLearnMore) { [weak self] in
+                                                     self?.appMediator.open(url)
+                                                 }
                                              })
         case .inviteAgain:
             state.bindings.alertInfo = .init(id: .inviteAgain,
