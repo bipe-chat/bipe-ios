@@ -48,3 +48,15 @@ Trade-off: the official Element X apps send push notifications through Element's
 ## Sign-up for friends
 
 Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Keychain (`proseio-friends-token`). Share it with friends directly; never post it publicly.
+
+## Status of my part of #60 (11 October 2026)
+
+- Done: default server `proseio.com.br`, server picker hidden, push gateway pointed at our own host, telemetry off, upload script `Tools/Proseio/testflight.sh`.
+- Drafted, not published: `/privacidade` and `/termos` pages (proseio-infra `compose/site/`). Waiting for MZ: contact email, copy approval (humanizer pass), legal review.
+- Reviewer access: a single-use registration token (60 days) is in MZ's Keychain as `proseio-review-token`. In the Beta App Review notes: "Choose Create account, then use this registration token: <token>". The reviewer creates their own account.
+
+## Draft Beta App Information (DRAFT, humanizer pass pending)
+
+- **Beta App Description (pt-BR):** Proseio é um aplicativo de mensagens brasileiro, com servidores no Brasil e conversas privadas criptografadas de ponta a ponta. Nesta fase de testes, o acesso é só por convite.
+- **What to Test:** criar conta com o código de convite, enviar mensagens e fotos, criar um grupo, fazer uma chamada de voz.
+- **Feedback email:** to be set by MZ.

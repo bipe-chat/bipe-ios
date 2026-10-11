@@ -69,7 +69,6 @@ Not done (needs the domain, Apple team or brand):
 - Associated domains (`applinks:element.io` and others) and `webcredentials` in `ElementX/SupportingFiles/target.yml`
 - `BGTaskSchedulerPermittedIdentifiers` (`io.element.elementx.*`)
 - Element Classic migration settings in `app.yml`
-- Homeserver defaults, OIDC configuration and feature flags in app settings
 - Final app icon artwork, onboarding copy
 
 ## Design tokens
@@ -78,7 +77,9 @@ Not done (needs the domain, Apple team or brand):
 - `Tools/XcodeGen/mirrors.json` maps Element's URL to the fork for every package. `postGenCommand.sh` copies it into the workspace on each `xcodegen`.
 - `compound-ios/Package.swift` pins the fork's version tag (`exact:`). Bump it when the fork gets a new tag.
 - `ORGANIZATIONNAME` in `project.yml` (file headers)
-- **Telemetry: Sentry (crash reports) and PostHog (analytics), both US services.** Current `Components/Secrets/Secrets.swift` holds `localhost` placeholders, so no data reaches Element's services. Before real users: set the four values to `nil` (disables SDK init and the consent prompt) or point them at Proseio-hosted instances in Brazil. Later: remove the Sentry and PostHog packages from `project.yml` to cut build size.
+- **Telemetry off (done 11 Oct 2026):** `Components/Secrets/Secrets.swift` sets Sentry, PostHog and rageshake to `nil`. That also disables Element Call analytics, which only switch on when app analytics exist. If `Secrets.swift` is ever regenerated from `Secrets.pkl`, keep these `nil`. Later: remove the Sentry and PostHog packages from `project.yml` to cut build size.
+- **Server (done 11 Oct 2026):** default account provider `proseio.com.br` (base `https://matrix.proseio.com.br`), picker hidden (`allowOtherAccountProviders = false`), push gateway `https://push.proseio.com.br` (Sygnal, issue #61; never matrix.org).
+- **TestFlight:** `Tools/Proseio/testflight.sh` archives Release with a UTC timestamp build number and uploads with `Tools/Proseio/ExportAppStore.plist`. Plan: `docs/testflight-plan.md`.
 
 ## Troubleshooting
 
