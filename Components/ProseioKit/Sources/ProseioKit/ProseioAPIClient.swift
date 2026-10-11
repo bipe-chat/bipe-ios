@@ -23,6 +23,12 @@ public struct ProseioAPIClient: Sendable {
         try await send(method: "POST", path: ["v1", "signup"], body: request)
     }
 
+    /// `POST /v1/attest/challenge`. No auth. One-time App Attest challenge, valid 5 minutes.
+    public func attestChallenge() async throws(ProseioAPIError) -> String {
+        let response: AttestChallengeResponse = try await send(method: "POST", path: ["v1", "attest", "challenge"], body: Empty?.none)
+        return response.challenge
+    }
+
     // MARK: - Invites
 
     /// `GET /v1/invites/{code}`. No auth. Validity and the inviter's handle.
@@ -99,6 +105,10 @@ public struct ProseioAPIClient: Sendable {
 
     /// Stands in for an empty 204 body.
     private struct NoContent: Decodable { }
+
+    private struct AttestChallengeResponse: Decodable {
+        let challenge: String
+    }
 
     private struct ResolveRequest: Encodable {
         let userIds: [String]
@@ -203,17 +213,43 @@ public struct ProseioSignupRequest: Encodable, Sendable, CustomStringConvertible
     public let password: String
     public let handle: String?
     public let displayName: String?
+    /// Absent where App Attest is not supported (simulator). The server decides whether to accept that.
+    public let attestation: ProseioAttestation?
 
-    public init(inviteCode: String? = nil, email: String, password: String, handle: String?, displayName: String?) {
+    public init(inviteCode: String? = nil,
+                email: String,
+                password: String,
+                handle: String?,
+                displayName: String?,
+                attestation: ProseioAttestation? = nil) {
         self.inviteCode = inviteCode
         self.email = email
         self.password = password
         self.handle = handle
         self.displayName = displayName
+        self.attestation = attestation
     }
 
     /// Never prints the password or the email.
     public var description: String { "ProseioSignupRequest" }
+}
+
+/// Apple App Attest result for sign-up. Contract: `Attestation`.
+public struct ProseioAttestation: Encodable, Sendable, CustomStringConvertible {
+    /// Base64 key ID, exactly as `DCAppAttestService.generateKey` returns it.
+    public let keyId: String
+    /// Standard base64 of the attestation object.
+    public let attestationObject: String
+    public let challenge: String
+
+    public init(keyId: String, attestationObject: String, challenge: String) {
+        self.keyId = keyId
+        self.attestationObject = attestationObject
+        self.challenge = challenge
+    }
+
+    /// Never prints the attestation data.
+    public var description: String { "ProseioAttestation" }
 }
 
 public struct ProseioSignupResponse: Decodable, Sendable {
@@ -324,6 +360,7 @@ public enum ProseioAPIErrorCode: String, Sendable {
     case handleTaken = "handle_taken"
     case handleCooldown = "handle_cooldown"
     case passwordWeak = "password_weak"
+    case attestationInvalid = "attestation_invalid"
     case unauthorized
     case notFound = "not_found"
     case rateLimited = "rate_limited"
@@ -337,13 +374,15 @@ public enum ProseioAPIError: Error, Sendable, Equatable {
     case network
     /// The server answered with something outside the contract.
     case unexpectedResponse(statusCode: Int?)
+    /// The device could not produce an App Attest attestation.
+    case attestationFailed
 
     /// HTTP 401: the access token was rejected.
     public var isUnauthorized: Bool {
         switch self {
         case .server(_, _, let statusCode): statusCode == 401
         case .unexpectedResponse(let statusCode): statusCode == 401
-        case .network: false
+        case .network, .attestationFailed: false
         }
     }
 
@@ -356,6 +395,7 @@ public enum ProseioAPIError: Error, Sendable, Equatable {
             case .inviteQuotaExhausted: ProseioStrings.errorInviteQuota
             case .emailTaken: ProseioStrings.errorEmailTaken
             case .passwordWeak: ProseioStrings.errorPasswordWeak
+            case .attestationInvalid: ProseioStrings.errorAttestationInvalid
             case .handleTaken: ProseioHandleProblem.taken.localizedMessage
             case .handleInvalid: (reason.flatMap(ProseioHandleProblem.init(rawValue:)) ?? .invalidCharacters).localizedMessage
             case .handleCooldown: ProseioStrings.errorHandleCooldown
@@ -367,6 +407,8 @@ public enum ProseioAPIError: Error, Sendable, Equatable {
             ProseioStrings.errorNetwork
         case .unexpectedResponse:
             ProseioStrings.errorGeneric
+        case .attestationFailed:
+            ProseioStrings.errorAttestationFailed
         }
     }
 }

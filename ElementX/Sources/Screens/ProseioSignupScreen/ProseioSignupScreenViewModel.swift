@@ -87,16 +87,22 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
         let email = state.bindings.email.trimmingCharacters(in: .whitespacesAndNewlines)
         let handle = ProseioHandle.sanitize(state.bindings.handle)
         let displayName = state.bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let request = ProseioSignupRequest(inviteCode: state.inviteCode?.value,
-                                           email: email,
-                                           password: state.bindings.password,
-                                           handle: handle.isEmpty ? nil : handle,
-                                           displayName: displayName.isEmpty ? nil : displayName)
 
         startLoading()
         defer { stopLoading() }
 
         do {
+            // Unsupported (simulator): sign up without it and let the server decide. A failure on a supported device stops sign-up.
+            var attestation: ProseioAttestation?
+            if ProseioAppAttest.isSupported {
+                attestation = try await ProseioAppAttest.attestation(api: apiClient)
+            }
+            let request = ProseioSignupRequest(inviteCode: state.inviteCode?.value,
+                                               email: email,
+                                               password: state.bindings.password,
+                                               handle: handle.isEmpty ? nil : handle,
+                                               displayName: displayName.isEmpty ? nil : displayName,
+                                               attestation: attestation)
             let response = try await apiClient.signup(request)
             MXLog.info("Proseio sign-up created \(response.userId)")
             createdEmail = email

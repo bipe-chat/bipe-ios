@@ -1,0 +1,36 @@
+//
+// Copyright 2026 Proseio.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+
+import CryptoKit
+import DeviceCheck
+import Foundation
+
+/// Apple App Attest for sign-up: proves the request comes from the genuine app on a real Apple device.
+/// Server side: proseio-api/src/attest.ts.
+public enum ProseioAppAttest {
+    /// False on the simulator and on devices without the Secure Enclave support App Attest needs.
+    public static var isSupported: Bool {
+        DCAppAttestService.shared.isSupported
+    }
+
+    /// Fetches a challenge and attests a new key against it. Sign-up is rare, so every attempt uses a fresh key
+    /// and nothing goes to the keychain.
+    public static func attestation(api: ProseioAPIClient) async throws(ProseioAPIError) -> ProseioAttestation {
+        let challenge = try await api.attestChallenge()
+        let clientDataHash = Data(SHA256.hash(data: Data(challenge.utf8)))
+        let service = DCAppAttestService.shared
+
+        do {
+            let keyID = try await service.generateKey()
+            let attestationObject = try await service.attestKey(keyID, clientDataHash: clientDataHash)
+            return ProseioAttestation(keyId: keyID,
+                                      attestationObject: attestationObject.base64EncodedString(),
+                                      challenge: challenge)
+        } catch {
+            throw .attestationFailed
+        }
+    }
+}

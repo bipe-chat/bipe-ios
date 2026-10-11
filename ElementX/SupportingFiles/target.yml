@@ -121,6 +121,7 @@ targets:
       path: ElementX.entitlements
       properties:
         aps-environment: development
+        com.apple.developer.devicecheck.appattest-environment: production
         com.apple.developer.associated-domains:
         - applinks:proseio.com.br
         # - applinks:localhost?mode=developer # developer mode only works with https (but self-signed is fine).

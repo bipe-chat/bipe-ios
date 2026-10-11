@@ -158,6 +158,10 @@ public enum ProseioStrings {
 
     public static var errorGeneric: String { NSLocalizedString("proseio_error_generic", tableName: "Proseio", bundle: .module, comment: "") }
 
+    public static var errorAttestationInvalid: String { NSLocalizedString("proseio_error_attestation_invalid", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var errorAttestationFailed: String { NSLocalizedString("proseio_error_attestation_failed", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var signupDisplayNameFooter: String { NSLocalizedString("proseio_signup_display_name_footer", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static func startChatHandleNotFound(_ p1: String) -> String {
