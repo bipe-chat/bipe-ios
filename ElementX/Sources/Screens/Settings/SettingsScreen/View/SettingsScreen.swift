@@ -7,11 +7,13 @@
 //
 
 import Compound
+import ProseioKit
 import SFSafeSymbols
 import SwiftUI
 
 struct SettingsScreen: View {
     @Bindable var context: SettingsScreenViewModel.Context
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         Form {
@@ -177,6 +179,14 @@ struct SettingsScreen: View {
                                     icon: \.darkMode),
                     kind: .picker(selection: $context.appAppearance,
                                   items: AppAppearance.allCases.map { (title: $0.name, tag: $0) }))
+            
+            // Proseio: pt-BR / en switch lives in iOS per-app language settings.
+            ListRow(label: .default(title: ProseioStrings.settingsLanguage,
+                                    description: ProseioStrings.settingsLanguageFooter,
+                                    icon: \.translate),
+                    kind: .button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    })
             
             ListRow(label: .default(title: L10n.commonMediaUploadQuality,
                                     icon: \.image),

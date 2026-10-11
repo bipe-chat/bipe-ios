@@ -6,6 +6,7 @@ import PackageDescription
 // come from proseio-shared (node tools/gen.mjs). Do not edit them by hand.
 let package = Package(
     name: "ProseioKit",
+    defaultLocalization: "pt-BR",
     platforms: [
         .iOS(.v18),
         .macOS(.v15)
@@ -15,6 +16,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "ProseioKit",
+                resources: [.process("Resources")],
                 swiftSettings: [
                     .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
                     .enableUpcomingFeature("InferIsolatedConformances")

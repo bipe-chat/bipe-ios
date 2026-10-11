@@ -10,6 +10,7 @@ fileGroups:
 
 options:
   groupSortPosition: bottom
+  developmentLanguage: pt-BR # Proseio: Brazilian Portuguese first
   createIntermediateGroups: true
   deploymentTarget:
     iOS: '18.5'

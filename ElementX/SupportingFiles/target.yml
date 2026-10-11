@@ -48,6 +48,9 @@ targets:
     info:
       path: Info.plist
       properties:
+        # Proseio: pt-BR is the default; the app ships only pt-BR and en (switch in iOS per-app language settings).
+        CFBundleDevelopmentRegion: pt-BR
+        CFBundleLocalizations: [pt-BR, en]
         UILaunchScreen:
           UIColorName: colors/background-color
         CFBundleDisplayName: $(APP_DISPLAY_NAME)
@@ -286,6 +289,47 @@ targets:
         - Other/Extensions/XCUIElement.swift
     - path: ../../Components/Secrets/Secrets.swift
     - path: ../Resources
+      excludes:
+        # Proseio ships pt-BR and en only.
+        - Localizations/ar.lproj
+        - Localizations/be.lproj
+        - Localizations/bg.lproj
+        - Localizations/ca.lproj
+        - Localizations/cs.lproj
+        - Localizations/cy.lproj
+        - Localizations/da.lproj
+        - Localizations/de.lproj
+        - Localizations/el.lproj
+        - Localizations/en-US.lproj
+        - Localizations/es.lproj
+        - Localizations/et.lproj
+        - Localizations/eu.lproj
+        - Localizations/fa.lproj
+        - Localizations/fi.lproj
+        - Localizations/fr.lproj
+        - Localizations/hr.lproj
+        - Localizations/hu.lproj
+        - Localizations/id.lproj
+        - Localizations/it.lproj
+        - Localizations/ja.lproj
+        - Localizations/ka.lproj
+        - Localizations/ko.lproj
+        - Localizations/lt.lproj
+        - Localizations/nb.lproj
+        - Localizations/nl.lproj
+        - Localizations/pl.lproj
+        - Localizations/pt.lproj
+        - Localizations/ro.lproj
+        - Localizations/ru.lproj
+        - Localizations/sk.lproj
+        - Localizations/sv.lproj
+        - Localizations/tr.lproj
+        - Localizations/uk.lproj
+        - Localizations/ur.lproj
+        - Localizations/uz.lproj
+        - Localizations/vi.lproj
+        - Localizations/zh-Hans.lproj
+        - Localizations/zh-Hant-TW.lproj
     - path: ../SupportingFiles
     - path: ../../Tools/Scripts/Templates/SimpleScreenExample/ElementX
     - path: ../../Components/DevelopmentAssets/Media
