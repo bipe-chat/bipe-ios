@@ -142,11 +142,11 @@ public enum ProseioRegistries {
     ]
 
     public static let pixKeyPatterns: [ScamPattern] = [
-        ScamPattern(id: "cpf", regex: "\\b\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}\\b"),
-        ScamPattern(id: "cnpj", regex: "\\b\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2}\\b"),
-        ScamPattern(id: "phone", regex: "(?<!\\d)(?:\\+?55\\s?)?\\(?[1-9]{2}\\)?\\s?9\\d{4}-?\\d{4}(?!\\d)"),
+        ScamPattern(id: "cpf", regex: "(?<![0-9A-Za-z])[0-9]{3}\\.?[0-9]{3}\\.?[0-9]{3}-?[0-9]{2}(?![0-9A-Za-z])"),
+        ScamPattern(id: "cnpj", regex: "(?<![0-9A-Za-z])[0-9]{2}\\.?[0-9]{3}\\.?[0-9]{3}/?[0-9]{4}-?[0-9]{2}(?![0-9A-Za-z])"),
+        ScamPattern(id: "phone", regex: "(?<![0-9])(?:\\+?55\\s?)?\\(?[1-9]{2}\\)?\\s?9[0-9]{4}-?[0-9]{4}(?![0-9])"),
         ScamPattern(id: "email", regex: "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"),
-        ScamPattern(id: "random", regex: "\\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\b"),
+        ScamPattern(id: "random", regex: "(?<![0-9A-Za-z])[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?![0-9A-Za-z])"),
     ]
 
     public static let pixCopyPastePatterns: [ScamPattern] = [
@@ -154,7 +154,7 @@ public enum ProseioRegistries {
     ]
 
     public static let boletoPatterns: [ScamPattern] = [
-        ScamPattern(id: "linha-digitavel", regex: "\\b\\d{5}\\.?\\d{5}\\s?\\d{5}\\.?\\d{6}\\s?\\d{5}\\.?\\d{6}\\s?\\d\\s?\\d{14}\\b"),
+        ScamPattern(id: "linha-digitavel", regex: "(?<![0-9A-Za-z])[0-9]{5}\\.?[0-9]{5}\\s?[0-9]{5}\\.?[0-9]{6}\\s?[0-9]{5}\\.?[0-9]{6}\\s?[0-9]\\s?[0-9]{14}(?![0-9A-Za-z])"),
     ]
 
     /// Normalised phrases, matched as substrings of the normalised message.
