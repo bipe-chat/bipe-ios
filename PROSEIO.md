@@ -129,6 +129,7 @@ Each line is a deliberate difference with its reason. A difference not listed he
 | Sign-up attestation | App Attest | None yet | Play Integrity not built on Android (#92) |
 | Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
 | Unencrypted room option | Still offered | Removed | Not done on iOS (#78). **Gap** |
+| Sticker import | Chat export ZIP or files | Chat export ZIP or files; picker opens in WhatsApp's stickers folder | iOS apps cannot read WhatsApp's files |
 | Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) |
 | Language fallback | pt-BR for other device languages | en | Undecided (#102) |
 | Handle lookup | Start chat only | Every user search | Undecided (#102) |
