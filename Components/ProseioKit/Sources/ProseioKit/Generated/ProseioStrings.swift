@@ -361,4 +361,12 @@ public enum ProseioStrings {
     public static var stickersImportNone: String { NSLocalizedString("proseio_stickers_import_none", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var stickersImportFailed: String { NSLocalizedString("proseio_stickers_import_failed", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var actionSaveSticker: String { NSLocalizedString("proseio_action_save_sticker", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickerSaved: String { NSLocalizedString("proseio_sticker_saved", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickerSaveFailed: String { NSLocalizedString("proseio_sticker_save_failed", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersFromPhoto: String { NSLocalizedString("proseio_stickers_from_photo", tableName: "Proseio", bundle: .module, comment: "") }
 }
