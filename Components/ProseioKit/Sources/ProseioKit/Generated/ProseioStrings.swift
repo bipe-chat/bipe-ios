@@ -455,4 +455,16 @@ public enum ProseioStrings {
     public static var phoneNotLinked: String { NSLocalizedString("proseio_phone_not_linked", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var phoneLinked: String { NSLocalizedString("proseio_phone_linked", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var tabChats: String { NSLocalizedString("proseio_tab_chats", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var tabGroups: String { NSLocalizedString("proseio_tab_groups", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var tabYou: String { NSLocalizedString("proseio_tab_you", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var selfChatTitle: String { NSLocalizedString("proseio_self_chat_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var selfChatSubtitle: String { NSLocalizedString("proseio_self_chat_subtitle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var selfChatError: String { NSLocalizedString("proseio_self_chat_error", tableName: "Proseio", bundle: .module, comment: "") }
 }

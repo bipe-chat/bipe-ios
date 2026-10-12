@@ -21,6 +21,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     private let bugReportService: BugReportServiceProtocol
     private let userSettings: UserSettings
     private let proseioInvitePairs: ProseioInvitePairs
+    private let proseioSelfChat: ProseioSelfChat
     private let notificationManager: NotificationManagerProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     
@@ -38,7 +39,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
          analyticsService: AnalyticsServiceProtocol,
          bugReportService: BugReportServiceProtocol,
          notificationManager: NotificationManagerProtocol,
-         userIndicatorController: UserIndicatorControllerProtocol) {
+         userIndicatorController: UserIndicatorControllerProtocol,
+         proseioScope: ProseioRoomListScope = .chats) {
         self.userSession = userSession
         self.availableSessionsPublisher = availableSessionsPublisher
         self.analyticsService = analyticsService
@@ -49,13 +51,24 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         spaceFilterSubject = CurrentValueSubject<SpaceServiceFilter?, Never>(nil)
         
-        roomSummaryProvider = userSession.clientProxy.roomSummaryProvider
+        roomSummaryProvider = switch proseioScope {
+        case .chats: userSession.clientProxy.roomSummaryProvider
+        case .groups: userSession.clientProxy.proseioGroupsRoomSummaryProvider
+        }
         
         proseioInvitePairs = ProseioInvitePairs(clientProxy: userSession.clientProxy, apiBaseURL: userSettings.app.proseioAPIBaseURL)
+        proseioSelfChat = ProseioSelfChat(clientProxy: userSession.clientProxy)
         
         super.init(initialViewState: .init(userProfile: userSession.clientProxy.userProfilePublisher.value,
-                                           bindings: .init(filtersState: .init(userSettings: userSession.userSettings))),
+                                           proseioScope: proseioScope,
+                                           bindings: .init(filtersState: .init(userSettings: userSession.userSettings,
+                                                                               proseioHiddenFilters: proseioScope.hiddenFilters))),
                    mediaProvider: userSession.mediaProvider)
+        
+        Task { [weak self] in
+            guard let self, await proseioSelfChat.refresh() else { return }
+            updateRooms()
+        }
         
         if userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
             state.isRoomListSearchEnabled = false
@@ -405,8 +418,14 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         // The SDK has no cheap "shares a joined room" check, so every DM invite counts as a request.
         let showsRequests = state.bindings.filtersState.isFilterActive(.invites)
         var requestCount = 0
+        // Proseio ADR 0053: the self-chat lives in the Você tab only.
+        let selfChatRoomID = proseioSelfChat.cachedRoomID
         
         for summary in roomSummaryProvider.roomListPublisher.value {
+            if summary.id == selfChatRoomID {
+                continue
+            }
+            
             if summary.isDirect, case .invite(let inviter) = summary.joinRequestType {
                 // Proseio ADR 0034: a chat from an invite pair skips Pedidos and is accepted without a tap.
                 if proseioInvitePairs.contains(inviter?.userID) {

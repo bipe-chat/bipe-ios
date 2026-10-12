@@ -41,6 +41,7 @@ enum SettingsScreenViewModelAction {
     case proseioMessaging
     case proseioInvites
     case proseioContacts
+    case proseioSelfChat
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -81,6 +82,8 @@ struct SettingsScreenViewState: BindableState {
     let isBugReportServiceEnabled: Bool
     
     let navigationBarVisibility: Visibility
+    /// Proseio: the screen is the root of the Você tab (ADR 0053), not a sheet.
+    var proseioIsInTab = false
     
     var bindings: SettingsScreenViewStateBindings
     
@@ -154,6 +157,7 @@ enum SettingsScreenViewAction {
     case proseioLoadHandle
     case proseioInvites
     case proseioContacts
+    case proseioSelfChat
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

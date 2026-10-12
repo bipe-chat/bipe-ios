@@ -64,11 +64,13 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
     ///   to the room list service through the `applyInput(input: .viewport(ranges` api. Only useful for
     ///   lists that need to update the visible range on Sliding Sync
     ///   - includesOnlyJoinedRooms: whether to leave out invites and other rooms the user hasn't joined, whatever the filter
+    ///   - proseioScope: Proseio home tab whose rooms this provider lists (ADR 0053)
     init(roomListService: RoomListServiceProtocol,
          eventStringBuilder: RoomEventStringBuilder,
          name: String,
          shouldUpdateVisibleRange: Bool = false,
          includesOnlyJoinedRooms: Bool = false,
+         proseioScope: ProseioRoomListScope? = nil,
          roomListPageSize: UInt32 = 100,
          notificationSettings: NotificationSettingsProxyProtocol,
          userSettings: UserSettings) {
@@ -82,7 +84,7 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
         
         baseFilter = [.any(filters: [.all(filters: [.nonSpace, .nonLeft]),
                                      .all(filters: [.space, .invite])]),
-                      .deduplicateVersions] + (includesOnlyJoinedRooms ? [.joined] : [])
+                      .deduplicateVersions] + (includesOnlyJoinedRooms ? [.joined] : []) + (proseioScope.map { [$0.rustFilter] } ?? [])
         
         let (diffsStream, diffsContinuation) = AsyncStream<[RoomListEntriesUpdate]>.makeStream()
         self.diffsContinuation = diffsContinuation

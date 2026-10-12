@@ -18,6 +18,10 @@ struct SettingsScreen: View {
     
     var body: some View {
         Form {
+            if context.viewState.proseioIsInTab {
+                ProseioSelfChatSection { context.send(viewAction: .proseioSelfChat) }
+            }
+            
             userSection
             
             if let trustProfile = context.viewState.proseioTrustProfile {
@@ -37,10 +41,10 @@ struct SettingsScreen: View {
         .compoundList()
         // Proseio: reloads the handle on first show and after returning from a pushed screen.
         .onAppear { context.send(viewAction: .proseioLoadHandle) }
-        .navigationTitle(L10n.commonSettings)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(context.viewState.proseioIsInTab ? ProseioStrings.tabYou : L10n.commonSettings)
+        .navigationBarTitleDisplayMode(context.viewState.proseioIsInTab ? .large : .inline)
         .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)
-        .toolbar { toolbar }
+        .toolbar { if !context.viewState.proseioIsInTab { toolbar } }
         .sheet(isPresented: $context.isPresentingStatusPicker) {
             SettingsScreenUserStatusPickerView { action in
                 context.send(viewAction: .userStatus(action))

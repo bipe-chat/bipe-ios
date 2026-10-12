@@ -150,6 +150,9 @@ protocol ClientProxyProtocol: AnyObject {
     
     var roomSummaryProvider: RoomSummaryProviderProtocol { get }
     
+    /// Proseio: the Grupos tab list (ADR 0053). `roomSummaryProvider` lists the Conversas tab.
+    var proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol { get }
+    
     /// Used for listing rooms that shouldn't be affected by the main `roomSummaryProvider` filtering
     /// But can still be filtered by queries, since this may be shared across multiple views, remember to reset
     /// The filtering state when you are done with it. Only lists joined rooms.
@@ -225,6 +228,12 @@ protocol ClientProxyProtocol: AnyObject {
     func uploadMedia(_ media: MediaInfo) async -> Result<String, ClientProxyError>
     
     func roomForIdentifier(_ identifier: String) async -> RoomProxyType?
+    
+    /// Proseio: global account data as a JSON string, `nil` when absent or on error.
+    func proseioAccountData(eventType: String) async -> String?
+    
+    /// Proseio: writes global account data from a JSON string.
+    func proseioSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError>
     
     func roomPreviewForIdentifier(_ identifier: String, via: [String]) async -> Result<RoomPreviewProxyProtocol, ClientProxyError>
     
@@ -317,4 +326,19 @@ protocol ClientProxyProtocol: AnyObject {
     /// Configures the client-owned presence used by future sync requests and shared with clones and notification children.
     /// When `sendImmediately` is `true` this also asks the SDK to send a direct presence update.
     func configurePresence(_ presence: ClientProxyPresence, sendImmediately: Bool) async -> Result<Void, ClientProxyError>
+}
+
+/// Proseio: mocks and previews share one room list and have no account data.
+extension ClientProxyProtocol {
+    var proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol {
+        roomSummaryProvider
+    }
+    
+    func proseioAccountData(eventType: String) async -> String? {
+        nil
+    }
+    
+    func proseioSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError> {
+        .failure(.forbiddenAccess)
+    }
 }

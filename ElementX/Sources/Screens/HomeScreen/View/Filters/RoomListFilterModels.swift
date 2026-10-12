@@ -92,9 +92,13 @@ struct RoomListFiltersState {
     private(set) var activeFilters: OrderedSet<RoomListFilter>
     private let userSettings: UserSettings
     
-    init(activeFilters: OrderedSet<RoomListFilter> = [], userSettings: UserSettings) {
+    /// Proseio: chips hidden in a scoped home tab (ADR 0053).
+    private let proseioHiddenFilters: Set<RoomListFilter>
+    
+    init(activeFilters: OrderedSet<RoomListFilter> = [], userSettings: UserSettings, proseioHiddenFilters: Set<RoomListFilter> = []) {
         self.activeFilters = .init(activeFilters)
         self.userSettings = userSettings
+        self.proseioHiddenFilters = proseioHiddenFilters
     }
     
     var availableFilters: [RoomListFilter] {
@@ -107,6 +111,8 @@ struct RoomListFiltersState {
         if !userSettings.app.mentionsFilterEnabled {
             availableFilters.remove(.mentions)
         }
+        
+        proseioHiddenFilters.forEach { availableFilters.remove($0) }
         
         for filter in activeFilters {
             availableFilters.remove(filter)

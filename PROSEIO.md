@@ -98,6 +98,16 @@ Not done (needs the domain, Apple team or brand):
 - **Quiet by default (#97):** `ProseioQuietGroups` runs once per account from `AppCoordinator.runPostSessionSetupTasks`. It sets the group default to mentions and keywords and adds the override push rule `br.com.proseio.poll_start` (`*.poll.start`) so new polls notify. It does nothing until `canPushEncryptedEventsToDevice()` is true: mentions in encrypted rooms need Synapse `msc4028_push_encrypted_events`, or mentions-only silences the group. Turn that server flag on only after Apple grants the NSE filtering entitlement (see Rebrand status), or the NSE cannot drop the other pushes. Android ships the same feature (#97, #98).
 - **"O que você perdeu" (#98):** `ProseioMissedSummary` (rules) and `ProseioMissedSummaryView` sit above the read marker in `RoomTimelineItemView`. Shown in groups on the live timeline when at least 20 loaded messages follow the marker. Lines: mentions of you or @room, replies to you, open polls you have not voted in. Pins are not in it yet.
 
+## Tab bar (proseio ADR 0053)
+
+- **Tabs:** Conversas, Grupos, Você, plus search (`UserSessionFlowCoordinator.HomeTab`). The Spaces tab is not created; `SpacesTabFlowCoordinator` stays in the tree for rebases.
+- **Conversas and Grupos** are two `ChatsTabFlowCoordinator`s with a `ProseioRoomListScope`. `clientProxy.roomSummaryProvider` lists Conversas (SDK category `people`, plus every invite); `proseioGroupsRoomSummaryProvider` lists Grupos (category `group`, joined). `NotificationSettingsEditScreenViewModel` reads `staticRoomSummaryProvider`, because the main provider no longer lists all rooms.
+- **Routing:** `.room`, `.event`, `.roomDetails` and `.thread` open in the tab that lists the room (`proseioRoomTab(for:)`). Other room routes stay in the current tab.
+- **Badges:** each tab sums `unreadNotificationsCount` of its own rooms. The app icon badge stays the total.
+- **Você** is `SettingsFlowCoordinator(isInTab: true)` in a stack in the tab: no close button, title "Você". `.settings` and `.chatBackupSettings` routes select the tab. On a Mac with secondary windows, settings still open in a window.
+- **Self-chat:** `ProseioSelfChat`. Account data `br.com.proseio.self_chat` = `{"room_id": "..."}` (same on Android). Created on first tap as a private encrypted room named "Anotações". The room lists hide it by a cached ID in `UserDefaults`; it opens in Conversas.
+- **Search:** the search tab needs iOS 26 (`globalSearchEnabled`, on by default). On iOS 18 to 25 search stays inline in the room list.
+
 ## Design tokens
 
 - Compound tokens come from the Proseio fork **proseio/compound-design-tokens** (local clone `~/Dev/Proseio/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
@@ -129,3 +139,4 @@ Each line is a deliberate difference with its reason. A difference not listed he
 | Language fallback | pt-BR for other device languages | en | Undecided (#102) |
 | Handle lookup | Start chat only | Every user search | Undecided (#102) |
 | Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/proseio; same result for the user |
+| Search | Search tab (iOS 26+), inline before iOS 26 | Search in the top bar | Platform idiom (ADR 0053) |

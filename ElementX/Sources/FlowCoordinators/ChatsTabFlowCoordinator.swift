@@ -24,6 +24,8 @@ enum ChatsTabFlowCoordinatorAction {
 class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
     private let navigationSplitCoordinator: NavigationSplitCoordinator
     private let flowParameters: CommonFlowParameters
+    /// Proseio: the same flow runs the Conversas and the Grupos tab (ADR 0053).
+    private let proseioScope: ProseioRoomListScope
     
     private var userSession: UserSessionProtocol {
         flowParameters.userSession
@@ -53,9 +55,11 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     init(navigationSplitCoordinator: NavigationSplitCoordinator,
+         proseioScope: ProseioRoomListScope = .chats,
          flowParameters: CommonFlowParameters) {
         stateMachine = flowParameters.stateMachineFactory.makeChatsTabFlowStateMachine()
         self.navigationSplitCoordinator = navigationSplitCoordinator
+        self.proseioScope = proseioScope
         self.flowParameters = flowParameters
         
         sidebarNavigationStackCoordinator = NavigationStackCoordinator(navigationSplitCoordinator: navigationSplitCoordinator)
@@ -380,7 +384,8 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
                                                          selectedRoomPublisher: selectedRoomSubject.asCurrentValuePublisher(),
                                                          analyticsService: flowParameters.analytics,
                                                          notificationManager: flowParameters.notificationManager,
-                                                         userIndicatorController: flowParameters.userIndicatorController)
+                                                         userIndicatorController: flowParameters.userIndicatorController,
+                                                         proseioScope: proseioScope)
         let coordinator = HomeScreenCoordinator(parameters: parameters)
         
         coordinator.actions

@@ -17,6 +17,7 @@ struct HomeScreenCoordinatorParameters {
     let analyticsService: AnalyticsServiceProtocol
     let notificationManager: NotificationManagerProtocol
     let userIndicatorController: UserIndicatorControllerProtocol
+    var proseioScope = ProseioRoomListScope.chats
 }
 
 enum HomeScreenCoordinatorAction {
@@ -54,7 +55,8 @@ final class HomeScreenCoordinator: CoordinatorProtocol {
                                         analyticsService: parameters.analyticsService,
                                         bugReportService: parameters.bugReportService,
                                         notificationManager: parameters.notificationManager,
-                                        userIndicatorController: parameters.userIndicatorController)
+                                        userIndicatorController: parameters.userIndicatorController,
+                                        proseioScope: parameters.proseioScope)
         
         viewModel.actions
             .sink { [weak self] action in

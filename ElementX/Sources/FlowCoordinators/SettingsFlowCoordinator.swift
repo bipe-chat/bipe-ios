@@ -18,11 +18,14 @@ enum SettingsFlowCoordinatorAction {
     case forceLogout
     /// Proseio: open a user's profile in the chats tab (from the invites screen).
     case openUserProfile(userID: String)
+    /// Proseio: open the self-chat (ADR 0053).
+    case openSelfChat
 }
 
 class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     private let appLockService: AppLockServiceProtocol
     private let isInSecondaryWindow: Bool
+    private let isInTab: Bool
     private let navigationStackCoordinator: NavigationStackCoordinator
     private let flowParameters: CommonFlowParameters
     
@@ -47,10 +50,12 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     init(appLockService: AppLockServiceProtocol,
          isInSecondaryWindow: Bool,
+         isInTab: Bool = false,
          navigationStackCoordinator: NavigationStackCoordinator,
          flowParameters: CommonFlowParameters) {
         self.appLockService = appLockService
         self.isInSecondaryWindow = isInSecondaryWindow
+        self.isInTab = isInTab
         self.navigationStackCoordinator = navigationStackCoordinator
         self.flowParameters = flowParameters
     }
@@ -82,7 +87,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         let settingsScreenCoordinator = SettingsScreenCoordinator(parameters: .init(userSession: flowParameters.userSession,
                                                                                     isBugReportServiceEnabled: flowParameters.bugReportService.isEnabled,
                                                                                     isInSecondaryWindow: isInSecondaryWindow,
-                                                                                    userIndicatorController: flowParameters.userIndicatorController))
+                                                                                    userIndicatorController: flowParameters.userIndicatorController,
+                                                                                    proseioIsInTab: isInTab))
         
         settingsScreenCoordinator.actions
             .sink { [weak self] action in
@@ -148,6 +154,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     presentProseioInvitesScreen()
                 case .proseioContacts:
                     presentProseioContactsScreen()
+                case .proseioSelfChat:
+                    actionsSubject.send(.openSelfChat)
                 }
             }
             .store(in: &cancellables)

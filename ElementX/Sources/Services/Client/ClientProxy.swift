@@ -61,6 +61,7 @@ class ClientProxy: ClientProxyProtocol {
     // These following summary providers both operate on the same allRooms() list but
     // can apply their own filtering and pagination
     private(set) var roomSummaryProvider: RoomSummaryProviderProtocol
+    private(set) var proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol
     private(set) var alternateRoomSummaryProvider: RoomSummaryProviderProtocol
     
     private(set) var staticRoomSummaryProvider: StaticRoomSummaryProviderProtocol
@@ -251,6 +252,7 @@ class ClientProxy: ClientProxyProtocol {
         syncService = configuredAppService.syncService
         roomListService = configuredAppService.roomListService
         roomSummaryProvider = configuredAppService.roomSummaryProvider
+        proseioGroupsRoomSummaryProvider = configuredAppService.proseioGroupsRoomSummaryProvider
         alternateRoomSummaryProvider = configuredAppService.alternateRoomSummaryProvider
         staticRoomSummaryProvider = configuredAppService.staticRoomSummaryProvider
         eventStringBuilder = configuredAppService.eventStringBuilder
@@ -678,6 +680,25 @@ class ClientProxy: ClientProxyProtocol {
         } catch {
             MXLog.error("Failed uploading media with error: \(error)")
             return .failure(ClientProxyError.sdkError(error))
+        }
+    }
+    
+    func proseioAccountData(eventType: String) async -> String? {
+        do {
+            return try await client.accountData(eventType: eventType)
+        } catch {
+            MXLog.error("Failed reading account data \(eventType): \(error)")
+            return nil
+        }
+    }
+    
+    func proseioSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError> {
+        do {
+            try await client.setAccountData(eventType: eventType, content: content)
+            return .success(())
+        } catch {
+            MXLog.error("Failed writing account data \(eventType): \(error)")
+            return .failure(.sdkError(error))
         }
     }
     
@@ -1557,6 +1578,7 @@ private struct ClientProxyServices {
     let syncService: SyncService
     let roomListService: RoomListService
     let roomSummaryProvider: RoomSummaryProviderProtocol
+    let proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol
     let alternateRoomSummaryProvider: RoomSummaryProviderProtocol
     let staticRoomSummaryProvider: StaticRoomSummaryProviderProtocol
     let eventStringBuilder: RoomEventStringBuilder
@@ -1584,9 +1606,19 @@ private struct ClientProxyServices {
                                                   eventStringBuilder: eventStringBuilder,
                                                   name: "AllRooms",
                                                   shouldUpdateVisibleRange: true,
+                                                  proseioScope: .chats,
                                                   notificationSettings: notificationSettings,
                                                   userSettings: userSettings)
         try await roomSummaryProvider.setRoomList(roomListService.allRooms())
+        
+        proseioGroupsRoomSummaryProvider = RoomSummaryProvider(roomListService: roomListService,
+                                                               eventStringBuilder: eventStringBuilder,
+                                                               name: "ProseioGroups",
+                                                               shouldUpdateVisibleRange: true,
+                                                               proseioScope: .groups,
+                                                               notificationSettings: notificationSettings,
+                                                               userSettings: userSettings)
+        try await proseioGroupsRoomSummaryProvider.setRoomList(roomListService.allRooms())
         
         alternateRoomSummaryProvider = RoomSummaryProvider(roomListService: roomListService,
                                                            eventStringBuilder: eventStringBuilder,
