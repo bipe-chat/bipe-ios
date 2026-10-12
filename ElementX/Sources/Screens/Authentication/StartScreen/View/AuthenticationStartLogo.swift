@@ -71,6 +71,11 @@ private struct AuthenticationBrandLogoModifier: ViewModifier {
         64 * scale
     }
     
+    /// The shape of the logo image, used for its shadows.
+    private var logoShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 24 * scale)
+    }
+    
     /// The shape that the logo is composed on top of.
     private var outerShape: RoundedRectangle {
         RoundedRectangle(cornerRadius: 44 * scale)
@@ -87,13 +92,13 @@ private struct AuthenticationBrandLogoModifier: ViewModifier {
     private func styledContent(_ content: Content) -> some View {
         content
             .background {
-                Circle()
+                logoShape
                     .inset(by: 1 * scale)
                     .shadow(color: .black.opacity(!isLight && isOnGradient ? 0.3 : 0.4),
                             radius: 12.57143 * scale,
                             y: 6.28571 * scale)
                 
-                Circle()
+                logoShape
                     .inset(by: 1 * scale)
                     .shadow(color: .black.opacity(0.5),
                             radius: 12.57143 * scale,
