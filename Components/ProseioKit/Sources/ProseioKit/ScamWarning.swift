@@ -13,6 +13,8 @@ public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
     case boleto
     case pixKey
     case deliveryFee
+    case lookalikeLink
+    case bankAlert
     case receipt
     case newNumber
     case urgency
@@ -24,6 +26,8 @@ public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
         case .boleto: ProseioStrings.scamWarningBoleto
         case .pixKey: ProseioStrings.scamWarningPixKey
         case .deliveryFee: ProseioStrings.scamWarningDeliveryFee
+        case .lookalikeLink: ProseioStrings.scamWarningLookalikeLink
+        case .bankAlert: ProseioStrings.scamWarningBankAlert
         case .receipt: ProseioStrings.scamWarningReceipt
         case .newNumber: ProseioStrings.scamWarningNewNumber
         case .urgency: ProseioStrings.scamWarningUrgency
@@ -56,6 +60,7 @@ public extension ScamDetector {
         let groups = Set(matchIDs.compactMap { $0.split(separator: ":", maxSplits: 1).first.map(String.init) })
         let phrases = matchIDs.compactMap { $0.hasPrefix("urgency:") ? String($0.dropFirst("urgency:".count)) : nil }
         let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
+        let hosts = linkHosts(in: message)
 
         return warningKindPriority.first { kind in
             switch kind {
@@ -64,13 +69,37 @@ public extension ScamDetector {
             // A phone number or e-mail alone is normal chat. Warn only when the message also talks about Pix.
             case .pixKey: groups.contains("pixKeyPatterns") && containsAny(normalized, ProseioRegistries.pixKeyContextWords)
             // The fake-delivery fee scam: a link, and the message talks about a held parcel and a fee.
-            case .deliveryFee: groups.contains("linkPatterns") && deliveryWordLists.allSatisfy { containsAny(normalized, $0) }
+            case .deliveryFee: !hosts.isEmpty && deliveryWordLists.allSatisfy { containsAny(normalized, $0) }
+            // A link that copies a bank, government or company address, also when spelled with homoglyphs.
+            case .lookalikeLink: hosts.contains(where: isLookalike)
+            // The fake bank alert: a link, and the message says the account, card or Pix is blocked or needs an update.
+            case .bankAlert: !hosts.isEmpty && bankAlertWordLists.allSatisfy { containsAny(normalized, $0) }
             case .receipt: groups.contains("receipt")
             // The falso parente opener. On Bipe it says new account, which is normal chat without a family term or urgency.
             case .newNumber: phrases.contains { ProseioRegistries.newNumberPhrases.contains($0) }
                 || (containsAny(normalized, ProseioRegistries.newAccountPhrases)
                     && (!phrases.isEmpty || containsWord(normalized, ProseioRegistries.familyTerms)))
             case .urgency: !phrases.isEmpty
+            }
+        }
+    }
+
+    /// A link host. `folded` is a link-pattern match on the host-folded message. `plain` is the same UTF-16 range
+    /// of the message normalised without folding, so it keeps homoglyphs.
+    struct LinkHost: Equatable {
+        let folded: String
+        let plain: String
+    }
+
+    /// Every link host in the message. Must match proseio-shared `linkHosts`.
+    static func linkHosts(in message: String) -> [LinkHost] {
+        let plain = NameNormalizer.normalize(message, homoglyphs: [:]) as NSString
+        let folded = NameNormalizer.normalize(message, homoglyphs: ProseioRegistries.hostHomoglyphs) as NSString
+        // proseio-shared validates that host folding keeps every UTF-16 index. An empty plain host is never official.
+        let aligned = plain.length == folded.length
+        return linkExpressions.flatMap { expression in
+            expression.matches(in: folded as String, range: NSRange(location: 0, length: folded.length)).map {
+                LinkHost(folded: folded.substring(with: $0.range), plain: aligned ? plain.substring(with: $0.range) : "")
             }
         }
     }
@@ -93,6 +122,21 @@ public extension ScamDetector {
         ProseioRegistries.deliveryHoldWords,
         ProseioRegistries.deliveryFeeWords
     ]
+
+    private static let bankAlertWordLists = [
+        ProseioRegistries.bankAlertSubjectWords,
+        ProseioRegistries.bankAlertThreatWords
+    ]
+
+    // proseio-shared validates every regex at generation time, so a compile failure here is not expected.
+    private static let linkExpressions = ProseioRegistries.linkPatterns.compactMap { try? NSRegularExpression(pattern: $0.regex) }
+
+    /// True when the host copies a brand: its folded form names a brand and its plain form is not that brand's domain.
+    private static func isLookalike(_ host: LinkHost) -> Bool {
+        let squashed = host.folded.replacingOccurrences(of: ".", with: "").replacingOccurrences(of: "-", with: "")
+        guard ProseioRegistries.lookalikeBrandTokens.contains(where: { containsCodeUnits(squashed, $0) }) else { return false }
+        return !ProseioRegistries.officialDomains.contains { host.plain == $0 || host.plain.hasSuffix(".\($0)") }
+    }
 
     private static func containsAny(_ normalized: String, _ words: [String]) -> Bool {
         words.contains { containsCodeUnits(normalized, $0) }
