@@ -20,6 +20,9 @@ let package = Package(
                 swiftSettings: [
                     .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
                     .enableUpcomingFeature("InferIsolatedConformances")
-                ])
+                ]),
+        // Reads ../../../proseio-shared/test-vectors directly (ADR 0031 rule 4). Run: swift test
+        .testTarget(name: "ProseioKitTests",
+                    dependencies: ["ProseioKit"])
     ]
 )

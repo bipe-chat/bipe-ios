@@ -9,8 +9,8 @@ import Foundation
 /// Invite links: `https://proseio.com.br/convite/XXXX-XXXX-XXXX`. The web page there explains how to install;
 /// the app opens it as a universal link and pre-fills the sign-up code.
 public nonisolated enum ProseioInviteLink {
-    /// Rule and cases: proseio-shared/test-vectors/invite-codes.json. The API and Android use the same pattern.
-    private static let pattern = try? NSRegularExpression(pattern: #"(?<![A-Z0-9])([A-HJKMNP-Z2-9]{4})[ \-\u2010-\u2014\u2212]?([A-HJKMNP-Z2-9]{4})[ \-\u2010-\u2014\u2212]?([A-HJKMNP-Z2-9]{4})(?![A-Z0-9])"#)
+    /// Rule: proseio-shared/registries/invite-codes.json (generated). Cases: test-vectors/invite-codes.json.
+    private static let pattern = try? NSRegularExpression(pattern: ProseioRegistries.inviteCodePattern)
 
     /// The invite code in a link, normalised, or `nil` when the URL is not an invite link.
     public static func code(from url: URL) -> String? {
@@ -25,7 +25,7 @@ public nonisolated enum ProseioInviteLink {
 
     /// `XXXX-XXXX-XXXX` from anything a user typed or pasted: a code, an invite link or a whole message. `nil` when it holds no code.
     public static func normalizedCode(_ raw: String) -> String? {
-        let text = String(raw.prefix(2048)).uppercased()
+        let text = String(raw.prefix(ProseioRegistries.inviteCodeMaxInputLength)).uppercased()
         let range = NSRange(text.startIndex..., in: text)
         guard let match = pattern?.firstMatch(in: text, range: range) else { return nil }
         let groups = (1...3).compactMap { Range(match.range(at: $0), in: text).map { String(text[$0]) } }

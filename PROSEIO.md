@@ -23,6 +23,12 @@ This repo is Proseio's iOS app: a fork of Element X iOS (AGPL-3.0). Upstream con
 xcodebuild -project ElementX.xcodeproj -scheme ElementX -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
+Shared test vectors (ADR 0031 rule 4): `Components/ProseioKit/Tests/ProseioKitTests/SharedVectorTests.swift` reads `../proseio-shared/test-vectors` directly. Run it after any registry, vector or ProseioKit logic change:
+
+```bash
+cd Components/ProseioKit && swift test
+```
+
 Device builds (signed, automatic provisioning with the Centaur Labs team):
 
 ```bash

@@ -221,4 +221,8 @@ public enum ProseioRegistries {
     public static let handleMinLength = 3
     public static let handleMaxLength = 30
     public static let handlePattern = "^[a-z0-9](?:[a-z0-9_]|\\.(?!\\.))*[a-z0-9_]$"
+
+    /// Invite codes: the code inside anything a user pastes (registries/invite-codes.json).
+    public static let inviteCodePattern = "(?<![A-Z0-9])([A-HJKMNP-Z2-9]{4})[ \\-\\u2010-\\u2014\\u2212]?([A-HJKMNP-Z2-9]{4})[ \\-\\u2010-\\u2014\\u2212]?([A-HJKMNP-Z2-9]{4})(?![A-Z0-9])"
+    public static let inviteCodeMaxInputLength = 2048
 }
