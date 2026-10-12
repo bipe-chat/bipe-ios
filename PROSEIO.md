@@ -95,7 +95,7 @@ Not done (needs the domain, Apple team or brand):
 
 ## Groups MVP (proseio/docs/groups.md, ADR 0026)
 
-- **Quiet by default (#97):** `ProseioQuietGroups` runs once per account from `AppCoordinator.runPostSessionSetupTasks`. It sets the group default to mentions and keywords and adds the override push rule `br.com.proseio.poll_start` (`*.poll.start`) so new polls notify. It does nothing until `canPushEncryptedEventsToDevice()` is true: mentions in encrypted rooms need Synapse `msc4028_push_encrypted_events`, or mentions-only silences the group. Turn that server flag on only after Apple grants the NSE filtering entitlement (see Rebrand status), or the NSE cannot drop the other pushes.
+- **Quiet by default (#97):** `ProseioQuietGroups` runs once per account from `AppCoordinator.runPostSessionSetupTasks`. It sets the group default to mentions and keywords and adds the override push rule `br.com.proseio.poll_start` (`*.poll.start`) so new polls notify. It does nothing until `canPushEncryptedEventsToDevice()` is true: mentions in encrypted rooms need Synapse `msc4028_push_encrypted_events`, or mentions-only silences the group. Turn that server flag on only after Apple grants the NSE filtering entitlement (see Rebrand status), or the NSE cannot drop the other pushes. Android ships the same feature (#97, #98).
 - **"O que você perdeu" (#98):** `ProseioMissedSummary` (rules) and `ProseioMissedSummaryView` sit above the read marker in `RoomTimelineItemView`. Shown in groups on the live timeline when at least 20 loaded messages follow the marker. Lines: mentions of you or @room, replies to you, open polls you have not voted in. Pins are not in it yet.
 
 ## Design tokens
@@ -128,3 +128,4 @@ Each line is a deliberate difference with its reason. A difference not listed he
 | Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) |
 | Language fallback | pt-BR for other device languages | en | Undecided (#102) |
 | Handle lookup | Start chat only | Every user search | Undecided (#102) |
+| Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/proseio; same result for the user |
