@@ -343,4 +343,22 @@ public enum ProseioStrings {
     public static func invitesJoined(_ p1: String) -> String {
         String(format: NSLocalizedString("proseio_invites_joined", tableName: "Proseio", bundle: .module, comment: ""), p1)
     }
+
+    public static var stickersImportAction: String { NSLocalizedString("proseio_stickers_import_action", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersImportHelp: String { NSLocalizedString("proseio_stickers_import_help", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersImportHelpFolderAndroid: String { NSLocalizedString("proseio_stickers_import_help_folder_android", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersImportNote: String { NSLocalizedString("proseio_stickers_import_note", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersImportProgress: String { NSLocalizedString("proseio_stickers_import_progress", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func stickersImportDone(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_stickers_import_done", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var stickersImportNone: String { NSLocalizedString("proseio_stickers_import_none", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersImportFailed: String { NSLocalizedString("proseio_stickers_import_failed", tableName: "Proseio", bundle: .module, comment: "") }
 }
