@@ -138,7 +138,7 @@
 "proseio_group_missed_title" = "What you missed";
 "proseio_group_missed_mention" = "%1$@ mentioned you";
 "proseio_group_missed_reply" = "%1$@ replied to you";
-"proseio_group_missed_poll" = "Poll you have not answered: %1$@";
+"proseio_group_missed_poll" = "Waiting on your vote: %1$@";
 "proseio_group_missed_pinned" = "Pinned: %1$@";
 "proseio_group_missed_more" = "Other messages: %1$@";
 "proseio_invites_joined" = "%1$@ joined with your invite";
