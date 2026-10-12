@@ -66,6 +66,24 @@ public enum ProseioStrings {
         String(format: NSLocalizedString("proseio_pix_card_bank_name", tableName: "Proseio", bundle: .module, comment: ""), p1)
     }
 
+    public static var pixCardTitle: String { NSLocalizedString("proseio_pix_card_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardCopy: String { NSLocalizedString("proseio_pix_card_copy", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardCopied: String { NSLocalizedString("proseio_pix_card_copied", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardMarkSent: String { NSLocalizedString("proseio_pix_card_mark_sent", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardMarkReceived: String { NSLocalizedString("proseio_pix_card_mark_received", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardStatusIssued: String { NSLocalizedString("proseio_pix_card_status_issued", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func pixCardStatusSent(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_pix_card_status_sent", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var pixCardStatusPaid: String { NSLocalizedString("proseio_pix_card_status_paid", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var warningNameLookalikeEmoji: String { NSLocalizedString("proseio_warning_name_lookalike_emoji", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var actionScamVictim: String { NSLocalizedString("proseio_action_scam_victim", tableName: "Proseio", bundle: .module, comment: "") }
