@@ -1,3 +1,5 @@
+> **Contributing to Proseio:** read the [Proseio contributing guide](https://github.com/proseio/.github/blob/main/CONTRIBUTING.md) first. Proseio needs a DCO sign-off on every commit (`git commit -s`). Element's guide below still applies to code style.
+
 # Contributing to Element X iOS
 
 Support can be found in [![Element X iOS Matrix room #element-x-ios:matrix.org](https://img.shields.io/matrix/element-x-ios:matrix.org.svg?label=%23element-x-ios:matrix.org&logo=matrix&server_fqdn=matrix.org)](https://matrix.to/#/#element-x-ios:matrix.org).
