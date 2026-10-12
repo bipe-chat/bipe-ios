@@ -63,6 +63,8 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>To take pictures or videos and send them as a message $(APP_DISPLAY_NAME) needs access to the camera.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>$(APP_DISPLAY_NAME) checks which of your contacts are on $(APP_DISPLAY_NAME). The numbers are only compared and never stored.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID is used to access your app.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

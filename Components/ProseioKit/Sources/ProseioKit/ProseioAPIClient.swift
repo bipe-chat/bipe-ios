@@ -46,6 +46,24 @@ public struct ProseioAPIClient: Sendable {
         try await send(method: "POST", path: ["v1", "me", "invites"], body: Empty?.none, accessToken: accessToken)
     }
 
+    // MARK: - Phone-number discovery
+
+    /// `POST /v1/contacts/lookup`. At most 500 numbers, already normalised with ``ProseioPhoneNumber``.
+    public func lookupContacts(phones: [String], accessToken: String) async throws(ProseioAPIError) -> [ProseioContactMatch] {
+        let response: LookupResponse = try await send(method: "POST", path: ["v1", "contacts", "lookup"], body: LookupRequest(phones: phones), accessToken: accessToken)
+        return response.matches
+    }
+
+    /// `GET /v1/me/phone`. Status only, never the number.
+    public func myPhone(accessToken: String) async throws(ProseioAPIError) -> ProseioMyPhone {
+        try await send(method: "GET", path: ["v1", "me", "phone"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `PUT /v1/me/discovery`.
+    public func setDiscoverableByPhone(_ value: Bool, accessToken: String) async throws(ProseioAPIError) {
+        let _: DiscoverySettings = try await send(method: "PUT", path: ["v1", "me", "discovery"], body: DiscoverySettings(byPhone: value), accessToken: accessToken)
+    }
+
     /// `GET /v1/me/invite-connections`. The caller's invite pairs (ADR 0034).
     public func inviteConnections(accessToken: String) async throws(ProseioAPIError) -> [String] {
         let response: InviteConnectionsResponse = try await send(method: "GET", path: ["v1", "me", "invite-connections"], body: Empty?.none, accessToken: accessToken)
@@ -55,6 +73,20 @@ public struct ProseioAPIClient: Sendable {
     /// `DELETE /v1/me/invites/{inviteId}`. Revokes a pending invite.
     public func revokeInvite(id: String, accessToken: String) async throws(ProseioAPIError) {
         let _: NoContent = try await send(method: "DELETE", path: ["v1", "me", "invites", id], body: Empty?.none, accessToken: accessToken)
+    }
+
+    // MARK: - Messaging
+
+    /// `GET /v1/me/messaging`. Who can message the caller.
+    public func messagingSetting(accessToken: String) async throws(ProseioAPIError) -> ProseioWhoCanMessage {
+        let response: MessagingSetting = try await send(method: "GET", path: ["v1", "me", "messaging"], body: Empty?.none, accessToken: accessToken)
+        return response.whoCanMessage
+    }
+
+    /// `PUT /v1/me/messaging`. The server enforces it on invites.
+    public func setMessagingSetting(_ value: ProseioWhoCanMessage, accessToken: String) async throws(ProseioAPIError) -> ProseioWhoCanMessage {
+        let response: MessagingSetting = try await send(method: "PUT", path: ["v1", "me", "messaging"], body: MessagingSetting(whoCanMessage: value), accessToken: accessToken)
+        return response.whoCanMessage
     }
 
     // MARK: - Handles
@@ -120,8 +152,24 @@ public struct ProseioAPIClient: Sendable {
         let userIds: [String]
     }
 
+    private struct LookupRequest: Encodable {
+        let phones: [String]
+    }
+
+    private struct LookupResponse: Decodable {
+        let matches: [ProseioContactMatch]
+    }
+
+    private struct DiscoverySettings: Codable {
+        let byPhone: Bool
+    }
+
     private struct InviteConnectionsResponse: Decodable {
         let userIds: [String]
+    }
+
+    private struct MessagingSetting: Codable {
+        let whoCanMessage: ProseioWhoCanMessage
     }
 
     private struct ResolveResponse: Decodable {
@@ -269,6 +317,20 @@ public struct ProseioSignupResponse: Decodable, Sendable {
     public let inviterUserId: String?
 }
 
+public struct ProseioContactMatch: Decodable, Sendable, Hashable {
+    /// E.164, as normalised by the server.
+    public let phone: String
+    public let userId: String
+}
+
+public struct ProseioMyPhone: Decodable, Sendable {
+    public let linked: Bool
+    public let discoverableByPhone: Bool
+    public let linkedAt: Date?
+    /// After this date the number stops being discoverable until confirmed again.
+    public let confirmBy: Date?
+}
+
 public struct ProseioInvitePreview: Decodable, Sendable {
     public let valid: Bool
     /// Without @. Only for a valid personal invite whose inviter has a handle.
@@ -349,6 +411,32 @@ public struct ProseioHandleAvailability: Decodable, Sendable {
 public struct ProseioHandleRecord: Decodable, Sendable {
     public let handle: String
     public let userId: String
+}
+
+/// Contract: `MessagingSetting.who_can_message`.
+public enum ProseioWhoCanMessage: String, Codable, Sendable, CaseIterable {
+    case everyone, verified, contacts
+
+    public init(from decoder: Decoder) throws {
+        // An unknown value from a newer server must not fail the response.
+        self = try Self(rawValue: decoder.singleValueContainer().decode(String.self)) ?? .everyone
+    }
+
+    public var title: String {
+        switch self {
+        case .everyone: ProseioStrings.messagingEveryone
+        case .verified: ProseioStrings.messagingVerified
+        case .contacts: ProseioStrings.messagingContacts
+        }
+    }
+
+    public var body: String {
+        switch self {
+        case .everyone: ProseioStrings.messagingEveryoneBody
+        case .verified: ProseioStrings.messagingVerifiedBody
+        case .contacts: ProseioStrings.messagingContactsBody
+        }
+    }
 }
 
 public struct ProseioMyHandle: Decodable, Sendable {

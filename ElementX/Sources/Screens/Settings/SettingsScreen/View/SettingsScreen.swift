@@ -195,10 +195,23 @@ struct SettingsScreen: View {
                             context.send(viewAction: .proseioHandle)
                         })
                 
+                ListRow(label: .default(title: ProseioStrings.messagingTitle,
+                                        icon: \.chat),
+                        details: context.viewState.proseioWhoCanMessage.map { .title($0.title) },
+                        kind: .navigationLink {
+                            context.send(viewAction: .proseioMessaging)
+                        })
+                
                 ListRow(label: .default(title: ProseioStrings.invitesTitle,
                                         icon: \.userAdd),
                         kind: .navigationLink {
                             context.send(viewAction: .proseioInvites)
+                        })
+                
+                ListRow(label: .default(title: ProseioStrings.contactsTitle,
+                                        icon: \.userProfile),
+                        kind: .navigationLink {
+                            context.send(viewAction: .proseioContacts)
                         })
             }
             

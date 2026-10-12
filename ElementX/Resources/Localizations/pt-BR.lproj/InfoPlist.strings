@@ -1,4 +1,5 @@
 "NSCameraUsageDescription" = "Para tirar fotos ou gravar vídeos e enviá-los como mensagem, o Proseio precisa de acesso à câmera.";
+"NSContactsUsageDescription" = "O Proseio confere quais dos seus contatos estão no Proseio. Os números só são comparados e nunca ficam guardados.";
 "NSFaceIDUsageDescription" = "O Face ID é usado para acessar o seu app.";
 "NSLocationAlwaysAndWhenInUseUsageDescription" = "Para compartilhar sua localização em tempo real nas conversas, o Proseio precisa de acesso à localização quando o app está em segundo plano.";
 "NSLocationWhenInUseUsageDescription" = "Conceda o acesso à localização para que o Proseio possa compartilhar a sua localização.";

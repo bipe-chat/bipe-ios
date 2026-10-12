@@ -44,7 +44,9 @@ enum SettingsScreenCoordinatorAction {
     case developerOptions
     
     case proseioHandle
+    case proseioMessaging
     case proseioInvites
+    case proseioContacts
 }
 
 final class SettingsScreenCoordinator: CoordinatorProtocol {
@@ -117,8 +119,12 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     
                 case .proseioHandle:
                     actionsSubject.send(.proseioHandle)
+                case .proseioMessaging:
+                    actionsSubject.send(.proseioMessaging)
                 case .proseioInvites:
                     actionsSubject.send(.proseioInvites)
+                case .proseioContacts:
+                    actionsSubject.send(.proseioContacts)
                 }
             }
             .store(in: &cancellables)

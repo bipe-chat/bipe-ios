@@ -37,7 +37,9 @@ enum SettingsScreenViewModelAction {
     case developerOptions
     
     case proseioHandle
+    case proseioMessaging
     case proseioInvites
+    case proseioContacts
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -57,6 +59,8 @@ struct SettingsScreenViewState: BindableState {
     /// Proseio: the username row (Proseio accounts only) and the current handle.
     var showProseioHandle = false
     var proseioHandle: String?
+    /// Proseio: "Quem pode me mandar mensagem". Same visibility as the username row.
+    var proseioWhoCanMessage: ProseioWhoCanMessage?
     
     /// Proseio: the "Perfil de confiança" card. Same visibility as the username row.
     var proseioTrustProfile: ProseioTrustProfile? {
@@ -142,8 +146,10 @@ enum SettingsScreenViewAction {
     case developerOptions
     
     case proseioHandle
+    case proseioMessaging
     case proseioLoadHandle
     case proseioInvites
+    case proseioContacts
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

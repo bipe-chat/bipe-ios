@@ -140,8 +140,12 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     
                 case .proseioHandle:
                     presentProseioHandleScreen()
+                case .proseioMessaging:
+                    presentProseioMessagingScreen()
                 case .proseioInvites:
                     presentProseioInvitesScreen()
+                case .proseioContacts:
+                    presentProseioContactsScreen()
                 }
             }
             .store(in: &cancellables)
@@ -165,6 +169,12 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.push(coordinator)
     }
     
+    private func presentProseioMessagingScreen() {
+        let coordinator = ProseioMessagingScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                              clientProxy: flowParameters.userSession.clientProxy))
+        navigationStackCoordinator.push(coordinator)
+    }
+    
     private func presentProseioInvitesScreen() {
         let coordinator = ProseioInvitesScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
                                                                             clientProxy: flowParameters.userSession.clientProxy,
@@ -174,6 +184,22 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .openUserProfile(let userID):
                     self?.actionsSubject.send(.openUserProfile(userID: userID))
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presentProseioContactsScreen() {
+        let coordinator = ProseioContactsScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                             clientProxy: flowParameters.userSession.clientProxy))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .openUserProfile(let userID):
+                    self?.actionsSubject.send(.openUserProfile(userID: userID))
+                case .openInvites:
+                    self?.presentProseioInvitesScreen()
                 }
             }
             .store(in: &cancellables)

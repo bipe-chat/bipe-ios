@@ -152,10 +152,15 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             
         case .proseioHandle:
             actionsSubject.send(.proseioHandle)
+        case .proseioMessaging:
+            actionsSubject.send(.proseioMessaging)
         case .proseioLoadHandle:
             Task { await loadProseioHandle() }
+            Task { await loadProseioWhoCanMessage() }
         case .proseioInvites:
             actionsSubject.send(.proseioInvites)
+        case .proseioContacts:
+            actionsSubject.send(.proseioContacts)
         }
     }
     
@@ -168,6 +173,18 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             state.proseioHandle = try await apiClient.myHandle(accessToken: accessToken).handle
         } catch {
             MXLog.error("Proseio handle load failed: \(error)")
+        }
+    }
+    
+    private func loadProseioWhoCanMessage() async {
+        guard state.showProseioHandle else { return }
+        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+        do {
+            state.proseioWhoCanMessage = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(ProseioAPIError) -> ProseioWhoCanMessage in
+                try await apiClient.messagingSetting(accessToken: token)
+            }
+        } catch {
+            MXLog.error("Proseio messaging setting load failed: \(error)")
         }
     }
     

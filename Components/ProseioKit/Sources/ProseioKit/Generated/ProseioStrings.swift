@@ -142,6 +142,20 @@ public enum ProseioStrings {
 
     public static var settingsHandleNone: String { NSLocalizedString("proseio_settings_handle_none", tableName: "Proseio", bundle: .module, comment: "") }
 
+    public static var messagingTitle: String { NSLocalizedString("proseio_messaging_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingEveryone: String { NSLocalizedString("proseio_messaging_everyone", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingEveryoneBody: String { NSLocalizedString("proseio_messaging_everyone_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingVerified: String { NSLocalizedString("proseio_messaging_verified", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingVerifiedBody: String { NSLocalizedString("proseio_messaging_verified_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingContacts: String { NSLocalizedString("proseio_messaging_contacts", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingContactsBody: String { NSLocalizedString("proseio_messaging_contacts_body", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var errorInviteInvalid: String { NSLocalizedString("proseio_error_invite_invalid", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var errorEmailTaken: String { NSLocalizedString("proseio_error_email_taken", tableName: "Proseio", bundle: .module, comment: "") }
@@ -369,4 +383,26 @@ public enum ProseioStrings {
     public static var stickerSaveFailed: String { NSLocalizedString("proseio_sticker_save_failed", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var stickersFromPhoto: String { NSLocalizedString("proseio_stickers_from_photo", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsTitle: String { NSLocalizedString("proseio_contacts_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsIntro: String { NSLocalizedString("proseio_contacts_intro", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsAllow: String { NSLocalizedString("proseio_contacts_allow", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsDenied: String { NSLocalizedString("proseio_contacts_denied", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsOpenSettings: String { NSLocalizedString("proseio_contacts_open_settings", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsNone: String { NSLocalizedString("proseio_contacts_none", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsInvite: String { NSLocalizedString("proseio_contacts_invite", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var discoveryToggle: String { NSLocalizedString("proseio_discovery_toggle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var discoveryFooter: String { NSLocalizedString("proseio_discovery_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var phoneNotLinked: String { NSLocalizedString("proseio_phone_not_linked", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var phoneLinked: String { NSLocalizedString("proseio_phone_linked", tableName: "Proseio", bundle: .module, comment: "") }
 }
