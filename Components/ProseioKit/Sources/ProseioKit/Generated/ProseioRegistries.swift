@@ -164,6 +164,10 @@ public enum ProseioRegistries {
         ScamPattern(id: "linha-digitavel", regex: "(?<![0-9A-Za-z])[0-9]{5}\\.?[0-9]{5}\\s?[0-9]{5}\\.?[0-9]{6}\\s?[0-9]{5}\\.?[0-9]{6}\\s?[0-9]\\s?[0-9]{14}(?![0-9A-Za-z])"),
     ]
 
+    public static let linkPatterns: [ScamPattern] = [
+        ScamPattern(id: "domain", regex: "(?<![0-9A-Za-z@.-])[0-9A-Za-z](?:[0-9A-Za-z-]*[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:[0-9A-Za-z-]*[0-9A-Za-z])?)*\\.(?:com|net|org|info|biz|br|ly|app|site|online|shop|store|top|xyz|link|click|vip|live|icu|cfd|sbs|lat)(?![0-9A-Za-z-])"),
+    ]
+
     /// Normalised phrases, matched as substrings of the normalised message.
     public static let urgencyPhrases: [String] = [
         "troquei de numero",
@@ -214,11 +218,44 @@ public enum ProseioRegistries {
         "salva esse numero",
     ]
 
+    /// Normalised words for the "delivery fee" kind. It needs a link and an entry from each of the three lists.
+    public static let deliveryParcelWords: [String] = [
+        "pacote",
+        "encomenda",
+        "entrega",
+        "pedido",
+        "correios",
+        "remessa",
+    ]
+    public static let deliveryHoldWords: [String] = [
+        "retid",
+        "taxad",
+        "tributad",
+        "bloquead",
+        "liberar",
+        "liberacao",
+        "pendente",
+        "aguardando pagamento",
+        "nao foi entregue",
+        "nao pode ser entregue",
+        "devolvid",
+    ]
+    public static let deliveryFeeWords: [String] = [
+        "taxa",
+        "tarifa",
+        "imposto",
+        "pague",
+        "pagar",
+        "pagamento",
+        "r$",
+    ]
+
     /// Scam warning kind raw values, most actionable first. The first kind whose rule applies wins.
     public static let scamWarningKindPriority: [String] = [
         "pixCode",
         "boleto",
         "pixKey",
+        "deliveryFee",
         "receipt",
         "newNumber",
         "urgency",

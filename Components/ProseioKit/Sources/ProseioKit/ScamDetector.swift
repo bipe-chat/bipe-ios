@@ -39,7 +39,8 @@ public nonisolated enum ScamDetector {
         let groups: [(name: String, patterns: [ScamPattern])] = [
             ("pixKeyPatterns", ProseioRegistries.pixKeyPatterns),
             ("pixCopyPastePatterns", ProseioRegistries.pixCopyPastePatterns),
-            ("boletoPatterns", ProseioRegistries.boletoPatterns)
+            ("boletoPatterns", ProseioRegistries.boletoPatterns),
+            ("linkPatterns", ProseioRegistries.linkPatterns)
         ]
         // proseio-shared validates every regex at generation time, so a compile failure here is not expected.
         return groups.flatMap { group in

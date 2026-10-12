@@ -212,6 +212,8 @@ public enum ProseioStrings {
 
     public static var scamWarningPixKey: String { NSLocalizedString("proseio_scam_warning_pix_key", tableName: "Proseio", bundle: .module, comment: "") }
 
+    public static var scamWarningDeliveryFee: String { NSLocalizedString("proseio_scam_warning_delivery_fee", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var scamWarningPixCode: String { NSLocalizedString("proseio_scam_warning_pix_code", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var scamWarningBoleto: String { NSLocalizedString("proseio_scam_warning_boleto", tableName: "Proseio", bundle: .module, comment: "") }

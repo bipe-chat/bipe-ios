@@ -12,6 +12,7 @@ public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
     case pixCode
     case boleto
     case pixKey
+    case deliveryFee
     case receipt
     case newNumber
     case urgency
@@ -22,6 +23,7 @@ public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
         case .pixCode: ProseioStrings.scamWarningPixCode
         case .boleto: ProseioStrings.scamWarningBoleto
         case .pixKey: ProseioStrings.scamWarningPixKey
+        case .deliveryFee: ProseioStrings.scamWarningDeliveryFee
         case .receipt: ProseioStrings.scamWarningReceipt
         case .newNumber: ProseioStrings.scamWarningNewNumber
         case .urgency: ProseioStrings.scamWarningUrgency
@@ -53,13 +55,16 @@ public extension ScamDetector {
     static func warningKind(forMatchIDs matchIDs: [String], message: String) -> ScamWarningKind? {
         let groups = Set(matchIDs.compactMap { $0.split(separator: ":", maxSplits: 1).first.map(String.init) })
         let phrases = matchIDs.compactMap { $0.hasPrefix("urgency:") ? String($0.dropFirst("urgency:".count)) : nil }
+        let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
 
         return warningKindPriority.first { kind in
             switch kind {
             case .pixCode: groups.contains("pixCopyPastePatterns")
             case .boleto: groups.contains("boletoPatterns")
             // A phone number or e-mail alone is normal chat. Warn only when the message also talks about Pix.
-            case .pixKey: groups.contains("pixKeyPatterns") && mentionsPix(message)
+            case .pixKey: groups.contains("pixKeyPatterns") && containsAny(normalized, ProseioRegistries.pixKeyContextWords)
+            // The fake-delivery fee scam: a link, and the message talks about a held parcel and a fee.
+            case .deliveryFee: groups.contains("linkPatterns") && deliveryWordLists.allSatisfy { containsAny(normalized, $0) }
             case .receipt: groups.contains("receipt")
             case .newNumber: phrases.contains { ProseioRegistries.newNumberPhrases.contains($0) }
             case .urgency: !phrases.isEmpty
@@ -80,8 +85,13 @@ public extension ScamDetector {
     /// proseio-shared validates that the priority lists every kind once, so `compactMap` drops nothing.
     private static let warningKindPriority = ProseioRegistries.scamWarningKindPriority.compactMap(ScamWarningKind.init(rawValue:))
 
-    private static func mentionsPix(_ message: String) -> Bool {
-        let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
-        return ProseioRegistries.pixKeyContextWords.contains { containsCodeUnits(normalized, $0) }
+    private static let deliveryWordLists = [
+        ProseioRegistries.deliveryParcelWords,
+        ProseioRegistries.deliveryHoldWords,
+        ProseioRegistries.deliveryFeeWords
+    ]
+
+    private static func containsAny(_ normalized: String, _ words: [String]) -> Bool {
+        words.contains { containsCodeUnits(normalized, $0) }
     }
 }
