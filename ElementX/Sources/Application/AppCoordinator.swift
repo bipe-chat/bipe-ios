@@ -714,6 +714,20 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
     }
     
+    /// Proseio: the existing direct chat with a user, or a new one; falls back to the profile.
+    private func openChat(with userID: String, userSession: UserSessionProtocol, flowCoordinator: UserSessionFlowCoordinator) async {
+        var roomID = try? userSession.clientProxy.directRoomForUserID(userID).get()
+        if roomID == nil {
+            roomID = try? await userSession.clientProxy.createDirectRoom(with: userID, expectedRoomName: nil).get()
+        }
+        if let roomID {
+            flowCoordinator.handleAppRoute(.room(roomID: roomID, via: []), animated: false)
+        } else {
+            MXLog.error("Proseio: could not open a chat with the inviter \(userID)")
+            flowCoordinator.handleAppRoute(.userProfile(userID: userID), animated: false)
+        }
+    }
+    
     private func runPostSessionSetupTasks() async {
         guard let userSession, let userSessionFlowCoordinator else {
             fatalError("User session not setup")
@@ -727,9 +741,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
            let storedAppRoute = storedAppRoute.take() {
             userSessionFlowCoordinator.handleAppRoute(storedAppRoute, animated: false)
         } else if let inviterUserID = appSettings.proseioPendingInviterUserID {
-            // Proseio: after a personal-invite sign-up, open the inviter's profile once, one tap from a chat.
+            // Proseio ADR 0034: after a personal-invite sign-up, open a chat with the inviter. Their app accepts it without a tap.
             appSettings.proseioPendingInviterUserID = nil
-            userSessionFlowCoordinator.handleAppRoute(.userProfile(userID: inviterUserID), animated: false)
+            await openChat(with: inviterUserID, userSession: userSession, flowCoordinator: userSessionFlowCoordinator)
         }
         
         if userSession.clientProxy.userIDServerName == appSettings.proseioSignupServerName {

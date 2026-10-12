@@ -20,6 +20,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     private let analyticsService: AnalyticsServiceProtocol
     private let bugReportService: BugReportServiceProtocol
     private let userSettings: UserSettings
+    private let proseioInvitePairs: ProseioInvitePairs
     private let notificationManager: NotificationManagerProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     
@@ -50,12 +51,19 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         roomSummaryProvider = userSession.clientProxy.roomSummaryProvider
         
+        proseioInvitePairs = ProseioInvitePairs(clientProxy: userSession.clientProxy, apiBaseURL: userSettings.app.proseioAPIBaseURL)
+        
         super.init(initialViewState: .init(userProfile: userSession.clientProxy.userProfilePublisher.value,
                                            bindings: .init(filtersState: .init(userSettings: userSession.userSettings))),
                    mediaProvider: userSession.mediaProvider)
         
         if userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
             state.isRoomListSearchEnabled = false
+        }
+        
+        Task { [weak self] in
+            guard let self, await proseioInvitePairs.refresh() else { return }
+            updateRooms()
         }
         
         userSession.clientProxy.userProfilePublisher
@@ -398,9 +406,17 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         var requestCount = 0
         
         for summary in roomSummaryProvider.roomListPublisher.value {
-            if !showsRequests, summary.isDirect, summary.joinRequestType?.isInvite == true {
-                requestCount += 1
-                continue
+            if summary.isDirect, case .invite(let inviter) = summary.joinRequestType {
+                // Proseio ADR 0034: a chat from an invite pair skips Pedidos and is accepted without a tap.
+                if proseioInvitePairs.contains(inviter?.userID) {
+                    proseioInvitePairs.autoAccept(roomID: summary.id)
+                } else {
+                    proseioInvitePairs.recheck(roomID: summary.id) { [weak self] in self?.updateRooms() }
+                    if !showsRequests {
+                        requestCount += 1
+                        continue
+                    }
+                }
             }
             
             let room = HomeScreenRoom(summary: summary,

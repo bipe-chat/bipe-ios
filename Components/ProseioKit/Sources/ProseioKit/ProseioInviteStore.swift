@@ -55,9 +55,21 @@ public nonisolated struct ProseioInviteStore {
         defaults.set(ids.sorted(), forKey: seenKey)
     }
 
+    // MARK: - Invite pairs
+
+    /// The last known invite pairs (ADR 0034), so trust works before the API answers. Not secret; UserDefaults.
+    public func invitePairs() -> Set<String> {
+        Set(defaults.stringArray(forKey: pairsKey) ?? [])
+    }
+
+    public func setInvitePairs(_ userIDs: Set<String>) {
+        defaults.set(userIDs.sorted(), forKey: pairsKey)
+    }
+
     // MARK: - Private
 
     private var seenKey: String { "proseio.invites.seenJoined.\(userID)" }
+    private var pairsKey: String { "proseio.invites.pairs.\(userID)" }
 
     private func writeLinks(_ links: [String: URL]) {
         guard let data = try? JSONEncoder().encode(links.mapValues(\.absoluteString)) else { return }
