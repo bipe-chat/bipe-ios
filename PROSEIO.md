@@ -61,7 +61,7 @@ Devices must be registered in the Centaur Labs team (automatic signing does this
 
 ## Rebrand status
 
-Done: display name, production app name, dev bundle ID and app group, Element's team ID replaced.
+Done: display name and production app name ("Bipe", ADR 0054; the code name stays Proseio), dev bundle ID and app group, Element's team ID replaced.
 
 - **OAuth login:** redirect is the private-use scheme `<bundle id>:/oauth/callback` (RFC 8252); client URI, logo, terms and privacy URLs moved to `https://proseio.com.br/...` because MAS requires them on the client URI host and requires the scheme to be the reverse of that host. Pages do not exist yet. **Verified 11 October 2026:** sign-in to matrix.org works end to end on a device (MAS dynamic registration accepted the client).
 - **Accent colour:** açaí `acai.1100` (`#80307B` light, `#D993D2` dark; high contrast `#5D1D59` / `#ECC0E7`) in `accent-color.colorset`. See proseio/docs/design/identity.md.
@@ -76,7 +76,7 @@ Element leftovers cleaned up (11 October 2026):
 - **Background tasks:** `BGTaskSchedulerPermittedIdentifiers` are `$(BASE_BUNDLE_IDENTIFIER).background.refresh` and `.background.search-backfill`. `AppSettings` derives the same IDs from `InfoPlistReader.main.baseBundleIdentifier`.
 - **Help links:** `encryptionURL`, `deviceVerificationURL`, `chatBackupDetailsURL`, `identityPinningViolationDetailsURL` and `historySharingDetailsURL` are `nil` in `AppSettings`, so their "Learn more" links are hidden (`AttributedString.proseioReplaceLink` in ProseioKit). Set a URL when Proseio has a help page. Terms, privacy and copyright already point at `proseio.com.br`.
 - **Matrix IDs:** the identity-reset warning in member details and the soft-logout notice show the handle when the resolver knows it.
-- **Permission prompts:** `InfoPlist.strings` in `en.lproj` and `pt-BR.lproj` say "Proseio", not "Element X" (the `.strings` override `$(APP_DISPLAY_NAME)` in `Info.plist`). pt-BR typos fixed ("áudio", "Para tirar") and the background-location prompt translated. The other locales are already excluded from the app target in `ElementX/SupportingFiles/target.yml`, so their Element X text does not ship.
+- **Permission prompts:** `InfoPlist.strings` in `en.lproj` and `pt-BR.lproj` say "Bipe", not "Element X" (the `.strings` override `$(APP_DISPLAY_NAME)` in `Info.plist`). pt-BR typos fixed ("áudio", "Para tirar") and the background-location prompt translated. The other locales are already excluded from the app target in `ElementX/SupportingFiles/target.yml`, so their Element X text does not ship.
 - **401 retry:** `ProseioAPIClient.withTokenRetry` re-reads the access token once on HTTP 401. The handle resolver and the "Nome de usuário" screen use it.
 
 Left on purpose: `elementWebHosts` and `accountProvisioningHost` (link parsing only), `elementProAppStoreURL` (only shown when a server requires Element Pro), Element Call and SDK URLs, `io.element.elementx.*` dispatch queue and notification IDs (internal, not user-visible).

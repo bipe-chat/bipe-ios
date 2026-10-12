@@ -1,6 +1,6 @@
 settings:
-  APP_DISPLAY_NAME: Proseio
-  PRODUCTION_APP_NAME: Proseio
+  APP_DISPLAY_NAME: Bipe
+  PRODUCTION_APP_NAME: Bipe
   APP_GROUP_IDENTIFIER: group.br.com.proseio.dev
   BASE_BUNDLE_IDENTIFIER: br.com.proseio.app.dev
   ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: "colors/accent-color"
