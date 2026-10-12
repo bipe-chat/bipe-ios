@@ -150,3 +150,7 @@
 "proseio_stickers_import_done" = "Stickers added: %1$@";
 "proseio_stickers_import_none" = "No new stickers in that file.";
 "proseio_stickers_import_failed" = "The import did not work. Try again.";
+"proseio_action_save_sticker" = "Save to my stickers";
+"proseio_sticker_saved" = "Sticker saved to My stickers";
+"proseio_sticker_save_failed" = "The sticker was not saved. Try again.";
+"proseio_stickers_from_photo" = "Make from a photo";

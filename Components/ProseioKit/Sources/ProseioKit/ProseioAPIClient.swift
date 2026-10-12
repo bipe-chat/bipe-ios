@@ -46,6 +46,12 @@ public struct ProseioAPIClient: Sendable {
         try await send(method: "POST", path: ["v1", "me", "invites"], body: Empty?.none, accessToken: accessToken)
     }
 
+    /// `GET /v1/me/invite-connections`. The caller's invite pairs (ADR 0034).
+    public func inviteConnections(accessToken: String) async throws(ProseioAPIError) -> [String] {
+        let response: InviteConnectionsResponse = try await send(method: "GET", path: ["v1", "me", "invite-connections"], body: Empty?.none, accessToken: accessToken)
+        return response.userIds
+    }
+
     /// `DELETE /v1/me/invites/{inviteId}`. Revokes a pending invite.
     public func revokeInvite(id: String, accessToken: String) async throws(ProseioAPIError) {
         let _: NoContent = try await send(method: "DELETE", path: ["v1", "me", "invites", id], body: Empty?.none, accessToken: accessToken)
@@ -111,6 +117,10 @@ public struct ProseioAPIClient: Sendable {
     }
 
     private struct ResolveRequest: Encodable {
+        let userIds: [String]
+    }
+
+    private struct InviteConnectionsResponse: Decodable {
         let userIds: [String]
     }
 
