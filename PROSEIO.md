@@ -93,6 +93,11 @@ Not done (needs the domain, Apple team or brand):
 - **Pause and resume recording:** `AudioRecorder.pauseRecording()` / `resumeRecording()` pause the engine and keep the file open. Resume sends `.didResumeRecording`, not `.didStartRecording`, so the waveform survives. `ProseioRecordingPauseButton` in the composer.
 - Sourcery is not installed on the dev Mac. The mock changes for these protocols were made by hand in `GeneratedMocks.swift` in Sourcery's pattern. A Sourcery run must give the same result.
 
+## Groups MVP (proseio/docs/groups.md, ADR 0026)
+
+- **Quiet by default (#97):** `ProseioQuietGroups` runs once per account from `AppCoordinator.runPostSessionSetupTasks`. It sets the group default to mentions and keywords and adds the override push rule `br.com.proseio.poll_start` (`*.poll.start`) so new polls notify. It does nothing until `canPushEncryptedEventsToDevice()` is true: mentions in encrypted rooms need Synapse `msc4028_push_encrypted_events`, or mentions-only silences the group. Turn that server flag on only after Apple grants the NSE filtering entitlement (see Rebrand status), or the NSE cannot drop the other pushes.
+- **"O que você perdeu" (#98):** `ProseioMissedSummary` (rules) and `ProseioMissedSummaryView` sit above the read marker in `RoomTimelineItemView`. Shown in groups on the live timeline when at least 20 loaded messages follow the marker. Lines: mentions of you or @room, replies to you, open polls you have not voted in. Pins are not in it yet.
+
 ## Design tokens
 
 - Compound tokens come from the Proseio fork **proseio/compound-design-tokens** (local clone `~/Dev/Proseio/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
