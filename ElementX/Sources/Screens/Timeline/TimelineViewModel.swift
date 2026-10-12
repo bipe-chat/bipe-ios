@@ -383,6 +383,8 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
             actionsSubject.send(.displayLocationPicker)
         case .poll:
             actionsSubject.send(.displayNewPollForm)
+        case .sticker:
+            actionsSubject.send(.displayStickerPicker)
         }
     }
     

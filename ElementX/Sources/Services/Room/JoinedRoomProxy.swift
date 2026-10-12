@@ -724,6 +724,16 @@ class JoinedRoomProxy: JoinedRoomProxyProtocol {
         }
     }
     
+    func sendRaw(eventType: String, content: String) async -> Result<Void, RoomProxyError> {
+        do {
+            _ = try await room.sendRaw(eventType: eventType, content: content)
+            return .success(())
+        } catch {
+            MXLog.error("Failed sending raw \(eventType) event with error: \(error)")
+            return .failure(.sdkError(error))
+        }
+    }
+    
     func sendLiveLocation(geoURI: GeoURI) async -> Result<Void, RoomProxyError> {
         do {
             try await room.sendLiveLocation(geoUri: geoURI.string)

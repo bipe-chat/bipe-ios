@@ -7,6 +7,7 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 import WysiwygComposer
 
@@ -43,6 +44,13 @@ struct RoomAttachmentPicker: View {
                 Label(L10n.screenRoomAttachmentSourcePoll, icon: \.polls)
             }
             .accessibilityIdentifier(A11yIdentifiers.roomScreen.attachmentPickerPoll)
+            
+            // Proseio: sticker picker (ADR 0029).
+            Button {
+                context.send(viewAction: .attach(.sticker))
+            } label: {
+                Label(ProseioStrings.actionStickers, icon: \.sticker)
+            }
             
             if context.viewState.isLocationSharingEnabled {
                 Button {

@@ -7511,6 +7511,48 @@ nonisolated class JoinedRoomProxyMock: JoinedRoomProxyProtocol, @unchecked Senda
             return stopLiveLocationShareReturnValue
         }
     }
+    //MARK: - sendRaw
+
+    private let sendRawEventTypeContentCallsCountLock = NSLock()
+    private nonisolated(unsafe) var sendRawEventTypeContentUnderlyingCallsCount = 0
+    var sendRawEventTypeContentCallsCount: Int {
+        get { sendRawEventTypeContentCallsCountLock.withLock { sendRawEventTypeContentUnderlyingCallsCount } }
+        set { sendRawEventTypeContentCallsCountLock.withLock { sendRawEventTypeContentUnderlyingCallsCount = newValue } }
+    }
+    var sendRawEventTypeContentCalled: Bool {
+        return sendRawEventTypeContentCallsCount > 0
+    }
+    private let sendRawEventTypeContentReceivedArgumentsLock = NSLock()
+    private nonisolated(unsafe) var sendRawEventTypeContentUnderlyingReceivedArguments: (eventType: String, content: String)?
+    var sendRawEventTypeContentReceivedArguments: (eventType: String, content: String)? {
+        get { sendRawEventTypeContentReceivedArgumentsLock.withLock { sendRawEventTypeContentUnderlyingReceivedArguments } }
+        set { sendRawEventTypeContentReceivedArgumentsLock.withLock { sendRawEventTypeContentUnderlyingReceivedArguments = newValue } }
+    }
+    private let sendRawEventTypeContentReceivedInvocationsLock = NSLock()
+    private nonisolated(unsafe) var sendRawEventTypeContentUnderlyingReceivedInvocations: [(eventType: String, content: String)] = []
+    var sendRawEventTypeContentReceivedInvocations: [(eventType: String, content: String)] {
+        get { sendRawEventTypeContentReceivedInvocationsLock.withLock { sendRawEventTypeContentUnderlyingReceivedInvocations } }
+        set { sendRawEventTypeContentReceivedInvocationsLock.withLock { sendRawEventTypeContentUnderlyingReceivedInvocations = newValue } }
+    }
+
+    private let sendRawEventTypeContentReturnValueLock = NSLock()
+    private nonisolated(unsafe) var sendRawEventTypeContentUnderlyingReturnValue: Result<Void, RoomProxyError>!
+    var sendRawEventTypeContentReturnValue: Result<Void, RoomProxyError>! {
+        get { sendRawEventTypeContentReturnValueLock.withLock { sendRawEventTypeContentUnderlyingReturnValue } }
+        set { sendRawEventTypeContentReturnValueLock.withLock { sendRawEventTypeContentUnderlyingReturnValue = newValue } }
+    }
+    nonisolated(unsafe) var sendRawEventTypeContentClosure: ((String, String) async -> Result<Void, RoomProxyError>)?
+
+    @concurrent func sendRaw(eventType: String, content: String) async -> Result<Void, RoomProxyError> {
+        sendRawEventTypeContentCallsCountLock.withLock { sendRawEventTypeContentUnderlyingCallsCount += 1 }
+        sendRawEventTypeContentReceivedArguments = (eventType: eventType, content: content)
+        sendRawEventTypeContentReceivedInvocationsLock.withLock { sendRawEventTypeContentUnderlyingReceivedInvocations.append((eventType: eventType, content: content)) }
+        if let sendRawEventTypeContentClosure = sendRawEventTypeContentClosure {
+            return await sendRawEventTypeContentClosure(eventType, content)
+        } else {
+            return sendRawEventTypeContentReturnValue
+        }
+    }
 }
 nonisolated class KeychainControllerMock: KeychainControllerProtocol, @unchecked Sendable {
 

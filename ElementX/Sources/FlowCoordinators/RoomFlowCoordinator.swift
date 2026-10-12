@@ -713,6 +713,8 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
                 case .presentPollForm(let mode):
                     stateMachine.tryEvent(.presentPollForm(mode: mode),
                                           userInfo: EventUserInfo(animated: animated, timelineController: timelineController))
+                case .presentStickerPicker:
+                    presentStickerPicker(threadRootEventID: nil)
                 case .presentLocationViewer(let location):
                     stateMachine.tryEvent(.presentMapNavigator(interactionMode: .viewStatic(location)),
                                           userInfo: EventUserInfo(animated: animated,
@@ -824,6 +826,8 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
             case .presentPollForm(let mode):
                 stateMachine.tryEvent(.presentPollForm(mode: mode),
                                       userInfo: EventUserInfo(animated: animated, timelineController: timelineController))
+            case .presentStickerPicker:
+                presentStickerPicker(threadRootEventID: threadRootEventID)
             case .presentLocationViewer(let location):
                 stateMachine.tryEvent(.presentMapNavigator(interactionMode: .viewStatic(location)),
                                       userInfo: EventUserInfo(animated: animated,
@@ -1196,6 +1200,28 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.setSheetCoordinator(stackCoordinator, animated: animated) { [weak self] in
             self?.stateMachine.tryEvent(.dismissMapNavigator)
         }
+    }
+    
+    /// Proseio: the sticker picker sheet (ADR 0029). It sends by itself and needs no state machine state.
+    private func presentStickerPicker(threadRootEventID: String?) {
+        let stackCoordinator = NavigationStackCoordinator()
+        let coordinator = ProseioStickerPickerScreenCoordinator(parameters: .init(clientProxy: userSession.clientProxy,
+                                                                                  roomProxy: roomProxy,
+                                                                                  threadRootEventID: threadRootEventID,
+                                                                                  mediaProvider: userSession.mediaProvider,
+                                                                                  userIndicatorController: flowParameters.userIndicatorController))
+        stackCoordinator.setRootCoordinator(coordinator)
+        
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .dismiss:
+                    self?.navigationStackCoordinator.setSheetCoordinator(nil)
+                }
+            }
+            .store(in: &cancellables)
+        
+        navigationStackCoordinator.setSheetCoordinator(stackCoordinator)
     }
     
     private func presentPollForm(mode: PollFormMode, timelineController: TimelineControllerProtocol) {

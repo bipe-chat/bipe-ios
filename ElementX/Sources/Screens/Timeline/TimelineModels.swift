@@ -19,6 +19,8 @@ enum TimelineViewModelAction {
     case displayDocumentPicker
     case displayLocationPicker
     case displayNewPollForm
+    /// Proseio: sticker picker (ADR 0029).
+    case displayStickerPicker
     case displayEditPollForm(eventID: String, poll: Poll)
     case displayMediaUploadPreviewScreen(mediaURLs: [URL])
     case displaySenderDetails(userID: String)

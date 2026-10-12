@@ -68,6 +68,8 @@ enum ComposerAttachmentType {
     case file
     case location
     case poll
+    /// Proseio: sticker picker (ADR 0029).
+    case sticker
 }
 
 struct ComposerToolbarViewState: BindableState {

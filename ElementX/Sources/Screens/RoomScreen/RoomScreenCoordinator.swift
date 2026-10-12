@@ -38,6 +38,8 @@ enum RoomScreenCoordinatorAction {
     case presentRoomDetails
     case presentLocationPicker
     case presentPollForm(mode: PollFormMode)
+    /// Proseio: sticker picker (ADR 0029).
+    case presentStickerPicker
     case presentLocationViewer(StaticLocationData)
     case presentLiveLocationViewer(sender: TimelineItemSender?, initialLiveLocationShare: LiveLocationShare?)
     case presentEmojiPicker(selectedEmojis: Set<String>, continuation: EmojiPickerScreenContinuation)
@@ -136,6 +138,8 @@ final class RoomScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.presentLocationPicker)
                 case .displayNewPollForm:
                     actionsSubject.send(.presentPollForm(mode: .new(topic: composerViewModel.context.plainComposerText.string)))
+                case .displayStickerPicker:
+                    actionsSubject.send(.presentStickerPicker)
                 case .displayEditPollForm(let eventID, let poll):
                     actionsSubject.send(.presentPollForm(mode: .edit(eventID: eventID, poll: poll)))
                 case .displayMediaUploadPreviewScreen(let mediaURLs):
