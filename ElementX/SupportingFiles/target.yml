@@ -96,6 +96,7 @@ targets:
         NSLocationWhenInUseUsageDescription: Grant location access so that $(APP_DISPLAY_NAME) can share your location.
         NSLocationAlwaysAndWhenInUseUsageDescription: To share your live location, $(APP_DISPLAY_NAME) needs location access when the app is in the background.
         NSFaceIDUsageDescription: Face ID is used to access your app.
+        NSContactsUsageDescription: $(APP_DISPLAY_NAME) checks which of your contacts are on $(APP_DISPLAY_NAME). The numbers are only compared and never stored.
         UIBackgroundModes: [
           audio,
           fetch,

@@ -120,7 +120,7 @@ struct TimelineViewState: BindableState {
     var members: [String: RoomMemberState] = [:]
     var typingMembers: [String] = []
     var showLoading = false
-    var showReadReceipts = false
+    var showReadReceipts = true // Proseio: receipts are always visible (ADR 0050)
     var isDM = false
     var timelineState: TimelineState // check the doc before changing this
     

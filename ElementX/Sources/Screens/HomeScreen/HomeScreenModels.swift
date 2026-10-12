@@ -111,6 +111,9 @@ struct HomeScreenViewState: BindableState {
     /// Proseio: DM invites kept out of the chat list, shown behind the Pedidos row.
     var proseioRequestCount = 0
     
+    /// Proseio: the home tab this list belongs to (ADR 0053).
+    var proseioScope = ProseioRoomListScope.chats
+    
     var shouldShowProseioRequestsRow: Bool {
         proseioRequestCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && roomListMode == .rooms
     }

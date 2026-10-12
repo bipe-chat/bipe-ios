@@ -61,11 +61,11 @@ Devices must be registered in the Centaur Labs team (automatic signing does this
 
 ## Rebrand status
 
-Done: display name, production app name, dev bundle ID and app group, Element's team ID replaced.
+Done: display name and production app name ("Bipe", ADR 0054; the code name stays Proseio), dev bundle ID and app group, Element's team ID replaced.
 
 - **OAuth login:** redirect is the private-use scheme `<bundle id>:/oauth/callback` (RFC 8252); client URI, logo, terms and privacy URLs moved to `https://proseio.com.br/...` because MAS requires them on the client URI host and requires the scheme to be the reverse of that host. Pages do not exist yet. **Verified 11 October 2026:** sign-in to matrix.org works end to end on a device (MAS dynamic registration accepted the client).
 - **Accent colour:** açaí `acai.1100` (`#80307B` light, `#D993D2` dark; high contrast `#5D1D59` / `#ECC0E7`) in `accent-color.colorset`. See proseio/docs/design/identity.md.
-- **App icon:** the web mark (`proseio-web/public/brand/app-icon.svg`, white seal-tail bubble on `acai.1100`) rendered full-bleed at 1024 px; iOS applies the corner mask. iOS and web share one icon. Final designer artwork replaces both at once.
+- **App icon:** the web mark (`proseio-web/public/brand/app-icon.svg`, white seal-tail bubble on `acai.1100`, tight corner top left so it reads as a "b") rendered full-bleed at 1024 px; iOS applies the corner mask. iOS and web share one icon. Final designer artwork replaces both at once.
 
 Entitlements removed from the fork (they block provisioning outside Element's team):
 - `com.apple.developer.usernotifications.filtering` (NSE). Apple grants it on request only. Without it the NSE cannot silently drop notifications. Request it for Proseio later.
@@ -76,7 +76,7 @@ Element leftovers cleaned up (11 October 2026):
 - **Background tasks:** `BGTaskSchedulerPermittedIdentifiers` are `$(BASE_BUNDLE_IDENTIFIER).background.refresh` and `.background.search-backfill`. `AppSettings` derives the same IDs from `InfoPlistReader.main.baseBundleIdentifier`.
 - **Help links:** `encryptionURL`, `deviceVerificationURL`, `chatBackupDetailsURL`, `identityPinningViolationDetailsURL` and `historySharingDetailsURL` are `nil` in `AppSettings`, so their "Learn more" links are hidden (`AttributedString.proseioReplaceLink` in ProseioKit). Set a URL when Proseio has a help page. Terms, privacy and copyright already point at `proseio.com.br`.
 - **Matrix IDs:** the identity-reset warning in member details and the soft-logout notice show the handle when the resolver knows it.
-- **Permission prompts:** `InfoPlist.strings` in `en.lproj` and `pt-BR.lproj` say "Proseio", not "Element X" (the `.strings` override `$(APP_DISPLAY_NAME)` in `Info.plist`). pt-BR typos fixed ("áudio", "Para tirar") and the background-location prompt translated. The other locales are already excluded from the app target in `ElementX/SupportingFiles/target.yml`, so their Element X text does not ship.
+- **Permission prompts:** `InfoPlist.strings` in `en.lproj` and `pt-BR.lproj` say "Bipe", not "Element X" (the `.strings` override `$(APP_DISPLAY_NAME)` in `Info.plist`). pt-BR typos fixed ("áudio", "Para tirar") and the background-location prompt translated. The other locales are already excluded from the app target in `ElementX/SupportingFiles/target.yml`, so their Element X text does not ship.
 - **401 retry:** `ProseioAPIClient.withTokenRetry` re-reads the access token once on HTTP 401. The handle resolver and the "Nome de usuário" screen use it.
 
 Left on purpose: `elementWebHosts` and `accountProvisioningHost` (link parsing only), `elementProAppStoreURL` (only shown when a server requires Element Pro), Element Call and SDK URLs, `io.element.elementx.*` dispatch queue and notification IDs (internal, not user-visible).
@@ -102,6 +102,21 @@ Not done (needs the domain, Apple team or brand):
 - **Animated WebP:** `LoadableImage` loads `image/webp` as data, like GIF. More than one frame plays in `ProseioAnimatedImage` (ImageIO `CGAnimateImageDataWithBlock`); Kingfisher animates GIF only.
 - **Make from a photo:** the picker's "+" menu → PhotosPicker → `StickerMaker` (ProseioKit) cuts out the subject with Vision (`VNGenerateForegroundInstanceMaskRequest`), or crops a centred square when there is no subject, fits it on a transparent 512 × 512 canvas and encodes PNG. On the device, nothing leaves it before the upload.
 - **Save a received sticker:** timeline menu action `.saveSticker` → `TimelineInteractionHandler.saveSticker` downloads the image and adds it. `ProseioStickerSaver` is the one place that adds stickers to the pack (import, photo, save).
+
+## Groups MVP (proseio/docs/groups.md, ADR 0026)
+
+- **Quiet by default (#97):** `ProseioQuietGroups` runs once per account from `AppCoordinator.runPostSessionSetupTasks`. It sets the group default to mentions and keywords and adds the override push rule `br.com.proseio.poll_start` (`*.poll.start`) so new polls notify. It does nothing until `canPushEncryptedEventsToDevice()` is true: mentions in encrypted rooms need Synapse `msc4028_push_encrypted_events`, or mentions-only silences the group. Turn that server flag on only after Apple grants the NSE filtering entitlement (see Rebrand status), or the NSE cannot drop the other pushes. Android ships the same feature (#97, #98).
+- **"O que você perdeu" (#98):** `ProseioMissedSummary` (rules) and `ProseioMissedSummaryView` sit above the read marker in `RoomTimelineItemView`. Shown in groups on the live timeline when at least 20 loaded messages follow the marker. Lines: mentions of you or @room, replies to you, open polls you have not voted in. Pins are not in it yet.
+
+## Tab bar (proseio ADR 0053)
+
+- **Tabs:** Conversas, Grupos, Você, plus search (`UserSessionFlowCoordinator.HomeTab`). The Spaces tab is not created; `SpacesTabFlowCoordinator` stays in the tree for rebases.
+- **Conversas and Grupos** are two `ChatsTabFlowCoordinator`s with a `ProseioRoomListScope`. `clientProxy.roomSummaryProvider` lists Conversas (SDK category `people`, plus every invite); `proseioGroupsRoomSummaryProvider` lists Grupos (category `group`, joined). `NotificationSettingsEditScreenViewModel` reads `staticRoomSummaryProvider`, because the main provider no longer lists all rooms.
+- **Routing:** `.room`, `.event`, `.roomDetails` and `.thread` open in the tab that lists the room (`proseioRoomTab(for:)`). Other room routes stay in the current tab.
+- **Badges:** each tab sums `unreadNotificationsCount` of its own rooms. The app icon badge stays the total.
+- **Você** is `SettingsFlowCoordinator(isInTab: true)` in a stack in the tab: no close button, title "Você". `.settings` and `.chatBackupSettings` routes select the tab. On a Mac with secondary windows, settings still open in a window.
+- **Self-chat:** `ProseioSelfChat`. Account data `br.com.proseio.self_chat` = `{"room_id": "..."}` (same on Android). Created on first tap as a private encrypted room named "Anotações". The room lists hide it by a cached ID in `UserDefaults`; it opens in Conversas.
+- **Search:** the search tab needs iOS 26 (`globalSearchEnabled`, on by default). On iOS 18 to 25 search stays inline in the room list.
 
 ## Design tokens
 
@@ -135,3 +150,5 @@ Each line is a deliberate difference with its reason. A difference not listed he
 | Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) |
 | Language fallback | pt-BR for other device languages | en | Undecided (#102) |
 | Handle lookup | Start chat only | Every user search | Undecided (#102) |
+| Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/proseio; same result for the user |
+| Search | Search tab (iOS 26+), inline before iOS 26 | Search in the top bar | Platform idiom (ADR 0053) |

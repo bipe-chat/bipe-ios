@@ -14,6 +14,7 @@ struct SettingsScreenCoordinatorParameters {
     let isBugReportServiceEnabled: Bool
     let isInSecondaryWindow: Bool
     let userIndicatorController: UserIndicatorControllerProtocol
+    var proseioIsInTab = false
 }
 
 enum SettingsScreenCoordinatorAction {
@@ -44,7 +45,11 @@ enum SettingsScreenCoordinatorAction {
     case developerOptions
     
     case proseioHandle
+    case proseioPublicProfile
+    case proseioMessaging
     case proseioInvites
+    case proseioContacts
+    case proseioSelfChat
 }
 
 final class SettingsScreenCoordinator: CoordinatorProtocol {
@@ -63,7 +68,8 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
         viewModel = SettingsScreenViewModel(userSession: parameters.userSession,
                                             isBugReportServiceEnabled: parameters.isBugReportServiceEnabled,
                                             isInSecondaryWindow: parameters.isInSecondaryWindow,
-                                            userIndicatorController: parameters.userIndicatorController)
+                                            userIndicatorController: parameters.userIndicatorController,
+                                            proseioIsInTab: parameters.proseioIsInTab)
         
         viewModel.actions
             .sink { [weak self] action in
@@ -117,8 +123,16 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     
                 case .proseioHandle:
                     actionsSubject.send(.proseioHandle)
+                case .proseioPublicProfile:
+                    actionsSubject.send(.proseioPublicProfile)
+                case .proseioMessaging:
+                    actionsSubject.send(.proseioMessaging)
                 case .proseioInvites:
                     actionsSubject.send(.proseioInvites)
+                case .proseioContacts:
+                    actionsSubject.send(.proseioContacts)
+                case .proseioSelfChat:
+                    actionsSubject.send(.proseioSelfChat)
                 }
             }
             .store(in: &cancellables)

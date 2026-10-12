@@ -66,6 +66,24 @@ public enum ProseioStrings {
         String(format: NSLocalizedString("proseio_pix_card_bank_name", tableName: "Proseio", bundle: .module, comment: ""), p1)
     }
 
+    public static var pixCardTitle: String { NSLocalizedString("proseio_pix_card_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardCopy: String { NSLocalizedString("proseio_pix_card_copy", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardCopied: String { NSLocalizedString("proseio_pix_card_copied", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardMarkSent: String { NSLocalizedString("proseio_pix_card_mark_sent", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardMarkReceived: String { NSLocalizedString("proseio_pix_card_mark_received", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var pixCardStatusIssued: String { NSLocalizedString("proseio_pix_card_status_issued", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func pixCardStatusSent(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_pix_card_status_sent", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var pixCardStatusPaid: String { NSLocalizedString("proseio_pix_card_status_paid", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var warningNameLookalikeEmoji: String { NSLocalizedString("proseio_warning_name_lookalike_emoji", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var actionScamVictim: String { NSLocalizedString("proseio_action_scam_victim", tableName: "Proseio", bundle: .module, comment: "") }
@@ -79,6 +97,10 @@ public enum ProseioStrings {
     public static var settingsLanguage: String { NSLocalizedString("proseio_settings_language", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var settingsLanguageFooter: String { NSLocalizedString("proseio_settings_language_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var settingsSharePresenceFooter: String { NSLocalizedString("proseio_settings_share_presence_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var aboutSteward: String { NSLocalizedString("proseio_about_steward", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var signupTitle: String { NSLocalizedString("proseio_signup_title", tableName: "Proseio", bundle: .module, comment: "") }
 
@@ -142,6 +164,20 @@ public enum ProseioStrings {
 
     public static var settingsHandleNone: String { NSLocalizedString("proseio_settings_handle_none", tableName: "Proseio", bundle: .module, comment: "") }
 
+    public static var messagingTitle: String { NSLocalizedString("proseio_messaging_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingEveryone: String { NSLocalizedString("proseio_messaging_everyone", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingEveryoneBody: String { NSLocalizedString("proseio_messaging_everyone_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingVerified: String { NSLocalizedString("proseio_messaging_verified", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingVerifiedBody: String { NSLocalizedString("proseio_messaging_verified_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingContacts: String { NSLocalizedString("proseio_messaging_contacts", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var messagingContactsBody: String { NSLocalizedString("proseio_messaging_contacts_body", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var errorInviteInvalid: String { NSLocalizedString("proseio_error_invite_invalid", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var errorEmailTaken: String { NSLocalizedString("proseio_error_email_taken", tableName: "Proseio", bundle: .module, comment: "") }
@@ -193,6 +229,8 @@ public enum ProseioStrings {
     public static var scamWarningTitle: String { NSLocalizedString("proseio_scam_warning_title", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var scamWarningPixKey: String { NSLocalizedString("proseio_scam_warning_pix_key", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var scamWarningDeliveryFee: String { NSLocalizedString("proseio_scam_warning_delivery_fee", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var scamWarningPixCode: String { NSLocalizedString("proseio_scam_warning_pix_code", tableName: "Proseio", bundle: .module, comment: "") }
 
@@ -269,6 +307,52 @@ public enum ProseioStrings {
     public static var trustStepProfileAddHandle: String { NSLocalizedString("proseio_trust_step_profile_add_handle", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var trustStepProfileAddPhoto: String { NSLocalizedString("proseio_trust_step_profile_add_photo", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var settingsPublicProfile: String { NSLocalizedString("proseio_settings_public_profile", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileOn: String { NSLocalizedString("proseio_public_profile_on", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileOff: String { NSLocalizedString("proseio_public_profile_off", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileToggle: String { NSLocalizedString("proseio_public_profile_toggle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileFooter: String { NSLocalizedString("proseio_public_profile_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileNeedsHandle: String { NSLocalizedString("proseio_public_profile_needs_handle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileName: String { NSLocalizedString("proseio_public_profile_name", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileBio: String { NSLocalizedString("proseio_public_profile_bio", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileBioPlaceholder: String { NSLocalizedString("proseio_public_profile_bio_placeholder", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfilePhotoChange: String { NSLocalizedString("proseio_public_profile_photo_change", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfilePhotoRemove: String { NSLocalizedString("proseio_public_profile_photo_remove", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileSave: String { NSLocalizedString("proseio_public_profile_save", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileSaved: String { NSLocalizedString("proseio_public_profile_saved", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileShare: String { NSLocalizedString("proseio_public_profile_share", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileNameEmpty: String { NSLocalizedString("proseio_public_profile_name_empty", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func publicProfileNameTooLong(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_public_profile_name_too_long", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func publicProfileBioTooLong(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_public_profile_bio_too_long", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func publicProfileBioTooManyLines(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_public_profile_bio_too_many_lines", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var publicProfilePhotoInvalid: String { NSLocalizedString("proseio_public_profile_photo_invalid", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileNotVerified: String { NSLocalizedString("proseio_public_profile_not_verified", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var trustStepEmail: String { NSLocalizedString("proseio_trust_step_email", tableName: "Proseio", bundle: .module, comment: "") }
 
@@ -369,4 +453,38 @@ public enum ProseioStrings {
     public static var stickerSaveFailed: String { NSLocalizedString("proseio_sticker_save_failed", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var stickersFromPhoto: String { NSLocalizedString("proseio_stickers_from_photo", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsTitle: String { NSLocalizedString("proseio_contacts_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsIntro: String { NSLocalizedString("proseio_contacts_intro", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsAllow: String { NSLocalizedString("proseio_contacts_allow", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsDenied: String { NSLocalizedString("proseio_contacts_denied", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsOpenSettings: String { NSLocalizedString("proseio_contacts_open_settings", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsNone: String { NSLocalizedString("proseio_contacts_none", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var contactsInvite: String { NSLocalizedString("proseio_contacts_invite", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var discoveryToggle: String { NSLocalizedString("proseio_discovery_toggle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var discoveryFooter: String { NSLocalizedString("proseio_discovery_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var phoneNotLinked: String { NSLocalizedString("proseio_phone_not_linked", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var phoneLinked: String { NSLocalizedString("proseio_phone_linked", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var tabChats: String { NSLocalizedString("proseio_tab_chats", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var tabGroups: String { NSLocalizedString("proseio_tab_groups", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var tabYou: String { NSLocalizedString("proseio_tab_you", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var selfChatTitle: String { NSLocalizedString("proseio_self_chat_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var selfChatSubtitle: String { NSLocalizedString("proseio_self_chat_subtitle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var selfChatError: String { NSLocalizedString("proseio_self_chat_error", tableName: "Proseio", bundle: .module, comment: "") }
 }

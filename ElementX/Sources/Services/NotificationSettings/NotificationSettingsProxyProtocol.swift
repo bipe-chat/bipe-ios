@@ -33,4 +33,6 @@ protocol NotificationSettingsProxyProtocol {
     func setInviteForMeEnabled(enabled: Bool) async throws
     func getRoomsWithUserDefinedRules() async throws -> [String]
     func canPushEncryptedEventsToDevice() async -> Bool
+    /// Proseio: a user-defined push rule (proseio#97).
+    func setCustomPushRule(ruleID: String, ruleKind: RuleKind, actions: [Action], conditions: [PushCondition]) async throws
 }

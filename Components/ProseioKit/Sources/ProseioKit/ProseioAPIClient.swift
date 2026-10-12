@@ -46,6 +46,24 @@ public struct ProseioAPIClient: Sendable {
         try await send(method: "POST", path: ["v1", "me", "invites"], body: Empty?.none, accessToken: accessToken)
     }
 
+    // MARK: - Phone-number discovery
+
+    /// `POST /v1/contacts/lookup`. At most 500 numbers, already normalised with ``ProseioPhoneNumber``.
+    public func lookupContacts(phones: [String], accessToken: String) async throws(ProseioAPIError) -> [ProseioContactMatch] {
+        let response: LookupResponse = try await send(method: "POST", path: ["v1", "contacts", "lookup"], body: LookupRequest(phones: phones), accessToken: accessToken)
+        return response.matches
+    }
+
+    /// `GET /v1/me/phone`. Status only, never the number.
+    public func myPhone(accessToken: String) async throws(ProseioAPIError) -> ProseioMyPhone {
+        try await send(method: "GET", path: ["v1", "me", "phone"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `PUT /v1/me/discovery`.
+    public func setDiscoverableByPhone(_ value: Bool, accessToken: String) async throws(ProseioAPIError) {
+        let _: DiscoverySettings = try await send(method: "PUT", path: ["v1", "me", "discovery"], body: DiscoverySettings(byPhone: value), accessToken: accessToken)
+    }
+
     /// `GET /v1/me/invite-connections`. The caller's invite pairs (ADR 0034).
     public func inviteConnections(accessToken: String) async throws(ProseioAPIError) -> [String] {
         let response: InviteConnectionsResponse = try await send(method: "GET", path: ["v1", "me", "invite-connections"], body: Empty?.none, accessToken: accessToken)
@@ -55,6 +73,20 @@ public struct ProseioAPIClient: Sendable {
     /// `DELETE /v1/me/invites/{inviteId}`. Revokes a pending invite.
     public func revokeInvite(id: String, accessToken: String) async throws(ProseioAPIError) {
         let _: NoContent = try await send(method: "DELETE", path: ["v1", "me", "invites", id], body: Empty?.none, accessToken: accessToken)
+    }
+
+    // MARK: - Messaging
+
+    /// `GET /v1/me/messaging`. Who can message the caller.
+    public func messagingSetting(accessToken: String) async throws(ProseioAPIError) -> ProseioWhoCanMessage {
+        let response: MessagingSetting = try await send(method: "GET", path: ["v1", "me", "messaging"], body: Empty?.none, accessToken: accessToken)
+        return response.whoCanMessage
+    }
+
+    /// `PUT /v1/me/messaging`. The server enforces it on invites.
+    public func setMessagingSetting(_ value: ProseioWhoCanMessage, accessToken: String) async throws(ProseioAPIError) -> ProseioWhoCanMessage {
+        let response: MessagingSetting = try await send(method: "PUT", path: ["v1", "me", "messaging"], body: MessagingSetting(whoCanMessage: value), accessToken: accessToken)
+        return response.whoCanMessage
     }
 
     // MARK: - Handles
@@ -86,6 +118,33 @@ public struct ProseioAPIClient: Sendable {
     /// `PUT /v1/me/handle`.
     public func setMyHandle(_ handle: String, accessToken: String) async throws(ProseioAPIError) -> ProseioMyHandle {
         try await send(method: "PUT", path: ["v1", "me", "handle"], body: SetHandleRequest(handle: handle), accessToken: accessToken)
+    }
+
+    // MARK: - Public profiles
+
+    /// `GET /v1/profiles/{handle}`. No auth. 404 for "no such handle" and for "profile off".
+    public func publicProfile(handle: String) async throws(ProseioAPIError) -> ProseioPublicProfile {
+        try await send(method: "GET", path: ["v1", "profiles", handle], body: Empty?.none)
+    }
+
+    /// `GET /v1/me/profile`. A user who never saved one gets `enabled` false and an empty name.
+    public func myProfile(accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "GET", path: ["v1", "me", "profile"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `PUT /v1/me/profile`. Turning it on needs a handle.
+    public func setMyProfile(_ update: ProseioProfileUpdate, accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "PUT", path: ["v1", "me", "profile"], body: update, accessToken: accessToken)
+    }
+
+    /// `PUT /v1/me/profile/photo`. `jpeg` must already fit the limits: see ``ProseioProfilePhoto``.
+    public func setMyProfilePhoto(jpeg: Data, accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "PUT", path: ["v1", "me", "profile", "photo"], rawBody: (data: jpeg, contentType: "image/jpeg"), accessToken: accessToken)
+    }
+
+    /// `DELETE /v1/me/profile/photo`.
+    public func deleteMyProfilePhoto(accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "DELETE", path: ["v1", "me", "profile", "photo"], body: Empty?.none, accessToken: accessToken)
     }
 
     // MARK: - Auth
@@ -120,8 +179,24 @@ public struct ProseioAPIClient: Sendable {
         let userIds: [String]
     }
 
+    private struct LookupRequest: Encodable {
+        let phones: [String]
+    }
+
+    private struct LookupResponse: Decodable {
+        let matches: [ProseioContactMatch]
+    }
+
+    private struct DiscoverySettings: Codable {
+        let byPhone: Bool
+    }
+
     private struct InviteConnectionsResponse: Decodable {
         let userIds: [String]
+    }
+
+    private struct MessagingSetting: Codable {
+        let whoCanMessage: ProseioWhoCanMessage
     }
 
     private struct ResolveResponse: Decodable {
@@ -141,6 +216,21 @@ public struct ProseioAPIClient: Sendable {
                                                             path: [String],
                                                             body: Body?,
                                                             accessToken: String? = nil) async throws(ProseioAPIError) -> Response {
+        var rawBody: (data: Data, contentType: String)?
+        if let body {
+            do {
+                rawBody = try (data: Self.encoder.encode(body), contentType: "application/json")
+            } catch {
+                throw .unexpectedResponse(statusCode: nil)
+            }
+        }
+        return try await send(method: method, path: path, rawBody: rawBody, accessToken: accessToken)
+    }
+
+    private func send<Response: Decodable>(method: String,
+                                           path: [String],
+                                           rawBody: (data: Data, contentType: String)?,
+                                           accessToken: String? = nil) async throws(ProseioAPIError) -> Response {
         // appending(path:) percent-encodes each component, so a handle cannot add path segments.
         let url = path.reduce(baseURL) { $0.appending(path: $1, directoryHint: .notDirectory) }
         var request = URLRequest(url: url)
@@ -149,13 +239,9 @@ public struct ProseioAPIClient: Sendable {
         if let accessToken {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
-        if let body {
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            do {
-                request.httpBody = try Self.encoder.encode(body)
-            } catch {
-                throw .unexpectedResponse(statusCode: nil)
-            }
+        if let rawBody {
+            request.setValue(rawBody.contentType, forHTTPHeaderField: "Content-Type")
+            request.httpBody = rawBody.data
         }
 
         let data: Data
@@ -269,6 +355,20 @@ public struct ProseioSignupResponse: Decodable, Sendable {
     public let inviterUserId: String?
 }
 
+public struct ProseioContactMatch: Decodable, Sendable, Hashable {
+    /// E.164, as normalised by the server.
+    public let phone: String
+    public let userId: String
+}
+
+public struct ProseioMyPhone: Decodable, Sendable {
+    public let linked: Bool
+    public let discoverableByPhone: Bool
+    public let linkedAt: Date?
+    /// After this date the number stops being discoverable until confirmed again.
+    public let confirmBy: Date?
+}
+
 public struct ProseioInvitePreview: Decodable, Sendable {
     public let valid: Bool
     /// Without @. Only for a valid personal invite whose inviter has a handle.
@@ -351,11 +451,74 @@ public struct ProseioHandleRecord: Decodable, Sendable {
     public let userId: String
 }
 
+/// Contract: `MessagingSetting.who_can_message`.
+public enum ProseioWhoCanMessage: String, Codable, Sendable, CaseIterable {
+    case everyone, verified, contacts
+
+    public init(from decoder: Decoder) throws {
+        // An unknown value from a newer server must not fail the response.
+        self = try Self(rawValue: decoder.singleValueContainer().decode(String.self)) ?? .everyone
+    }
+
+    public var title: String {
+        switch self {
+        case .everyone: ProseioStrings.messagingEveryone
+        case .verified: ProseioStrings.messagingVerified
+        case .contacts: ProseioStrings.messagingContacts
+        }
+    }
+
+    public var body: String {
+        switch self {
+        case .everyone: ProseioStrings.messagingEveryoneBody
+        case .verified: ProseioStrings.messagingVerifiedBody
+        case .contacts: ProseioStrings.messagingContactsBody
+        }
+    }
+}
+
 public struct ProseioMyHandle: Decodable, Sendable {
     public let userId: String
     public let handle: String?
     /// `nil` when a change is allowed now.
     public let changeableAt: Date?
+}
+
+/// Contract: `PublicProfile`. What anyone with the exact handle sees.
+public struct ProseioPublicProfile: Decodable, Sendable, Equatable {
+    public let handle: String
+    public let name: String
+    /// Plain text. Absent when empty.
+    public let bio: String?
+    /// Absent without a photo. The URL changes when the photo changes.
+    public let photoUrl: URL?
+    /// Set by the server only. The apps do not show a profile badge yet.
+    public let badge: BadgeEnvelope?
+}
+
+/// Contract: `MyProfile`. The caller's own profile, published or not.
+public struct ProseioMyProfile: Decodable, Sendable, Equatable {
+    public let enabled: Bool
+    public let name: String
+    public let bio: String
+    public let hasPhoto: Bool
+    /// Absent when the caller has no handle.
+    public let handle: String?
+    /// Absent without a photo.
+    public let photoUrl: URL?
+}
+
+/// Contract: `ProfileUpdate`.
+public struct ProseioProfileUpdate: Encodable, Sendable, Equatable {
+    public let enabled: Bool
+    public let name: String
+    public let bio: String
+
+    public init(enabled: Bool, name: String, bio: String) {
+        self.enabled = enabled
+        self.name = name
+        self.bio = bio
+    }
 }
 
 // MARK: - Errors
@@ -371,6 +534,8 @@ public enum ProseioAPIErrorCode: String, Sendable {
     case handleCooldown = "handle_cooldown"
     case passwordWeak = "password_weak"
     case attestationInvalid = "attestation_invalid"
+    case profileInvalid = "profile_invalid"
+    case photoInvalid = "photo_invalid"
     case unauthorized
     case notFound = "not_found"
     case rateLimited = "rate_limited"
@@ -409,6 +574,8 @@ public enum ProseioAPIError: Error, Sendable, Equatable {
             case .handleTaken: ProseioHandleProblem.taken.localizedMessage
             case .handleInvalid: (reason.flatMap(ProseioHandleProblem.init(rawValue:)) ?? .invalidCharacters).localizedMessage
             case .handleCooldown: ProseioStrings.errorHandleCooldown
+            case .profileInvalid: (reason.flatMap(ProseioProfileProblem.init(rawValue:))?.localizedMessage) ?? ProseioStrings.errorGeneric
+            case .photoInvalid: ProseioStrings.publicProfilePhotoInvalid
             case .rateLimited: ProseioStrings.errorRateLimited
             case .unauthorized: ProseioStrings.errorUnauthorized
             case .badRequest, .notFound, .internal: ProseioStrings.errorGeneric

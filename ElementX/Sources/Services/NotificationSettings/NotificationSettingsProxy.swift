@@ -115,6 +115,11 @@ final class NotificationSettingsProxy: NotificationSettingsProxyProtocol {
         await notificationSettings.canPushEncryptedEventToDevice()
     }
     
+    func setCustomPushRule(ruleID: String, ruleKind: RuleKind, actions: [Action], conditions: [PushCondition]) async throws {
+        try await notificationSettings.setCustomPushRule(ruleId: ruleID, ruleKind: ruleKind, actions: actions, conditions: conditions)
+        await updatedSettings()
+    }
+    
     // MARK: - Private
     
     func updatedSettings() async {

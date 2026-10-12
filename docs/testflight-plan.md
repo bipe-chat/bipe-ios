@@ -6,7 +6,7 @@ Goal: friends install Proseio on iPhone and use `proseio.com.br` during the 11-d
 
 - **Team:** Centaur Labs OU (`992N457T8D`) until Proseio has its own Apple organisation account.
 - **Bundle ID:** `br.com.proseio.app.dev` (already registered under Centaur). The production ID `br.com.proseio.app` stays unregistered.
-- **App Store Connect record name: "Proseio"** (MZ, 11 Oct 2026). The record sits under Centaur for now; it moves to Proseio's own account later through Apple's app transfer.
+- **App Store Connect record name: "Bipe Chat"** (MZ, 12 Oct 2026; was "Proseio"; Apple refused "Bipe" because another account uses it). The name under the icon is "Bipe" (`APP_DISPLAY_NAME`). The record sits under Centaur for now; it moves to Proseio's own account later through Apple's app transfer.
 - **Testers:** friends are **external testers** through a **public TestFlight link**. External testing needs Beta App Review for the first build of each version. Internal testing (no review) is only for App Store Connect users of the Centaur team.
 
 ## Blockers before the first upload

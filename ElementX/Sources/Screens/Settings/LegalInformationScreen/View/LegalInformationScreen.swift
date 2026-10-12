@@ -7,6 +7,7 @@
 //
 
 import Compound
+import ProseioKit
 import SwiftUI
 
 struct LegalInformationScreen: View {
@@ -22,6 +23,10 @@ struct LegalInformationScreen: View {
                         kind: .button { openURL(context.viewState.acceptableUseURL) })
                 ListRow(label: .plain(title: L10n.commonPrivacyPolicy),
                         kind: .button { openURL(context.viewState.privacyURL) })
+            } footer: {
+                // Proseio: name the steward (ADR 0040).
+                Text(ProseioStrings.aboutSteward)
+                    .compoundListSectionFooter()
             }
         }
         .compoundList()

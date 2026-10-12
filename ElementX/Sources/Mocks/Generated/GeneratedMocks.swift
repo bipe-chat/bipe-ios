@@ -9686,6 +9686,41 @@ nonisolated class NotificationSettingsProxyMock: NotificationSettingsProxyProtoc
             return canPushEncryptedEventsToDeviceReturnValue
         }
     }
+    //MARK: - setCustomPushRule
+
+    nonisolated(unsafe) var setCustomPushRuleRuleIDRuleKindActionsConditionsThrowableError: Error?
+    private let setCustomPushRuleRuleIDRuleKindActionsConditionsCallsCountLock = NSLock()
+    private nonisolated(unsafe) var setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingCallsCount = 0
+    var setCustomPushRuleRuleIDRuleKindActionsConditionsCallsCount: Int {
+        get { setCustomPushRuleRuleIDRuleKindActionsConditionsCallsCountLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingCallsCount } }
+        set { setCustomPushRuleRuleIDRuleKindActionsConditionsCallsCountLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingCallsCount = newValue } }
+    }
+    var setCustomPushRuleRuleIDRuleKindActionsConditionsCalled: Bool {
+        return setCustomPushRuleRuleIDRuleKindActionsConditionsCallsCount > 0
+    }
+    private let setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedArgumentsLock = NSLock()
+    private nonisolated(unsafe) var setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingReceivedArguments: (ruleID: String, ruleKind: RuleKind, actions: [Action], conditions: [PushCondition])?
+    var setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedArguments: (ruleID: String, ruleKind: RuleKind, actions: [Action], conditions: [PushCondition])? {
+        get { setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedArgumentsLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingReceivedArguments } }
+        set { setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedArgumentsLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingReceivedArguments = newValue } }
+    }
+    private let setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedInvocationsLock = NSLock()
+    private nonisolated(unsafe) var setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingReceivedInvocations: [(ruleID: String, ruleKind: RuleKind, actions: [Action], conditions: [PushCondition])] = []
+    var setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedInvocations: [(ruleID: String, ruleKind: RuleKind, actions: [Action], conditions: [PushCondition])] {
+        get { setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedInvocationsLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingReceivedInvocations } }
+        set { setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedInvocationsLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingReceivedInvocations = newValue } }
+    }
+    nonisolated(unsafe) var setCustomPushRuleRuleIDRuleKindActionsConditionsClosure: ((String, RuleKind, [Action], [PushCondition]) async throws -> Void)?
+
+    @concurrent func setCustomPushRule(ruleID: String, ruleKind: RuleKind, actions: [Action], conditions: [PushCondition]) async throws {
+        if let error = setCustomPushRuleRuleIDRuleKindActionsConditionsThrowableError {
+            throw error
+        }
+        setCustomPushRuleRuleIDRuleKindActionsConditionsCallsCountLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingCallsCount += 1 }
+        setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedArguments = (ruleID: ruleID, ruleKind: ruleKind, actions: actions, conditions: conditions)
+        setCustomPushRuleRuleIDRuleKindActionsConditionsReceivedInvocationsLock.withLock { setCustomPushRuleRuleIDRuleKindActionsConditionsUnderlyingReceivedInvocations.append((ruleID: ruleID, ruleKind: ruleKind, actions: actions, conditions: conditions)) }
+        try await setCustomPushRuleRuleIDRuleKindActionsConditionsClosure?(ruleID, ruleKind, actions, conditions)
+    }
 }
 nonisolated class NotificationToneManagerMock: NotificationToneManagerProtocol, @unchecked Sendable {
 

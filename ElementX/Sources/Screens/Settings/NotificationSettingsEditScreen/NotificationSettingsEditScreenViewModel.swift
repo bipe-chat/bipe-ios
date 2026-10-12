@@ -16,7 +16,7 @@ class NotificationSettingsEditScreenViewModel: NotificationSettingsEditScreenVie
     private let chatType: NotificationSettingsChatType
     private let notificationSettingsProxy: NotificationSettingsProxyProtocol
     private let userSession: UserSessionProtocol
-    private let roomSummaryProvider: RoomSummaryProviderProtocol?
+    private let roomSummaryProvider: StaticRoomSummaryProviderProtocol?
     
     @CancellableTask private var fetchDefaultRoomNotificationModesTask: Task<Void, Error>?
     @CancellableTask private var updateRoomsWithUserDefinedModeTask: Task<Void, Error>?
@@ -30,7 +30,8 @@ class NotificationSettingsEditScreenViewModel: NotificationSettingsEditScreenVie
         self.chatType = chatType
         self.userSession = userSession
         notificationSettingsProxy = userSession.clientProxy.notificationSettings
-        roomSummaryProvider = userSession.clientProxy.roomSummaryProvider
+        // Proseio: the main provider only lists the Conversas tab (ADR 0053), so read all rooms.
+        roomSummaryProvider = userSession.clientProxy.staticRoomSummaryProvider
         
         super.init(initialViewState: NotificationSettingsEditScreenViewState(bindings: bindings,
                                                                              strings: NotificationSettingsEditScreenStrings(chatType: chatType)),

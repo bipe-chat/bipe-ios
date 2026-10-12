@@ -23,7 +23,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         actionsSubject.eraseToAnyPublisher()
     }
     
-    init(userSession: UserSessionProtocol, isBugReportServiceEnabled: Bool, isInSecondaryWindow: Bool, userIndicatorController: UserIndicatorControllerProtocol) {
+    init(userSession: UserSessionProtocol, isBugReportServiceEnabled: Bool, isInSecondaryWindow: Bool, userIndicatorController: UserIndicatorControllerProtocol, proseioIsInTab: Bool = false) {
         userSettings = userSession.userSettings
         clientProxy = userSession.clientProxy
         self.userIndicatorController = userIndicatorController
@@ -40,6 +40,8 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
                                            navigationBarVisibility: isInSecondaryWindow ? .hidden : .automatic,
                                            bindings: .init(userSettings: userSettings)),
                    mediaProvider: userSession.mediaProvider)
+        
+        state.proseioIsInTab = proseioIsInTab
         
         userSettings.app.developerOptionsEnabledPublisher
             .weakAssign(to: \.state.showDeveloperOptions, on: self)
@@ -152,10 +154,20 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             
         case .proseioHandle:
             actionsSubject.send(.proseioHandle)
+        case .proseioPublicProfile:
+            actionsSubject.send(.proseioPublicProfile)
+        case .proseioMessaging:
+            actionsSubject.send(.proseioMessaging)
         case .proseioLoadHandle:
             Task { await loadProseioHandle() }
+            Task { await loadProseioWhoCanMessage() }
+            Task { await loadProseioPublicProfile() }
         case .proseioInvites:
             actionsSubject.send(.proseioInvites)
+        case .proseioContacts:
+            actionsSubject.send(.proseioContacts)
+        case .proseioSelfChat:
+            actionsSubject.send(.proseioSelfChat)
         }
     }
     
@@ -168,6 +180,30 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             state.proseioHandle = try await apiClient.myHandle(accessToken: accessToken).handle
         } catch {
             MXLog.error("Proseio handle load failed: \(error)")
+        }
+    }
+    
+    private func loadProseioWhoCanMessage() async {
+        guard state.showProseioHandle else { return }
+        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+        do {
+            state.proseioWhoCanMessage = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(ProseioAPIError) -> ProseioWhoCanMessage in
+                try await apiClient.messagingSetting(accessToken: token)
+            }
+        } catch {
+            MXLog.error("Proseio messaging setting load failed: \(error)")
+        }
+    }
+    
+    private func loadProseioPublicProfile() async {
+        guard state.showProseioHandle else { return }
+        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+        do {
+            state.proseioPublicProfileEnabled = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(ProseioAPIError) -> Bool in
+                try await apiClient.myProfile(accessToken: token).enabled
+            }
+        } catch {
+            MXLog.error("Proseio public profile load failed: \(error)")
         }
     }
     

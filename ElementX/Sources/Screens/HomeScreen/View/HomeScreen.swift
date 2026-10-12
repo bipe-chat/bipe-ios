@@ -55,7 +55,7 @@ struct HomeScreen: View {
         if let selectedSpace = context.viewState.selectedSpaceFilter {
             selectedSpace.room.name
         } else {
-            L10n.screenRoomlistMainSpaceTitle
+            context.viewState.proseioScope.title
         }
     }
     

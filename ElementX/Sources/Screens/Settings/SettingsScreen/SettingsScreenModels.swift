@@ -37,7 +37,11 @@ enum SettingsScreenViewModelAction {
     case developerOptions
     
     case proseioHandle
+    case proseioPublicProfile
+    case proseioMessaging
     case proseioInvites
+    case proseioContacts
+    case proseioSelfChat
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -57,6 +61,10 @@ struct SettingsScreenViewState: BindableState {
     /// Proseio: the username row (Proseio accounts only) and the current handle.
     var showProseioHandle = false
     var proseioHandle: String?
+    /// Proseio: whether the public profile is on (ADR 0041). `nil` until loaded.
+    var proseioPublicProfileEnabled: Bool?
+    /// Proseio: "Quem pode me mandar mensagem". Same visibility as the username row.
+    var proseioWhoCanMessage: ProseioWhoCanMessage?
     
     /// Proseio: the "Perfil de confiança" card. Same visibility as the username row.
     var proseioTrustProfile: ProseioTrustProfile? {
@@ -74,6 +82,8 @@ struct SettingsScreenViewState: BindableState {
     let isBugReportServiceEnabled: Bool
     
     let navigationBarVisibility: Visibility
+    /// Proseio: the screen is the root of the Você tab (ADR 0053), not a sheet.
+    var proseioIsInTab = false
     
     var bindings: SettingsScreenViewStateBindings
     
@@ -142,8 +152,12 @@ enum SettingsScreenViewAction {
     case developerOptions
     
     case proseioHandle
+    case proseioPublicProfile
+    case proseioMessaging
     case proseioLoadHandle
     case proseioInvites
+    case proseioContacts
+    case proseioSelfChat
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

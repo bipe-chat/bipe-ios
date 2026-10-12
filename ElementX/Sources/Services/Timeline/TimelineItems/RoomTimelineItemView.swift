@@ -51,7 +51,12 @@ struct RoomTimelineItemView: View {
         case .encrypted(let item):
             EncryptedRoomTimelineView(timelineItem: item)
         case .readMarker:
-            ReadMarkerRoomTimelineView()
+            VStack(spacing: 0) { // Proseio: proseio#98
+                if let summary = context?.viewState.proseioMissedSummary {
+                    ProseioMissedSummaryView(summary: summary) { context?.send(viewAction: .focusOnEventID($0)) }
+                }
+                ReadMarkerRoomTimelineView()
+            }
         case .paginationIndicator:
             PaginationIndicatorRoomTimelineView()
         case .sticker(let item):

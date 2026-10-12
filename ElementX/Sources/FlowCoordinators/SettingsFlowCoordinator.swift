@@ -18,11 +18,14 @@ enum SettingsFlowCoordinatorAction {
     case forceLogout
     /// Proseio: open a user's profile in the chats tab (from the invites screen).
     case openUserProfile(userID: String)
+    /// Proseio: open the self-chat (ADR 0053).
+    case openSelfChat
 }
 
 class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     private let appLockService: AppLockServiceProtocol
     private let isInSecondaryWindow: Bool
+    private let isInTab: Bool
     private let navigationStackCoordinator: NavigationStackCoordinator
     private let flowParameters: CommonFlowParameters
     
@@ -47,10 +50,12 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     init(appLockService: AppLockServiceProtocol,
          isInSecondaryWindow: Bool,
+         isInTab: Bool = false,
          navigationStackCoordinator: NavigationStackCoordinator,
          flowParameters: CommonFlowParameters) {
         self.appLockService = appLockService
         self.isInSecondaryWindow = isInSecondaryWindow
+        self.isInTab = isInTab
         self.navigationStackCoordinator = navigationStackCoordinator
         self.flowParameters = flowParameters
     }
@@ -82,7 +87,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         let settingsScreenCoordinator = SettingsScreenCoordinator(parameters: .init(userSession: flowParameters.userSession,
                                                                                     isBugReportServiceEnabled: flowParameters.bugReportService.isEnabled,
                                                                                     isInSecondaryWindow: isInSecondaryWindow,
-                                                                                    userIndicatorController: flowParameters.userIndicatorController))
+                                                                                    userIndicatorController: flowParameters.userIndicatorController,
+                                                                                    proseioIsInTab: isInTab))
         
         settingsScreenCoordinator.actions
             .sink { [weak self] action in
@@ -140,8 +146,16 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     
                 case .proseioHandle:
                     presentProseioHandleScreen()
+                case .proseioPublicProfile:
+                    presentProseioPublicProfileScreen()
+                case .proseioMessaging:
+                    presentProseioMessagingScreen()
                 case .proseioInvites:
                     presentProseioInvitesScreen()
+                case .proseioContacts:
+                    presentProseioContactsScreen()
+                case .proseioSelfChat:
+                    actionsSubject.send(.openSelfChat)
                 }
             }
             .store(in: &cancellables)
@@ -149,7 +163,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.setRootCoordinator(settingsScreenCoordinator, animated: animated)
     }
     
-    private func presentProseioHandleScreen() {
+    /// `onDone` runs after the screen pops, e.g. to reload the screen below.
+    private func presentProseioHandleScreen(onDone: (() -> Void)? = nil) {
         let coordinator = ProseioHandleScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
                                                                            clientProxy: flowParameters.userSession.clientProxy,
                                                                            handleResolver: flowParameters.userSession.proseioHandleResolver,
@@ -159,9 +174,31 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .done:
                     self?.navigationStackCoordinator.pop()
+                    onDone?()
                 }
             }
             .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presentProseioPublicProfileScreen() {
+        let coordinator = ProseioPublicProfileScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                                  userSession: flowParameters.userSession,
+                                                                                  userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self, weak coordinator] action in
+                switch action {
+                case .openHandle:
+                    self?.presentProseioHandleScreen { coordinator?.reload() }
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presentProseioMessagingScreen() {
+        let coordinator = ProseioMessagingScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                              clientProxy: flowParameters.userSession.clientProxy))
         navigationStackCoordinator.push(coordinator)
     }
     
@@ -174,6 +211,22 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .openUserProfile(let userID):
                     self?.actionsSubject.send(.openUserProfile(userID: userID))
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presentProseioContactsScreen() {
+        let coordinator = ProseioContactsScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                             clientProxy: flowParameters.userSession.clientProxy))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .openUserProfile(let userID):
+                    self?.actionsSubject.send(.openUserProfile(userID: userID))
+                case .openInvites:
+                    self?.presentProseioInvitesScreen()
                 }
             }
             .store(in: &cancellables)

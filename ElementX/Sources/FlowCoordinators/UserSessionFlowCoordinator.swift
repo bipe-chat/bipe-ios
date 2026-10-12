@@ -22,7 +22,8 @@ enum UserSessionFlowCoordinatorAction {
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
-    enum HomeTab: Hashable { case chats, spaces, search }
+    /// Proseio ADR 0053: Conversas, Grupos, Você and search. The Spaces tab is gone.
+    enum HomeTab: Hashable { case chats, groups, you, search }
     
     private let navigationRootCoordinator: NavigationRootCoordinator
     private let navigationTabCoordinator: NavigationTabCoordinator<HomeTab>
@@ -39,8 +40,10 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     private let onboardingStackCoordinator: NavigationStackCoordinator
     private let chatsTabFlowCoordinator: ChatsTabFlowCoordinator
     private let chatsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
-    private let spacesTabFlowCoordinator: SpacesTabFlowCoordinator
-    private let spacesTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
+    private let groupsTabFlowCoordinator: ChatsTabFlowCoordinator
+    private let groupsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
+    private let youTabFlowCoordinator: SettingsFlowCoordinator
+    private let proseioSelfChat: ProseioSelfChat
     
     private let searchScreenCoordinator: SearchScreenCoordinator?
     private let searchTabNavigationStackCoordinator: NavigationStackCoordinator?
@@ -92,14 +95,24 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
                                                           flowParameters: flowParameters)
-        chatsTabDetails = .init(tag: HomeTab.chats, title: L10n.screenHomeTabChats, icon: \.chat, selectedIcon: \.chatSolid)
+        chatsTabDetails = .init(tag: HomeTab.chats, title: ProseioStrings.tabChats, icon: \.chat, selectedIcon: \.chatSolid)
         chatsTabDetails.navigationSplitCoordinator = chatsSplitCoordinator
         
-        let spacesSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
-        spacesTabFlowCoordinator = SpacesTabFlowCoordinator(navigationSplitCoordinator: spacesSplitCoordinator,
-                                                            flowParameters: flowParameters)
-        spacesTabDetails = .init(tag: HomeTab.spaces, title: L10n.screenHomeTabSpaces, icon: \.space, selectedIcon: \.spaceSolid)
-        spacesTabDetails.navigationSplitCoordinator = spacesSplitCoordinator
+        let groupsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
+        groupsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: groupsSplitCoordinator,
+                                                           proseioScope: .groups,
+                                                           flowParameters: flowParameters)
+        groupsTabDetails = .init(tag: HomeTab.groups, title: ProseioStrings.tabGroups, icon: \.group, selectedIcon: \.group)
+        groupsTabDetails.navigationSplitCoordinator = groupsSplitCoordinator
+        
+        let youStackCoordinator = NavigationStackCoordinator()
+        youTabFlowCoordinator = SettingsFlowCoordinator(appLockService: appLockService,
+                                                        isInSecondaryWindow: false,
+                                                        isInTab: true,
+                                                        navigationStackCoordinator: youStackCoordinator,
+                                                        flowParameters: flowParameters)
+        let youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: ProseioStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
+        proseioSelfChat = ProseioSelfChat(clientProxy: flowParameters.userSession.clientProxy)
         
         if flowParameters.userSession.userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
             let searchCoordinator = SearchScreenCoordinator(parameters: .init(roomSummaryProvider: flowParameters.userSession.clientProxy.alternateRoomSummaryProvider,
@@ -125,7 +138,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         var tabs: [NavigationTabCoordinator<HomeTab>.Tab] = [
             .init(coordinator: chatsSplitCoordinator, details: chatsTabDetails),
-            .init(coordinator: spacesSplitCoordinator, details: spacesTabDetails)
+            .init(coordinator: groupsSplitCoordinator, details: groupsTabDetails),
+            .init(coordinator: youStackCoordinator, details: youTabDetails)
         ]
         if let searchTabNavigationStackCoordinator, let searchTabDetails {
             tabs.append(.init(coordinator: searchTabNavigationStackCoordinator, details: searchTabDetails))
@@ -144,6 +158,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     
     func stop() {
         chatsTabFlowCoordinator.stop()
+        groupsTabFlowCoordinator.stop()
     }
     
     func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
@@ -156,10 +171,12 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             if ProcessInfo.processInfo.isiOSAppOnMac, flowParameters.windowManager.secondaryWindowsEnabled {
                 startSettingsFlow(detached: true)
             } else {
-                if stateMachine.state != .settingsScreen {
-                    stateMachine.tryEvent(.showSettingsScreen)
+                // Proseio ADR 0053: settings live in the Você tab, not in a sheet.
+                clearPresentedSheets(animated: animated)
+                navigationTabCoordinator.selectedTab = .you
+                if case .chatBackupSettings = appRoute {
+                    youTabFlowCoordinator.handleAppRoute(appRoute, animated: animated)
                 }
-                settingsFlowCoordinator?.handleAppRoute(appRoute, animated: animated)
             }
         case .call(let roomID, let isVoiceCall):
             Task { await presentCallScreen(roomID: roomID, isVoiceCall: isVoiceCall) }
@@ -168,9 +185,10 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
              .event, .eventOnRoomAlias, .childEvent, .childEventOnRoomAlias,
              .share, .transferOwnership, .thread:
             clearPresentedSheets(animated: animated) // Make sure the presented route is visible.
-            chatsTabFlowCoordinator.handleAppRoute(appRoute, animated: animated)
-            if navigationTabCoordinator.selectedTab != .chats {
-                navigationTabCoordinator.selectedTab = .chats
+            let tab = proseioRoomTab(for: appRoute)
+            roomListFlowCoordinator(for: tab).handleAppRoute(appRoute, animated: animated)
+            if navigationTabCoordinator.selectedTab != tab {
+                navigationTabCoordinator.selectedTab = tab
             }
         case .proseioHandle(let handle):
             Task { await openProseioHandle(handle, animated: animated) }
@@ -187,6 +205,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     func clearRoute(animated: Bool) {
         clearPresentedSheets(animated: animated)
         chatsTabFlowCoordinator.clearRoute(animated: animated)
+        groupsTabFlowCoordinator.clearRoute(animated: animated)
     }
     
     /// Clearing routes is more complicated than it first seems. When passing routes
@@ -205,11 +224,42 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     func isDisplayingRoomScreen(withRoomID roomID: String) -> Bool {
-        guard navigationTabCoordinator.selectedTab == .chats else { return false }
-        return chatsTabFlowCoordinator.isDisplayingRoomScreen(withRoomID: roomID)
+        switch navigationTabCoordinator.selectedTab {
+        case .chats: chatsTabFlowCoordinator.isDisplayingRoomScreen(withRoomID: roomID)
+        case .groups: groupsTabFlowCoordinator.isDisplayingRoomScreen(withRoomID: roomID)
+        default: false
+        }
     }
     
     // MARK: - Private
+    
+    /// Proseio ADR 0053: a room opens in the tab that lists it. Routes into an open room stay in the current tab.
+    private func proseioRoomTab(for appRoute: AppRoute) -> HomeTab {
+        let currentTab: HomeTab = navigationTabCoordinator.selectedTab == .groups ? .groups : .chats
+        
+        let roomID: String? = switch appRoute {
+        case .room(let roomID, _), .roomDetails(let roomID), .event(_, let roomID, _), .thread(let roomID, _, _): roomID
+        default: nil
+        }
+        
+        guard let roomID else { return currentTab }
+        // The self-chat has one member, so the SDK files it as a group. It opens in Conversas.
+        if roomID == proseioSelfChat.cachedRoomID { return .chats }
+        guard let summary = userSession.clientProxy.roomSummaryForIdentifier(roomID) else { return currentTab }
+        return ProseioRoomListScope(summary: summary) == .groups ? .groups : .chats
+    }
+    
+    private func roomListFlowCoordinator(for tab: HomeTab) -> ChatsTabFlowCoordinator {
+        tab == .groups ? groupsTabFlowCoordinator : chatsTabFlowCoordinator
+    }
+    
+    private func openSelfChat() async {
+        guard let roomID = await proseioSelfChat.roomID() else {
+            flowParameters.userIndicatorController.submitIndicator(.init(title: ProseioStrings.selfChatError))
+            return
+        }
+        handleAppRoute(.room(roomID: roomID, via: []), animated: true)
+    }
     
     /// Proseio: a `proseio.com.br/@handle` link opens that user's profile.
     private func openProseioHandle(_ handle: String, animated: Bool) async {
@@ -227,7 +277,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             guard let self else { return }
             
             chatsTabFlowCoordinator.start()
-            spacesTabFlowCoordinator.start()
+            groupsTabFlowCoordinator.start()
+            youTabFlowCoordinator.handleAppRoute(.settings, animated: false)
             attemptStartingOnboarding()
         }
         
@@ -244,12 +295,25 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     private func setupObservers() {
-        chatsTabFlowCoordinator.actionsPublisher
+        observeRoomListFlow(chatsTabFlowCoordinator, tab: .chats)
+        observeRoomListFlow(groupsTabFlowCoordinator, tab: .groups)
+        
+        youTabFlowCoordinator.actions
+            .sink { [weak self] action in
+                self?.handleSettingsFlowAction(action)
+            }
+            .store(in: &cancellables)
+        
+        setupOtherObservers()
+    }
+    
+    private func observeRoomListFlow(_ flowCoordinator: ChatsTabFlowCoordinator, tab: HomeTab) {
+        flowCoordinator.actionsPublisher
             .sink { [weak self] action in
                 guard let self else { return }
                 switch action {
                 case .switchToChatsTab:
-                    navigationTabCoordinator.selectedTab = .chats
+                    navigationTabCoordinator.selectedTab = tab
                 case .showSettings:
                     handleAppRoute(.settings, animated: true)
                 case .showChatBackupSettings:
@@ -265,21 +329,9 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 }
             }
             .store(in: &cancellables)
-        
-        spacesTabFlowCoordinator.actionsPublisher
-            .sink { [weak self] action in
-                guard let self else { return }
-                switch action {
-                case .presentCallScreen(let roomProxy, let isVoiceCall):
-                    presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
-                case .verifyUser(let userID):
-                    presentSessionVerificationScreen(flow: .userInitiator(userID: userID))
-                case .showSettings:
-                    stateMachine.tryEvent(.showSettingsScreen)
-                }
-            }
-            .store(in: &cancellables)
-        
+    }
+    
+    private func setupOtherObservers() {
         userSession.sessionSecurityStatePublisher
             .map(\.verificationState)
             .filter { $0 != .unknown }
@@ -375,26 +427,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                                   flowParameters: flowParameters)
         
         coordinator.actions.sink { [weak self] action in
-            guard let self else { return }
-            
-            switch action {
-            case .dismiss:
-                navigationTabCoordinator.setSheetCoordinator(nil)
-            case .clearCache:
-                actionsSubject.send(.clearCache)
-            case .runLogoutFlow:
-                Task {
-                    self.navigationTabCoordinator.setSheetCoordinator(nil)
-                    
-                    // The sheet needs to be dismissed before the alert can be shown
-                    try? await Task.sleep(for: .milliseconds(100))
-                    await self.runLogoutFlow()
-                }
-            case .forceLogout:
-                actionsSubject.send(.forceLogout)
-            case .openUserProfile(let userID):
-                handleAppRoute(.userProfile(userID: userID), animated: true)
-            }
+            self?.handleSettingsFlowAction(action)
         }
         .store(in: &cancellables)
         
@@ -410,6 +443,29 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             navigationTabCoordinator.setSheetCoordinator(navigationStackCoordinator) { [weak self] in
                 self?.stateMachine.tryEvent(.dismissedSettingsScreen)
             }
+        }
+    }
+    
+    private func handleSettingsFlowAction(_ action: SettingsFlowCoordinatorAction) {
+        switch action {
+        case .dismiss:
+            navigationTabCoordinator.setSheetCoordinator(nil)
+        case .clearCache:
+            actionsSubject.send(.clearCache)
+        case .runLogoutFlow:
+            Task {
+                self.navigationTabCoordinator.setSheetCoordinator(nil)
+                
+                // The sheet needs to be dismissed before the alert can be shown
+                try? await Task.sleep(for: .milliseconds(100))
+                await self.runLogoutFlow()
+            }
+        case .forceLogout:
+            actionsSubject.send(.forceLogout)
+        case .openUserProfile(let userID):
+            handleAppRoute(.userProfile(userID: userID), animated: true)
+        case .openSelfChat:
+            Task { await openSelfChat() }
         }
     }
     
@@ -556,7 +612,17 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 
                 let badgeCount = Int(userSession.clientProxy.totalUnreadNotifications)
                 
-                chatsTabDetails.badgeCount = badgeCount
+                // Proseio ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
+                var chatsCount = 0
+                var groupsCount = 0
+                for summary in roomSummaries {
+                    switch ProseioRoomListScope(summary: summary) {
+                    case .chats: chatsCount += Int(summary.unreadNotificationsCount)
+                    case .groups: groupsCount += Int(summary.unreadNotificationsCount)
+                    }
+                }
+                chatsTabDetails.badgeCount = chatsCount
+                groupsTabDetails.badgeCount = groupsCount
                 
                 await flowParameters.notificationManager.removeDeliveredNotificationsForFullyReadRooms(roomSummaries)
                 await flowParameters.notificationManager.updateAppBadgeCount(badgeCount)

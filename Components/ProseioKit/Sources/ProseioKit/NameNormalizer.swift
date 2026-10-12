@@ -59,7 +59,7 @@ public nonisolated enum NameNormalizer {
 
     /// JS `\s` and `String.prototype.trim()`: WhiteSpace plus LineTerminator (ECMA-262).
     /// Not the same set as ICU `\s` or `Character.isWhitespace` (U+000B, U+FEFF, U+0085 differ).
-    private static func isJavaScriptWhitespace(_ scalar: Unicode.Scalar) -> Bool {
+    static func isJavaScriptWhitespace(_ scalar: Unicode.Scalar) -> Bool {
         switch scalar.value {
         case 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x20, 0xA0, 0xFEFF, 0x2028, 0x2029:
             true

@@ -2,6 +2,7 @@
 // Source of truth: proseio-shared/registries and proseio-shared/strings.
 
 public enum ReservedNameCategory: String, Sendable {
+    case bipe
     case proseio
     case bank
     case government
@@ -15,6 +16,12 @@ public struct ScamPattern: Sendable, Equatable {
 public enum ProseioRegistries {
     /// Normalised reserved display names and their category.
     public static let reservedNames: [String: ReservedNameCategory] = [
+        "bipe": .bipe,
+        "bipe oficial": .bipe,
+        "bipe chat": .bipe,
+        "suporte bipe": .bipe,
+        "equipe bipe": .bipe,
+        "seguranca bipe": .bipe,
         "proseio": .proseio,
         "proseio oficial": .proseio,
         "suporte proseio": .proseio,
@@ -157,6 +164,10 @@ public enum ProseioRegistries {
         ScamPattern(id: "linha-digitavel", regex: "(?<![0-9A-Za-z])[0-9]{5}\\.?[0-9]{5}\\s?[0-9]{5}\\.?[0-9]{6}\\s?[0-9]{5}\\.?[0-9]{6}\\s?[0-9]\\s?[0-9]{14}(?![0-9A-Za-z])"),
     ]
 
+    public static let linkPatterns: [ScamPattern] = [
+        ScamPattern(id: "domain", regex: "(?<![0-9A-Za-z@.-])[0-9A-Za-z](?:[0-9A-Za-z-]*[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:[0-9A-Za-z-]*[0-9A-Za-z])?)*\\.(?:com|net|org|info|biz|br|ly|app|site|online|shop|store|top|xyz|link|click|vip|live|icu|cfd|sbs|lat)(?![0-9A-Za-z-])"),
+    ]
+
     /// Normalised phrases, matched as substrings of the normalised message.
     public static let urgencyPhrases: [String] = [
         "troquei de numero",
@@ -207,11 +218,44 @@ public enum ProseioRegistries {
         "salva esse numero",
     ]
 
+    /// Normalised words for the "delivery fee" kind. It needs a link and an entry from each of the three lists.
+    public static let deliveryParcelWords: [String] = [
+        "pacote",
+        "encomenda",
+        "entrega",
+        "pedido",
+        "correios",
+        "remessa",
+    ]
+    public static let deliveryHoldWords: [String] = [
+        "retid",
+        "taxad",
+        "tributad",
+        "bloquead",
+        "liberar",
+        "liberacao",
+        "pendente",
+        "aguardando pagamento",
+        "nao foi entregue",
+        "nao pode ser entregue",
+        "devolvid",
+    ]
+    public static let deliveryFeeWords: [String] = [
+        "taxa",
+        "tarifa",
+        "imposto",
+        "pague",
+        "pagar",
+        "pagamento",
+        "r$",
+    ]
+
     /// Scam warning kind raw values, most actionable first. The first kind whose rule applies wins.
     public static let scamWarningKindPriority: [String] = [
         "pixCode",
         "boleto",
         "pixKey",
+        "deliveryFee",
         "receipt",
         "newNumber",
         "urgency",
@@ -222,7 +266,91 @@ public enum ProseioRegistries {
     public static let handleMaxLength = 30
     public static let handlePattern = "^[a-z0-9](?:[a-z0-9_]|\\.(?!\\.))*[a-z0-9_]$"
 
+    /// Public profile rules (ADR 0041). Lengths count Unicode scalars. The server is the authority.
+    public static let profileNameMaxLength = 50
+    public static let profileBioMaxLength = 160
+    public static let profileBioMaxLines = 4
+    public static let profilePhotoMaxBytes = 262144
+    public static let profilePhotoMaxPixels = 512
+
     /// Invite codes: the code inside anything a user pastes (registries/invite-codes.json).
     public static let inviteCodePattern = "(?<![A-Z0-9])([A-HJKMNP-Z2-9]{4})[ \\-\\u2010-\\u2014\\u2212]?([A-HJKMNP-Z2-9]{4})[ \\-\\u2010-\\u2014\\u2212]?([A-HJKMNP-Z2-9]{4})(?![A-Z0-9])"
     public static let inviteCodeMaxInputLength = 2048
+
+    /// Brazilian mobile numbers for contact discovery (registries/phone-numbers.json).
+    public static let phoneCountryCode = "55"
+    public static let phoneAreaCodes: Set<String> = [
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "21",
+        "22",
+        "24",
+        "27",
+        "28",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "37",
+        "38",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "51",
+        "53",
+        "54",
+        "55",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "71",
+        "73",
+        "74",
+        "75",
+        "77",
+        "79",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+    ]
+    public static let phoneMobileLength = 9
+    public static let phoneMobilePrefix = "9"
+    public static let phoneMaxInputLength = 64
+    public static let phoneInternationalMinDigits = 8
+    public static let phoneInternationalMaxDigits = 15
 }

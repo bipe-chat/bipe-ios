@@ -51,8 +51,13 @@ struct UserProfileScreen: View {
                              mediaProvider: context.mediaProvider) { url in
                 context.send(viewAction: .displayAvatar(url))
             } footer: {
-                otherUserFooter
-                    .padding(.top, 8)
+                VStack(spacing: 0) {
+                    if !context.viewState.isOwnUser {
+                        ProseioPublicProfileBioView(userID: context.viewState.userID)
+                    }
+                    otherUserFooter
+                        .padding(.top, 8)
+                }
             }
         } else {
             AvatarHeaderView(user: UserProfile(userID: context.viewState.userID),

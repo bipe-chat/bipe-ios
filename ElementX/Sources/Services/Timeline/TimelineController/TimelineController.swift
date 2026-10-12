@@ -128,7 +128,7 @@ class TimelineController: TimelineControllerProtocol {
     }
     
     func sendReadReceipt(for itemID: TimelineItemIdentifier) async {
-        let receiptType: MatrixRustSDK.ReceiptType = userSettings.app.sharePresence ? .read : .readPrivate
+        let receiptType: MatrixRustSDK.ReceiptType = .read // Proseio: receipts are always public (ADR 0050)
         
         guard let eventID = itemID.eventID else {
             return

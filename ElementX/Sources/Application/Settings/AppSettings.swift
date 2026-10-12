@@ -143,7 +143,8 @@ final nonisolated class AppSettings: @unchecked Sendable {
     /// A URL that contains the app's logo that may be used when showing content in a web view.
     private(set) var logoURL: URL = "https://proseio.com.br/icone.png"
     /// A URL that contains that app's copyright notice.
-    private(set) var copyrightURL: URL = "https://proseio.com.br/direitos"
+    // Proseio: the About page names the steward and the licence (ADR 0040).
+    private(set) var copyrightURL: URL = "https://proseio.com.br/sobre"
     /// A URL that contains the app's Terms of use.
     private(set) var acceptableUseURL: URL = "https://proseio.com.br/termos"
     /// A URL that contains the app's Privacy Policy.
