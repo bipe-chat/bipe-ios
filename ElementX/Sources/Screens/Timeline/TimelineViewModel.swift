@@ -577,10 +577,6 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
     }
     
     private func setupUserSettingsSubscriptions() {
-        userSettings.app.sharePresencePublisher
-            .weakAssign(to: \.state.showReadReceipts, on: self)
-            .store(in: &cancellables)
-        
         userSettings.app.viewSourceEnabledPublisher
             .weakAssign(to: \.state.isViewSourceEnabled, on: self)
             .store(in: &cancellables)

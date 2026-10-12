@@ -80,6 +80,8 @@ public enum ProseioStrings {
 
     public static var settingsLanguageFooter: String { NSLocalizedString("proseio_settings_language_footer", tableName: "Proseio", bundle: .module, comment: "") }
 
+    public static var settingsSharePresenceFooter: String { NSLocalizedString("proseio_settings_share_presence_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var aboutSteward: String { NSLocalizedString("proseio_about_steward", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var signupTitle: String { NSLocalizedString("proseio_signup_title", tableName: "Proseio", bundle: .module, comment: "") }

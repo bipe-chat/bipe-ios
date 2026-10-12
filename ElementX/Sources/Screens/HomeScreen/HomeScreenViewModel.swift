@@ -285,7 +285,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                 case .success:
                     analyticsService.trackInteraction(name: .MobileRoomListRoomContextMenuUnreadToggle)
                     
-                    if case .failure(let error) = await roomProxy.markAsRead(receiptType: userSettings.app.sharePresence ? .read : .readPrivate) {
+                    // Proseio: receipts are always public (ADR 0050)
+                    if case .failure(let error) = await roomProxy.markAsRead(receiptType: .read) {
                         MXLog.error("Failed marking room \(roomIdentifier) as read with error: \(error)")
                     }
                 case .failure(let error):
