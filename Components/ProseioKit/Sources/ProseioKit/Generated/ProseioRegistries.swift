@@ -2,6 +2,7 @@
 // Source of truth: proseio-shared/registries and proseio-shared/strings.
 
 public enum ReservedNameCategory: String, Sendable {
+    case bipe
     case proseio
     case bank
     case government
@@ -15,6 +16,12 @@ public struct ScamPattern: Sendable, Equatable {
 public enum ProseioRegistries {
     /// Normalised reserved display names and their category.
     public static let reservedNames: [String: ReservedNameCategory] = [
+        "bipe": .bipe,
+        "bipe oficial": .bipe,
+        "bipe chat": .bipe,
+        "suporte bipe": .bipe,
+        "equipe bipe": .bipe,
+        "seguranca bipe": .bipe,
         "proseio": .proseio,
         "proseio oficial": .proseio,
         "suporte proseio": .proseio,
