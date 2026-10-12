@@ -58,8 +58,8 @@ Devices must be registered in the Centaur Labs team (automatic signing does this
 Done: display name, production app name, dev bundle ID and app group, Element's team ID replaced.
 
 - **OAuth login:** redirect is the private-use scheme `<bundle id>:/oauth/callback` (RFC 8252); client URI, logo, terms and privacy URLs moved to `https://proseio.com.br/...` because MAS requires them on the client URI host and requires the scheme to be the reverse of that host. Pages do not exist yet. **Verified 11 October 2026:** sign-in to matrix.org works end to end on a device (MAS dynamic registration accepted the client).
-- **Accent colour:** açaí (`#7C2C78` light, `#DA96D4` dark, `#692465` / `#E6AFE0` high contrast) in `accent-color.colorset`. See proseio/docs/design/identity.md.
-- **App icon: PLACEHOLDER** drawn in code (white bubble on açaí). Replace with designer artwork.
+- **Accent colour:** açaí `acai.1100` (`#80307B` light, `#D993D2` dark; high contrast `#5D1D59` / `#ECC0E7`) in `accent-color.colorset`. See proseio/docs/design/identity.md.
+- **App icon:** the web mark (`proseio-web/public/brand/app-icon.svg`, white seal-tail bubble on `acai.1100`) rendered full-bleed at 1024 px; iOS applies the corner mask. iOS and web share one icon. Final designer artwork replaces both at once.
 
 Entitlements removed from the fork (they block provisioning outside Element's team):
 - `com.apple.developer.usernotifications.filtering` (NSE). Apple grants it on request only. Without it the NSE cannot silently drop notifications. Request it for Proseio later.
