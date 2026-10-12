@@ -101,3 +101,18 @@ Not done (needs the domain, Apple team or brand):
 
 - **Login stuck on "loading" after choosing a server:** check the app log for `TimedOut` on `/.well-known/matrix/client`. On 11 October 2026 the cause was the phone's Tailscale routing, not the app. Logs: `xcrun devicectl device copy from --device <UDID> --domain-type appGroupDataContainer --domain-identifier group.br.com.proseio.dev --source Library/Logs/br.com.proseio.app.dev/<file> --destination <local file>`.
 
+## Differences from Android (ADR 0031)
+
+Each line is a deliberate difference with its reason. A difference not listed here is a bug. Android's list: `../proseio-android/PROSEIO.md`.
+
+| Area | iOS | Android | Reason |
+|---|---|---|---|
+| Dev bundle ID | `br.com.proseio.app.dev` | `br.com.proseio.app.debug` | Element's build-type suffix on each platform |
+| OAuth redirect | `<bundle id>:/oauth/callback` | `<application id>:/` | Element's default per platform; both are reverse-domain private-use schemes |
+| Push | APNs through Sygnal | FCM through Sygnal; UnifiedPush optional | OS push channel (#90) |
+| Sign-up attestation | App Attest | None yet | Play Integrity not built on Android (#92) |
+| Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
+| Unencrypted room option | Still offered | Removed | Not done on iOS (#78). **Gap** |
+| Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) |
+| Language fallback | pt-BR for other device languages | en | Undecided (#102) |
+| Handle lookup | Start chat only | Every user search | Undecided (#102) |
