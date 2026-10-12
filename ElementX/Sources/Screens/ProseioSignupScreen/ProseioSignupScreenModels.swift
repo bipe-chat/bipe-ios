@@ -11,10 +11,13 @@ import SwiftUI
 enum ProseioSignupScreenViewModelAction: CustomStringConvertible {
     /// The account exists. Continue with MAS login, pre-filled with the email.
     case continueWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
+    /// The account came from a personal invite. The app opens the inviter's profile after the first sign-in.
+    case createdWithInvite(inviterUserID: String)
 
     var description: String {
         switch self {
         case .continueWithOAuth: "continueWithOAuth"
+        case .createdWithInvite: "createdWithInvite"
         }
     }
 }

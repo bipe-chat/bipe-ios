@@ -17,7 +17,7 @@ struct ProseioInvitesScreenViewState: BindableState {
     var available = 0
     var nextAvailableAt: Date?
     var invites: [ProseioInvite] = []
-    /// Links for invites created on this device in this session. The server keeps only a hash of each code.
+    /// Links for pending invites created on this device (kept in the keychain). The server keeps only a hash of each code.
     var shareURLs: [String: URL] = [:]
     
     var bindings = ProseioInvitesScreenViewStateBindings()

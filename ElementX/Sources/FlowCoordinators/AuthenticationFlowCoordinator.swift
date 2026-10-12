@@ -468,6 +468,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .continueWithOAuth(let oAuthData, let window):
                     self?.showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
+                case .createdWithInvite(let inviterUserID):
+                    self?.appSettings.proseioPendingInviterUserID = inviterUserID
                 }
             }
             .store(in: &cancellables)

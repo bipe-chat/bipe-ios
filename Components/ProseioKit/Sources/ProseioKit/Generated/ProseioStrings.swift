@@ -299,4 +299,48 @@ public enum ProseioStrings {
     public static var actionShowMore: String { NSLocalizedString("proseio_action_show_more", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var actionShowLess: String { NSLocalizedString("proseio_action_show_less", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var actionStickers: String { NSLocalizedString("proseio_action_stickers", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersTitle: String { NSLocalizedString("proseio_stickers_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersPackPersonal: String { NSLocalizedString("proseio_stickers_pack_personal", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersPackRoom: String { NSLocalizedString("proseio_stickers_pack_room", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersEmptyTitle: String { NSLocalizedString("proseio_stickers_empty_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersEmptyBody: String { NSLocalizedString("proseio_stickers_empty_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersErrorLoad: String { NSLocalizedString("proseio_stickers_error_load", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func a11yStickerSend(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_a11y_sticker_send", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var groupMissedTitle: String { NSLocalizedString("proseio_group_missed_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func groupMissedMention(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_group_missed_mention", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func groupMissedReply(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_group_missed_reply", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func groupMissedPoll(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_group_missed_poll", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func groupMissedPinned(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_group_missed_pinned", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func groupMissedMore(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_group_missed_more", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func invitesJoined(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_invites_joined", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
 }

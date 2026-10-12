@@ -726,6 +726,19 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         if storedAppRoute?.isAuthenticationRoute == false,
            let storedAppRoute = storedAppRoute.take() {
             userSessionFlowCoordinator.handleAppRoute(storedAppRoute, animated: false)
+        } else if let inviterUserID = appSettings.proseioPendingInviterUserID {
+            // Proseio: after a personal-invite sign-up, open the inviter's profile once, one tap from a chat.
+            appSettings.proseioPendingInviterUserID = nil
+            userSessionFlowCoordinator.handleAppRoute(.userProfile(userID: inviterUserID), animated: false)
+        }
+        
+        if userSession.clientProxy.userIDServerName == appSettings.proseioSignupServerName {
+            Task {
+                await ProseioInviteJoinNotifier(apiBaseURL: appSettings.proseioAPIBaseURL,
+                                                clientProxy: userSession.clientProxy,
+                                                handleResolver: userSession.proseioHandleResolver,
+                                                userIndicatorController: userIndicatorController).run()
+            }
         }
         
         if let storedInlineReply {
