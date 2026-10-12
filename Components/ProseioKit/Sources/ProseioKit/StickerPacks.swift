@@ -177,14 +177,48 @@ public struct StickerPackClient: Sendable {
     }
 
     /// GET under `/_matrix/client/v3`. Returns nil on 404 (no such account data or state).
-    private func get(_ path: [String], accessToken: String) async throws(ProseioAPIError) -> Data? {
+    func get(_ path: [String], accessToken: String) async throws(ProseioAPIError) -> Data? {
+        var request = URLRequest(url: clientURL(path))
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        return try await perform(request)
+    }
+
+    /// PUT a JSON body under `/_matrix/client/v3`.
+    func put(_ path: [String], json: Data, accessToken: String) async throws(ProseioAPIError) {
+        var request = URLRequest(url: clientURL(path))
+        request.httpMethod = "PUT"
+        request.httpBody = json
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        _ = try await perform(request)
+    }
+
+    /// `POST /_matrix/media/v3/upload`. Returns the `mxc://` URI.
+    func upload(_ data: Data, mimeType: String, fileName: String, accessToken: String) async throws(ProseioAPIError) -> String {
+        var url = homeserverURL.appending(path: "_matrix/media/v3/upload")
+        url.append(queryItems: [URLQueryItem(name: "filename", value: fileName)])
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = data
+        request.setValue(mimeType, forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        guard let body = try await perform(request),
+              let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+              let contentURI = json["content_uri"] as? String, contentURI.hasPrefix("mxc://") else {
+            throw .unexpectedResponse(statusCode: 200)
+        }
+        return contentURI
+    }
+
+    private func clientURL(_ path: [String]) -> URL {
         var url = homeserverURL.appending(path: "_matrix/client/v3")
         for component in path {
             url = url.appending(component: component)
         }
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        return url
+    }
 
+    private func perform(_ request: URLRequest) async throws(ProseioAPIError) -> Data? {
         let data: Data
         let response: URLResponse
         do {

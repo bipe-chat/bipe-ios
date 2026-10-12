@@ -46,6 +46,13 @@ class ProseioStickerPickerScreenViewModel: ProseioStickerPickerScreenViewModelTy
             Task { await send(sticker) }
         case .close:
             actionsSubject.send(.dismiss)
+        case .showImportHelp:
+            state.bindings.isShowingImportHelp = true
+        case .chooseImportFiles:
+            state.bindings.isShowingFileImporter = true
+        case .importFiles(let urls):
+            guard !state.isImporting else { return }
+            Task { await importFiles(urls) }
         }
     }
     
@@ -70,6 +77,46 @@ class ProseioStickerPickerScreenViewModel: ProseioStickerPickerScreenViewModelTy
             MXLog.error("Sticker packs failed to load: \(error)")
             state.content = .failed
         }
+    }
+    
+    private func importFiles(_ urls: [URL]) async {
+        state.isImporting = true
+        userIndicatorController.submitIndicator(UserIndicator(id: importIndicatorID,
+                                                              type: .modal,
+                                                              title: ProseioStrings.stickersImportProgress,
+                                                              persistent: true))
+        defer {
+            state.isImporting = false
+            userIndicatorController.retractIndicatorWithId(importIndicatorID)
+        }
+        
+        let candidates = await Task.detached { StickerImporter.candidates(from: urls) }.value
+        guard !candidates.isEmpty else {
+            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportNone))
+            return
+        }
+        guard let homeserverURL = URL(string: clientProxy.homeserver) else {
+            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportFailed))
+            return
+        }
+        
+        let client = StickerPackClient(homeserverURL: homeserverURL)
+        let userID = clientProxy.userID
+        do {
+            let added = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { token throws(ProseioAPIError) in
+                try await client.importStickers(candidates, userID: userID, accessToken: token)
+            }
+            let title = added > 0 ? ProseioStrings.stickersImportDone(added.formatted()) : ProseioStrings.stickersImportNone
+            userIndicatorController.submitIndicator(UserIndicator(title: title))
+        } catch {
+            MXLog.error("Sticker import failed: \(error)")
+            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportFailed))
+        }
+        await loadPacks()
+    }
+    
+    private var importIndicatorID: String {
+        "\(ProseioStickerPickerScreenViewModel.self)-Import"
     }
     
     private func send(_ sticker: Sticker) async {

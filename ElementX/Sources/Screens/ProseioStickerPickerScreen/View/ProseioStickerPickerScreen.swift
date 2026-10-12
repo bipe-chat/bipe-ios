@@ -7,9 +7,10 @@
 import Compound
 import ProseioKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ProseioStickerPickerScreen: View {
-    let context: ProseioStickerPickerScreenViewModel.Context
+    @Bindable var context: ProseioStickerPickerScreenViewModel.Context
     
     private let columns = [GridItem(.adaptive(minimum: 80, maximum: 120), spacing: 12)]
     
@@ -24,8 +25,28 @@ struct ProseioStickerPickerScreen: View {
                         context.send(viewAction: .close)
                     }
                 }
+                ToolbarItem(placement: .primaryAction) {
+                    Button(ProseioStrings.stickersImportAction) {
+                        context.send(viewAction: .showImportHelp)
+                    }
+                }
             }
-            .disabled(context.viewState.isSending)
+            .disabled(context.viewState.isSending || context.viewState.isImporting)
+            .alert(ProseioStrings.stickersImportAction, isPresented: $context.isShowingImportHelp) {
+                Button(L10n.actionChooseFile) {
+                    context.send(viewAction: .chooseImportFiles)
+                }
+                Button(L10n.actionCancel, role: .cancel) { }
+            } message: {
+                Text(ProseioStrings.stickersImportHelp + "\n\n" + ProseioStrings.stickersImportNote)
+            }
+            .fileImporter(isPresented: $context.isShowingFileImporter,
+                          allowedContentTypes: [.zip, .webP, .png],
+                          allowsMultipleSelection: true) { result in
+                if case let .success(urls) = result, !urls.isEmpty {
+                    context.send(viewAction: .importFiles(urls))
+                }
+            }
     }
     
     @ViewBuilder

@@ -9,6 +9,7 @@
 import Combine
 import Compound
 import Kingfisher
+import ProseioKit
 import SwiftUI
 
 /// Used to configure animations
@@ -138,6 +139,8 @@ private struct LoadableImageContent<TransformerView: View, PlaceholderView: View
                 transformer(AnyView(Image(uiImage: image).resizable()))
             case (.gifData, true):
                 transformer(AnyView(KFAnimatedImage(source: .provider(self))))
+            case (.animatedData(let data), true):
+                transformer(AnyView(ProseioAnimatedImage(data: data)))
             case (.none, _), (_, false):
                 if let blurHashView {
                     if shouldRender {
@@ -256,6 +259,8 @@ private class ContentLoader: ObservableObject {
     enum Content: Equatable {
         case image(UIImage)
         case gifData(Data)
+        /// Proseio: animated WebP (WhatsApp stickers), played by `ProseioAnimatedImage`.
+        case animatedData(Data)
     }
     
     private let mediaProvider: MediaProviderProtocol?
@@ -268,6 +273,11 @@ private class ContentLoader: ObservableObject {
     var content: Content? {
         if cachedContent != nil {
             return cachedContent
+        }
+        
+        // Proseio: a cached WebP may be a still thumbnail of an animated file, so always load the data.
+        if isWebP {
+            return nil
         }
         
         if isGIF {
@@ -289,6 +299,18 @@ private class ContentLoader: ObservableObject {
     }
     
     func load() async {
+        // Proseio: WebP loads the full data like GIF does. More than one frame plays as an animation.
+        if isWebP {
+            if case let .success(data) = await mediaProvider?.loadImageDataFromSource(mediaSource) {
+                if ProseioAnimatedImage.frameCount(of: data) > 1 {
+                    cachedContent = .animatedData(data)
+                } else if let image = UIImage(data: data) {
+                    cachedContent = .image(image)
+                }
+            }
+            return
+        }
+        
         if isGIF {
             if case let .success(data) = await mediaProvider?.loadImageDataFromSource(mediaSource) {
                 cachedContent = .gifData(data)
@@ -313,6 +335,10 @@ private class ContentLoader: ObservableObject {
     
     private var isGIF: Bool {
         mediaSource.mimeType == "image/gif"
+    }
+    
+    private var isWebP: Bool {
+        mediaSource.mimeType == "image/webp"
     }
 }
 
