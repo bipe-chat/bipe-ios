@@ -76,3 +76,9 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 - Build `202610112038` (open sign-up, no invite code) submitted for Beta App Review in Amigos. Sign-in not required: the reviewer creates an account.
 - Public link: https://testflight.apple.com/join/KUnUX9Mz, open to anyone, limit 100. It works after Apple approves the build.
 - Review notes: no code, create two accounts to test chat. Old MAS reviewer token and the API reviewer invite are revoked.
+
+## Status (11 October 2026, night)
+
+- Build `202610112038` (no invite field) was removed from review: the server requires invite codes again.
+- Build `202610120012` (invite codes, App Attest, handles, Pedidos, scam warnings, trust card) submitted for Beta App Review in Amigos. Review notes give a 2-use invite code (Keychain `proseio-review-invite`).
+- Uploads sign in with the App Store Connect API key and manual App Store profiles (see PROSEIO.md).
