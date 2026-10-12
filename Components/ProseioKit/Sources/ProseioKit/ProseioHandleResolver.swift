@@ -83,6 +83,12 @@ public final class ProseioHandleResolver {
         entries[userID] = Entry(handle: handle, expiry: .now.addingTimeInterval(handle == nil ? Self.missingTTL : Self.foundTTL))
     }
 
+    /// The published profile (ADR 0041). `nil` without a handle, with the profile off, or when the lookup failed.
+    public func publicProfile(for userID: String) async -> ProseioPublicProfile? {
+        guard let handle = await resolve(userID) else { return nil }
+        return try? await apiClient.publicProfile(handle: handle)
+    }
+
     // MARK: - Handle to Matrix ID
 
     /// Exact lookup through `GET /v1/handles/{handle}`. Returns `nil` when nobody holds the handle.

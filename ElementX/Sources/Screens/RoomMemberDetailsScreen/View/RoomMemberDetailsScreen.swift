@@ -56,8 +56,13 @@ struct RoomMemberDetailsScreen: View {
                         withdrawVerificationSection
                     }
                     
-                    otherUserFooter
-                        .padding(.top, 8)
+                    VStack(spacing: 0) {
+                        if !context.viewState.isOwnMemberDetails {
+                            ProseioPublicProfileBioView(userID: memberDetails.id)
+                        }
+                        otherUserFooter
+                            .padding(.top, 8)
+                    }
                 }
             }
         } else {

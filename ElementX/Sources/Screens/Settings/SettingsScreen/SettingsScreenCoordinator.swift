@@ -44,6 +44,7 @@ enum SettingsScreenCoordinatorAction {
     case developerOptions
     
     case proseioHandle
+    case proseioPublicProfile
     case proseioMessaging
     case proseioInvites
     case proseioContacts
@@ -119,6 +120,8 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     
                 case .proseioHandle:
                     actionsSubject.send(.proseioHandle)
+                case .proseioPublicProfile:
+                    actionsSubject.send(.proseioPublicProfile)
                 case .proseioMessaging:
                     actionsSubject.send(.proseioMessaging)
                 case .proseioInvites:

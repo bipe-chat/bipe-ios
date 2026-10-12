@@ -120,6 +120,33 @@ public struct ProseioAPIClient: Sendable {
         try await send(method: "PUT", path: ["v1", "me", "handle"], body: SetHandleRequest(handle: handle), accessToken: accessToken)
     }
 
+    // MARK: - Public profiles
+
+    /// `GET /v1/profiles/{handle}`. No auth. 404 for "no such handle" and for "profile off".
+    public func publicProfile(handle: String) async throws(ProseioAPIError) -> ProseioPublicProfile {
+        try await send(method: "GET", path: ["v1", "profiles", handle], body: Empty?.none)
+    }
+
+    /// `GET /v1/me/profile`. A user who never saved one gets `enabled` false and an empty name.
+    public func myProfile(accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "GET", path: ["v1", "me", "profile"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `PUT /v1/me/profile`. Turning it on needs a handle.
+    public func setMyProfile(_ update: ProseioProfileUpdate, accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "PUT", path: ["v1", "me", "profile"], body: update, accessToken: accessToken)
+    }
+
+    /// `PUT /v1/me/profile/photo`. `jpeg` must already fit the limits: see ``ProseioProfilePhoto``.
+    public func setMyProfilePhoto(jpeg: Data, accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "PUT", path: ["v1", "me", "profile", "photo"], rawBody: (data: jpeg, contentType: "image/jpeg"), accessToken: accessToken)
+    }
+
+    /// `DELETE /v1/me/profile/photo`.
+    public func deleteMyProfilePhoto(accessToken: String) async throws(ProseioAPIError) -> ProseioMyProfile {
+        try await send(method: "DELETE", path: ["v1", "me", "profile", "photo"], body: Empty?.none, accessToken: accessToken)
+    }
+
     // MARK: - Auth
 
     /// Runs `request` with the token from `accessToken`. On HTTP 401 it reads the token again and retries once,
@@ -189,6 +216,21 @@ public struct ProseioAPIClient: Sendable {
                                                             path: [String],
                                                             body: Body?,
                                                             accessToken: String? = nil) async throws(ProseioAPIError) -> Response {
+        var rawBody: (data: Data, contentType: String)?
+        if let body {
+            do {
+                rawBody = try (data: Self.encoder.encode(body), contentType: "application/json")
+            } catch {
+                throw .unexpectedResponse(statusCode: nil)
+            }
+        }
+        return try await send(method: method, path: path, rawBody: rawBody, accessToken: accessToken)
+    }
+
+    private func send<Response: Decodable>(method: String,
+                                           path: [String],
+                                           rawBody: (data: Data, contentType: String)?,
+                                           accessToken: String? = nil) async throws(ProseioAPIError) -> Response {
         // appending(path:) percent-encodes each component, so a handle cannot add path segments.
         let url = path.reduce(baseURL) { $0.appending(path: $1, directoryHint: .notDirectory) }
         var request = URLRequest(url: url)
@@ -197,13 +239,9 @@ public struct ProseioAPIClient: Sendable {
         if let accessToken {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
-        if let body {
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            do {
-                request.httpBody = try Self.encoder.encode(body)
-            } catch {
-                throw .unexpectedResponse(statusCode: nil)
-            }
+        if let rawBody {
+            request.setValue(rawBody.contentType, forHTTPHeaderField: "Content-Type")
+            request.httpBody = rawBody.data
         }
 
         let data: Data
@@ -446,6 +484,43 @@ public struct ProseioMyHandle: Decodable, Sendable {
     public let changeableAt: Date?
 }
 
+/// Contract: `PublicProfile`. What anyone with the exact handle sees.
+public struct ProseioPublicProfile: Decodable, Sendable, Equatable {
+    public let handle: String
+    public let name: String
+    /// Plain text. Absent when empty.
+    public let bio: String?
+    /// Absent without a photo. The URL changes when the photo changes.
+    public let photoUrl: URL?
+    /// Set by the server only. The apps do not show a profile badge yet.
+    public let badge: BadgeEnvelope?
+}
+
+/// Contract: `MyProfile`. The caller's own profile, published or not.
+public struct ProseioMyProfile: Decodable, Sendable, Equatable {
+    public let enabled: Bool
+    public let name: String
+    public let bio: String
+    public let hasPhoto: Bool
+    /// Absent when the caller has no handle.
+    public let handle: String?
+    /// Absent without a photo.
+    public let photoUrl: URL?
+}
+
+/// Contract: `ProfileUpdate`.
+public struct ProseioProfileUpdate: Encodable, Sendable, Equatable {
+    public let enabled: Bool
+    public let name: String
+    public let bio: String
+
+    public init(enabled: Bool, name: String, bio: String) {
+        self.enabled = enabled
+        self.name = name
+        self.bio = bio
+    }
+}
+
 // MARK: - Errors
 
 /// The contract's `Error.error` enum.
@@ -459,6 +534,8 @@ public enum ProseioAPIErrorCode: String, Sendable {
     case handleCooldown = "handle_cooldown"
     case passwordWeak = "password_weak"
     case attestationInvalid = "attestation_invalid"
+    case profileInvalid = "profile_invalid"
+    case photoInvalid = "photo_invalid"
     case unauthorized
     case notFound = "not_found"
     case rateLimited = "rate_limited"
@@ -497,6 +574,8 @@ public enum ProseioAPIError: Error, Sendable, Equatable {
             case .handleTaken: ProseioHandleProblem.taken.localizedMessage
             case .handleInvalid: (reason.flatMap(ProseioHandleProblem.init(rawValue:)) ?? .invalidCharacters).localizedMessage
             case .handleCooldown: ProseioStrings.errorHandleCooldown
+            case .profileInvalid: (reason.flatMap(ProseioProfileProblem.init(rawValue:))?.localizedMessage) ?? ProseioStrings.errorGeneric
+            case .photoInvalid: ProseioStrings.publicProfilePhotoInvalid
             case .rateLimited: ProseioStrings.errorRateLimited
             case .unauthorized: ProseioStrings.errorUnauthorized
             case .badRequest, .notFound, .internal: ProseioStrings.errorGeneric

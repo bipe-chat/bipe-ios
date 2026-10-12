@@ -288,6 +288,52 @@ public enum ProseioStrings {
 
     public static var trustStepProfileAddPhoto: String { NSLocalizedString("proseio_trust_step_profile_add_photo", tableName: "Proseio", bundle: .module, comment: "") }
 
+    public static var settingsPublicProfile: String { NSLocalizedString("proseio_settings_public_profile", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileOn: String { NSLocalizedString("proseio_public_profile_on", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileOff: String { NSLocalizedString("proseio_public_profile_off", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileToggle: String { NSLocalizedString("proseio_public_profile_toggle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileFooter: String { NSLocalizedString("proseio_public_profile_footer", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileNeedsHandle: String { NSLocalizedString("proseio_public_profile_needs_handle", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileName: String { NSLocalizedString("proseio_public_profile_name", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileBio: String { NSLocalizedString("proseio_public_profile_bio", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileBioPlaceholder: String { NSLocalizedString("proseio_public_profile_bio_placeholder", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfilePhotoChange: String { NSLocalizedString("proseio_public_profile_photo_change", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfilePhotoRemove: String { NSLocalizedString("proseio_public_profile_photo_remove", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileSave: String { NSLocalizedString("proseio_public_profile_save", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileSaved: String { NSLocalizedString("proseio_public_profile_saved", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileShare: String { NSLocalizedString("proseio_public_profile_share", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileNameEmpty: String { NSLocalizedString("proseio_public_profile_name_empty", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func publicProfileNameTooLong(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_public_profile_name_too_long", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func publicProfileBioTooLong(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_public_profile_bio_too_long", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static func publicProfileBioTooManyLines(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_public_profile_bio_too_many_lines", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
+
+    public static var publicProfilePhotoInvalid: String { NSLocalizedString("proseio_public_profile_photo_invalid", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var publicProfileNotVerified: String { NSLocalizedString("proseio_public_profile_not_verified", tableName: "Proseio", bundle: .module, comment: "") }
+
     public static var trustStepEmail: String { NSLocalizedString("proseio_trust_step_email", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var trustStepEmailBody: String { NSLocalizedString("proseio_trust_step_email_body", tableName: "Proseio", bundle: .module, comment: "") }

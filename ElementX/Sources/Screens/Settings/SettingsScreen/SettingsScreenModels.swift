@@ -37,6 +37,7 @@ enum SettingsScreenViewModelAction {
     case developerOptions
     
     case proseioHandle
+    case proseioPublicProfile
     case proseioMessaging
     case proseioInvites
     case proseioContacts
@@ -59,6 +60,8 @@ struct SettingsScreenViewState: BindableState {
     /// Proseio: the username row (Proseio accounts only) and the current handle.
     var showProseioHandle = false
     var proseioHandle: String?
+    /// Proseio: whether the public profile is on (ADR 0041). `nil` until loaded.
+    var proseioPublicProfileEnabled: Bool?
     /// Proseio: "Quem pode me mandar mensagem". Same visibility as the username row.
     var proseioWhoCanMessage: ProseioWhoCanMessage?
     
@@ -146,6 +149,7 @@ enum SettingsScreenViewAction {
     case developerOptions
     
     case proseioHandle
+    case proseioPublicProfile
     case proseioMessaging
     case proseioLoadHandle
     case proseioInvites

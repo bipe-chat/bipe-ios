@@ -222,6 +222,13 @@ public enum ProseioRegistries {
     public static let handleMaxLength = 30
     public static let handlePattern = "^[a-z0-9](?:[a-z0-9_]|\\.(?!\\.))*[a-z0-9_]$"
 
+    /// Public profile rules (ADR 0041). Lengths count Unicode scalars. The server is the authority.
+    public static let profileNameMaxLength = 50
+    public static let profileBioMaxLength = 160
+    public static let profileBioMaxLines = 4
+    public static let profilePhotoMaxBytes = 262144
+    public static let profilePhotoMaxPixels = 512
+
     /// Invite codes: the code inside anything a user pastes (registries/invite-codes.json).
     public static let inviteCodePattern = "(?<![A-Z0-9])([A-HJKMNP-Z2-9]{4})[ \\-\\u2010-\\u2014\\u2212]?([A-HJKMNP-Z2-9]{4})[ \\-\\u2010-\\u2014\\u2212]?([A-HJKMNP-Z2-9]{4})(?![A-Z0-9])"
     public static let inviteCodeMaxInputLength = 2048

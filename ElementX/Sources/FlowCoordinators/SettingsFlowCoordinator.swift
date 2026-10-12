@@ -140,6 +140,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     
                 case .proseioHandle:
                     presentProseioHandleScreen()
+                case .proseioPublicProfile:
+                    presentProseioPublicProfileScreen()
                 case .proseioMessaging:
                     presentProseioMessagingScreen()
                 case .proseioInvites:
@@ -153,7 +155,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.setRootCoordinator(settingsScreenCoordinator, animated: animated)
     }
     
-    private func presentProseioHandleScreen() {
+    /// `onDone` runs after the screen pops, e.g. to reload the screen below.
+    private func presentProseioHandleScreen(onDone: (() -> Void)? = nil) {
         let coordinator = ProseioHandleScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
                                                                            clientProxy: flowParameters.userSession.clientProxy,
                                                                            handleResolver: flowParameters.userSession.proseioHandleResolver,
@@ -163,6 +166,22 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .done:
                     self?.navigationStackCoordinator.pop()
+                    onDone?()
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presentProseioPublicProfileScreen() {
+        let coordinator = ProseioPublicProfileScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+                                                                                  userSession: flowParameters.userSession,
+                                                                                  userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self, weak coordinator] action in
+                switch action {
+                case .openHandle:
+                    self?.presentProseioHandleScreen { coordinator?.reload() }
                 }
             }
             .store(in: &cancellables)

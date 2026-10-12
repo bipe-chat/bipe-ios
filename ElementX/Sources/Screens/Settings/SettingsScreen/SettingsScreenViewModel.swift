@@ -152,11 +152,14 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             
         case .proseioHandle:
             actionsSubject.send(.proseioHandle)
+        case .proseioPublicProfile:
+            actionsSubject.send(.proseioPublicProfile)
         case .proseioMessaging:
             actionsSubject.send(.proseioMessaging)
         case .proseioLoadHandle:
             Task { await loadProseioHandle() }
             Task { await loadProseioWhoCanMessage() }
+            Task { await loadProseioPublicProfile() }
         case .proseioInvites:
             actionsSubject.send(.proseioInvites)
         case .proseioContacts:
@@ -185,6 +188,18 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             }
         } catch {
             MXLog.error("Proseio messaging setting load failed: \(error)")
+        }
+    }
+    
+    private func loadProseioPublicProfile() async {
+        guard state.showProseioHandle else { return }
+        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+        do {
+            state.proseioPublicProfileEnabled = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(ProseioAPIError) -> Bool in
+                try await apiClient.myProfile(accessToken: token).enabled
+            }
+        } catch {
+            MXLog.error("Proseio public profile load failed: \(error)")
         }
     }
     

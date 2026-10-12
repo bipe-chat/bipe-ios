@@ -195,6 +195,13 @@ struct SettingsScreen: View {
                             context.send(viewAction: .proseioHandle)
                         })
                 
+                ListRow(label: .default(title: ProseioStrings.settingsPublicProfile,
+                                        icon: \.webBrowser),
+                        details: context.viewState.proseioPublicProfileEnabled.map { .title($0 ? ProseioStrings.publicProfileOn : ProseioStrings.publicProfileOff) },
+                        kind: .navigationLink {
+                            context.send(viewAction: .proseioPublicProfile)
+                        })
+                
                 ListRow(label: .default(title: ProseioStrings.messagingTitle,
                                         icon: \.chat),
                         details: context.viewState.proseioWhoCanMessage.map { .title($0.title) },
