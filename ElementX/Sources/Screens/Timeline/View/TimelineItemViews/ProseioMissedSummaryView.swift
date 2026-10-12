@@ -72,7 +72,7 @@ struct ProseioMissedSummaryView: View {
 
 struct ProseioMissedSummaryView_Previews: PreviewProvider {
     static var previews: some View {
-        ProseioMissedSummaryView(summary: .init(lines: [.init(kind: .mention, eventID: "$1", senderName: "Bia", text: "@mz você leva o carvão?"),
+        ProseioMissedSummaryView(summary: .init(lines: [.init(kind: .mention, eventID: "$1", senderName: "Bia", text: "@gabi você leva o carvão?"),
                                                         .init(kind: .reply, eventID: "$2", senderName: "Léo", text: "Fechado, 13h lá em casa"),
                                                         .init(kind: .poll, eventID: "$3", senderName: "Léo", text: "Sábado ou domingo?")],
                                                 otherCount: 142)) { _ in }
