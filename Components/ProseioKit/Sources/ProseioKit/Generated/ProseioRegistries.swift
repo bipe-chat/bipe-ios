@@ -300,4 +300,6 @@ public enum ProseioRegistries {
     public static let phoneMobileLength = 9
     public static let phoneMobilePrefix = "9"
     public static let phoneMaxInputLength = 64
+    public static let phoneInternationalMinDigits = 8
+    public static let phoneInternationalMaxDigits = 15
 }

@@ -6,12 +6,14 @@
 
 import Foundation
 
-/// Brazilian mobile numbers for contact discovery. Rule: proseio-shared/registries/phone-numbers.json (generated);
+/// Phone numbers for contact discovery: Brazilian mobiles in any local format, other countries only when written with `+` or `00`. Rule: proseio-shared/registries/phone-numbers.json (generated);
 /// cases: test-vectors/phone-numbers.json. Same result as the API's `normalizePhone`.
 public nonisolated enum ProseioPhoneNumber {
-    /// E.164 (`+5511987654321`) from an address-book entry, or `nil` for anything that is not a Brazilian mobile number.
+    /// E.164 (`+5511987654321`) from an address-book entry, or `nil`.
     public static func normalize(_ text: String) -> String? {
-        let head = String(text.prefix(ProseioRegistries.phoneMaxInputLength)).trimmingCharacters(in: .whitespacesAndNewlines)
+        let head = String(text.prefix(ProseioRegistries.phoneMaxInputLength))
+            .replacingOccurrences(of: "(0)", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         var plus = head.filter { $0.isASCII && ($0.isNumber || $0 == "+") }.hasPrefix("+")
         var digits = head.filter { $0.isASCII && $0.isNumber }
         if !plus, digits.hasPrefix("00") {
@@ -21,7 +23,11 @@ public nonisolated enum ProseioPhoneNumber {
         let countryCode = ProseioRegistries.phoneCountryCode
         let national = ProseioRegistries.phoneMobileLength + 2
         if plus {
-            guard digits.hasPrefix(countryCode) else { return nil }
+            guard digits.hasPrefix(countryCode) else {
+                // Another country: E.164 as written, length checked only.
+                let valid = (ProseioRegistries.phoneInternationalMinDigits...ProseioRegistries.phoneInternationalMaxDigits).contains(digits.count) && !digits.hasPrefix("0")
+                return valid ? "+\(digits)" : nil
+            }
             digits.removeFirst(countryCode.count)
         } else if digits.count == national + 3, digits.hasPrefix("0") {
             digits.removeFirst(3) // trunk 0 + carrier code
