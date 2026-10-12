@@ -299,4 +299,22 @@ public enum ProseioStrings {
     public static var actionShowMore: String { NSLocalizedString("proseio_action_show_more", tableName: "Proseio", bundle: .module, comment: "") }
 
     public static var actionShowLess: String { NSLocalizedString("proseio_action_show_less", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var actionStickers: String { NSLocalizedString("proseio_action_stickers", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersTitle: String { NSLocalizedString("proseio_stickers_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersPackPersonal: String { NSLocalizedString("proseio_stickers_pack_personal", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersPackRoom: String { NSLocalizedString("proseio_stickers_pack_room", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersEmptyTitle: String { NSLocalizedString("proseio_stickers_empty_title", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersEmptyBody: String { NSLocalizedString("proseio_stickers_empty_body", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static var stickersErrorLoad: String { NSLocalizedString("proseio_stickers_error_load", tableName: "Proseio", bundle: .module, comment: "") }
+
+    public static func a11yStickerSend(_ p1: String) -> String {
+        String(format: NSLocalizedString("proseio_a11y_sticker_send", tableName: "Proseio", bundle: .module, comment: ""), p1)
+    }
 }
