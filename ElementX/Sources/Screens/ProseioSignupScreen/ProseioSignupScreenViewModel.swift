@@ -107,6 +107,9 @@ class ProseioSignupScreenViewModel: ProseioSignupScreenViewModelType, ProseioSig
             MXLog.info("Proseio sign-up created \(response.userId)")
             createdEmail = email
             state.isAccountCreated = true
+            if let inviterUserID = response.inviterUserId {
+                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
+            }
             state.bindings.password = ""
             state.bindings.passwordConfirmation = ""
             userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.signupSuccess, icon: \.checkCircle))

@@ -20,10 +20,12 @@ struct ProseioSignupScreenCoordinatorParameters {
 
 enum ProseioSignupScreenCoordinatorAction: CustomStringConvertible {
     case continueWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
+    case createdWithInvite(inviterUserID: String)
     
     var description: String {
         switch self {
         case .continueWithOAuth: "continueWithOAuth"
+        case .createdWithInvite: "createdWithInvite"
         }
     }
 }
@@ -57,6 +59,8 @@ final class ProseioSignupScreenCoordinator: CoordinatorProtocol {
             switch action {
             case .continueWithOAuth(let data, let window):
                 actionsSubject.send(.continueWithOAuth(data: data, window: window))
+            case .createdWithInvite(let inviterUserID):
+                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
             }
         }
         .store(in: &cancellables)

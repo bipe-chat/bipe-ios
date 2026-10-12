@@ -111,6 +111,10 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference(defaultValue: Set<String>())
     var seenInvites: Set<String>
     
+    /// Proseio: the inviter from a personal-invite sign-up, shown once after the first sign-in.
+    @UserPreference
+    var proseioPendingInviterUserID: String?
+    
     /// Defaults to `true` for new users, and we use a migration to set it to `false` for existing users.
     @UserPreference(defaultValue: true)
     var hasSeenNewSoundBanner: Bool

@@ -14,6 +14,7 @@ class ProseioInvitesScreenViewModel: ProseioInvitesScreenViewModelType, ProseioI
     private let apiClient: ProseioAPIClient
     private let clientProxy: ClientProxyProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
+    private let store: ProseioInviteStore
     
     private let actionsSubject: PassthroughSubject<ProseioInvitesScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<ProseioInvitesScreenViewModelAction, Never> {
@@ -26,8 +27,11 @@ class ProseioInvitesScreenViewModel: ProseioInvitesScreenViewModelType, ProseioI
         self.apiClient = apiClient
         self.clientProxy = clientProxy
         self.userIndicatorController = userIndicatorController
+        store = ProseioInviteStore(userID: clientProxy.userID)
         
-        super.init(initialViewState: ProseioInvitesScreenViewState())
+        var initialState = ProseioInvitesScreenViewState()
+        initialState.shareURLs = store.links()
+        super.init(initialViewState: initialState)
         
         Task { await load() }
     }
@@ -56,6 +60,12 @@ class ProseioInvitesScreenViewModel: ProseioInvitesScreenViewModelType, ProseioI
             state.available = myInvites.available
             state.nextAvailableAt = myInvites.nextAvailableAt
             state.invites = myInvites.invites
+            // Forget links of invites that can no longer be used; the list itself shows who joined.
+            let pendingIDs = Set(myInvites.invites.filter { $0.status == .pending }.map(\.id))
+            store.keepLinks(forPendingInviteIDs: pendingIDs)
+            state.shareURLs = state.shareURLs.filter { pendingIDs.contains($0.key) }
+            let joinedIDs = Set(myInvites.invites.filter { $0.status == .used }.map(\.id))
+            store.setSeenJoinedInviteIDs((store.seenJoinedInviteIDs() ?? []).union(joinedIDs))
         } catch {
             MXLog.error("Proseio invites load failed: \(error)")
             show(error)
@@ -74,6 +84,7 @@ class ProseioInvitesScreenViewModel: ProseioInvitesScreenViewModelType, ProseioI
             }
             MXLog.info("Proseio invite created \(created)")
             state.shareURLs[created.id] = created.url
+            store.saveLink(created.url, forInviteID: created.id)
             await load()
         } catch {
             MXLog.error("Proseio invite creation failed: \(error)")

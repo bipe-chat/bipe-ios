@@ -13,7 +13,7 @@ This repo is Proseio's iOS app: a fork of Element X iOS (AGPL-3.0). Upstream con
 
 ## Upstream
 
-- `upstream` = element-hq/element-x-ios (push disabled). `origin` = michellzappa/proseio-ios. Local `main` tracks `origin/main`.
+- `upstream` = element-hq/element-x-ios (push disabled). `origin` = proseio/proseio-ios. Local `main` tracks `origin/main`.
 - Rebase: `git fetch upstream && git rebase upstream/develop`.
 - git-lfs is not installed on the dev Mac. The LFS filter is overridden in this clone's local config; LFS files (snapshots, dev media) are pointers. Snapshot tests need git-lfs.
 
@@ -102,12 +102,13 @@ Not done (needs the domain, Apple team or brand):
 
 ## Design tokens
 
-- Compound tokens come from the Proseio fork **michellzappa/compound-design-tokens** (local clone `~/Dev/Proseio/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
+- Compound tokens come from the Proseio fork **proseio/compound-design-tokens** (local clone `~/Dev/Proseio/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
 - `Tools/XcodeGen/mirrors.json` maps Element's URL to the fork for every package. `postGenCommand.sh` copies it into the workspace on each `xcodegen`.
 - `compound-ios/Package.swift` pins the fork's version tag (`exact:`). Bump it when the fork gets a new tag.
 - `ORGANIZATIONNAME` in `project.yml` (file headers)
 - **Telemetry off (done 11 Oct 2026):** `Components/Secrets/Secrets.swift` sets Sentry, PostHog and rageshake to `nil`. That also disables Element Call analytics, which only switch on when app analytics exist. If `Secrets.swift` is ever regenerated from `Secrets.pkl`, keep these `nil`. Later: remove the Sentry and PostHog packages from `project.yml` to cut build size.
 - **Server (done 11 Oct 2026):** default account provider `proseio.com.br` (base `https://matrix.proseio.com.br`), picker hidden (`allowOtherAccountProviders = false`), push gateway `https://push.proseio.com.br` (Sygnal, issue #61; never matrix.org).
+- **TestFlight signing (11 Oct 2026):** xcodebuild cannot use the account signed in to the Xcode GUI, so it cannot regenerate profiles. `testflight.sh` signs in with the App Store Connect API key "Proseio CI" (`M2VUX56QAJ`, App Manager, `~/.config/proseio/`). App Manager keys cannot use cloud signing, so export uses manual App Store profiles made in the developer portal with the local "Apple Distribution: CENTAUR LABS OU" certificate (expires 20 Mar 2027): "Proseio App Store", "Proseio NSE App Store", "Proseio Share App Store" (`Tools/Proseio/ExportAppStore.plist`). **After any capability change on an App ID, regenerate its profile in the portal and install it in `~/Library/Developer/Xcode/UserData/Provisioning Profiles/`.**
 - **TestFlight:** `Tools/Proseio/testflight.sh` archives Release with a UTC timestamp build number and uploads with `Tools/Proseio/ExportAppStore.plist`. Plan: `docs/testflight-plan.md`.
 
 ## Troubleshooting
