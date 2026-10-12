@@ -5,12 +5,14 @@
 //
 
 import Compound
+import PhotosUI
 import ProseioKit
 import SwiftUI
 import UniformTypeIdentifiers
 
 struct ProseioStickerPickerScreen: View {
     @Bindable var context: ProseioStickerPickerScreenViewModel.Context
+    @State private var selectedPhoto: PhotosPickerItem?
     
     private let columns = [GridItem(.adaptive(minimum: 80, maximum: 120), spacing: 12)]
     
@@ -26,9 +28,21 @@ struct ProseioStickerPickerScreen: View {
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Button(ProseioStrings.stickersImportAction) {
-                        context.send(viewAction: .showImportHelp)
+                    Menu {
+                        Button {
+                            context.isShowingPhotoPicker = true
+                        } label: {
+                            Label(ProseioStrings.stickersFromPhoto, icon: \.image)
+                        }
+                        Button {
+                            context.send(viewAction: .showImportHelp)
+                        } label: {
+                            Label(ProseioStrings.stickersImportAction, icon: \.download)
+                        }
+                    } label: {
+                        CompoundIcon(\.plus)
                     }
+                    .accessibilityLabel(L10n.actionCreate)
                 }
             }
             .disabled(context.viewState.isSending || context.viewState.isImporting)
@@ -39,6 +53,16 @@ struct ProseioStickerPickerScreen: View {
                 Button(L10n.actionCancel, role: .cancel) { }
             } message: {
                 Text(ProseioStrings.stickersImportHelp + "\n\n" + ProseioStrings.stickersImportNote)
+            }
+            .photosPicker(isPresented: $context.isShowingPhotoPicker, selection: $selectedPhoto, matching: .images)
+            .onChange(of: selectedPhoto) { _, item in
+                guard let item else { return }
+                selectedPhoto = nil
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self) {
+                        context.send(viewAction: .makeSticker(data))
+                    }
+                }
             }
             .fileImporter(isPresented: $context.isShowingFileImporter,
                           allowedContentTypes: [.zip, .webP, .png],

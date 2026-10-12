@@ -49,7 +49,7 @@ public enum StickerImporter {
             return nil
         }
         let digest = SHA256.hash(data: data).prefix(8).map { String(format: "%02x", $0) }.joined()
-        return StickerImportCandidate(data: data, mimeType: mimeType, width: width, height: height, shortcode: "wa_\(digest)")
+        return StickerImportCandidate(data: data, mimeType: mimeType, width: width, height: height, shortcode: "st_\(digest)")
     }
 
     // MARK: - Private

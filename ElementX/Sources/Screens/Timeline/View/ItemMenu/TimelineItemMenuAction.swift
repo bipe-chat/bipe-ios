@@ -7,6 +7,7 @@
 //
 
 import OrderedCollections
+import ProseioKit
 import SFSafeSymbols
 import SwiftUI
 
@@ -77,6 +78,8 @@ enum TimelineItemMenuAction: Identifiable, Hashable {
     case unpin
     case viewInRoomTimeline
     case downloadMedia
+    /// Proseio: add a received sticker to "Meus stickers" (ADR 0029).
+    case saveSticker
     
     var id: Self {
         self
@@ -146,6 +149,8 @@ enum TimelineItemMenuAction: Identifiable, Hashable {
         switch self {
         case .copy:
             Label(L10n.actionCopyText, icon: \.copy)
+        case .saveSticker:
+            Label(ProseioStrings.actionSaveSticker, icon: \.sticker)
         case .translate:
             Label(L10n.actionTranslate, icon: \.translate)
         case .copyCaption:

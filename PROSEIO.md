@@ -98,9 +98,10 @@ Not done (needs the domain, Apple team or brand):
 - **Picker:** composer "+" menu → `ComposerAttachmentType.sticker` → `TimelineViewModelAction.displayStickerPicker` → `presentStickerPicker` in `RoomFlowCoordinator` (a sheet, no state machine state). Screen: `ProseioStickerPickerScreen`.
 - **Packs:** MSC2545 (`im.ponies.*`). `StickerPackClient` in ProseioKit reads them over HTTP: the SDK cannot read custom room state under sliding sync, and it cannot observe custom account data. Order: the user's pack, this room's packs, then enabled packs from other rooms.
 - **Send:** `JoinedRoomProxy.sendRaw(eventType: "m.sticker", …)`. The SDK has no typed sticker send. `sendRaw` skips the send queue: no local echo, no retry. In a thread the content carries an `m.thread` relation.
-- **Import:** "Importar do WhatsApp" in the picker opens the file importer for a WhatsApp chat export ZIP, WebP or PNG. `ZipReader` (ProseioKit, Compression framework, no dependency) reads the `.webp` entries. `StickerImporter` checks magic bytes, size (1 MB) and sides (1024 px), derives the shortcode from SHA-256 (`wa_…`), uploads over HTTP and adds the images to `im.ponies.user_emotes`. Same file twice: skipped.
+- **Import:** "Importar do WhatsApp" in the picker opens the file importer for a WhatsApp chat export ZIP, WebP or PNG. `ZipReader` (ProseioKit, Compression framework, no dependency) reads the `.webp` entries. `StickerImporter` checks magic bytes, size (1 MB) and sides (1024 px), derives the shortcode from SHA-256 (`st_…`), uploads over HTTP and adds the images to `im.ponies.user_emotes`. Same file twice: skipped.
 - **Animated WebP:** `LoadableImage` loads `image/webp` as data, like GIF. More than one frame plays in `ProseioAnimatedImage` (ImageIO `CGAnimateImageDataWithBlock`); Kingfisher animates GIF only.
-- Not built yet: making a sticker from a photo, saving a received sticker.
+- **Make from a photo:** the picker's "+" menu → PhotosPicker → `StickerMaker` (ProseioKit) cuts out the subject with Vision (`VNGenerateForegroundInstanceMaskRequest`), or crops a centred square when there is no subject, fits it on a transparent 512 × 512 canvas and encodes PNG. On the device, nothing leaves it before the upload.
+- **Save a received sticker:** timeline menu action `.saveSticker` → `TimelineInteractionHandler.saveSticker` downloads the image and adds it. `ProseioStickerSaver` is the one place that adds stickers to the pack (import, photo, save).
 
 ## Design tokens
 

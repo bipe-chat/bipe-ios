@@ -144,6 +144,9 @@ class TimelineInteractionHandler {
         }
         
         switch action {
+        case .saveSticker:
+            guard let sticker = timelineItem as? StickerRoomTimelineItem else { return }
+            Task { await saveSticker(sticker) }
         case .copy:
             guard let messageTimelineItem = timelineItem as? EventBasedMessageTimelineItemProtocol else { return }
             UIPasteboard.general.string = messageTimelineItem.body
@@ -768,4 +771,23 @@ class TimelineInteractionHandler {
 private struct ReplyInfo {
     let type: TimelineEventContent
     let isThread: Bool
+}
+
+// MARK: - Proseio
+
+extension TimelineInteractionHandler {
+    /// Downloads the sticker and adds it to "Meus stickers" (ADR 0029). The same file twice is kept once.
+    func saveSticker(_ sticker: StickerRoomTimelineItem) async {
+        guard case let .success(data) = await userSession.mediaProvider.loadImageDataFromSource(sticker.imageInfo.source),
+              let candidate = StickerImporter.candidate(from: data) else {
+            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaveFailed))
+            return
+        }
+        switch await ProseioStickerSaver(clientProxy: userSession.clientProxy).add([candidate]) {
+        case .success:
+            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaved, icon: \.checkCircle))
+        case .failure:
+            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaveFailed))
+        }
+    }
 }

@@ -53,6 +53,9 @@ class ProseioStickerPickerScreenViewModel: ProseioStickerPickerScreenViewModelTy
         case .importFiles(let urls):
             guard !state.isImporting else { return }
             Task { await importFiles(urls) }
+        case .makeSticker(let photoData):
+            guard !state.isImporting else { return }
+            Task { await makeSticker(fromPhotoData: photoData) }
         }
     }
     
@@ -95,23 +98,35 @@ class ProseioStickerPickerScreenViewModel: ProseioStickerPickerScreenViewModelTy
             userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportNone))
             return
         }
-        guard let homeserverURL = URL(string: clientProxy.homeserver) else {
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportFailed))
-            return
-        }
         
-        let client = StickerPackClient(homeserverURL: homeserverURL)
-        let userID = clientProxy.userID
-        do {
-            let added = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { token throws(ProseioAPIError) in
-                try await client.importStickers(candidates, userID: userID, accessToken: token)
-            }
+        switch await ProseioStickerSaver(clientProxy: clientProxy).add(candidates) {
+        case .success(let added):
             let title = added > 0 ? ProseioStrings.stickersImportDone(added.formatted()) : ProseioStrings.stickersImportNone
             userIndicatorController.submitIndicator(UserIndicator(title: title))
-        } catch {
-            MXLog.error("Sticker import failed: \(error)")
+        case .failure:
             userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportFailed))
         }
+        await loadPacks()
+    }
+    
+    /// "Make from a photo": cut out the subject on the device and add the result to "Meus stickers".
+    private func makeSticker(fromPhotoData data: Data) async {
+        state.isImporting = true
+        userIndicatorController.submitIndicator(UserIndicator(id: importIndicatorID,
+                                                              type: .modal,
+                                                              title: L10n.commonLoading,
+                                                              persistent: true))
+        defer {
+            state.isImporting = false
+            userIndicatorController.retractIndicatorWithId(importIndicatorID)
+        }
+        
+        guard let candidate = await Task.detached(operation: { StickerMaker.sticker(fromImageData: data) }).value,
+              case .success = await ProseioStickerSaver(clientProxy: clientProxy).add([candidate]) else {
+            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaveFailed))
+            return
+        }
+        userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaved, icon: \.checkCircle))
         await loadPacks()
     }
     

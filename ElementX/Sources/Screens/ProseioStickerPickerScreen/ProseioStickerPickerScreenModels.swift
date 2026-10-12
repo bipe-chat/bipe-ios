@@ -31,6 +31,7 @@ struct ProseioStickerPickerScreenViewState: BindableState {
 struct ProseioStickerPickerScreenViewStateBindings {
     var isShowingImportHelp = false
     var isShowingFileImporter = false
+    var isShowingPhotoPicker = false
 }
 
 enum ProseioStickerPickerScreenViewAction {
@@ -41,4 +42,6 @@ enum ProseioStickerPickerScreenViewAction {
     case showImportHelp
     case chooseImportFiles
     case importFiles([URL])
+    /// The photo picked for "Make from a photo".
+    case makeSticker(Data)
 }
