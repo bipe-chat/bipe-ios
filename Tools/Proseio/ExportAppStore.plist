@@ -5,7 +5,14 @@
   <key>method</key><string>app-store-connect</string>
   <key>destination</key><string>upload</string>
   <key>teamID</key><string>992N457T8D</string>
-  <key>signingStyle</key><string>automatic</string>
+  <key>signingStyle</key><string>manual</string>
+  <key>signingCertificate</key><string>Apple Distribution</string>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>br.com.proseio.app.dev</key><string>Proseio App Store</string>
+    <key>br.com.proseio.app.dev.nse</key><string>Proseio NSE App Store</string>
+    <key>br.com.proseio.app.dev.shareextension</key><string>Proseio Share App Store</string>
+  </dict>
   <key>uploadSymbols</key><true/>
   <key>manageAppVersionAndBuildNumber</key><false/>
 </dict>
