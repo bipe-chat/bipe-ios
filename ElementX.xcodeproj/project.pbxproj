@@ -118,6 +118,7 @@
 		106E3126B0C49231381B5B80 /* AccountUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96792E7EE6742172DA3A35E /* AccountUserDefaultsTests.swift */; };
 		108D3C0707A90B0F848CDBB9 /* ResolveVerifiedUserSendFailureScreenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011EF0086E49DBD78E16E5 /* ResolveVerifiedUserSendFailureScreenModels.swift */; };
 		109AEB7D33C4497727AFB87F /* TimelineInteractionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA894BC09972DC45E497D37 /* TimelineInteractionHandler.swift */; };
+		10A2A7B8295DB70A234E6E7B /* ProseioQuietGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6C8751C0730591575DB569 /* ProseioQuietGroups.swift */; };
 		10D60D287025B71F4743A425 /* RoomDirectorySearchProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471BB7276C97AF60B3A5463B /* RoomDirectorySearchProxy.swift */; };
 		112C6F1C493B3F26AB22716A /* LinkMetadataProviderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6885D1340AA9C76063E26868 /* LinkMetadataProviderProtocol.swift */; };
 		1146E9EDCF8344F7D6E0D553 /* MockCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0376C429FAB1687C3D905F3E /* MockCoder.swift */; };
@@ -3052,6 +3053,7 @@
 		DC0AEA686E425F86F6BA0404 /* UNNotification+Creator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UNNotification+Creator.swift"; sourceTree = "<group>"; };
 		DC10CCC8D68B863E20660DBC /* MessageForwardingScreenViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageForwardingScreenViewModelProtocol.swift; sourceTree = "<group>"; };
 		DC528B3764E3CF7FCFEF40E7 /* PollInteractionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollInteractionHandler.swift; sourceTree = "<group>"; };
+		DC6C8751C0730591575DB569 /* ProseioQuietGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProseioQuietGroups.swift; sourceTree = "<group>"; };
 		DCAC01A97A43BE07B9E94E43 /* ShareExtensionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareExtensionModels.swift; sourceTree = "<group>"; };
 		DCDAB580109C09A6AA97AF7E /* PollFormScreenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollFormScreenTests.swift; sourceTree = "<group>"; };
 		DCF239C619971FDE48132550 /* SecureBackupLogoutConfirmationScreenModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureBackupLogoutConfirmationScreenModels.swift; sourceTree = "<group>"; };
@@ -6381,6 +6383,7 @@
 				7B9FCA1CFD07B8CF9BD21266 /* FlowCoordinatorProtocol.swift */,
 				CEB1C976CD9481B34A4BA32A /* ProseioInviteJoinNotifier.swift */,
 				E92F70E77DA4C3ECEAD21898 /* ProseioInvitePairs.swift */,
+				DC6C8751C0730591575DB569 /* ProseioQuietGroups.swift */,
 				B5D829FD8958376614504B18 /* TargetConfiguration.swift */,
 				780F74C73E826685A9DB289B /* Navigation */,
 				D64E20C9E4C486D5C764D7F3 /* Settings */,
@@ -9318,6 +9321,7 @@
 				5F3BB180D25E499E52484D42 /* ProseioInvitesScreenModels.swift in Sources */,
 				B5F467C0C7A817F9C13A5F64 /* ProseioInvitesScreenViewModel.swift in Sources */,
 				726D93F6788B89C58AC07C62 /* ProseioInvitesScreenViewModelProtocol.swift in Sources */,
+				10A2A7B8295DB70A234E6E7B /* ProseioQuietGroups.swift in Sources */,
 				90E229A629F4A18016B25AF5 /* ProseioRecordingPauseButton.swift in Sources */,
 				1FD49BD16A4FB2E8497D51A1 /* ProseioRequestsRow.swift in Sources */,
 				94E8BF370FCB77FC2E886111 /* ProseioScamWarningView.swift in Sources */,

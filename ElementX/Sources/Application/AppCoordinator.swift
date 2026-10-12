@@ -755,6 +755,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             }
         }
         
+        Task { await ProseioQuietGroups(clientProxy: userSession.clientProxy).run() } // Proseio: proseio#97
+        
         if let storedInlineReply {
             await processInlineReply(roomID: storedInlineReply.roomID, replyText: storedInlineReply.message)
         }
