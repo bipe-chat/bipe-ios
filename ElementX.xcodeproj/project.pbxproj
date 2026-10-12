@@ -346,6 +346,7 @@
 		355B11D08CE0CEF97A813236 /* AppRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A9E3FBE8A66B5A17AD7F74 /* AppRoutes.swift */; };
 		3582056513A384F110EC8274 /* MediaPlayerProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D7A2C4A3A74F0D2FFE9356A /* MediaPlayerProviderTests.swift */; };
 		358290C2E4574456FE0C2DF6 /* LocationSharingScreenViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B73675A21580971E9ADF66A /* LocationSharingScreenViewModelProtocol.swift */; };
+		35A2A50349C6F21F61770415 /* ProseioMissedSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5934709923AC6AA2286606 /* ProseioMissedSummaryView.swift */; };
 		35E975CFDA60E05362A7CF79 /* target.yml in Resources */ = {isa = PBXBuildFile; fileRef = 1222DB76B917EB8A55365BA5 /* target.yml */; };
 		36206F74DDEBF9BEAF6A6A1F /* ExtensionLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A8571A8A071FB41778C016 /* ExtensionLogger.swift */; };
 		3683C4C0DBFA397BE0105B0D /* NotificationTone.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF08D6FC1919CB804A9191E8 /* NotificationTone.swift */; };
@@ -1298,6 +1299,7 @@
 		C6C06DDA8881260303FBA3A0 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2141693488CE5446BB391964 /* Date.swift */; };
 		C76892321558E75101E68ED6 /* ReadableFrameModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398817652FA8ABAE0A31AC6D /* ReadableFrameModifier.swift */; };
 		C7774720A4B2E34693E3227C /* RoomNotificationSettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8896CDD20CA2D87EA3B848A1 /* RoomNotificationSettingsScreen.swift */; };
+		C7848112F422CB018D0F0761 /* ProseioMissedSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB219CA13AE2E515A789FBDD /* ProseioMissedSummary.swift */; };
 		C797C0B4CF45C66CD1921252 /* SoftLogoutScreenViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC43313F21511C853D34544E /* SoftLogoutScreenViewModelTests.swift */; };
 		C7ABEBECDC513F7887DACF66 /* ProgressMaskModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68010886142843705E342645 /* ProgressMaskModifier.swift */; };
 		C7CEFC1FB0547CFC8F5C84EF /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78C13EF5035879B6131030F /* Room.swift */; };
@@ -2964,6 +2966,7 @@
 		CA90BD288E5AE6BC643AFDDF /* TemplateScreenCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateScreenCoordinator.swift; sourceTree = "<group>"; };
 		CACA846B3E3E9A521D98B178 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CB04B2D794885025DACFCEFB /* SnapshotableGlassEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotableGlassEffect.swift; sourceTree = "<group>"; };
+		CB219CA13AE2E515A789FBDD /* ProseioMissedSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProseioMissedSummary.swift; sourceTree = "<group>"; };
 		CB7B588A06911B455AC0B4C9 /* ManageRoomMemberSheetViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageRoomMemberSheetViewModelProtocol.swift; sourceTree = "<group>"; };
 		CB98BFD8E93C7FCCEDEC46F9 /* SpacesScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacesScreenViewModel.swift; sourceTree = "<group>"; };
 		CBF9AEA706926DD0DA2B954C /* JoinedRoomSize+MemberCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JoinedRoomSize+MemberCount.swift"; sourceTree = "<group>"; };
@@ -3223,6 +3226,7 @@
 		FA2397174D0DC3918A7A8A7B /* AnalyticsConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsConfiguration.swift; sourceTree = "<group>"; };
 		FA393404F96DFB505B86E913 /* CurrentValuePublisherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentValuePublisherTests.swift; sourceTree = "<group>"; };
 		FA3EB5B1848CF4F64E63C6B7 /* PermalinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermalinkTests.swift; sourceTree = "<group>"; };
+		FA5934709923AC6AA2286606 /* ProseioMissedSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProseioMissedSummaryView.swift; sourceTree = "<group>"; };
 		FA723686F23EF45E2B398FBC /* TestablePreviewsDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestablePreviewsDictionary.swift; sourceTree = "<group>"; };
 		FA7BB497B2F539C17E88F6B7 /* NotificationSettingsEditScreenViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsEditScreenViewModelProtocol.swift; sourceTree = "<group>"; };
 		FABAC5C4373B0EC24D399663 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/SAS.strings"; sourceTree = "<group>"; };
@@ -3703,6 +3707,7 @@
 		15D44FCA9475E660B7F56DB9 /* Timeline */ = {
 			isa = PBXGroup;
 			children = (
+				CB219CA13AE2E515A789FBDD /* ProseioMissedSummary.swift */,
 				2BA894BC09972DC45E497D37 /* TimelineInteractionHandler.swift */,
 				029D5701F80A9AF7167BB4D0 /* TimelineModels.swift */,
 				8112846C9D9D3817689CBAF8 /* TimelineTableViewController.swift */,
@@ -6915,6 +6920,7 @@
 				3F54FA7C5CB7B342EF9B9B2F /* NoticeRoomTimelineView.swift */,
 				4E7F7A975514E850A834B29F /* PaginationIndicatorRoomTimelineView.swift */,
 				AF8548D48512127CCC17C520 /* PollRoomTimelineView.swift */,
+				FA5934709923AC6AA2286606 /* ProseioMissedSummaryView.swift */,
 				5501E386A1DCBEF6733787CB /* ProseioScamWarningView.swift */,
 				7EA56BC4FAC339FB2F3D8AA7 /* ProseioVoiceTranscriptView.swift */,
 				012A284622B32052015F1F89 /* ReadMarkerRoomTimelineView.swift */,
@@ -9321,6 +9327,8 @@
 				5F3BB180D25E499E52484D42 /* ProseioInvitesScreenModels.swift in Sources */,
 				B5F467C0C7A817F9C13A5F64 /* ProseioInvitesScreenViewModel.swift in Sources */,
 				726D93F6788B89C58AC07C62 /* ProseioInvitesScreenViewModelProtocol.swift in Sources */,
+				C7848112F422CB018D0F0761 /* ProseioMissedSummary.swift in Sources */,
+				35A2A50349C6F21F61770415 /* ProseioMissedSummaryView.swift in Sources */,
 				10A2A7B8295DB70A234E6E7B /* ProseioQuietGroups.swift in Sources */,
 				90E229A629F4A18016B25AF5 /* ProseioRecordingPauseButton.swift in Sources */,
 				1FD49BD16A4FB2E8497D51A1 /* ProseioRequestsRow.swift in Sources */,
