@@ -51,7 +51,8 @@ struct AuthenticationStartScreen: View {
             .scrollBounceBehavior(.basedOnSize)
         }
         .background {
-            AuthenticationStartScreenBackgroundImage()
+            // Bipe: açaí background instead of Element's launch artwork.
+            BipeWelcomeBackground()
         }
         .navigationBarHidden(context.viewState.classicAppMode == nil)
         .toolbar { toolbar }
@@ -62,39 +63,8 @@ struct AuthenticationStartScreen: View {
     }
     
     var content: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            
-            if verticalSizeClass == .regular {
-                Spacer()
-                
-                AuthenticationStartLogo(hideBrandChrome: context.viewState.hideBrandChrome,
-                                        isOnGradient: !context.viewState.hideBrandChrome)
-            }
-            
-            Spacer()
-            
-            if !context.viewState.hideBrandChrome {
-                VStack(spacing: 8) {
-                    Text(L10n.screenOnboardingWelcomeTitle)
-                        .font(.compound.headingLGBold)
-                        .foregroundColor(.compound.textPrimary)
-                        .multilineTextAlignment(.center)
-                        .accessibilityAddTraits(.isHeader)
-                    Text(L10n.screenOnboardingWelcomeMessage(InfoPlistReader.main.productionAppName))
-                        .font(.compound.bodyLG)
-                        .foregroundColor(.compound.textPrimary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding()
-                .fixedSize(horizontal: false, vertical: true)
-            }
-            
-            Spacer()
-        }
-        .padding(.bottom)
-        .padding(.horizontal, 16)
-        .readableFrame()
+        // Bipe: logo, promise and value points instead of Element's logo and welcome text.
+        BipeWelcomeView()
     }
     
     /// The main action buttons.

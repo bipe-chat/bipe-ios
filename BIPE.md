@@ -70,6 +70,7 @@ Done: display name and production app name ("Bipe", ADR 0054; the code name stay
 
 - **OAuth login:** redirect is the private-use scheme `<bundle id>:/oauth/callback` (RFC 8252); client URI, logo, terms and privacy URLs are on `https://bipe.chat/...` (client URI `https://bipe.chat/apps/ios`) because MAS requires them on the client URI host and requires the scheme to be the reverse of that host. Pages do not exist yet. **Verified 11 October 2026:** sign-in to matrix.org works end to end on a device (MAS dynamic registration accepted the client).
 - **Accent colour:** açaí `acai.1100` (`#80307B` light, `#D993D2` dark; high contrast `#5D1D59` / `#ECC0E7`) in `accent-color.colorset`. See proseio/docs/design/identity.md.
+- **Welcome screen:** `BipeWelcomeView` and `BipeWelcomeBackground` (`Screens/Authentication/StartScreen/View`) replace Element's logo, welcome text and launch artwork on the start screen. Copy: `bipe_onboarding_*` in proseio-shared. Android: `BipeWelcomeView` in libraries/bipe.
 - **App icon:** the web mark (`proseio-web/public/brand/app-icon.svg`, white seal-tail bubble on `acai.1100`, tight corner top left so it reads as a "b") rendered full-bleed at 1024 px; iOS applies the corner mask. iOS and web share one icon. Final designer artwork replaces both at once.
 
 Entitlements removed from the fork (they block provisioning outside Element's team):
@@ -89,7 +90,7 @@ Left on purpose: `elementWebHosts` and `accountProvisioningHost` (link parsing o
 Not done (needs the domain, Apple team or brand):
 - Help pages on `bipe.chat` for the hidden "Learn more" links
 - Element Classic migration settings in `app.yml`
-- Final app icon artwork, onboarding copy
+- Final app icon artwork
 
 ## Voice messages (proseio/docs/audio.md, ADR 0023)
 
