@@ -112,7 +112,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             }
             state.bindings.password = ""
             state.bindings.passwordConfirmation = ""
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.signupSuccess, icon: \.checkCircle))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.signupSuccess, icon: \.checkCircle))
             return true
         } catch {
             MXLog.error("Bipe sign-up failed: \(error)")
@@ -128,7 +128,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         if preview.valid {
             state.inviterHandle = preview.inviterHandle
         } else {
-            state.inviteCodeError = ProseioStrings.errorInviteInvalid
+            state.inviteCodeError = BipeStrings.errorInviteInvalid
         }
     }
 

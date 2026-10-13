@@ -41,7 +41,7 @@ struct SettingsScreen: View {
         .compoundList()
         // Bipe: reloads the handle on first show and after returning from a pushed screen.
         .onAppear { context.send(viewAction: .bipeLoadHandle) }
-        .navigationTitle(context.viewState.bipeIsInTab ? ProseioStrings.tabYou : L10n.commonSettings)
+        .navigationTitle(context.viewState.bipeIsInTab ? BipeStrings.tabYou : L10n.commonSettings)
         .navigationBarTitleDisplayMode(context.viewState.bipeIsInTab ? .large : .inline)
         .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)
         .toolbar { if !context.viewState.bipeIsInTab { toolbar } }
@@ -192,34 +192,34 @@ struct SettingsScreen: View {
                                   items: AppAppearance.allCases.map { (title: $0.name, tag: $0) }))
             
             if context.viewState.showBipeHandle {
-                ListRow(label: .default(title: ProseioStrings.settingsHandle,
+                ListRow(label: .default(title: BipeStrings.settingsHandle,
                                         icon: \.userProfile),
-                        details: .title(context.viewState.bipeHandle.map { "@\($0)" } ?? ProseioStrings.settingsHandleNone),
+                        details: .title(context.viewState.bipeHandle.map { "@\($0)" } ?? BipeStrings.settingsHandleNone),
                         kind: .navigationLink {
                             context.send(viewAction: .bipeHandle)
                         })
                 
-                ListRow(label: .default(title: ProseioStrings.settingsPublicProfile,
+                ListRow(label: .default(title: BipeStrings.settingsPublicProfile,
                                         icon: \.webBrowser),
-                        details: context.viewState.bipePublicProfileEnabled.map { .title($0 ? ProseioStrings.publicProfileOn : ProseioStrings.publicProfileOff) },
+                        details: context.viewState.bipePublicProfileEnabled.map { .title($0 ? BipeStrings.publicProfileOn : BipeStrings.publicProfileOff) },
                         kind: .navigationLink {
                             context.send(viewAction: .bipePublicProfile)
                         })
                 
-                ListRow(label: .default(title: ProseioStrings.messagingTitle,
+                ListRow(label: .default(title: BipeStrings.messagingTitle,
                                         icon: \.chat),
                         details: context.viewState.bipeWhoCanMessage.map { .title($0.title) },
                         kind: .navigationLink {
                             context.send(viewAction: .bipeMessaging)
                         })
                 
-                ListRow(label: .default(title: ProseioStrings.invitesTitle,
+                ListRow(label: .default(title: BipeStrings.invitesTitle,
                                         icon: \.userAdd),
                         kind: .navigationLink {
                             context.send(viewAction: .bipeInvites)
                         })
                 
-                ListRow(label: .default(title: ProseioStrings.contactsTitle,
+                ListRow(label: .default(title: BipeStrings.contactsTitle,
                                         icon: \.userProfile),
                         kind: .navigationLink {
                             context.send(viewAction: .bipeContacts)
@@ -227,8 +227,8 @@ struct SettingsScreen: View {
             }
             
             // Bipe: pt-BR / en switch lives in iOS per-app language settings.
-            ListRow(label: .default(title: ProseioStrings.settingsLanguage,
-                                    description: ProseioStrings.settingsLanguageFooter,
+            ListRow(label: .default(title: BipeStrings.settingsLanguage,
+                                    description: BipeStrings.settingsLanguageFooter,
                                     icon: \.translate),
                     kind: .button {
                         if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }

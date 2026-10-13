@@ -19,10 +19,10 @@ public nonisolated enum ScamDetector {
 
         // The reference matches phrases on the normalised message without homoglyph folding.
         let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
-        for phrase in ProseioRegistries.urgencyPhrases where containsCodeUnits(normalized, phrase) {
+        for phrase in BipeRegistries.urgencyPhrases where containsCodeUnits(normalized, phrase) {
             ids.append("urgency:\(phrase)")
         }
-        for keyword in ProseioRegistries.receiptKeywords where containsCodeUnits(normalized, keyword) {
+        for keyword in BipeRegistries.receiptKeywords where containsCodeUnits(normalized, keyword) {
             ids.append("receipt:\(keyword)")
         }
         return ids
@@ -37,10 +37,10 @@ public nonisolated enum ScamDetector {
 
     private static let compiledPatterns: [CompiledPattern] = {
         let groups: [(name: String, patterns: [ScamPattern])] = [
-            ("pixKeyPatterns", ProseioRegistries.pixKeyPatterns),
-            ("pixCopyPastePatterns", ProseioRegistries.pixCopyPastePatterns),
-            ("boletoPatterns", ProseioRegistries.boletoPatterns),
-            ("linkPatterns", ProseioRegistries.linkPatterns)
+            ("pixKeyPatterns", BipeRegistries.pixKeyPatterns),
+            ("pixCopyPastePatterns", BipeRegistries.pixCopyPastePatterns),
+            ("boletoPatterns", BipeRegistries.boletoPatterns),
+            ("linkPatterns", BipeRegistries.linkPatterns)
         ]
         // proseio-shared validates every regex at generation time, so a compile failure here is not expected.
         return groups.flatMap { group in

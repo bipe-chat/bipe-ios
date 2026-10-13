@@ -41,7 +41,7 @@ struct BipeInviteJoinNotifier {
             guard let userID = invite.joinedUserId else { continue }
             _ = await handleResolver?.resolve(userID)
             let name = handleResolver?.displayText(for: userID) ?? userID
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.invitesJoined(name), icon: \.userAdd))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.invitesJoined(name), icon: \.userAdd))
         }
     }
 }

@@ -15,7 +15,7 @@ struct BipeScamWarningView: View {
     var body: some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
-                Text(ProseioStrings.scamWarningTitle)
+                Text(BipeStrings.scamWarningTitle)
                     .font(.compound.bodySMSemibold)
                 Text(kind.message)
                     .font(.compound.bodySM)

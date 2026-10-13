@@ -22,15 +22,15 @@ public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
     /// The pt-BR first explanation. It never says the message IS a scam.
     public var message: String {
         switch self {
-        case .pixCode: ProseioStrings.scamWarningPixCode
-        case .boleto: ProseioStrings.scamWarningBoleto
-        case .pixKey: ProseioStrings.scamWarningPixKey
-        case .deliveryFee: ProseioStrings.scamWarningDeliveryFee
-        case .lookalikeLink: ProseioStrings.scamWarningLookalikeLink
-        case .bankAlert: ProseioStrings.scamWarningBankAlert
-        case .receipt: ProseioStrings.scamWarningReceipt
-        case .newNumber: ProseioStrings.scamWarningNewNumber
-        case .urgency: ProseioStrings.scamWarningUrgency
+        case .pixCode: BipeStrings.scamWarningPixCode
+        case .boleto: BipeStrings.scamWarningBoleto
+        case .pixKey: BipeStrings.scamWarningPixKey
+        case .deliveryFee: BipeStrings.scamWarningDeliveryFee
+        case .lookalikeLink: BipeStrings.scamWarningLookalikeLink
+        case .bankAlert: BipeStrings.scamWarningBankAlert
+        case .receipt: BipeStrings.scamWarningReceipt
+        case .newNumber: BipeStrings.scamWarningNewNumber
+        case .urgency: BipeStrings.scamWarningUrgency
         }
     }
 }
@@ -67,7 +67,7 @@ public extension ScamDetector {
             case .pixCode: groups.contains("pixCopyPastePatterns")
             case .boleto: groups.contains("boletoPatterns")
             // A phone number or e-mail alone is normal chat. Warn only when the message also talks about Pix.
-            case .pixKey: groups.contains("pixKeyPatterns") && containsAny(normalized, ProseioRegistries.pixKeyContextWords)
+            case .pixKey: groups.contains("pixKeyPatterns") && containsAny(normalized, BipeRegistries.pixKeyContextWords)
             // The fake-delivery fee scam: a link, and the message talks about a held parcel and a fee.
             case .deliveryFee: !hosts.isEmpty && deliveryWordLists.allSatisfy { containsAny(normalized, $0) }
             // A link that copies a bank, government or company address, also when spelled with homoglyphs.
@@ -76,9 +76,9 @@ public extension ScamDetector {
             case .bankAlert: !hosts.isEmpty && bankAlertWordLists.allSatisfy { containsAny(normalized, $0) }
             case .receipt: groups.contains("receipt")
             // The falso parente opener. On Bipe it says new account, which is normal chat without a family term or urgency.
-            case .newNumber: phrases.contains { ProseioRegistries.newNumberPhrases.contains($0) }
-                || (containsAny(normalized, ProseioRegistries.newAccountPhrases)
-                    && (!phrases.isEmpty || containsWord(normalized, ProseioRegistries.familyTerms)))
+            case .newNumber: phrases.contains { BipeRegistries.newNumberPhrases.contains($0) }
+                || (containsAny(normalized, BipeRegistries.newAccountPhrases)
+                    && (!phrases.isEmpty || containsWord(normalized, BipeRegistries.familyTerms)))
             case .urgency: !phrases.isEmpty
             }
         }
@@ -94,7 +94,7 @@ public extension ScamDetector {
     /// Every link host in the message. Must match proseio-shared `linkHosts`.
     static func linkHosts(in message: String) -> [LinkHost] {
         let plain = NameNormalizer.normalize(message, homoglyphs: [:]) as NSString
-        let folded = NameNormalizer.normalize(message, homoglyphs: ProseioRegistries.hostHomoglyphs) as NSString
+        let folded = NameNormalizer.normalize(message, homoglyphs: BipeRegistries.hostHomoglyphs) as NSString
         // proseio-shared validates that host folding keeps every UTF-16 index. An empty plain host is never official.
         let aligned = plain.length == folded.length
         return linkExpressions.flatMap { expression in
@@ -115,27 +115,27 @@ public extension ScamDetector {
     private static let warningCache = Mutex<[String: CachedWarning]>([:])
 
     /// proseio-shared validates that the priority lists every kind once, so `compactMap` drops nothing.
-    private static let warningKindPriority = ProseioRegistries.scamWarningKindPriority.compactMap(ScamWarningKind.init(rawValue:))
+    private static let warningKindPriority = BipeRegistries.scamWarningKindPriority.compactMap(ScamWarningKind.init(rawValue:))
 
     private static let deliveryWordLists = [
-        ProseioRegistries.deliveryParcelWords,
-        ProseioRegistries.deliveryHoldWords,
-        ProseioRegistries.deliveryFeeWords
+        BipeRegistries.deliveryParcelWords,
+        BipeRegistries.deliveryHoldWords,
+        BipeRegistries.deliveryFeeWords
     ]
 
     private static let bankAlertWordLists = [
-        ProseioRegistries.bankAlertSubjectWords,
-        ProseioRegistries.bankAlertThreatWords
+        BipeRegistries.bankAlertSubjectWords,
+        BipeRegistries.bankAlertThreatWords
     ]
 
     // proseio-shared validates every regex at generation time, so a compile failure here is not expected.
-    private static let linkExpressions = ProseioRegistries.linkPatterns.compactMap { try? NSRegularExpression(pattern: $0.regex) }
+    private static let linkExpressions = BipeRegistries.linkPatterns.compactMap { try? NSRegularExpression(pattern: $0.regex) }
 
     /// True when the host copies a brand: its folded form names a brand and its plain form is not that brand's domain.
     private static func isLookalike(_ host: LinkHost) -> Bool {
         let squashed = host.folded.replacingOccurrences(of: ".", with: "").replacingOccurrences(of: "-", with: "")
-        guard ProseioRegistries.lookalikeBrandTokens.contains(where: { containsCodeUnits(squashed, $0) }) else { return false }
-        return !ProseioRegistries.officialDomains.contains { host.plain == $0 || host.plain.hasSuffix(".\($0)") }
+        guard BipeRegistries.lookalikeBrandTokens.contains(where: { containsCodeUnits(squashed, $0) }) else { return false }
+        return !BipeRegistries.officialDomains.contains { host.plain == $0 || host.plain.hasSuffix(".\($0)") }
     }
 
     private static func containsAny(_ normalized: String, _ words: [String]) -> Bool {

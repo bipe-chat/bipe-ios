@@ -42,7 +42,7 @@ enum RoomListFilter: Int, CaseIterable, Identifiable {
         case .favourites:
             return L10n.screenRoomlistFilterFavourites
         case .invites:
-            return ProseioStrings.requestsTitle // Bipe: invites are message requests.
+            return BipeStrings.requestsTitle // Bipe: invites are message requests.
         case .lowPriority:
             return L10n.screenRoomlistFilterLowPriority
         }

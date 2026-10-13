@@ -24,7 +24,7 @@ struct BipeHandleScreen: View {
             .padding(16)
         }
         .background(Color.compound.bgCanvasDefault.ignoresSafeArea())
-        .navigationTitle(ProseioStrings.settingsHandle)
+        .navigationTitle(BipeStrings.settingsHandle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
@@ -38,10 +38,10 @@ struct BipeHandleScreen: View {
     
     private var handleField: some View {
         TextField(text: $context.handle) {
-                Text(ProseioStrings.handlePlaceholder).foregroundColor(.compound.textSecondary)
+                Text(BipeStrings.handlePlaceholder).foregroundColor(.compound.textSecondary)
             }
             .focused($isFocused)
-            .textFieldStyle(.compound(labelText: ProseioStrings.settingsHandle,
+            .textFieldStyle(.compound(labelText: BipeStrings.settingsHandle,
                                       footerText: context.viewState.footer,
                                       state: context.viewState.fieldState))
             .textInputAutocapitalization(.never)
@@ -58,12 +58,12 @@ struct BipeHandleScreen: View {
             VStack(spacing: 16) {
                 BipeQRCodeView(url: url)
                     .frame(maxWidth: 220)
-                Text(ProseioStrings.profileQrFooter)
+                Text(BipeStrings.profileQrFooter)
                     .font(.compound.bodySM)
                     .foregroundStyle(.compound.textSecondary)
                     .multilineTextAlignment(.center)
                 ShareLink(item: url) {
-                    Label(ProseioStrings.profileShare, icon: \.shareIos)
+                    Label(BipeStrings.profileShare, icon: \.shareIos)
                 }
                 .buttonStyle(.compound(.secondary, size: .medium))
             }

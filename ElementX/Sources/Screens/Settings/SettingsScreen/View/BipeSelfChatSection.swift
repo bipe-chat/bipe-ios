@@ -14,8 +14,8 @@ struct BipeSelfChatSection: View {
 
     var body: some View {
         Section {
-            ListRow(label: .default(title: ProseioStrings.selfChatTitle,
-                                    description: ProseioStrings.selfChatSubtitle,
+            ListRow(label: .default(title: BipeStrings.selfChatTitle,
+                                    description: BipeStrings.selfChatSubtitle,
                                     icon: \.edit),
                     kind: .navigationLink(action: action))
         }

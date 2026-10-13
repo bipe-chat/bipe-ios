@@ -30,9 +30,9 @@ struct BipeHandleScreenViewState: BindableState {
     var footer: String {
         if let handleError { return handleError }
         if isInCooldown, let changeableAt {
-            return ProseioStrings.handleCooldownUntil(changeableAt.formatted(date: .long, time: .shortened))
+            return BipeStrings.handleCooldownUntil(changeableAt.formatted(date: .long, time: .shortened))
         }
-        return handleStatus.footer(defaultText: ProseioStrings.handleScreenFooter)
+        return handleStatus.footer(defaultText: BipeStrings.handleScreenFooter)
     }
     
     var fieldState: CompoundTextFieldStyle.State {

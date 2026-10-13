@@ -13,9 +13,9 @@ struct BipeUnverifiedRequestCard: View {
     var body: some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
-                Text(ProseioStrings.bannerUnverifiedTitle)
+                Text(BipeStrings.bannerUnverifiedTitle)
                     .font(.compound.bodyMDSemibold)
-                Text(ProseioStrings.requestUnverifiedBody)
+                Text(BipeStrings.requestUnverifiedBody)
                     .font(.compound.bodySM)
             }
             .foregroundStyle(.compound.textTrustNeutral)

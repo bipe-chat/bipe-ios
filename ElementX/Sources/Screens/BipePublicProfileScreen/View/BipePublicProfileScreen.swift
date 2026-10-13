@@ -31,11 +31,11 @@ struct BipePublicProfileScreen: View {
         }
         .compoundList()
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle(ProseioStrings.settingsPublicProfile)
+        .navigationTitle(BipeStrings.settingsPublicProfile)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button(ProseioStrings.publicProfileSave, action: save)
+                Button(BipeStrings.publicProfileSave, action: save)
                     .disabled(!context.viewState.canSave)
             }
         }
@@ -54,23 +54,23 @@ struct BipePublicProfileScreen: View {
 
     private var needsHandleSection: some View {
         Section {
-            ListRow(label: .default(title: ProseioStrings.settingsHandle, icon: \.userProfile),
+            ListRow(label: .default(title: BipeStrings.settingsHandle, icon: \.userProfile),
                     kind: .navigationLink {
                         context.send(viewAction: .openHandle)
                     })
         } footer: {
-            Text(ProseioStrings.publicProfileNeedsHandle)
+            Text(BipeStrings.publicProfileNeedsHandle)
                 .compoundListSectionFooter()
         }
     }
 
     private var toggleSection: some View {
         Section {
-            ListRow(label: .default(title: ProseioStrings.publicProfileToggle, icon: \.webBrowser),
+            ListRow(label: .default(title: BipeStrings.publicProfileToggle, icon: \.webBrowser),
                     kind: .toggle($context.isEnabled))
                 .disabled(context.viewState.isLoading || context.viewState.handle == nil)
         } footer: {
-            Text(ProseioStrings.publicProfileFooter)
+            Text(BipeStrings.publicProfileFooter)
                 .compoundListSectionFooter()
         }
     }
@@ -86,12 +86,12 @@ struct BipePublicProfileScreen: View {
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
                     // The label builder isn't isolated in SwiftUI's signature but is only ever called on the main actor.
                     MainActor.assumeIsolated {
-                        ListRowLabel.action(title: ProseioStrings.publicProfilePhotoChange, icon: \.takePhoto)
+                        ListRowLabel.action(title: BipeStrings.publicProfilePhotoChange, icon: \.takePhoto)
                     }
                 }
             })
             if context.viewState.hasPhoto {
-                ListRow(label: .action(title: ProseioStrings.publicProfilePhotoRemove, icon: \.delete, role: .destructive),
+                ListRow(label: .action(title: BipeStrings.publicProfilePhotoRemove, icon: \.delete, role: .destructive),
                         kind: .button {
                             context.send(viewAction: .removePhoto)
                         })
@@ -133,12 +133,12 @@ struct BipePublicProfileScreen: View {
 
     private var nameSection: some View {
         Section {
-            ListRow(label: .plain(title: ProseioStrings.publicProfileName),
+            ListRow(label: .plain(title: BipeStrings.publicProfileName),
                     kind: .textField(text: $context.name, axis: .horizontal))
                 .focused($focus, equals: .name)
                 .disabled(context.viewState.isLoading)
         } header: {
-            Text(ProseioStrings.publicProfileName)
+            Text(BipeStrings.publicProfileName)
                 .compoundListSectionHeader()
         } footer: {
             if let footer = context.viewState.nameFooter {
@@ -151,13 +151,13 @@ struct BipePublicProfileScreen: View {
 
     private var bioSection: some View {
         Section {
-            ListRow(label: .plain(title: ProseioStrings.publicProfileBioPlaceholder),
+            ListRow(label: .plain(title: BipeStrings.publicProfileBioPlaceholder),
                     kind: .textField(text: $context.bio, axis: .vertical))
                 .focused($focus, equals: .bio)
                 .lineLimit(3...)
                 .disabled(context.viewState.isLoading)
         } header: {
-            Text(ProseioStrings.publicProfileBio)
+            Text(BipeStrings.publicProfileBio)
                 .compoundListSectionHeader()
         } footer: {
             if let footer = context.viewState.bioFooter {
@@ -173,7 +173,7 @@ struct BipePublicProfileScreen: View {
             ListRow(kind: .custom {
                 ShareLink(item: url) {
                     MainActor.assumeIsolated {
-                        ListRowLabel.action(title: ProseioStrings.publicProfileShare, icon: \.shareIos)
+                        ListRowLabel.action(title: BipeStrings.publicProfileShare, icon: \.shareIos)
                     }
                 }
             })

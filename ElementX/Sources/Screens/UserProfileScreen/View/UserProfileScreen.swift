@@ -110,7 +110,7 @@ struct UserProfileScreen: View {
                 } label: {
                     CompoundIcon(\.qrCode)
                 }
-                .buttonStyle(FormActionButtonStyle(title: ProseioStrings.profileQrAction))
+                .buttonStyle(FormActionButtonStyle(title: BipeStrings.profileQrAction))
             }
         }
     }

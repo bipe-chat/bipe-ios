@@ -22,10 +22,10 @@ struct BipeRequestsRow: View {
                     .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(ProseioStrings.requestsTitle)
+                    Text(BipeStrings.requestsTitle)
                         .font(.compound.bodyLGSemibold)
                         .foregroundStyle(.compound.textPrimary)
-                    Text(ProseioStrings.requestsRowBody)
+                    Text(BipeStrings.requestsRowBody)
                         .font(.compound.bodyMD)
                         .foregroundStyle(.compound.textSecondary)
                 }

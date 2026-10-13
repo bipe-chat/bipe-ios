@@ -12,7 +12,7 @@ public nonisolated enum NameNormalizer {
     /// NFKD, strip combining marks, lowercase, fold homoglyphs, collapse whitespace, trim.
     /// Pass an empty `homoglyphs` map to skip folding (scam phrase matching does this).
     public static func normalize(_ input: String,
-                                 homoglyphs: [Character: Character] = ProseioRegistries.homoglyphs) -> String {
+                                 homoglyphs: [Character: Character] = BipeRegistries.homoglyphs) -> String {
         var stripped = String.UnicodeScalarView()
         for scalar in input.decomposedStringWithCompatibilityMapping.unicodeScalars where !isMark(scalar) {
             stripped.append(scalar)
@@ -43,7 +43,7 @@ public nonisolated enum NameNormalizer {
 
     /// Category of a reserved display name, or `nil` when the name is free to use.
     public static func reservedCategory(for displayName: String) -> ReservedNameCategory? {
-        ProseioRegistries.reservedNames[normalize(displayName)]
+        BipeRegistries.reservedNames[normalize(displayName)]
     }
 
     // MARK: - Private

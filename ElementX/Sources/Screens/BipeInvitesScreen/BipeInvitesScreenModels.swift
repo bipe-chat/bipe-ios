@@ -27,9 +27,9 @@ struct BipeInvitesScreenViewState: BindableState {
     }
     
     var footer: String {
-        guard !isLoading, available == 0 else { return ProseioStrings.invitesExplainer }
-        guard let nextAvailableAt else { return ProseioStrings.invitesNoneLeft }
-        return "\(ProseioStrings.invitesNoneLeft) \(ProseioStrings.invitesNext(nextAvailableAt.formatted(date: .abbreviated, time: .shortened)))"
+        guard !isLoading, available == 0 else { return BipeStrings.invitesExplainer }
+        guard let nextAvailableAt else { return BipeStrings.invitesNoneLeft }
+        return "\(BipeStrings.invitesNoneLeft) \(BipeStrings.invitesNext(nextAvailableAt.formatted(date: .abbreviated, time: .shortened)))"
     }
 }
 
@@ -50,10 +50,10 @@ enum BipeInvitesScreenViewAction {
 extension BipeInviteStatus {
     var title: String {
         switch self {
-        case .pending: ProseioStrings.invitesStatusPending
-        case .used: ProseioStrings.invitesStatusUsed
-        case .expired: ProseioStrings.invitesStatusExpired
-        case .revoked: ProseioStrings.invitesStatusRevoked
+        case .pending: BipeStrings.invitesStatusPending
+        case .used: BipeStrings.invitesStatusUsed
+        case .expired: BipeStrings.invitesStatusExpired
+        case .revoked: BipeStrings.invitesStatusRevoked
         }
     }
 }

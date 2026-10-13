@@ -95,14 +95,14 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
                                                           flowParameters: flowParameters)
-        chatsTabDetails = .init(tag: HomeTab.chats, title: ProseioStrings.tabChats, icon: \.chat, selectedIcon: \.chatSolid)
+        chatsTabDetails = .init(tag: HomeTab.chats, title: BipeStrings.tabChats, icon: \.chat, selectedIcon: \.chatSolid)
         chatsTabDetails.navigationSplitCoordinator = chatsSplitCoordinator
         
         let groupsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         groupsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: groupsSplitCoordinator,
                                                            bipeScope: .groups,
                                                            flowParameters: flowParameters)
-        groupsTabDetails = .init(tag: HomeTab.groups, title: ProseioStrings.tabGroups, icon: \.group, selectedIcon: \.group)
+        groupsTabDetails = .init(tag: HomeTab.groups, title: BipeStrings.tabGroups, icon: \.group, selectedIcon: \.group)
         groupsTabDetails.navigationSplitCoordinator = groupsSplitCoordinator
         
         let youStackCoordinator = NavigationStackCoordinator()
@@ -111,7 +111,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                                         isInTab: true,
                                                         navigationStackCoordinator: youStackCoordinator,
                                                         flowParameters: flowParameters)
-        let youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: ProseioStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
+        let youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: BipeStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
         bipeSelfChat = BipeSelfChat(clientProxy: flowParameters.userSession.clientProxy)
         
         if flowParameters.userSession.userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
@@ -193,7 +193,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         case .bipeHandle(let handle):
             Task { await openBipeHandle(handle, animated: animated) }
         case .bipeInvite:
-            flowParameters.userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.inviteAlreadySignedIn))
+            flowParameters.userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.inviteAlreadySignedIn))
         case .search:
             // Switch to the dedicated search tab when it's available (iOS 26 + flag), otherwise ignore.
             if searchTabNavigationStackCoordinator != nil {
@@ -255,7 +255,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     
     private func openSelfChat() async {
         guard let roomID = await bipeSelfChat.roomID() else {
-            flowParameters.userIndicatorController.submitIndicator(.init(title: ProseioStrings.selfChatError))
+            flowParameters.userIndicatorController.submitIndicator(.init(title: BipeStrings.selfChatError))
             return
         }
         handleAppRoute(.room(roomID: roomID, via: []), animated: true)
@@ -266,7 +266,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         let userID = try? await flowParameters.userSession.bipeHandleResolver?.userID(forHandle: handle)
         guard let userID else {
             MXLog.info("No user for a Bipe handle link")
-            flowParameters.userIndicatorController.submitIndicator(.init(title: ProseioStrings.linkHandleNotFound(handle)))
+            flowParameters.userIndicatorController.submitIndicator(.init(title: BipeStrings.linkHandleNotFound(handle)))
             return
         }
         handleAppRoute(.userProfile(userID: userID), animated: animated)

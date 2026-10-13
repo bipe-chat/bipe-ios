@@ -42,7 +42,7 @@ struct BipeSignupScreenViewState: BindableState {
     }
 
     var handleFooter: String {
-        handleError ?? handleStatus.footer(defaultText: ProseioStrings.signupHandleFooter)
+        handleError ?? handleStatus.footer(defaultText: BipeStrings.signupHandleFooter)
     }
 
     var handleFieldState: CompoundTextFieldStyle.State {
@@ -59,7 +59,7 @@ struct BipeSignupScreenViewState: BindableState {
     }
 
     var inviteCodeFooter: String? {
-        inviteCodeError ?? (isInviteCodeAcceptable ? nil : ProseioStrings.errorInviteInvalid)
+        inviteCodeError ?? (isInviteCodeAcceptable ? nil : BipeStrings.errorInviteInvalid)
     }
 
     var canSubmit: Bool {

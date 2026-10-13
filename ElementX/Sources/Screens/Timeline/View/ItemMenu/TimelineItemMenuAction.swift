@@ -150,7 +150,7 @@ enum TimelineItemMenuAction: Identifiable, Hashable {
         case .copy:
             Label(L10n.actionCopyText, icon: \.copy)
         case .saveSticker:
-            Label(ProseioStrings.actionSaveSticker, icon: \.sticker)
+            Label(BipeStrings.actionSaveSticker, icon: \.sticker)
         case .translate:
             Label(L10n.actionTranslate, icon: \.translate)
         case .copyCaption:

@@ -15,8 +15,8 @@ enum BipeRoomListScope {
     
     var title: String {
         switch self {
-        case .chats: ProseioStrings.tabChats
-        case .groups: ProseioStrings.tabGroups
+        case .chats: BipeStrings.tabChats
+        case .groups: BipeStrings.tabGroups
         }
     }
     

@@ -133,7 +133,7 @@ struct StartChatScreen: View {
     }
     
     private var noResultsContent: some View {
-        Text(context.viewState.bipeHandleNotFound.map(ProseioStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
+        Text(context.viewState.bipeHandleNotFound.map(BipeStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
             .font(.compound.bodyLG)
             .foregroundColor(.compound.textSecondary)
             .frame(maxWidth: .infinity)

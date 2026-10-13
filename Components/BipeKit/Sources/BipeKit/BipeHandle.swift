@@ -17,11 +17,11 @@ public enum BipeHandleProblem: String, Sendable, Equatable {
 
     public var localizedMessage: String {
         switch self {
-        case .tooShort: ProseioStrings.handleTooShort(String(ProseioRegistries.handleMinLength))
-        case .tooLong: ProseioStrings.handleTooLong(String(ProseioRegistries.handleMaxLength))
-        case .invalidCharacters: ProseioStrings.handleInvalidCharacters
-        case .reserved: ProseioStrings.handleReserved
-        case .taken: ProseioStrings.handleTaken
+        case .tooShort: BipeStrings.handleTooShort(String(BipeRegistries.handleMinLength))
+        case .tooLong: BipeStrings.handleTooLong(String(BipeRegistries.handleMaxLength))
+        case .invalidCharacters: BipeStrings.handleInvalidCharacters
+        case .reserved: BipeStrings.handleReserved
+        case .taken: BipeStrings.handleTaken
         }
     }
 }
@@ -42,9 +42,9 @@ public nonisolated enum BipeHandle {
     public static func localProblem(for handle: String) -> BipeHandleProblem? {
         // JS `length` counts UTF-16 code units; the pattern is ASCII-only, so any non-ASCII input fails it anyway.
         let length = handle.utf16.count
-        if length < ProseioRegistries.handleMinLength { return .tooShort }
-        if length > ProseioRegistries.handleMaxLength { return .tooLong }
-        if handle.range(of: ProseioRegistries.handlePattern, options: .regularExpression) == nil { return .invalidCharacters }
+        if length < BipeRegistries.handleMinLength { return .tooShort }
+        if length > BipeRegistries.handleMaxLength { return .tooLong }
+        if handle.range(of: BipeRegistries.handlePattern, options: .regularExpression) == nil { return .invalidCharacters }
         return nil
     }
 }
@@ -85,8 +85,8 @@ public enum BipeHandleStatus: Sendable, Equatable {
     public func footer(defaultText: String) -> String {
         switch self {
         case .empty, .unknown: defaultText
-        case .checking: ProseioStrings.handleChecking
-        case .available: ProseioStrings.handleAvailable
+        case .checking: BipeStrings.handleChecking
+        case .available: BipeStrings.handleAvailable
         case .problem(let problem): problem.localizedMessage
         }
     }

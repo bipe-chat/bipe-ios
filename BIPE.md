@@ -6,7 +6,7 @@ This repo is Bipe's iOS app: a fork of Element X iOS (AGPL-3.0). Upstream conven
 
 - **All Bipe code lives in `Components/BipeKit`** (local Swift package, linked into the ElementX target). Element X sources get small hooks only. Keep the upstream diff small so rebases stay cheap.
 - **Never hand-edit `Components/BipeKit/Sources/BipeKit/Generated/`.** It comes from `../proseio-shared` (`node tools/gen.mjs`). Change registries and strings there.
-- Bipe UI strings come from `ProseioStrings` (generated), not `Untranslated.strings` and not Localazy.
+- Bipe UI strings come from `BipeStrings` (generated), not `Untranslated.strings` and not Localazy.
 - Platform logic (badge verification, normalisation, scam detection) must pass `../proseio-shared/test-vectors/`. Android mirrors the same vectors.
 - Build settings, identifiers and entitlements: `app.yml`, `project.yml`, `target.yml`, then `xcodegen`. Never edit `ElementX.xcodeproj` directly.
 - The `Enterprise/` submodule (private Element repo) is not used. `Package.swift` skips it when absent.

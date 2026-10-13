@@ -24,7 +24,7 @@ struct BipeMessagingScreen: View {
             }
         }
         .compoundList()
-        .navigationTitle(ProseioStrings.messagingTitle)
+        .navigationTitle(BipeStrings.messagingTitle)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
     }

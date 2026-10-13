@@ -15,9 +15,9 @@ struct BipeInvitesScreen: View {
     var body: some View {
         Form {
             Section {
-                ListRow(label: .plain(title: ProseioStrings.invitesAvailable(String(context.viewState.available))),
+                ListRow(label: .plain(title: BipeStrings.invitesAvailable(String(context.viewState.available))),
                         kind: .label)
-                ListRow(label: .action(title: ProseioStrings.invitesCreate, icon: \.plus),
+                ListRow(label: .action(title: BipeStrings.invitesCreate, icon: \.plus),
                         kind: .button { context.send(viewAction: .create) })
                     .disabled(!context.viewState.canCreate)
             } footer: {
@@ -27,7 +27,7 @@ struct BipeInvitesScreen: View {
             
             Section {
                 if context.viewState.invites.isEmpty, !context.viewState.isLoading {
-                    ListRow(label: .plain(title: ProseioStrings.invitesEmpty), kind: .label)
+                    ListRow(label: .plain(title: BipeStrings.invitesEmpty), kind: .label)
                 }
                 ForEach(context.viewState.invites) { invite in
                     row(for: invite)
@@ -35,7 +35,7 @@ struct BipeInvitesScreen: View {
             }
         }
         .compoundList()
-        .navigationTitle(ProseioStrings.invitesTitle)
+        .navigationTitle(BipeStrings.invitesTitle)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
     }
@@ -46,12 +46,12 @@ struct BipeInvitesScreen: View {
         case .pending:
             VStack(alignment: .leading, spacing: 8) {
                 ListRow(label: .default(title: invite.status.title,
-                                        description: ProseioStrings.invitesExpires(invite.expiresAt.formatted(date: .abbreviated, time: .omitted)),
+                                        description: BipeStrings.invitesExpires(invite.expiresAt.formatted(date: .abbreviated, time: .omitted)),
                                         icon: \.time),
                         kind: .label)
                 HStack(spacing: 12) {
                     if let url = context.viewState.shareURLs[invite.id] {
-                        ShareLink(item: ProseioStrings.invitesShareMessage(url.absoluteString)) {
+                        ShareLink(item: BipeStrings.invitesShareMessage(url.absoluteString)) {
                             Label(L10n.actionShare, icon: \.shareIos)
                         }
                         .buttonStyle(.compound(.secondary, size: .medium))
@@ -59,7 +59,7 @@ struct BipeInvitesScreen: View {
                     Button(role: .destructive) {
                         context.send(viewAction: .revoke(inviteID: invite.id))
                     } label: {
-                        Text(ProseioStrings.invitesRevoke)
+                        Text(BipeStrings.invitesRevoke)
                     }
                     .buttonStyle(.compound(.tertiary, size: .medium))
                 }

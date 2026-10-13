@@ -462,17 +462,17 @@ public enum BipeWhoCanMessage: String, Codable, Sendable, CaseIterable {
 
     public var title: String {
         switch self {
-        case .everyone: ProseioStrings.messagingEveryone
-        case .verified: ProseioStrings.messagingVerified
-        case .contacts: ProseioStrings.messagingContacts
+        case .everyone: BipeStrings.messagingEveryone
+        case .verified: BipeStrings.messagingVerified
+        case .contacts: BipeStrings.messagingContacts
         }
     }
 
     public var body: String {
         switch self {
-        case .everyone: ProseioStrings.messagingEveryoneBody
-        case .verified: ProseioStrings.messagingVerifiedBody
-        case .contacts: ProseioStrings.messagingContactsBody
+        case .everyone: BipeStrings.messagingEveryoneBody
+        case .verified: BipeStrings.messagingVerifiedBody
+        case .contacts: BipeStrings.messagingContactsBody
         }
     }
 }
@@ -566,26 +566,26 @@ public enum BipeAPIError: Error, Sendable, Equatable {
         switch self {
         case .server(let code, let reason, _):
             switch code {
-            case .inviteInvalid: ProseioStrings.errorInviteInvalid
-            case .inviteQuotaExhausted: ProseioStrings.errorInviteQuota
-            case .emailTaken: ProseioStrings.errorEmailTaken
-            case .passwordWeak: ProseioStrings.errorPasswordWeak
-            case .attestationInvalid: ProseioStrings.errorAttestationInvalid
+            case .inviteInvalid: BipeStrings.errorInviteInvalid
+            case .inviteQuotaExhausted: BipeStrings.errorInviteQuota
+            case .emailTaken: BipeStrings.errorEmailTaken
+            case .passwordWeak: BipeStrings.errorPasswordWeak
+            case .attestationInvalid: BipeStrings.errorAttestationInvalid
             case .handleTaken: BipeHandleProblem.taken.localizedMessage
             case .handleInvalid: (reason.flatMap(BipeHandleProblem.init(rawValue:)) ?? .invalidCharacters).localizedMessage
-            case .handleCooldown: ProseioStrings.errorHandleCooldown
-            case .profileInvalid: (reason.flatMap(BipeProfileProblem.init(rawValue:))?.localizedMessage) ?? ProseioStrings.errorGeneric
-            case .photoInvalid: ProseioStrings.publicProfilePhotoInvalid
-            case .rateLimited: ProseioStrings.errorRateLimited
-            case .unauthorized: ProseioStrings.errorUnauthorized
-            case .badRequest, .notFound, .internal: ProseioStrings.errorGeneric
+            case .handleCooldown: BipeStrings.errorHandleCooldown
+            case .profileInvalid: (reason.flatMap(BipeProfileProblem.init(rawValue:))?.localizedMessage) ?? BipeStrings.errorGeneric
+            case .photoInvalid: BipeStrings.publicProfilePhotoInvalid
+            case .rateLimited: BipeStrings.errorRateLimited
+            case .unauthorized: BipeStrings.errorUnauthorized
+            case .badRequest, .notFound, .internal: BipeStrings.errorGeneric
             }
         case .network:
-            ProseioStrings.errorNetwork
+            BipeStrings.errorNetwork
         case .unexpectedResponse:
-            ProseioStrings.errorGeneric
+            BipeStrings.errorGeneric
         case .attestationFailed:
-            ProseioStrings.errorAttestationFailed
+            BipeStrings.errorAttestationFailed
         }
     }
 }

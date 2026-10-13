@@ -780,14 +780,14 @@ extension TimelineInteractionHandler {
     func saveSticker(_ sticker: StickerRoomTimelineItem) async {
         guard case let .success(data) = await userSession.mediaProvider.loadImageDataFromSource(sticker.imageInfo.source),
               let candidate = StickerImporter.candidate(from: data) else {
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaveFailed))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.stickerSaveFailed))
             return
         }
         switch await BipeStickerSaver(clientProxy: userSession.clientProxy).add([candidate]) {
         case .success:
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaved, icon: \.checkCircle))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.stickerSaved, icon: \.checkCircle))
         case .failure:
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaveFailed))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.stickerSaveFailed))
         }
     }
 }

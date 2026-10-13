@@ -86,7 +86,7 @@ class BipeStickerPickerScreenViewModel: BipeStickerPickerScreenViewModelType, Bi
         state.isImporting = true
         userIndicatorController.submitIndicator(UserIndicator(id: importIndicatorID,
                                                               type: .modal,
-                                                              title: ProseioStrings.stickersImportProgress,
+                                                              title: BipeStrings.stickersImportProgress,
                                                               persistent: true))
         defer {
             state.isImporting = false
@@ -95,16 +95,16 @@ class BipeStickerPickerScreenViewModel: BipeStickerPickerScreenViewModelType, Bi
         
         let candidates = await Task.detached { StickerImporter.candidates(from: urls) }.value
         guard !candidates.isEmpty else {
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportNone))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.stickersImportNone))
             return
         }
         
         switch await BipeStickerSaver(clientProxy: clientProxy).add(candidates) {
         case .success(let added):
-            let title = added > 0 ? ProseioStrings.stickersImportDone(added.formatted()) : ProseioStrings.stickersImportNone
+            let title = added > 0 ? BipeStrings.stickersImportDone(added.formatted()) : BipeStrings.stickersImportNone
             userIndicatorController.submitIndicator(UserIndicator(title: title))
         case .failure:
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickersImportFailed))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.stickersImportFailed))
         }
         await loadPacks()
     }
@@ -123,10 +123,10 @@ class BipeStickerPickerScreenViewModel: BipeStickerPickerScreenViewModelType, Bi
         
         guard let candidate = await Task.detached(operation: { StickerMaker.sticker(fromImageData: data) }).value,
               case .success = await BipeStickerSaver(clientProxy: clientProxy).add([candidate]) else {
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaveFailed))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.stickerSaveFailed))
             return
         }
-        userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaved, icon: \.checkCircle))
+        userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.stickerSaved, icon: \.checkCircle))
         await loadPacks()
     }
     

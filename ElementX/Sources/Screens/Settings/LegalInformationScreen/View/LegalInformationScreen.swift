@@ -25,7 +25,7 @@ struct LegalInformationScreen: View {
                         kind: .button { openURL(context.viewState.privacyURL) })
             } footer: {
                 // Bipe: name the steward (ADR 0040).
-                Text(ProseioStrings.aboutSteward)
+                Text(BipeStrings.aboutSteward)
                     .compoundListSectionFooter()
             }
         }

@@ -109,18 +109,18 @@ public struct BipeProfileQRCodeSheet: View {
 
     public var body: some View {
         VStack(spacing: 20) {
-            Text(ProseioStrings.profileQrTitle)
+            Text(BipeStrings.profileQrTitle)
                 .font(.title3.bold())
             BipeQRCodeView(url: url)
                 .frame(maxWidth: 280)
             Text("@\(handle)")
                 .font(.headline)
-            Text(ProseioStrings.profileQrFooter)
+            Text(BipeStrings.profileQrFooter)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             ShareLink(item: url) {
-                Label(ProseioStrings.profileShare, systemImage: "square.and.arrow.up")
+                Label(BipeStrings.profileShare, systemImage: "square.and.arrow.up")
             }
             .buttonStyle(.borderedProminent)
         }

@@ -92,7 +92,7 @@ class BipePublicProfileScreenViewModel: BipePublicProfileScreenViewModelType, Bi
 
     private func usePhoto(_ data: Data) async {
         guard let jpeg = await Self.reencode(data) else {
-            state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: ProseioStrings.publicProfilePhotoInvalid)
+            state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: BipeStrings.publicProfilePhotoInvalid)
             return
         }
         state.pendingPhoto = jpeg
@@ -133,7 +133,7 @@ class BipePublicProfileScreenViewModel: BipePublicProfileScreenViewModelType, Bi
                 }
             }
             apply(profile)
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.publicProfileSaved, icon: \.checkCircle))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.publicProfileSaved, icon: \.checkCircle))
         } catch {
             MXLog.error("Bipe public profile save failed: \(error)")
             show(error)

@@ -19,7 +19,7 @@ struct BipeStickerPickerScreen: View {
     var body: some View {
         content
             .background(Color.compound.bgCanvasDefault.ignoresSafeArea())
-            .navigationTitle(ProseioStrings.stickersTitle)
+            .navigationTitle(BipeStrings.stickersTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -32,12 +32,12 @@ struct BipeStickerPickerScreen: View {
                         Button {
                             context.isShowingPhotoPicker = true
                         } label: {
-                            Label(ProseioStrings.stickersFromPhoto, icon: \.image)
+                            Label(BipeStrings.stickersFromPhoto, icon: \.image)
                         }
                         Button {
                             context.send(viewAction: .showImportHelp)
                         } label: {
-                            Label(ProseioStrings.stickersImportAction, icon: \.download)
+                            Label(BipeStrings.stickersImportAction, icon: \.download)
                         }
                     } label: {
                         CompoundIcon(\.plus)
@@ -46,13 +46,13 @@ struct BipeStickerPickerScreen: View {
                 }
             }
             .disabled(context.viewState.isSending || context.viewState.isImporting)
-            .alert(ProseioStrings.stickersImportAction, isPresented: $context.isShowingImportHelp) {
+            .alert(BipeStrings.stickersImportAction, isPresented: $context.isShowingImportHelp) {
                 Button(L10n.actionChooseFile) {
                     context.send(viewAction: .chooseImportFiles)
                 }
                 Button(L10n.actionCancel, role: .cancel) { }
             } message: {
-                Text(ProseioStrings.stickersImportHelp + "\n\n" + ProseioStrings.stickersImportNote)
+                Text(BipeStrings.stickersImportHelp + "\n\n" + BipeStrings.stickersImportNote)
             }
             .photosPicker(isPresented: $context.isShowingPhotoPicker, selection: $selectedPhoto, matching: .images)
             .onChange(of: selectedPhoto) { _, item in
@@ -80,9 +80,9 @@ struct BipeStickerPickerScreen: View {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed:
-            message(title: ProseioStrings.stickersErrorLoad, body: nil, showsRetry: true)
+            message(title: BipeStrings.stickersErrorLoad, body: nil, showsRetry: true)
         case .loaded(let packs) where packs.isEmpty:
-            message(title: ProseioStrings.stickersEmptyTitle, body: ProseioStrings.stickersEmptyBody, showsRetry: false)
+            message(title: BipeStrings.stickersEmptyTitle, body: BipeStrings.stickersEmptyBody, showsRetry: false)
         case .loaded(let packs):
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 24) {
@@ -117,7 +117,7 @@ struct BipeStickerPickerScreen: View {
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(ProseioStrings.a11yStickerSend(sticker.body))
+        .accessibilityLabel(BipeStrings.a11yStickerSend(sticker.body))
     }
     
     @ViewBuilder
@@ -169,9 +169,9 @@ struct BipeStickerPickerScreen: View {
     private func title(for pack: StickerPack) -> String {
         switch pack.source {
         case .user:
-            ProseioStrings.stickersPackPersonal
+            BipeStrings.stickersPackPersonal
         case .room(let roomID, _):
-            pack.displayName ?? (roomID == context.viewState.roomID ? ProseioStrings.stickersPackRoom : ProseioStrings.stickersTitle)
+            pack.displayName ?? (roomID == context.viewState.roomID ? BipeStrings.stickersPackRoom : BipeStrings.stickersTitle)
         }
     }
 }

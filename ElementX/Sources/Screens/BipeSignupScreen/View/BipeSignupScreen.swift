@@ -33,7 +33,7 @@ struct BipeSignupScreen: View {
         .scrollDismissesKeyboard(.interactively)
         .background(Color.compound.bgCanvasDefault.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle(ProseioStrings.signupTitle)
+        .navigationTitle(BipeStrings.signupTitle)
         .alert(item: $context.alertInfo)
         .introspect(.window, on: .supportedVersions) { window in
             context.send(viewAction: .updateWindow(window))
@@ -49,7 +49,7 @@ struct BipeSignupScreen: View {
             BigIcon(icon: \.userProfileSolid)
                 .padding(.bottom, 8)
 
-            Text(context.viewState.inviterHandle.map(ProseioStrings.signupInvitedBy) ?? ProseioStrings.signupHeader)
+            Text(context.viewState.inviterHandle.map(BipeStrings.signupInvitedBy) ?? BipeStrings.signupHeader)
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textSecondary)
@@ -62,7 +62,7 @@ struct BipeSignupScreen: View {
                 .disabled(context.viewState.isAccountCreated)
             
             Button(action: submit) {
-                Text(context.viewState.isAccountCreated ? L10n.actionContinue : ProseioStrings.signupSubmit)
+                Text(context.viewState.isAccountCreated ? L10n.actionContinue : BipeStrings.signupSubmit)
             }
             .buttonStyle(.compound(.primary))
             .disabled(!context.viewState.canSubmit)
@@ -73,16 +73,16 @@ struct BipeSignupScreen: View {
         VStack(alignment: .leading, spacing: 20) {
             TextField(text: $context.displayName) { placeholder("") }
                 .focused($focusedField, equals: .displayName)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupDisplayName,
-                                          footerText: ProseioStrings.signupDisplayNameFooter))
+                .textFieldStyle(.compound(labelText: BipeStrings.signupDisplayName,
+                                          footerText: BipeStrings.signupDisplayNameFooter))
                 .textContentType(.name)
                 .submitLabel(.next)
                 .onSubmit { focusedField = .email }
             
             TextField(text: $context.email) { placeholder("") }
                 .focused($focusedField, equals: .email)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupEmail,
-                                          footerText: context.viewState.emailError ?? ProseioStrings.signupEmailFooter,
+                .textFieldStyle(.compound(labelText: BipeStrings.signupEmail,
+                                          footerText: context.viewState.emailError ?? BipeStrings.signupEmailFooter,
                                           state: context.viewState.emailError == nil ? .default : .error))
                 .keyboardType(.emailAddress)
                 .textContentType(.username)
@@ -93,8 +93,8 @@ struct BipeSignupScreen: View {
 
             SecureField(text: $context.password) { placeholder("") }
                 .focused($focusedField, equals: .password)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupPassword,
-                                          footerText: context.viewState.passwordError ?? ProseioStrings.signupPasswordFooter(String(BipeSignupRules.passwordMinLength)),
+                .textFieldStyle(.compound(labelText: BipeStrings.signupPassword,
+                                          footerText: context.viewState.passwordError ?? BipeStrings.signupPasswordFooter(String(BipeSignupRules.passwordMinLength)),
                                           state: context.viewState.passwordError == nil ? .default : .error))
                 .textContentType(.newPassword)
                 .submitLabel(.next)
@@ -102,16 +102,16 @@ struct BipeSignupScreen: View {
 
             SecureField(text: $context.passwordConfirmation) { placeholder("") }
                 .focused($focusedField, equals: .passwordConfirmation)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupPasswordConfirm,
-                                          footerText: context.viewState.passwordMismatch ? ProseioStrings.signupPasswordMismatch : nil,
+                .textFieldStyle(.compound(labelText: BipeStrings.signupPasswordConfirm,
+                                          footerText: context.viewState.passwordMismatch ? BipeStrings.signupPasswordMismatch : nil,
                                           state: context.viewState.passwordMismatch ? .error : .default))
                 .textContentType(.newPassword)
                 .submitLabel(.next)
                 .onSubmit { focusedField = .handle }
 
-            TextField(text: $context.handle) { placeholder(ProseioStrings.handlePlaceholder) }
+            TextField(text: $context.handle) { placeholder(BipeStrings.handlePlaceholder) }
                 .focused($focusedField, equals: .handle)
-                .textFieldStyle(.compound(labelText: ProseioStrings.signupHandle,
+                .textFieldStyle(.compound(labelText: BipeStrings.signupHandle,
                                           footerText: context.viewState.handleFooter,
                                           state: context.viewState.handleFieldState))
                 .textInputAutocapitalization(.never)
@@ -122,7 +122,7 @@ struct BipeSignupScreen: View {
             VStack(alignment: .leading, spacing: 8) {
                 TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
                     .focused($focusedField, equals: .inviteCode)
-                    .textFieldStyle(.compound(labelText: ProseioStrings.signupInviteCode,
+                    .textFieldStyle(.compound(labelText: BipeStrings.signupInviteCode,
                                               footerText: context.viewState.inviteCodeFooter,
                                               state: context.viewState.inviteCodeFooter == nil ? .default : .error))
                     .textInputAutocapitalization(.characters)

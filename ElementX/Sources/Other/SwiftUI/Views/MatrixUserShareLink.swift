@@ -24,7 +24,7 @@ struct MatrixUserShareLink<Label: View>: View {
     
     var body: some View {
         if let profileLink = bipeHandleResolver?.profileLink(for: userID) {
-            ShareLink(item: ProseioStrings.inviteFriendsText(profileLink.absoluteString)) {
+            ShareLink(item: BipeStrings.inviteFriendsText(profileLink.absoluteString)) {
                 label
             }
         } else if let permalink {

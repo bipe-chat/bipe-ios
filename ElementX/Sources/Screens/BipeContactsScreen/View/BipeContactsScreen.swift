@@ -18,10 +18,10 @@ struct BipeContactsScreen: View {
             Section {
                 switch context.viewState.access {
                 case .notDetermined, .unknown:
-                    ListRow(label: .action(title: ProseioStrings.contactsAllow, icon: \.userProfile),
+                    ListRow(label: .action(title: BipeStrings.contactsAllow, icon: \.userProfile),
                             kind: .button { context.send(viewAction: .requestAccess) })
                 case .denied:
-                    ListRow(label: .action(title: ProseioStrings.contactsOpenSettings, icon: \.settings),
+                    ListRow(label: .action(title: BipeStrings.contactsOpenSettings, icon: \.settings),
                             kind: .button {
                                 if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
                             })
@@ -29,7 +29,7 @@ struct BipeContactsScreen: View {
                     if context.viewState.isLoading {
                         ListRow(kind: .custom { ProgressView().frame(maxWidth: .infinity).padding() })
                     } else if context.viewState.hasSearched, context.viewState.matches.isEmpty {
-                        ListRow(label: .plain(title: ProseioStrings.contactsNone), kind: .label)
+                        ListRow(label: .plain(title: BipeStrings.contactsNone), kind: .label)
                     }
                     ForEach(context.viewState.matches) { match in
                         ListRow(label: .default(title: match.contactName,
@@ -38,15 +38,15 @@ struct BipeContactsScreen: View {
                                 kind: .navigationLink { context.send(viewAction: .openUserProfile(userID: match.userID)) })
                     }
                 }
-                ListRow(label: .action(title: ProseioStrings.contactsInvite, icon: \.userAdd),
+                ListRow(label: .action(title: BipeStrings.contactsInvite, icon: \.userAdd),
                         kind: .button { context.send(viewAction: .openInvites) })
             } footer: {
-                Text(context.viewState.access == .denied ? ProseioStrings.contactsDenied : ProseioStrings.contactsIntro)
+                Text(context.viewState.access == .denied ? BipeStrings.contactsDenied : BipeStrings.contactsIntro)
                     .compoundListSectionFooter()
             }
             
             Section {
-                ListRow(label: .default(title: ProseioStrings.discoveryToggle, icon: \.search),
+                ListRow(label: .default(title: BipeStrings.discoveryToggle, icon: \.search),
                         kind: .toggle($context.discoverableByPhone))
             } footer: {
                 Text(discoveryFooter)
@@ -54,7 +54,7 @@ struct BipeContactsScreen: View {
             }
         }
         .compoundList()
-        .navigationTitle(ProseioStrings.contactsTitle)
+        .navigationTitle(BipeStrings.contactsTitle)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
         .onChange(of: context.discoverableByPhone) { context.send(viewAction: .discoverableChanged) }
@@ -62,9 +62,9 @@ struct BipeContactsScreen: View {
     
     private var discoveryFooter: String {
         switch context.viewState.phoneLinked {
-        case .some(false): "\(ProseioStrings.discoveryFooter) \(ProseioStrings.phoneNotLinked)"
-        case .some(true): "\(ProseioStrings.discoveryFooter) \(ProseioStrings.phoneLinked)"
-        case .none: ProseioStrings.discoveryFooter
+        case .some(false): "\(BipeStrings.discoveryFooter) \(BipeStrings.phoneNotLinked)"
+        case .some(true): "\(BipeStrings.discoveryFooter) \(BipeStrings.phoneLinked)"
+        case .none: BipeStrings.discoveryFooter
         }
     }
 }

@@ -25,12 +25,12 @@ public enum BipeProfileProblem: String, Sendable, Equatable {
 
     public var localizedMessage: String {
         switch self {
-        case .nameEmpty: ProseioStrings.publicProfileNameEmpty
-        case .nameTooLong: ProseioStrings.publicProfileNameTooLong(String(ProseioRegistries.profileNameMaxLength))
-        case .nameReserved: ProseioStrings.warningReservedName
-        case .bioTooLong: ProseioStrings.publicProfileBioTooLong(String(ProseioRegistries.profileBioMaxLength))
-        case .bioTooManyLines: ProseioStrings.publicProfileBioTooManyLines(String(ProseioRegistries.profileBioMaxLines))
-        case .noHandle: ProseioStrings.publicProfileNeedsHandle
+        case .nameEmpty: BipeStrings.publicProfileNameEmpty
+        case .nameTooLong: BipeStrings.publicProfileNameTooLong(String(BipeRegistries.profileNameMaxLength))
+        case .nameReserved: BipeStrings.warningReservedName
+        case .bioTooLong: BipeStrings.publicProfileBioTooLong(String(BipeRegistries.profileBioMaxLength))
+        case .bioTooManyLines: BipeStrings.publicProfileBioTooManyLines(String(BipeRegistries.profileBioMaxLines))
+        case .noHandle: BipeStrings.publicProfileNeedsHandle
         }
     }
 }
@@ -41,12 +41,12 @@ public nonisolated enum BipePublicProfileRules {
     public static func profileProblem(name: String, bio: String) -> BipeProfileProblem? {
         let trimmedName = trim(name)
         if trimmedName.unicodeScalars.isEmpty { return .nameEmpty }
-        if trimmedName.unicodeScalars.count > ProseioRegistries.profileNameMaxLength { return .nameTooLong }
+        if trimmedName.unicodeScalars.count > BipeRegistries.profileNameMaxLength { return .nameTooLong }
         if NameNormalizer.reservedCategory(for: trimmedName) != nil { return .nameReserved }
         let trimmedBio = trim(bio)
-        if trimmedBio.unicodeScalars.count > ProseioRegistries.profileBioMaxLength { return .bioTooLong }
+        if trimmedBio.unicodeScalars.count > BipeRegistries.profileBioMaxLength { return .bioTooLong }
         // JS `split("\n")`: count scalars, because Swift treats "\r\n" as one Character.
-        if trimmedBio.unicodeScalars.count(where: { $0 == "\n" }) + 1 > ProseioRegistries.profileBioMaxLines { return .bioTooManyLines }
+        if trimmedBio.unicodeScalars.count(where: { $0 == "\n" }) + 1 > BipeRegistries.profileBioMaxLines { return .bioTooManyLines }
         return nil
     }
 
@@ -109,7 +109,7 @@ public nonisolated enum BipeProfilePhoto {
         let pixelHeight = image.size.height * image.scale
         guard pixelWidth > 0, pixelHeight > 0 else { return nil }
 
-        let ratio = min(1, CGFloat(ProseioRegistries.profilePhotoMaxPixels) / max(pixelWidth, pixelHeight))
+        let ratio = min(1, CGFloat(BipeRegistries.profilePhotoMaxPixels) / max(pixelWidth, pixelHeight))
         let size = CGSize(width: max(1, (pixelWidth * ratio).rounded(.down)),
                           height: max(1, (pixelHeight * ratio).rounded(.down)))
 
@@ -125,7 +125,7 @@ public nonisolated enum BipeProfilePhoto {
         }
 
         for quality in qualities {
-            if let data = rendered.jpegData(compressionQuality: quality), data.count <= ProseioRegistries.profilePhotoMaxBytes {
+            if let data = rendered.jpegData(compressionQuality: quality), data.count <= BipeRegistries.profilePhotoMaxBytes {
                 return data
             }
         }

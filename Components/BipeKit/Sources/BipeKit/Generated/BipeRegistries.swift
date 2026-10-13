@@ -3,7 +3,6 @@
 
 public enum ReservedNameCategory: String, Sendable {
     case bipe
-    case proseio
     case bank
     case government
 }
@@ -13,7 +12,7 @@ public struct ScamPattern: Sendable, Equatable {
     public let regex: String
 }
 
-public enum ProseioRegistries {
+public enum BipeRegistries {
     /// Normalised reserved display names and their category.
     public static let reservedNames: [String: ReservedNameCategory] = [
         "bipe": .bipe,
@@ -22,11 +21,6 @@ public enum ProseioRegistries {
         "suporte bipe": .bipe,
         "equipe bipe": .bipe,
         "seguranca bipe": .bipe,
-        "proseio": .proseio,
-        "proseio oficial": .proseio,
-        "suporte proseio": .proseio,
-        "equipe proseio": .proseio,
-        "seguranca proseio": .proseio,
         "banco do brasil": .bank,
         "caixa": .bank,
         "caixa economica federal": .bank,
@@ -333,7 +327,7 @@ public enum ProseioRegistries {
         "whatsapp",
         "netflix",
         "shopee",
-        "proseio",
+        "bipe",
     ]
 
     /// Real domains of those brands. A host that is one of them, or a subdomain of one, is not a lookalike.
@@ -366,6 +360,8 @@ public enum ProseioRegistries {
         "whatsapp.net",
         "netflix.com",
         "shopee.com.br",
+        "bipe.chat",
+        "bipe.net.br",
         "proseio.com.br",
     ]
 

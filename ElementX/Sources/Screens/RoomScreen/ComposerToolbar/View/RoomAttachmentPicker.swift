@@ -49,7 +49,7 @@ struct RoomAttachmentPicker: View {
             Button {
                 context.send(viewAction: .attach(.sticker))
             } label: {
-                Label(ProseioStrings.actionStickers, icon: \.sticker)
+                Label(BipeStrings.actionStickers, icon: \.sticker)
             }
             
             if context.viewState.isLocationSharingEnabled {

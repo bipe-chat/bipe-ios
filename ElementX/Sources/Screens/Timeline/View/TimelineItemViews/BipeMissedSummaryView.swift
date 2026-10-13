@@ -15,7 +15,7 @@ struct BipeMissedSummaryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(ProseioStrings.groupMissedTitle)
+            Text(BipeStrings.groupMissedTitle)
                 .font(.compound.bodySMSemibold)
                 .foregroundStyle(.compound.textActionAccent)
                 .padding(.horizontal, 12)
@@ -30,7 +30,7 @@ struct BipeMissedSummaryView: View {
             }
 
             Divider()
-            Text(ProseioStrings.groupMissedMore("\(summary.otherCount)"))
+            Text(BipeStrings.groupMissedMore("\(summary.otherCount)"))
                 .font(.compound.bodySM)
                 .foregroundStyle(.compound.textSecondary)
                 .padding(.horizontal, 12)
@@ -63,9 +63,9 @@ struct BipeMissedSummaryView: View {
 
     private func title(for line: BipeMissedSummary.Line) -> String {
         switch line.kind {
-        case .mention: ProseioStrings.groupMissedMention(line.senderName)
-        case .reply: ProseioStrings.groupMissedReply(line.senderName)
-        case .poll: ProseioStrings.groupMissedPoll(line.text)
+        case .mention: BipeStrings.groupMissedMention(line.senderName)
+        case .reply: BipeStrings.groupMissedReply(line.senderName)
+        case .poll: BipeStrings.groupMissedPoll(line.text)
         }
     }
 }

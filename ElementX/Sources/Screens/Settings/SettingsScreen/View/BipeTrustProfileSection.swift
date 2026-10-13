@@ -27,7 +27,7 @@ struct BipeTrustProfileSection: View {
                 }
             }
         } footer: {
-            Text(ProseioStrings.trustFooter)
+            Text(BipeStrings.trustFooter)
                 .compoundListSectionFooter()
         }
     }
@@ -35,13 +35,13 @@ struct BipeTrustProfileSection: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(ProseioStrings.trustTitle)
+                Text(BipeStrings.trustTitle)
                     .font(.compound.headingSMSemibold)
                     .foregroundStyle(.compound.textPrimary)
 
                 Spacer()
 
-                Text(ProseioStrings.trustProgress(String(profile.completedCount), String(profile.totalCount)))
+                Text(BipeStrings.trustProgress(String(profile.completedCount), String(profile.totalCount)))
                     .font(.compound.bodySMSemibold)
                     .foregroundStyle(.compound.textSecondary)
             }
@@ -89,7 +89,7 @@ struct BipeTrustProfileSection: View {
     }
 
     private var comingSoonTag: some View {
-        Text(ProseioStrings.trustComingSoon)
+        Text(BipeStrings.trustComingSoon)
             .font(.compound.bodyXSSemibold)
             .foregroundStyle(.compound.textSecondary)
             .padding(.horizontal, 8)
@@ -101,21 +101,21 @@ struct BipeTrustProfileSection: View {
 private extension BipeTrustProfile.Step {
     var title: String {
         switch id {
-        case .account: ProseioStrings.trustStepAccount
-        case .profile: ProseioStrings.trustStepProfile
-        case .email: ProseioStrings.trustStepEmail
-        case .pix: ProseioStrings.trustStepPix
-        case .govbr: ProseioStrings.trustStepGovbr
+        case .account: BipeStrings.trustStepAccount
+        case .profile: BipeStrings.trustStepProfile
+        case .email: BipeStrings.trustStepEmail
+        case .pix: BipeStrings.trustStepPix
+        case .govbr: BipeStrings.trustStepGovbr
         }
     }
 
     var description: String {
         switch id {
-        case .account: ProseioStrings.trustStepAccountBody
-        case .profile: ProseioStrings.trustStepProfileBody
-        case .email: ProseioStrings.trustStepEmailBody
-        case .pix: ProseioStrings.trustStepPixBody
-        case .govbr: ProseioStrings.trustStepGovbrBody
+        case .account: BipeStrings.trustStepAccountBody
+        case .profile: BipeStrings.trustStepProfileBody
+        case .email: BipeStrings.trustStepEmailBody
+        case .pix: BipeStrings.trustStepPixBody
+        case .govbr: BipeStrings.trustStepGovbrBody
         }
     }
 }
@@ -123,9 +123,9 @@ private extension BipeTrustProfile.Step {
 private extension BipeTrustProfile.ProfileItem {
     var actionTitle: String {
         switch self {
-        case .displayName: ProseioStrings.trustStepProfileAddName
-        case .handle: ProseioStrings.trustStepProfileAddHandle
-        case .avatar: ProseioStrings.trustStepProfileAddPhoto
+        case .displayName: BipeStrings.trustStepProfileAddName
+        case .handle: BipeStrings.trustStepProfileAddHandle
+        case .avatar: BipeStrings.trustStepProfileAddPhoto
         }
     }
 }

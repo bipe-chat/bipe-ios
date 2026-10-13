@@ -47,7 +47,7 @@ final class BipeSelfChat {
             return roomID
         }
         
-        guard case .success(let roomID) = await clientProxy.createRoom(name: ProseioStrings.selfChatTitle,
+        guard case .success(let roomID) = await clientProxy.createRoom(name: BipeStrings.selfChatTitle,
                                                                        topic: nil,
                                                                        accessType: .private,
                                                                        isSpace: false,

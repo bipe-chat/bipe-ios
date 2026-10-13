@@ -14,7 +14,7 @@ struct BipeVoiceTranscriptEditor: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(ProseioStrings.voiceTranscriptTitle)
+            Text(BipeStrings.voiceTranscriptTitle)
                 .font(.compound.bodyXSSemibold)
                 .foregroundStyle(.compound.textSecondary)
 
@@ -23,17 +23,17 @@ struct BipeVoiceTranscriptEditor: View {
                 HStack(spacing: 6) {
                     ProgressView()
                         .controlSize(.mini)
-                    Text(ProseioStrings.voiceTranscribing)
+                    Text(BipeStrings.voiceTranscribing)
                 }
                 .font(.compound.bodySM)
                 .foregroundStyle(.compound.textSecondary)
             case .ready:
-                TextField(ProseioStrings.voiceTranscriptPlaceholder, text: $draft.text, axis: .vertical)
+                TextField(BipeStrings.voiceTranscriptPlaceholder, text: $draft.text, axis: .vertical)
                     .lineLimit(1...5)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textPrimary)
             case .unavailable:
-                Text(ProseioStrings.voiceTranscriptUnavailable)
+                Text(BipeStrings.voiceTranscriptUnavailable)
                     .font(.compound.bodySM)
                     .foregroundStyle(.compound.textSecondary)
             }

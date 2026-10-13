@@ -16,7 +16,7 @@ struct BipeVoiceTranscriptView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(ProseioStrings.voiceTranscriptTitle)
+            Text(BipeStrings.voiceTranscriptTitle)
                 .font(.compound.bodyXSSemibold)
                 .foregroundStyle(.compound.textSecondary)
             Text(text)
@@ -25,7 +25,7 @@ struct BipeVoiceTranscriptView: View {
                 .lineLimit(isExpanded ? nil : Self.collapsedLineLimit)
             // A character count approximates truncation: measuring rendered lines costs a layout pass per row.
             if text.count > Self.collapseThreshold {
-                Button(isExpanded ? ProseioStrings.actionShowLess : ProseioStrings.actionShowMore) {
+                Button(isExpanded ? BipeStrings.actionShowLess : BipeStrings.actionShowMore) {
                     isExpanded.toggle()
                 }
                 .font(.compound.bodySMSemibold)

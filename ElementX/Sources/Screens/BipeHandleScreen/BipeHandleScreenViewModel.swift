@@ -87,7 +87,7 @@ class BipeHandleScreenViewModel: BipeHandleScreenViewModelType, BipeHandleScreen
                 try await apiClient.setMyHandle(handle, accessToken: token)
             }
             apply(myHandle)
-            userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.handleSaved, icon: \.checkCircle))
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.handleSaved, icon: \.checkCircle))
             actionsSubject.send(.done)
         } catch {
             MXLog.error("Bipe handle change failed: \(error)")
