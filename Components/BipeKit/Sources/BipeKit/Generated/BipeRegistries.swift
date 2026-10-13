@@ -422,6 +422,11 @@ public enum BipeRegistries {
     public static let handleMinLength = 3
     public static let handleMaxLength = 30
     public static let handlePattern = "^[a-z0-9](?:[a-z0-9_]|\\.(?!\\.))*[a-z0-9_]$"
+    /// Owned handles (ADR 0065): only these may be shorter than `handleMinLength`, down to `handleOwnerMinLength`.
+    public static let handleOwnerMinLength = 2
+    public static let ownedHandles: Set<String> = [
+        "mz",
+    ]
 
     /// Public profile rules (ADR 0041). Lengths count Unicode scalars. The server is the authority.
     public static let profileNameMaxLength = 50

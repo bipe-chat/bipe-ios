@@ -38,12 +38,14 @@ public nonisolated enum BipeHandle {
         return handle
     }
 
-    /// Length and character checks only. `nil` means the server must decide.
+    /// Length and character checks only, the same as a lookup. `nil` means the server must decide.
+    /// An owned handle may be shorter than `handleMinLength` (ADR 0065); the server decides who may claim it.
     public static func localProblem(for handle: String) -> BipeHandleProblem? {
         // JS `length` counts UTF-16 code units; the pattern is ASCII-only, so any non-ASCII input fails it anyway.
         let length = handle.utf16.count
-        if length < BipeRegistries.handleMinLength { return .tooShort }
+        if length < BipeRegistries.handleOwnerMinLength { return .tooShort }
         if length > BipeRegistries.handleMaxLength { return .tooLong }
+        if length < BipeRegistries.handleMinLength, !BipeRegistries.ownedHandles.contains(handle) { return .tooShort }
         if handle.range(of: BipeRegistries.handlePattern, options: .regularExpression) == nil { return .invalidCharacters }
         return nil
     }
