@@ -170,7 +170,6 @@ Each line is a deliberate difference with its reason. A difference not listed he
 | Push | APNs through Sygnal | FCM through Sygnal; UnifiedPush optional | OS push channel (#90) |
 | Sign-up attestation | App Attest | None yet | Play Integrity not built on Android (#92) |
 | Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
-| Start screen and sign-up | "Começar" first; one question per screen (bipe#195, bipe#196) | Old single form | Not done on Android yet. **Gap**
 | Unencrypted room option | Still offered | Removed | Not done on iOS (#78). **Gap** |
 | Sticker from a photo | Subject cut-out (Vision) | Centred square crop | Cut-out needs ML Kit, not decided |
 | Sticker import | Chat export ZIP or files | Chat export ZIP or files; picker opens in WhatsApp's stickers folder | iOS apps cannot read WhatsApp's files |
