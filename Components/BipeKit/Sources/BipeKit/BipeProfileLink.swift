@@ -7,10 +7,18 @@
 import CoreImage.CIFilterBuiltins
 import SwiftUI
 
-/// Profile links: `https://proseio.com.br/@handle`. The web page there falls back to the App Store;
-/// the app opens it as a universal link (`applinks:proseio.com.br`).
+/// Profile links: `https://bipe.chat/@handle`. The web page there falls back to the App Store;
+/// the app opens it as a universal link (`applinks:bipe.chat`).
+/// Links on the old host `proseio.com.br` still parse: that host redirects to `bipe.chat`.
 public nonisolated enum BipeProfileLink {
-    public static let host = "proseio.com.br"
+    public static let host = "bipe.chat"
+    /// Hosts whose links the app accepts. The old host stays for links already shared.
+    static let acceptedHosts: Set<String> = [host, "www.\(host)", "proseio.com.br", "www.proseio.com.br"]
+
+    static func isBipeLinkHost(_ url: URL) -> Bool {
+        guard let host = url.host()?.lowercased() else { return false }
+        return acceptedHosts.contains(host)
+    }
 
     public static func url(handle: String) -> URL? {
         var components = URLComponents()
@@ -22,8 +30,7 @@ public nonisolated enum BipeProfileLink {
 
     /// The handle in a profile link, lowercased, or `nil` when the URL is not one.
     public static func handle(from url: URL) -> String? {
-        guard url.scheme == "https",
-              url.host()?.lowercased() == host || url.host()?.lowercased() == "www.\(host)" else {
+        guard url.scheme == "https", isBipeLinkHost(url) else {
             return nil
         }
         let components = url.pathComponents.filter { $0 != "/" }

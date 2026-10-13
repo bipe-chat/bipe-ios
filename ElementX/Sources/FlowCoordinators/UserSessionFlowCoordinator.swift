@@ -261,7 +261,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         handleAppRoute(.room(roomID: roomID, via: []), animated: true)
     }
     
-    /// Bipe: a `proseio.com.br/@handle` link opens that user's profile.
+    /// Bipe: a `bipe.chat/@handle` link opens that user's profile.
     private func openBipeHandle(_ handle: String, animated: Bool) async {
         let userID = try? await flowParameters.userSession.bipeHandleResolver?.userID(forHandle: handle)
         guard let userID else {

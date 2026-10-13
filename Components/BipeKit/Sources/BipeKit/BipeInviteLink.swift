@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// Invite links: `https://proseio.com.br/convite/XXXX-XXXX-XXXX`. The web page there explains how to install;
+/// Invite links: `https://bipe.chat/convite/XXXX-XXXX-XXXX`. The web page there explains how to install;
 /// the app opens it as a universal link and pre-fills the sign-up code.
 public nonisolated enum BipeInviteLink {
     /// Rule: proseio-shared/registries/invite-codes.json (generated). Cases: test-vectors/invite-codes.json.
@@ -14,8 +14,7 @@ public nonisolated enum BipeInviteLink {
 
     /// The invite code in a link, normalised, or `nil` when the URL is not an invite link.
     public static func code(from url: URL) -> String? {
-        guard url.scheme == "https",
-              url.host()?.lowercased() == BipeProfileLink.host || url.host()?.lowercased() == "www.\(BipeProfileLink.host)" else {
+        guard url.scheme == "https", BipeProfileLink.isBipeLinkHost(url) else {
             return nil
         }
         let components = url.pathComponents.filter { $0 != "/" }

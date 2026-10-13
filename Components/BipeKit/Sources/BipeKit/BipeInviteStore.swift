@@ -15,7 +15,7 @@ public nonisolated struct BipeInviteStore {
     private let userID: String
     private let defaults: UserDefaults
 
-    private static let keychainService = "br.com.proseio.invites"
+    private static let keychainService = "chat.bipe.invites"
 
     public init(userID: String, defaults: UserDefaults = .standard) {
         self.userID = userID
@@ -68,8 +68,8 @@ public nonisolated struct BipeInviteStore {
 
     // MARK: - Private
 
-    private var seenKey: String { "proseio.invites.seenJoined.\(userID)" }
-    private var pairsKey: String { "proseio.invites.pairs.\(userID)" }
+    private var seenKey: String { "bipe.invites.seenJoined.\(userID)" }
+    private var pairsKey: String { "bipe.invites.pairs.\(userID)" }
 
     private func writeLinks(_ links: [String: URL]) {
         guard let data = try? JSONEncoder().encode(links.mapValues(\.absoluteString)) else { return }

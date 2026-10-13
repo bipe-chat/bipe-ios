@@ -17,9 +17,9 @@ import SwiftUI
 struct BipeQuietGroups {
     let clientProxy: ClientProxyProtocol
 
-    private static let pollRuleID = "br.com.proseio.poll_start"
+    private static let pollRuleID = "chat.bipe.poll_start"
 
-    private var appliedKey: String { "proseio.quietGroupsApplied.\(clientProxy.userID)" }
+    private var appliedKey: String { "bipe.quietGroupsApplied.\(clientProxy.userID)" }
 
     func run() async {
         guard !UserDefaults.standard.bool(forKey: appliedKey) else { return }

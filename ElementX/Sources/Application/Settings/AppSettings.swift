@@ -127,7 +127,7 @@ final nonisolated class AppSettings: @unchecked Sendable {
     ///
     /// Account provider is the friendly term for the server name. It should not contain an `https` prefix and should
     /// match the last part of the user ID. For example `example.com` and not `https://matrix.example.com`.
-    private(set) var accountProviders: [AccountProvider] = [.managed(serverName: "proseio.com.br", baseURL: "https://matrix.proseio.com.br")] // Bipe
+    private(set) var accountProviders: [AccountProvider] = [.managed(serverName: "bipe.net.br", baseURL: "https://matrix.bipe.net.br")] // Bipe
     /// Whether or not the user is allowed to manually enter their own account provider or must select from one of `defaultAccountProviders`.
     private(set) var allowOtherAccountProviders = false // Bipe: own server only (closed federation)
     /// Whether the components surrounding the app brand/logo should be hidden or not
@@ -139,16 +139,16 @@ final nonisolated class AppSettings: @unchecked Sendable {
     var searchBackfillTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.search-backfill" } // Bipe: derived from the bundle ID
     
     /// A URL where users can go read more about the app.
-    private(set) var websiteURL: URL = "https://proseio.com.br"
+    private(set) var websiteURL: URL = "https://bipe.chat"
     /// A URL that contains the app's logo that may be used when showing content in a web view.
-    private(set) var logoURL: URL = "https://proseio.com.br/icone.png"
+    private(set) var logoURL: URL = "https://bipe.chat/icone.png"
     /// A URL that contains that app's copyright notice.
     // Bipe: the About page names the steward and the licence (ADR 0040).
-    private(set) var copyrightURL: URL = "https://proseio.com.br/sobre"
+    private(set) var copyrightURL: URL = "https://bipe.chat/sobre"
     /// A URL that contains the app's Terms of use.
-    private(set) var acceptableUseURL: URL = "https://proseio.com.br/termos"
+    private(set) var acceptableUseURL: URL = "https://bipe.chat/termos"
     /// A URL that contains the app's Privacy Policy.
-    private(set) var privacyURL: URL = "https://proseio.com.br/privacidade"
+    private(set) var privacyURL: URL = "https://bipe.chat/privacidade"
     // Bipe: no help pages yet, so these are nil and the "Learn more" links they feed are hidden.
     /// A URL where users can go read more about encryption in general.
     private(set) var encryptionURL: URL?
@@ -233,15 +233,15 @@ final nonisolated class AppSettings: @unchecked Sendable {
         #endif
     }
     
-    private(set) var pushGatewayBaseURL: URL = "https://push.proseio.com.br" // Bipe: own Sygnal (issue #61); never matrix.org
+    private(set) var pushGatewayBaseURL: URL = "https://push.bipe.net.br" // Bipe: own Sygnal (issue #61); never matrix.org
     var pushGatewayNotifyEndpoint: URL {
         pushGatewayBaseURL.appending(path: "_matrix/push/v1/notify")
     }
     
     /// Bipe API (sign-up, handles). Contract: proseio-shared/api/openapi.yaml.
-    private(set) var bipeAPIBaseURL: URL = "https://api.proseio.com.br" // Bipe
+    private(set) var bipeAPIBaseURL: URL = "https://api.bipe.net.br" // Bipe
     /// Bipe: "Create account" for this provider opens the invite sign-up screen instead of MAS registration.
-    private(set) var bipeSignupServerName = "proseio.com.br"
+    private(set) var bipeSignupServerName = "bipe.net.br"
     var usesBipeSignup: Bool {
         defaultAccountProvider.serverNameOrBaseURL == bipeSignupServerName
     }

@@ -125,7 +125,7 @@ targets:
         aps-environment: development
         com.apple.developer.devicecheck.appattest-environment: production
         com.apple.developer.associated-domains:
-        - applinks:proseio.com.br
+        - applinks:bipe.chat
         # - applinks:localhost?mode=developer # developer mode only works with https (but self-signed is fine).
         com.apple.developer.usernotifications.communication: true
         com.apple.security.app-sandbox: true

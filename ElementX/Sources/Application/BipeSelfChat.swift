@@ -12,7 +12,7 @@ import SwiftUI
 /// Android uses the same event type and content shape.
 @MainActor
 final class BipeSelfChat {
-    static let accountDataType = "br.com.proseio.self_chat"
+    static let accountDataType = "chat.bipe.self_chat"
     
     private struct Content: Codable {
         let roomID: String
@@ -73,7 +73,7 @@ final class BipeSelfChat {
     // MARK: - Private
     
     private var cacheKey: String {
-        "proseio.selfChat.\(clientProxy.userID)"
+        "bipe.selfChat.\(clientProxy.userID)"
     }
     
     private func storedRoomID() async -> String? {

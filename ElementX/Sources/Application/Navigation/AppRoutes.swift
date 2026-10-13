@@ -57,9 +57,9 @@ enum AppRoute: Hashable {
     case thread(roomID: String, threadRootEventID: String, focusEventID: String?)
     /// The search screen
     case search
-    /// Bipe: a `proseio.com.br/@handle` link. Resolved to a ``userProfile`` once a session exists.
+    /// Bipe: a `bipe.chat/@handle` link (or the old `proseio.com.br`). Resolved to a ``userProfile`` once a session exists.
     case bipeHandle(String)
-    /// Bipe: a `proseio.com.br/convite/<code>` invite link. Opens sign-up with the code, or tells a signed-in user it is not for them.
+    /// Bipe: a `bipe.chat/convite/<code>` invite link (or the old `proseio.com.br`). Opens sign-up with the code, or tells a signed-in user it is not for them.
     case bipeInvite(code: BipeInviteCode)
     
     /// Whether or not the route should be handled by the authentication flow.
@@ -211,14 +211,14 @@ private struct AccountProvisioningURLParser: URLParser {
     }
 }
 
-/// Bipe: the parser for `https://proseio.com.br/@handle` profile links.
+/// Bipe: the parser for `https://bipe.chat/@handle` profile links (`proseio.com.br` still accepted).
 private struct BipeHandleURLParser: URLParser {
     func route(from url: URL) -> AppRoute? {
         BipeProfileLink.handle(from: url).map(AppRoute.bipeHandle)
     }
 }
 
-/// Bipe: the parser for `https://proseio.com.br/convite/<code>` invite links.
+/// Bipe: the parser for `https://bipe.chat/convite/<code>` invite links (`proseio.com.br` still accepted).
 private struct BipeInviteURLParser: URLParser {
     func route(from url: URL) -> AppRoute? {
         BipeInviteLink.code(from: url).flatMap(BipeInviteCode.init).map { AppRoute.bipeInvite(code: $0) }

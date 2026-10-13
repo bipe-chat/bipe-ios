@@ -45,7 +45,7 @@ public final class BipeHandleResolver {
 
     // MARK: - Matrix ID to handle
 
-    /// `true` for a user ID on the Bipe server, e.g. `@k7q2m9x4tp:proseio.com.br`.
+    /// `true` for a user ID on the Bipe server, e.g. `@k7q2m9x4tp:bipe.net.br`.
     public func isBipeUserID(_ userID: String) -> Bool {
         userID.hasPrefix("@") && userID.hasSuffix(":\(serverName)")
     }
