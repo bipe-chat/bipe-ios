@@ -3467,13 +3467,6 @@
 			path = Sources;
 			sourceTree = "<group>";
 		};
-		01F16F321A5F26DC59164988 /* ProseioHandleScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ProseioHandleScreen;
-			sourceTree = "<group>";
-		};
 		0210F4932B59277E2EEEF7BC /* RoomNotificationSettingsScreen */ = {
 			isa = PBXGroup;
 			children = (
@@ -3602,13 +3595,6 @@
 				AAFE4295DD635085A44CBF4C /* View */,
 			);
 			path = AnalyticsSettingsScreen;
-			sourceTree = "<group>";
-		};
-		0A362ACAA29487489E0FDD0D /* ProseioSignupScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ProseioSignupScreen;
 			sourceTree = "<group>";
 		};
 		0B7746360C4753B5A014838F /* SupportingFiles */ = {
@@ -3884,13 +3870,6 @@
 				CEE41494C837AA403A06A5D9 /* UnitTests.xctestplan */,
 			);
 			path = SupportingFiles;
-			sourceTree = "<group>";
-		};
-		251531D5FBC03CC377C9A1D2 /* ProseioStickerPickerScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ProseioStickerPickerScreen;
 			sourceTree = "<group>";
 		};
 		2565414373E6F68005966B8E /* SecureBackup */ = {
@@ -6777,26 +6756,12 @@
 			path = MediaUploadQualitySettingsScreen;
 			sourceTree = "<group>";
 		};
-		BA5F569191DDED29FE098616 /* ProseioMessagingScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ProseioMessagingScreen;
-			sourceTree = "<group>";
-		};
 		BA6CA37D945DC83B235BD7C9 /* View */ = {
 			isa = PBXGroup;
 			children = (
 				C5C76FA4DDE96D0C3D46E2D2 /* BipeStickerPickerScreen.swift */,
 			);
 			path = View;
-			sourceTree = "<group>";
-		};
-		BA7CC281F1D2029134A547E6 /* ProseioPublicProfileScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ProseioPublicProfileScreen;
 			sourceTree = "<group>";
 		};
 		BB11CF5847CA0B3BC3A7F8DA /* View */ = {
@@ -6956,13 +6921,6 @@
 				A722D372674EE5687E1A67E4 /* View */,
 			);
 			path = SessionVerificationScreen;
-			sourceTree = "<group>";
-		};
-		C1F109346B86FC6DA077F43F /* ProseioInvitesScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ProseioInvitesScreen;
 			sourceTree = "<group>";
 		};
 		C360FCF7418FE3593D5A0CBF /* SpaceScreen */ = {
@@ -7406,13 +7364,6 @@
 				8F074E22FD93E64211971845 /* Onboarding */,
 				A448A3A8F764174C60CD0CA1 /* Other */,
 				3E535010B850B53DDD3CFF2A /* PinnedEventsTimelineScreen */,
-				FC2995DFA0B159A4E2D840CD /* ProseioContactsScreen */,
-				01F16F321A5F26DC59164988 /* ProseioHandleScreen */,
-				C1F109346B86FC6DA077F43F /* ProseioInvitesScreen */,
-				BA5F569191DDED29FE098616 /* ProseioMessagingScreen */,
-				BA7CC281F1D2029134A547E6 /* ProseioPublicProfileScreen */,
-				0A362ACAA29487489E0FDD0D /* ProseioSignupScreen */,
-				251531D5FBC03CC377C9A1D2 /* ProseioStickerPickerScreen */,
 				3D733E8352DD4C461CFD8B8A /* QRCodeLoginScreen */,
 				5970F275D6014548DCED6106 /* ReportContentScreen */,
 				4DDB6973795DA09189CF64A5 /* ReportRoomScreen */,
@@ -7737,13 +7688,6 @@
 				37FEE10AB666891E6A675E5E /* SecureBackupLogoutConfirmationScreen.swift */,
 			);
 			path = View;
-			sourceTree = "<group>";
-		};
-		FC2995DFA0B159A4E2D840CD /* ProseioContactsScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ProseioContactsScreen;
 			sourceTree = "<group>";
 		};
 		FCDF06BDB123505F0334B4F9 /* Timeline */ = {
