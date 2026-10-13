@@ -14,9 +14,9 @@
 "bipe_warning_receipt_image" = "Image, not a payment receipt.";
 "bipe_warning_reserved_name" = "This name is reserved for verified organisations.";
 "bipe_warning_not_your_contact" = "Not your contact %1$@.";
-"bipe_device_approval_never_for_others" = "Bipe never asks you to approve someone else's login.";
+"bipe_device_approval_never_for_others" = "Bipe never asks you to approve someone else's phone.";
 "bipe_badge_verified_contact" = "Confirmed in person";
-"bipe_badge_suspended_body" = "This account signed in on a new device. Verification comes back when the person confirms their identity there.";
+"bipe_badge_suspended_body" = "This account signed in on a new device. The seal comes back when the person verifies again on that device.";
 "bipe_warning_nickname_confirm_title" = "Confirm who this is";
 "bipe_warning_nickname_confirm_body" = "You saved this contact as %1$@. The account is verified as %2$@. Is it the same person?";
 "bipe_action_nickname_confirm_yes" = "Yes, same person";
@@ -155,9 +155,9 @@
 "bipe_trust_step_email" = "Email confirmed";
 "bipe_trust_step_email_body" = "Open a link we send to your email.";
 "bipe_trust_step_pix" = "Pix";
-"bipe_trust_step_pix_body" = "A R$0.01 Pix from your bank account confirms your name.";
+"bipe_trust_step_pix_body" = "A R$0.01 Pix from your bank account verifies your name.";
 "bipe_trust_step_govbr" = "gov.br";
-"bipe_trust_step_govbr_body" = "A signature with your gov.br account confirms your name.";
+"bipe_trust_step_govbr_body" = "A signature with your gov.br account verifies your name.";
 "bipe_trust_coming_soon" = "Coming soon";
 "bipe_invites_next" = "Next invite on %1$@";
 "bipe_voice_transcript_title" = "Transcript";
@@ -218,7 +218,7 @@
 "bipe_signup_device_header" = "To create an account, you only need your name. The @ and the email are optional.";
 "bipe_signup_email_optional" = "Email (optional)";
 "bipe_signup_email_optional_footer" = "Only used to get back into your account if you lose your phone. Nobody else sees it.";
-"bipe_signup_device_success" = "Account created. It stays on this phone, with no login.";
+"bipe_signup_device_success" = "Account created. It stays on this phone.";
 "bipe_pin_create_title" = "Create your PIN";
 "bipe_pin_create_body" = "Pick a PIN with %1$@ digits, like your bank PIN. It locks the app and protects getting back into your account.";
 "bipe_pin_confirm_title" = "Enter the PIN again";
@@ -275,8 +275,8 @@
 "bipe_recovery_pin_ready" = "Done. Your new PIN works now.";
 "bipe_recovery_history_note" = "To see your old messages, approve this phone on an old device or use your recovery key.";
 "bipe_recovery_cancelled" = "Getting back into the account was cancelled on one of your devices.";
-"bipe_error_recovery_invalid" = "This request no longer works. Start again.";
-"bipe_recovery_alert_title" = "Request to get into your account";
+"bipe_error_recovery_invalid" = "You can't continue from here anymore. Start again.";
+"bipe_recovery_alert_title" = "Your account is moving to a new device";
 "bipe_recovery_alert_email" = "Someone used your recovery email to move your account to another device. If it was not you, cancel now. If nobody cancels, the account opens on that device on %1$@.";
 "bipe_recovery_alert_guardian" = "Your guardians approved moving your account to another device. If it was not you, cancel now. If nobody cancels, the account opens on that device on %1$@.";
 "bipe_recovery_alert_cpf" = "Someone verified your CPF to move your account to another device. If it was not you, cancel now. If nobody cancels, the account opens on that device on %1$@.";
