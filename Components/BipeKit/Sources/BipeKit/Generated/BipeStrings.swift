@@ -250,6 +250,12 @@ public enum BipeStrings {
 
     public static var scamWarningUrgency: String { NSLocalizedString("bipe_scam_warning_urgency", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var scamWarningExtortion: String { NSLocalizedString("bipe_scam_warning_extortion", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var scamWarningRemoteApp: String { NSLocalizedString("bipe_scam_warning_remote_app", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var scamWarningPinRequest: String { NSLocalizedString("bipe_scam_warning_pin_request", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var signupInviteCode: String { NSLocalizedString("bipe_signup_invite_code", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static func signupInvitedBy(_ p1: String) -> String {
@@ -289,6 +295,12 @@ public enum BipeStrings {
     public static var invitesStatusRevoked: String { NSLocalizedString("bipe_invites_status_revoked", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var invitesRevoke: String { NSLocalizedString("bipe_invites_revoke", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesQrAction: String { NSLocalizedString("bipe_invites_qr_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesQrTitle: String { NSLocalizedString("bipe_invites_qr_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesQrFooter: String { NSLocalizedString("bipe_invites_qr_footer", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var invitesChat: String { NSLocalizedString("bipe_invites_chat", tableName: "Bipe", bundle: .module, comment: "") }
 
@@ -519,6 +531,8 @@ public enum BipeStrings {
     public static func pinCreateBody(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_pin_create_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
+
+    public static var pinNeverAsked: String { NSLocalizedString("bipe_pin_never_asked", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var pinConfirmTitle: String { NSLocalizedString("bipe_pin_confirm_title", tableName: "Bipe", bundle: .module, comment: "") }
 

@@ -57,11 +57,8 @@ Devices must be registered in the Centaur Labs team (automatic signing does this
 
 - **Dev builds use the Centaur Labs team (`992N457T8D`)** with bundle ID `chat.bipe.app.dev` and app group `group.chat.bipe.dev` (ADR 0061). Approved by MZ on 11 October 2026.
 - **The production ID `chat.bipe.app` (app group `group.chat.bipe`) stays unregistered** until the Bipe organisation account exists. App IDs belong to the team that registers them; never register the production ID under Centaur.
-- **By hand (MZ), after the rename to Bipe names:**
-  - Developer portal: register App IDs `chat.bipe.app.dev`, `chat.bipe.app.dev.nse`, `chat.bipe.app.dev.shareextension` and app group `group.chat.bipe.dev` (production: the same without `.dev`, group `group.chat.bipe`). Register the push key for them.
-  - Developer portal: create the manual App Store profiles "Bipe App Store", "Bipe NSE App Store", "Bipe Share App Store" (names in `Tools/Bipe/ExportAppStore.plist`) and install them in `~/Library/Developer/Xcode/UserData/Provisioning Profiles/`. Delete the old "Proseio ..." profiles.
-  - App Store Connect: create the new app record "Bipe" for `chat.bipe.app.dev`. Rename the API key "Proseio CI" to "Bipe CI".
-  - Mac: `mv ~/.config/proseio ~/.config/bipe`. Keychain: rename item `proseio-asc-api-key` to `bipe-asc-api-key`.
+- **Rename to Bipe names, done 13 October 2026:** App IDs `chat.bipe.app.dev` (+ `.nse`, `.shareextension`) and app group `group.chat.bipe.dev` registered; profiles "Bipe App Store", "Bipe NSE App Store", "Bipe Share App Store" installed; App Store Connect record "Bipe Chat" (`6822454419`, SKU `bipe-dev`) for `chat.bipe.app.dev`; the old record (`6821694616`, `br.com.proseio.app.dev`) renamed "Bipe Chat Legacy"; `~/.config/proseio` moved to `~/.config/bipe`.
+- **Still by hand (MZ):** delete the old "Proseio ..." profiles in the portal; rename the API key "Proseio CI" to "Bipe CI"; rename Keychain item `proseio-asc-api-key` to `bipe-asc-api-key`. Production IDs (without `.dev`, group `group.chat.bipe`) wait for the Bipe organisation account.
 - Switching to production: change `DEVELOPMENT_TEAM`, `BASE_BUNDLE_IDENTIFIER` and `APP_GROUP_IDENTIFIER` in `app.yml`, then `xcodegen`.
 
 ## Rebrand status

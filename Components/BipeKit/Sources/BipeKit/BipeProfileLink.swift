@@ -96,7 +96,57 @@ public struct BipeQRCodeView: View {
     }
 }
 
-/// Sheet content: the QR code of the user's own profile link, the handle and a share button.
+/// Sheet content: a QR code for a link, a title, an optional caption, a footer and a share button.
+/// The button shares `shareMessage` when there is one, else the link.
+public struct BipeQRCodeSheet: View {
+    private let url: URL
+    private let title: String
+    private let caption: String?
+    private let footer: String
+    private let shareMessage: String?
+    private let shareTitle: String
+
+    public init(url: URL, title: String, caption: String? = nil, footer: String, shareMessage: String? = nil, shareTitle: String) {
+        self.url = url
+        self.title = title
+        self.caption = caption
+        self.footer = footer
+        self.shareMessage = shareMessage
+        self.shareTitle = shareTitle
+    }
+
+    public var body: some View {
+        VStack(spacing: 20) {
+            Text(title)
+                .font(.title3.bold())
+            BipeQRCodeView(url: url)
+                .frame(maxWidth: 280)
+            if let caption {
+                Text(caption)
+                    .font(.headline)
+            }
+            Text(footer)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Group {
+                if let shareMessage {
+                    ShareLink(item: shareMessage) { shareLabel }
+                } else {
+                    ShareLink(item: url) { shareLabel }
+                }
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding(24)
+    }
+
+    private var shareLabel: some View {
+        Label(shareTitle, systemImage: "square.and.arrow.up")
+    }
+}
+
+/// Sheet content: the QR code of the user's own profile link.
 public struct BipeProfileQRCodeSheet: View {
     private let handle: String
     private let url: URL
@@ -108,23 +158,31 @@ public struct BipeProfileQRCodeSheet: View {
     }
 
     public var body: some View {
-        VStack(spacing: 20) {
-            Text(BipeStrings.profileQrTitle)
-                .font(.title3.bold())
-            BipeQRCodeView(url: url)
-                .frame(maxWidth: 280)
-            Text("@\(handle)")
-                .font(.headline)
-            Text(BipeStrings.profileQrFooter)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            ShareLink(item: url) {
-                Label(BipeStrings.profileShare, systemImage: "square.and.arrow.up")
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding(24)
+        BipeQRCodeSheet(url: url,
+                        title: BipeStrings.profileQrTitle,
+                        caption: "@\(handle)",
+                        footer: BipeStrings.profileQrFooter,
+                        shareTitle: BipeStrings.profileShare)
+    }
+}
+
+/// Sheet content: the QR code of a personal invite link (`bipe.chat/convite/<code>`).
+/// Scanned with the camera, it opens the app on sign-up with the code, or the invite page when the app is missing.
+public struct BipeInviteQRCodeSheet: View {
+    private let url: URL
+    private let shareTitle: String
+
+    public init(url: URL, shareTitle: String) {
+        self.url = url
+        self.shareTitle = shareTitle
+    }
+
+    public var body: some View {
+        BipeQRCodeSheet(url: url,
+                        title: BipeStrings.invitesQrTitle,
+                        footer: BipeStrings.invitesQrFooter,
+                        shareMessage: BipeStrings.invitesShareMessage(url.absoluteString),
+                        shareTitle: shareTitle)
     }
 }
 #endif

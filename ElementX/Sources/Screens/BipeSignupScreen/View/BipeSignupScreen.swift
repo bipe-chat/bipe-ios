@@ -99,7 +99,7 @@ struct BipeSignupScreen: View {
             SecureField(text: $context.pinConfirmation) { placeholder("") }
                 .focused($focusedField, equals: .pinConfirmation)
                 .textFieldStyle(.compound(labelText: BipeStrings.pinConfirmTitle,
-                                          footerText: context.viewState.pinMismatch ? BipeStrings.pinMismatch : nil,
+                                          footerText: context.viewState.pinMismatch ? BipeStrings.pinMismatch : BipeStrings.pinNeverAsked,
                                           state: context.viewState.pinMismatch ? .error : .default))
                 .keyboardType(.numberPad)
                 .textContentType(.oneTimeCode)
