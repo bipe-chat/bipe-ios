@@ -8,7 +8,7 @@ import BipeKit
 import Compound
 import SwiftUI
 
-/// Bipe's welcome content on the start screen: the logo, the promise and three value points.
+/// Bipe's welcome content on the start screen: the logo, the welcome line, the promise and three value points.
 /// Android: `BipeWelcomeView` in libraries/bipe.
 struct BipeWelcomeView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -22,6 +22,12 @@ struct BipeWelcomeView: View {
                     .padding(.bottom, 32)
             }
 
+            Text(BipeStrings.onboardingWelcome)
+                .font(.compound.bodyLGSemibold)
+                .foregroundStyle(.compound.textPrimary)
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 8)
+
             Text(BipeStrings.onboardingTitle)
                 .font(.compound.headingXLBold)
                 .foregroundStyle(.compound.textPrimary)
@@ -31,7 +37,7 @@ struct BipeWelcomeView: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 point(icon: \.shield, text: BipeStrings.onboardingPointScam)
-                point(icon: \.mention, text: BipeStrings.onboardingPointHandle)
+                point(icon: \.locationPin, text: BipeStrings.onboardingPointBrazil)
                 point(icon: \.block, text: BipeStrings.onboardingPointNoAds)
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -69,16 +75,25 @@ struct BipeWelcomeView: View {
     }
 }
 
-/// Bipe's start screen background: a soft açaí wash from the top over the canvas colour.
+/// Bipe's start screen background: an açaí wash from the top over the canvas colour.
 /// Replaces Element's launch artwork. Works in light, dark and high contrast through Compound tokens.
+///
+/// Wash spec (same numbers in Android `Modifier.bipeWelcomeBackground()`, libraries/bipe BipeWelcomeView.kt):
+/// - Base: bgCanvasDefault, full screen, behind the system bars.
+/// - Vertical gradient over the full screen height, top to bottom:
+///   gradientSubtleStop1 at 0, stop2 at 0.2, stop3 at 0.4, stop4 at 0.55, stop5 at 0.7,
+///   and stop5 with alpha 0 at 0.85.
+/// - The end stop is stop5 with alpha 0, not gradientSubtleStop6 (transparent black). Android (Skia) interpolates
+///   unpremultiplied colours, so a fade to transparent black darkens the last segment there. With one RGB at both
+///   ends of the last segment, premultiplied and unpremultiplied interpolation give the same pixels.
 struct BipeWelcomeBackground: View {
     var body: some View {
         LinearGradient(stops: [.init(color: .compound.gradientSubtleStop1, location: 0),
-                               .init(color: .compound.gradientSubtleStop2, location: 0.12),
-                               .init(color: .compound.gradientSubtleStop3, location: 0.25),
-                               .init(color: .compound.gradientSubtleStop4, location: 0.38),
-                               .init(color: .compound.gradientSubtleStop5, location: 0.5),
-                               .init(color: .compound.gradientSubtleStop6, location: 0.65)],
+                               .init(color: .compound.gradientSubtleStop2, location: 0.2),
+                               .init(color: .compound.gradientSubtleStop3, location: 0.4),
+                               .init(color: .compound.gradientSubtleStop4, location: 0.55),
+                               .init(color: .compound.gradientSubtleStop5, location: 0.7),
+                               .init(color: .compound.gradientSubtleStop5.opacity(0), location: 0.85)],
                        startPoint: .top,
                        endPoint: .bottom)
             .background(.compound.bgCanvasDefault)
