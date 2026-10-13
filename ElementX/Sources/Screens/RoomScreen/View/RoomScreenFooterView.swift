@@ -7,7 +7,7 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct RoomScreenFooterView: View {
@@ -126,7 +126,7 @@ struct RoomScreenFooterView: View {
         userIDString.bold()
         description.replace(userIDPlaceholder, with: userIDString)
         
-        description.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: url)
+        description.bipeReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: url)
         return description
     }
     
@@ -140,7 +140,7 @@ struct RoomScreenFooterView: View {
         userIDString.bold()
         description.replace(userIDPlaceholder, with: userIDString)
         
-        description.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: url)
+        description.bipeReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: url)
         return description
     }
     

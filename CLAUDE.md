@@ -1,2 +1,2 @@
 @AGENTS.md
-@PROSEIO.md
+@BIPE.md

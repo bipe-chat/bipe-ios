@@ -7,7 +7,7 @@
 //
 
 import Combine
-import ProseioKit
+import BipeKit
 import SwiftState
 import SwiftUI
 
@@ -42,8 +42,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         /// The screen to login with a password.
         case loginScreen
         
-        /// Proseio: invite-based sign-up through the Proseio API.
-        case proseioSignupScreen
+        /// Bipe: invite-based sign-up through the Bipe API.
+        case bipeSignupScreen
         
         /// The screen to report an error.
         case bugReportFlow
@@ -76,10 +76,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         /// The password login was aborted.
         case cancelledPasswordLogin(previousState: State)
         
-        /// Proseio: show the invite sign-up screen.
-        case proseioSignup
-        /// Proseio: the invite sign-up was aborted.
-        case cancelledProseioSignup
+        /// Bipe: show the invite sign-up screen.
+        case bipeSignup
+        /// Bipe: the invite sign-up was aborted.
+        case cancelledBipeSignup
         
         /// The user encountered a problem.
         case reportProblem
@@ -99,8 +99,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private var cancellables = Set<AnyCancellable>()
     
     private var oAuthPresenter: OAuthAuthenticationPresenter?
-    /// Proseio: the code from an invite link, handed to the next sign-up screen.
-    private var pendingInviteCode: ProseioInviteCode?
+    /// Bipe: the code from an invite link, handed to the next sign-up screen.
+    private var pendingInviteCode: BipeInviteCode?
     
     // periphery:ignore - retaining purpose
     private var bugReportFlowCoordinator: BugReportFlowCoordinator?
@@ -148,13 +148,13 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             }
             
             stateMachine.tryEvent(.applyProvisioningParameters, userInfo: provisioningParameters)
-        case .proseioInvite(let code):
-            guard appSettings.usesProseioSignup else { return }
+        case .bipeInvite(let code):
+            guard appSettings.usesBipeSignup else { return }
             pendingInviteCode = code
             if stateMachine.state != .startScreen {
                 clearRoute(animated: animated)
             }
-            stateMachine.tryEvent(.proseioSignup)
+            stateMachine.tryEvent(.bipeSignup)
         default:
             fatalError()
         }
@@ -173,7 +173,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             navigationStackCoordinator.popToRoot(animated: animated)
         case .loginScreen:
             navigationStackCoordinator.popToRoot(animated: animated)
-        case .proseioSignupScreen:
+        case .bipeSignupScreen:
             navigationStackCoordinator.popToRoot(animated: animated)
         case .bugReportFlow:
             navigationStackCoordinator.setSheetCoordinator(nil)
@@ -231,12 +231,12 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         stateMachine.addRoutes(event: .cancelledPasswordLogin(previousState: .serverSelectionScreen), transitions: [.loginScreen => .serverSelectionScreen])
         stateMachine.addRoutes(event: .cancelledPasswordLogin(previousState: .startScreen), transitions: [.loginScreen => .startScreen])
         
-        // Proseio Sign-up
+        // Bipe Sign-up
         
-        stateMachine.addRoutes(event: .proseioSignup, transitions: [.startScreen => .proseioSignupScreen]) { [weak self] _ in
-            self?.showProseioSignupScreen()
+        stateMachine.addRoutes(event: .bipeSignup, transitions: [.startScreen => .bipeSignupScreen]) { [weak self] _ in
+            self?.showBipeSignupScreen()
         }
-        stateMachine.addRoutes(event: .cancelledProseioSignup, transitions: [.proseioSignupScreen => .startScreen])
+        stateMachine.addRoutes(event: .cancelledBipeSignup, transitions: [.bipeSignupScreen => .startScreen])
         
         // Bug Report
         
@@ -258,7 +258,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                                                                .serverSelectionScreen => .complete, // OAuth authentication
                                                                .startScreen => .complete, // Direct OAuth authentication
                                                                .loginScreen => .complete,
-                                                               .proseioSignupScreen => .complete]) { [weak self] context in
+                                                               .bipeSignupScreen => .complete]) { [weak self] context in
             guard let userSession = context.userInfo as? UserSessionProtocol else { fatalError("The user session wasn't included in the context") }
             self?.userHasSignedIn(userSession: userSession)
         }
@@ -307,8 +307,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 case .login:
                     stateMachine.tryEvent(.selectServer(.login))
                 case .register:
-                    if appSettings.usesProseioSignup {
-                        stateMachine.tryEvent(.proseioSignup)
+                    if appSettings.usesBipeSignup {
+                        stateMachine.tryEvent(.bipeSignup)
                     } else {
                         stateMachine.tryEvent(.selectServer(.register))
                     }
@@ -451,17 +451,17 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         }
     }
     
-    // MARK: - Proseio Sign-up
+    // MARK: - Bipe Sign-up
     
-    private func showProseioSignupScreen() {
+    private func showBipeSignupScreen() {
         let inviteCode = pendingInviteCode
         pendingInviteCode = nil
-        let parameters = ProseioSignupScreenCoordinatorParameters(inviteCode: inviteCode,
-                                                                  apiClient: ProseioAPIClient(baseURL: appSettings.proseioAPIBaseURL),
+        let parameters = BipeSignupScreenCoordinatorParameters(inviteCode: inviteCode,
+                                                                  apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
                                                                   authenticationService: authenticationService,
                                                                   serverNameOrBaseURL: appSettings.defaultAccountProvider.serverNameOrBaseURL,
                                                                   userIndicatorController: userIndicatorController)
-        let coordinator = ProseioSignupScreenCoordinator(parameters: parameters)
+        let coordinator = BipeSignupScreenCoordinator(parameters: parameters)
         
         coordinator.actionsPublisher
             .sink { [weak self] action in
@@ -469,13 +469,13 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 case .continueWithOAuth(let oAuthData, let window):
                     self?.showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
                 case .createdWithInvite(let inviterUserID):
-                    self?.appSettings.proseioPendingInviterUserID = inviterUserID
+                    self?.appSettings.bipePendingInviterUserID = inviterUserID
                 }
             }
             .store(in: &cancellables)
         
         navigationStackCoordinator.push(coordinator) { [weak self] in
-            self?.stateMachine.tryEvent(.cancelledProseioSignup)
+            self?.stateMachine.tryEvent(.cancelledBipeSignup)
         }
     }
     

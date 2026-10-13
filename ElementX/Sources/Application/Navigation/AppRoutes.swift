@@ -8,7 +8,7 @@
 
 import Foundation
 import MatrixRustSDK
-import ProseioKit
+import BipeKit
 
 // MARK: - Routes
 
@@ -57,10 +57,10 @@ enum AppRoute: Hashable {
     case thread(roomID: String, threadRootEventID: String, focusEventID: String?)
     /// The search screen
     case search
-    /// Proseio: a `proseio.com.br/@handle` link. Resolved to a ``userProfile`` once a session exists.
-    case proseioHandle(String)
-    /// Proseio: a `proseio.com.br/convite/<code>` invite link. Opens sign-up with the code, or tells a signed-in user it is not for them.
-    case proseioInvite(code: ProseioInviteCode)
+    /// Bipe: a `proseio.com.br/@handle` link. Resolved to a ``userProfile`` once a session exists.
+    case bipeHandle(String)
+    /// Bipe: a `proseio.com.br/convite/<code>` invite link. Opens sign-up with the code, or tells a signed-in user it is not for them.
+    case bipeInvite(code: BipeInviteCode)
     
     /// Whether or not the route should be handled by the authentication flow.
     var isAuthenticationRoute: Bool {
@@ -89,8 +89,8 @@ struct AppRouteURLParser {
     init(appSettings: AppSettings) {
         urlParsers = [
             AppGroupURLParser(),
-            ProseioHandleURLParser(),
-            ProseioInviteURLParser(),
+            BipeHandleURLParser(),
+            BipeInviteURLParser(),
             MatrixPermalinkParser(),
             ElementWebURLParser(domains: appSettings.elementWebHosts),
             AccountProvisioningURLParser(domain: appSettings.accountProvisioningHost),
@@ -211,17 +211,17 @@ private struct AccountProvisioningURLParser: URLParser {
     }
 }
 
-/// Proseio: the parser for `https://proseio.com.br/@handle` profile links.
-private struct ProseioHandleURLParser: URLParser {
+/// Bipe: the parser for `https://proseio.com.br/@handle` profile links.
+private struct BipeHandleURLParser: URLParser {
     func route(from url: URL) -> AppRoute? {
-        ProseioProfileLink.handle(from: url).map(AppRoute.proseioHandle)
+        BipeProfileLink.handle(from: url).map(AppRoute.bipeHandle)
     }
 }
 
-/// Proseio: the parser for `https://proseio.com.br/convite/<code>` invite links.
-private struct ProseioInviteURLParser: URLParser {
+/// Bipe: the parser for `https://proseio.com.br/convite/<code>` invite links.
+private struct BipeInviteURLParser: URLParser {
     func route(from url: URL) -> AppRoute? {
-        ProseioInviteLink.code(from: url).flatMap(ProseioInviteCode.init).map { AppRoute.proseioInvite(code: $0) }
+        BipeInviteLink.code(from: url).flatMap(BipeInviteCode.init).map { AppRoute.bipeInvite(code: $0) }
     }
 }
 

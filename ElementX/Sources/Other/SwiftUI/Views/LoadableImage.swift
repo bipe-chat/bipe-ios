@@ -9,7 +9,7 @@
 import Combine
 import Compound
 import Kingfisher
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 /// Used to configure animations
@@ -140,7 +140,7 @@ private struct LoadableImageContent<TransformerView: View, PlaceholderView: View
             case (.gifData, true):
                 transformer(AnyView(KFAnimatedImage(source: .provider(self))))
             case (.animatedData(let data), true):
-                transformer(AnyView(ProseioAnimatedImage(data: data)))
+                transformer(AnyView(BipeAnimatedImage(data: data)))
             case (.none, _), (_, false):
                 if let blurHashView {
                     if shouldRender {
@@ -259,7 +259,7 @@ private class ContentLoader: ObservableObject {
     enum Content: Equatable {
         case image(UIImage)
         case gifData(Data)
-        /// Proseio: animated WebP (WhatsApp stickers), played by `ProseioAnimatedImage`.
+        /// Bipe: animated WebP (WhatsApp stickers), played by `BipeAnimatedImage`.
         case animatedData(Data)
     }
     
@@ -275,7 +275,7 @@ private class ContentLoader: ObservableObject {
             return cachedContent
         }
         
-        // Proseio: a cached WebP may be a still thumbnail of an animated file, so always load the data.
+        // Bipe: a cached WebP may be a still thumbnail of an animated file, so always load the data.
         if isWebP {
             return nil
         }
@@ -299,10 +299,10 @@ private class ContentLoader: ObservableObject {
     }
     
     func load() async {
-        // Proseio: WebP loads the full data like GIF does. More than one frame plays as an animation.
+        // Bipe: WebP loads the full data like GIF does. More than one frame plays as an animation.
         if isWebP {
             if case let .success(data) = await mediaProvider?.loadImageDataFromSource(mediaSource) {
-                if ProseioAnimatedImage.frameCount(of: data) > 1 {
+                if BipeAnimatedImage.frameCount(of: data) > 1 {
                     cachedContent = .animatedData(data)
                 } else if let image = UIImage(data: data) {
                     cachedContent = .image(image)

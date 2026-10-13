@@ -8,7 +8,7 @@
 
 import Foundation
 import MatrixRustSDK
-import ProseioKit
+import BipeKit
 
 class UserSessionStore: UserSessionStoreProtocol {
     private let keychainController: KeychainControllerProtocol
@@ -124,23 +124,23 @@ class UserSessionStore: UserSessionStoreProtocol {
                                 userSettings: userSettings)
         }
         
-        let proseioHandleResolver = await makeProseioHandleResolver(clientProxy: clientProxy)
+        let bipeHandleResolver = await makeBipeHandleResolver(clientProxy: clientProxy)
         
         return UserSession(clientProxy: clientProxy,
                            userSettings: userSettings,
                            mediaProvider: mediaProvider,
                            voiceMessageMediaManager: voiceMessageMediaManager,
                            liveLocationManager: liveLocationManager,
-                           proseioHandleResolver: proseioHandleResolver)
+                           bipeHandleResolver: bipeHandleResolver)
     }
     
-    /// Proseio: handles exist only for accounts on the Proseio server.
-    private func makeProseioHandleResolver(clientProxy: ClientProxyProtocol) async -> ProseioHandleResolver? {
-        let serverName = appSettings.proseioSignupServerName
-        let apiBaseURL = appSettings.proseioAPIBaseURL
+    /// Bipe: handles exist only for accounts on the Bipe server.
+    private func makeBipeHandleResolver(clientProxy: ClientProxyProtocol) async -> BipeHandleResolver? {
+        let serverName = appSettings.bipeSignupServerName
+        let apiBaseURL = appSettings.bipeAPIBaseURL
         return await MainActor.run {
             guard clientProxy.userIDServerName == serverName else { return nil }
-            return ProseioHandleResolver(apiClient: ProseioAPIClient(baseURL: apiBaseURL), serverName: serverName) { [weak clientProxy] in
+            return BipeHandleResolver(apiClient: BipeAPIClient(baseURL: apiBaseURL), serverName: serverName) { [weak clientProxy] in
                 clientProxy?.accessToken
             }
         }

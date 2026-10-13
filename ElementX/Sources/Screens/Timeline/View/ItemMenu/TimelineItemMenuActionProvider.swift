@@ -103,7 +103,7 @@ struct TimelineItemMenuActionProvider {
             actions.append(.removeCaption)
         }
         
-        // Proseio: save a sticker to "Meus stickers" (ADR 0029).
+        // Bipe: save a sticker to "Meus stickers" (ADR 0029).
         if item is StickerRoomTimelineItem {
             actions.append(.saveSticker)
         }

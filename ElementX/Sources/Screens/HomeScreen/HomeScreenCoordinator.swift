@@ -17,7 +17,7 @@ struct HomeScreenCoordinatorParameters {
     let analyticsService: AnalyticsServiceProtocol
     let notificationManager: NotificationManagerProtocol
     let userIndicatorController: UserIndicatorControllerProtocol
-    var proseioScope = ProseioRoomListScope.chats
+    var bipeScope = BipeRoomListScope.chats
 }
 
 enum HomeScreenCoordinatorAction {
@@ -56,7 +56,7 @@ final class HomeScreenCoordinator: CoordinatorProtocol {
                                         bugReportService: parameters.bugReportService,
                                         notificationManager: parameters.notificationManager,
                                         userIndicatorController: parameters.userIndicatorController,
-                                        proseioScope: parameters.proseioScope)
+                                        bipeScope: parameters.bipeScope)
         
         viewModel.actions
             .sink { [weak self] action in

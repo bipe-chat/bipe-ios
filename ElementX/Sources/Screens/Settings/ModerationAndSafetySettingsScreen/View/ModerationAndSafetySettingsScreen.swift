@@ -6,7 +6,7 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct ModerationAndSafetySettingsScreen: View {
@@ -27,7 +27,7 @@ struct ModerationAndSafetySettingsScreen: View {
     private var sharePresenceSection: some View {
         Section {
             ListRow(label: .plain(title: L10n.screenAdvancedSettingsSharePresence,
-                                  description: ProseioStrings.settingsSharePresenceFooter), // Proseio: receipts are not part of this toggle (ADR 0050)
+                                  description: ProseioStrings.settingsSharePresenceFooter), // Bipe: receipts are not part of this toggle (ADR 0050)
                     kind: .toggle($context.sharePresence))
         } header: {
             Text(L10n.screenModerationAndSafetySharePresenceHeading)

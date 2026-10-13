@@ -206,7 +206,7 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .roomAlias, .childRoomAlias, .eventOnRoomAlias, .childEventOnRoomAlias:
             break // These are converted to a room ID route one level above.
-        case .accountProvisioningLink, .oAuthCallback, .roomList, .userProfile, .call, .settings, .chatBackupSettings, .search, .proseioHandle, .proseioInvite:
+        case .accountProvisioningLink, .oAuthCallback, .roomList, .userProfile, .call, .settings, .chatBackupSettings, .search, .bipeHandle, .bipeInvite:
             break // These routes can't be handled.
         case .transferOwnership(let roomID):
             guard self.roomID == roomID else { fatalError("Navigation route doesn't belong to this room flow.") }
@@ -1202,10 +1202,10 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
         }
     }
     
-    /// Proseio: the sticker picker sheet (ADR 0029). It sends by itself and needs no state machine state.
+    /// Bipe: the sticker picker sheet (ADR 0029). It sends by itself and needs no state machine state.
     private func presentStickerPicker(threadRootEventID: String?) {
         let stackCoordinator = NavigationStackCoordinator()
-        let coordinator = ProseioStickerPickerScreenCoordinator(parameters: .init(clientProxy: userSession.clientProxy,
+        let coordinator = BipeStickerPickerScreenCoordinator(parameters: .init(clientProxy: userSession.clientProxy,
                                                                                   roomProxy: roomProxy,
                                                                                   threadRootEventID: threadRootEventID,
                                                                                   mediaProvider: userSession.mediaProvider,

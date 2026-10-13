@@ -10,7 +10,7 @@ fileGroups:
 
 options:
   groupSortPosition: bottom
-  developmentLanguage: pt-BR # Proseio: Brazilian Portuguese first
+  developmentLanguage: pt-BR # Bipe: Brazilian Portuguese first
   createIntermediateGroups: true
   deploymentTarget:
     iOS: '18.5'
@@ -84,8 +84,8 @@ packages:
     url: https://github.com/element-hq/element-call-ios
     exactVersion: 0.1.0-rc.10
     # path: ../element-call-ios
-  ProseioKit:
-    path: Components/ProseioKit
+  BipeKit:
+    path: Components/BipeKit
   BuildExtensions:
     path: Components/BuildExtensions
   AnalyticsEvents:

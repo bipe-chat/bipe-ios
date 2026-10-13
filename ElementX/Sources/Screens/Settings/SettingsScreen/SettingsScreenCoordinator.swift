@@ -14,7 +14,7 @@ struct SettingsScreenCoordinatorParameters {
     let isBugReportServiceEnabled: Bool
     let isInSecondaryWindow: Bool
     let userIndicatorController: UserIndicatorControllerProtocol
-    var proseioIsInTab = false
+    var bipeIsInTab = false
 }
 
 enum SettingsScreenCoordinatorAction {
@@ -44,12 +44,12 @@ enum SettingsScreenCoordinatorAction {
     
     case developerOptions
     
-    case proseioHandle
-    case proseioPublicProfile
-    case proseioMessaging
-    case proseioInvites
-    case proseioContacts
-    case proseioSelfChat
+    case bipeHandle
+    case bipePublicProfile
+    case bipeMessaging
+    case bipeInvites
+    case bipeContacts
+    case bipeSelfChat
 }
 
 final class SettingsScreenCoordinator: CoordinatorProtocol {
@@ -69,7 +69,7 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                                             isBugReportServiceEnabled: parameters.isBugReportServiceEnabled,
                                             isInSecondaryWindow: parameters.isInSecondaryWindow,
                                             userIndicatorController: parameters.userIndicatorController,
-                                            proseioIsInTab: parameters.proseioIsInTab)
+                                            bipeIsInTab: parameters.bipeIsInTab)
         
         viewModel.actions
             .sink { [weak self] action in
@@ -121,18 +121,18 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                 case .developerOptions:
                     actionsSubject.send(.developerOptions)
                     
-                case .proseioHandle:
-                    actionsSubject.send(.proseioHandle)
-                case .proseioPublicProfile:
-                    actionsSubject.send(.proseioPublicProfile)
-                case .proseioMessaging:
-                    actionsSubject.send(.proseioMessaging)
-                case .proseioInvites:
-                    actionsSubject.send(.proseioInvites)
-                case .proseioContacts:
-                    actionsSubject.send(.proseioContacts)
-                case .proseioSelfChat:
-                    actionsSubject.send(.proseioSelfChat)
+                case .bipeHandle:
+                    actionsSubject.send(.bipeHandle)
+                case .bipePublicProfile:
+                    actionsSubject.send(.bipePublicProfile)
+                case .bipeMessaging:
+                    actionsSubject.send(.bipeMessaging)
+                case .bipeInvites:
+                    actionsSubject.send(.bipeInvites)
+                case .bipeContacts:
+                    actionsSubject.send(.bipeContacts)
+                case .bipeSelfChat:
+                    actionsSubject.send(.bipeSelfChat)
                 }
             }
             .store(in: &cancellables)

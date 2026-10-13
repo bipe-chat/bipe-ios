@@ -111,9 +111,9 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference(defaultValue: Set<String>())
     var seenInvites: Set<String>
     
-    /// Proseio: the inviter from a personal-invite sign-up, shown once after the first sign-in.
+    /// Bipe: the inviter from a personal-invite sign-up, shown once after the first sign-in.
     @UserPreference
-    var proseioPendingInviterUserID: String?
+    var bipePendingInviterUserID: String?
     
     /// Defaults to `true` for new users, and we use a migration to set it to `false` for existing users.
     @UserPreference(defaultValue: true)
@@ -127,29 +127,29 @@ final nonisolated class AppSettings: @unchecked Sendable {
     ///
     /// Account provider is the friendly term for the server name. It should not contain an `https` prefix and should
     /// match the last part of the user ID. For example `example.com` and not `https://matrix.example.com`.
-    private(set) var accountProviders: [AccountProvider] = [.managed(serverName: "proseio.com.br", baseURL: "https://matrix.proseio.com.br")] // Proseio
+    private(set) var accountProviders: [AccountProvider] = [.managed(serverName: "proseio.com.br", baseURL: "https://matrix.proseio.com.br")] // Bipe
     /// Whether or not the user is allowed to manually enter their own account provider or must select from one of `defaultAccountProviders`.
-    private(set) var allowOtherAccountProviders = false // Proseio: own server only (closed federation)
+    private(set) var allowOtherAccountProviders = false // Bipe: own server only (closed federation)
     /// Whether the components surrounding the app brand/logo should be hidden or not
     private(set) var hideBrandChrome = false
     
     /// The task identifier used for background app refresh. Also used in main target's the Info.plist
-    var backgroundAppRefreshTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.refresh" } // Proseio: derived from the bundle ID
+    var backgroundAppRefreshTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.refresh" } // Bipe: derived from the bundle ID
     /// The task identifier used for the search index backfill. Also used in main target's the Info.plist
-    var searchBackfillTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.search-backfill" } // Proseio: derived from the bundle ID
+    var searchBackfillTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.search-backfill" } // Bipe: derived from the bundle ID
     
     /// A URL where users can go read more about the app.
     private(set) var websiteURL: URL = "https://proseio.com.br"
     /// A URL that contains the app's logo that may be used when showing content in a web view.
     private(set) var logoURL: URL = "https://proseio.com.br/icone.png"
     /// A URL that contains that app's copyright notice.
-    // Proseio: the About page names the steward and the licence (ADR 0040).
+    // Bipe: the About page names the steward and the licence (ADR 0040).
     private(set) var copyrightURL: URL = "https://proseio.com.br/sobre"
     /// A URL that contains the app's Terms of use.
     private(set) var acceptableUseURL: URL = "https://proseio.com.br/termos"
     /// A URL that contains the app's Privacy Policy.
     private(set) var privacyURL: URL = "https://proseio.com.br/privacidade"
-    // Proseio: no help pages yet, so these are nil and the "Learn more" links they feed are hidden.
+    // Bipe: no help pages yet, so these are nil and the "Learn more" links they feed are hidden.
     /// A URL where users can go read more about encryption in general.
     private(set) var encryptionURL: URL?
     /// A URL where users can go read more about device verification..
@@ -202,7 +202,7 @@ final nonisolated class AppSettings: @unchecked Sendable {
     let oAuthStaticRegistrations: [URL: String] = ["https://id.thirdroom.io/realms/thirdroom": "elementx"]
     /// The redirect URL used for OAuth. For the normal case we don't actually need the bundle ID as the web authentication session handles the redirect internally.
     /// However in the case where MAS sends the user to an external app, we need to make sure that the system will open the correct variant of the app (e.g. Nightly).
-    private(set) nonisolated(unsafe) var oAuthRedirectURL: URL! = URL(string: "\(InfoPlistReader.main.bundleIdentifier):/oauth/callback") // Proseio: private-use scheme (RFC 8252); MAS requires it to be the reverse of the client URI host.
+    private(set) nonisolated(unsafe) var oAuthRedirectURL: URL! = URL(string: "\(InfoPlistReader.main.bundleIdentifier):/oauth/callback") // Bipe: private-use scheme (RFC 8252); MAS requires it to be the reverse of the client URI host.
     /// A path that is appended to `websiteURL` to form the OAuth `clientURI`. MAS uses `clientURI` as the identifier for a specific app, allowing us to
     /// distinguish the various clients we have for Android, iOS and Web from each other.
     /// Intentionally a distinct property so it can be easily overridden without having to manipulate the website URL.
@@ -233,17 +233,17 @@ final nonisolated class AppSettings: @unchecked Sendable {
         #endif
     }
     
-    private(set) var pushGatewayBaseURL: URL = "https://push.proseio.com.br" // Proseio: own Sygnal (issue #61); never matrix.org
+    private(set) var pushGatewayBaseURL: URL = "https://push.proseio.com.br" // Bipe: own Sygnal (issue #61); never matrix.org
     var pushGatewayNotifyEndpoint: URL {
         pushGatewayBaseURL.appending(path: "_matrix/push/v1/notify")
     }
     
-    /// Proseio API (sign-up, handles). Contract: proseio-shared/api/openapi.yaml.
-    private(set) var proseioAPIBaseURL: URL = "https://api.proseio.com.br" // Proseio
-    /// Proseio: "Create account" for this provider opens the invite sign-up screen instead of MAS registration.
-    private(set) var proseioSignupServerName = "proseio.com.br"
-    var usesProseioSignup: Bool {
-        defaultAccountProvider.serverNameOrBaseURL == proseioSignupServerName
+    /// Bipe API (sign-up, handles). Contract: proseio-shared/api/openapi.yaml.
+    private(set) var bipeAPIBaseURL: URL = "https://api.proseio.com.br" // Bipe
+    /// Bipe: "Create account" for this provider opens the invite sign-up screen instead of MAS registration.
+    private(set) var bipeSignupServerName = "proseio.com.br"
+    var usesBipeSignup: Bool {
+        defaultAccountProvider.serverNameOrBaseURL == bipeSignupServerName
     }
     
     @UserPreference(defaultValue: true)
@@ -304,7 +304,7 @@ final nonisolated class AppSettings: @unchecked Sendable {
     /// The configuration to use for analytics. Set to `nil` to disable analytics.
     let analyticsConfiguration: AnalyticsConfiguration? = AppSettings.makeAnalyticsConfiguration()
     /// The URL to open with more information about analytics terms. When this is `nil` the "Learn more" link will be hidden.
-    private(set) var analyticsTermsURL: URL? = nil // Proseio: no analytics
+    private(set) var analyticsTermsURL: URL? = nil // Bipe: no analytics
     /// Whether or not there the app is able ask for user consent to enable analytics or sentry reporting.
     var canPromptForAnalytics: Bool {
         analyticsConfiguration != nil || bugReportSentryURL != nil
@@ -414,7 +414,7 @@ final nonisolated class AppSettings: @unchecked Sendable {
     var mentionsFilterEnabled: Bool
     
     /// Configuration to enable only signed device isolation mode for  crypto. In this mode only devices signed by their owner will be considered in e2ee rooms.
-    /// Proseio: on by default, so a server-added device never receives room keys (proseio docs/security.md, E2EE rules).
+    /// Bipe: on by default, so a server-added device never receives room keys (bipe docs/security.md, E2EE rules).
     @UserPreference(defaultValue: true)
     var enableOnlySignedDeviceIsolationMode: Bool
     

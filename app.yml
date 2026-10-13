@@ -4,7 +4,7 @@ settings:
   APP_GROUP_IDENTIFIER: group.br.com.proseio.dev
   BASE_BUNDLE_IDENTIFIER: br.com.proseio.app.dev
   ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: "colors/accent-color"
-  DEVELOPMENT_TEAM: 992N457T8D # Dev builds: Centaur Labs team. Production br.com.proseio.app waits for the Proseio organisation account.
+  DEVELOPMENT_TEAM: 992N457T8D # Dev builds: Centaur Labs team. Production br.com.proseio.app waits for the Bipe organisation account.
   IS_NIGHTLY_BUILD: false
 
   # Optional configuration to load accounts from Element Classic.

@@ -15,7 +15,7 @@ import Foundation
 import LocalAuthentication
 import Photos
 
-import ProseioKit
+import BipeKit
 
 nonisolated class AnalyticsClientMock: AnalyticsClientProtocol, @unchecked Sendable {
     var isRunning: Bool {
@@ -15162,7 +15162,7 @@ nonisolated class UserSessionMock: UserSessionProtocol, @unchecked Sendable {
     }
     nonisolated(unsafe) var underlyingLiveLocationManager: LiveLocationManagerProtocol!
     nonisolated(unsafe) var contentScannerService: ContentScannerServiceProtocol?
-    nonisolated(unsafe) var proseioHandleResolver: ProseioHandleResolver?
+    nonisolated(unsafe) var bipeHandleResolver: BipeHandleResolver?
     var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> {
         get { return underlyingSessionSecurityStatePublisher }
         set(value) { underlyingSessionSecurityStatePublisher = value }

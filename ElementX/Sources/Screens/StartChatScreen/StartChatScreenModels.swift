@@ -23,8 +23,8 @@ struct StartChatScreenViewState: BindableState {
     let userID: String
     var bindings = StartChatScreenViewStateBindings()
     var usersSection: UserDiscoverySection = .init(type: .suggestions, users: [])
-    /// Proseio: the handle in the query when nobody holds it.
-    var proseioHandleNotFound: String?
+    /// Bipe: the handle in the query when nobody holds it.
+    var bipeHandleNotFound: String?
     
     var isSearching: Bool {
         !bindings.searchQuery.isEmpty

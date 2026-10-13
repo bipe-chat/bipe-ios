@@ -7,7 +7,7 @@
 //
 
 import Combine
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 typealias SettingsScreenViewModelType = StateStoreViewModelV2<SettingsScreenViewState, SettingsScreenViewAction>
@@ -23,7 +23,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         actionsSubject.eraseToAnyPublisher()
     }
     
-    init(userSession: UserSessionProtocol, isBugReportServiceEnabled: Bool, isInSecondaryWindow: Bool, userIndicatorController: UserIndicatorControllerProtocol, proseioIsInTab: Bool = false) {
+    init(userSession: UserSessionProtocol, isBugReportServiceEnabled: Bool, isInSecondaryWindow: Bool, userIndicatorController: UserIndicatorControllerProtocol, bipeIsInTab: Bool = false) {
         userSettings = userSession.userSettings
         clientProxy = userSession.clientProxy
         self.userIndicatorController = userIndicatorController
@@ -34,14 +34,14 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
                                            showAddAccountButton: userSettings.app.multiAccountEnabled,
                                            showAccountDeactivation: userSession.clientProxy.canDeactivateAccount,
                                            showDeveloperOptions: userSettings.app.developerOptionsEnabled,
-                                           showProseioHandle: userSession.clientProxy.userIDServerName == userSettings.app.proseioSignupServerName,
+                                           showBipeHandle: userSession.clientProxy.userIDServerName == userSettings.app.bipeSignupServerName,
                                            showAnalyticsSettings: userSettings.app.canPromptForAnalytics,
                                            isBugReportServiceEnabled: isBugReportServiceEnabled,
                                            navigationBarVisibility: isInSecondaryWindow ? .hidden : .automatic,
                                            bindings: .init(userSettings: userSettings)),
                    mediaProvider: userSession.mediaProvider)
         
-        state.proseioIsInTab = proseioIsInTab
+        state.bipeIsInTab = bipeIsInTab
         
         userSettings.app.developerOptionsEnabledPublisher
             .weakAssign(to: \.state.showDeveloperOptions, on: self)
@@ -152,58 +152,58 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         case .developerOptions:
             actionsSubject.send(.developerOptions)
             
-        case .proseioHandle:
-            actionsSubject.send(.proseioHandle)
-        case .proseioPublicProfile:
-            actionsSubject.send(.proseioPublicProfile)
-        case .proseioMessaging:
-            actionsSubject.send(.proseioMessaging)
-        case .proseioLoadHandle:
-            Task { await loadProseioHandle() }
-            Task { await loadProseioWhoCanMessage() }
-            Task { await loadProseioPublicProfile() }
-        case .proseioInvites:
-            actionsSubject.send(.proseioInvites)
-        case .proseioContacts:
-            actionsSubject.send(.proseioContacts)
-        case .proseioSelfChat:
-            actionsSubject.send(.proseioSelfChat)
+        case .bipeHandle:
+            actionsSubject.send(.bipeHandle)
+        case .bipePublicProfile:
+            actionsSubject.send(.bipePublicProfile)
+        case .bipeMessaging:
+            actionsSubject.send(.bipeMessaging)
+        case .bipeLoadHandle:
+            Task { await loadBipeHandle() }
+            Task { await loadBipeWhoCanMessage() }
+            Task { await loadBipePublicProfile() }
+        case .bipeInvites:
+            actionsSubject.send(.bipeInvites)
+        case .bipeContacts:
+            actionsSubject.send(.bipeContacts)
+        case .bipeSelfChat:
+            actionsSubject.send(.bipeSelfChat)
         }
     }
     
-    // MARK: - Proseio
+    // MARK: - Bipe
     
-    private func loadProseioHandle() async {
-        guard state.showProseioHandle, let accessToken = clientProxy.accessToken else { return }
-        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+    private func loadBipeHandle() async {
+        guard state.showBipeHandle, let accessToken = clientProxy.accessToken else { return }
+        let apiClient = BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL)
         do {
-            state.proseioHandle = try await apiClient.myHandle(accessToken: accessToken).handle
+            state.bipeHandle = try await apiClient.myHandle(accessToken: accessToken).handle
         } catch {
-            MXLog.error("Proseio handle load failed: \(error)")
+            MXLog.error("Bipe handle load failed: \(error)")
         }
     }
     
-    private func loadProseioWhoCanMessage() async {
-        guard state.showProseioHandle else { return }
-        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+    private func loadBipeWhoCanMessage() async {
+        guard state.showBipeHandle else { return }
+        let apiClient = BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL)
         do {
-            state.proseioWhoCanMessage = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(ProseioAPIError) -> ProseioWhoCanMessage in
+            state.bipeWhoCanMessage = try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(BipeAPIError) -> BipeWhoCanMessage in
                 try await apiClient.messagingSetting(accessToken: token)
             }
         } catch {
-            MXLog.error("Proseio messaging setting load failed: \(error)")
+            MXLog.error("Bipe messaging setting load failed: \(error)")
         }
     }
     
-    private func loadProseioPublicProfile() async {
-        guard state.showProseioHandle else { return }
-        let apiClient = ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL)
+    private func loadBipePublicProfile() async {
+        guard state.showBipeHandle else { return }
+        let apiClient = BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL)
         do {
-            state.proseioPublicProfileEnabled = try await ProseioAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(ProseioAPIError) -> Bool in
+            state.bipePublicProfileEnabled = try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(BipeAPIError) -> Bool in
                 try await apiClient.myProfile(accessToken: token).enabled
             }
         } catch {
-            MXLog.error("Proseio public profile load failed: \(error)")
+            MXLog.error("Bipe public profile load failed: \(error)")
         }
     }
     

@@ -8,12 +8,12 @@
 
 import Combine
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct HomeScreenInviteCell: View {
     @Environment(\.dynamicTypeSize) var dynamicTypeSize
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     let room: HomeScreenRoom
     let context: HomeScreenViewModel.Context
@@ -137,11 +137,11 @@ struct HomeScreenInviteCell: View {
     }
     
     private var title: String {
-        proseioHandleResolver?.displayText(for: room.name) ?? room.name
+        bipeHandleResolver?.displayText(for: room.name) ?? room.name
     }
     
     private var subtitle: String? {
-        room.isDirect ? room.inviter.map { proseioHandleResolver?.displayText(for: $0.id) ?? $0.id } : nil
+        room.isDirect ? room.inviter.map { bipeHandleResolver?.displayText(for: $0.id) ?? $0.id } : nil
     }
     
     @ViewBuilder

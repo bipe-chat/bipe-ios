@@ -1,0 +1,83 @@
+//
+// Copyright 2026 Bipe.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+
+import Compound
+import BipeKit
+import SwiftUI
+
+struct BipeContactsScreen: View {
+    @Bindable var context: BipeContactsScreenViewModel.Context
+    @Environment(\.bipeHandleResolver) private var handleResolver
+    @Environment(\.openURL) private var openURL
+    
+    var body: some View {
+        Form {
+            Section {
+                switch context.viewState.access {
+                case .notDetermined, .unknown:
+                    ListRow(label: .action(title: ProseioStrings.contactsAllow, icon: \.userProfile),
+                            kind: .button { context.send(viewAction: .requestAccess) })
+                case .denied:
+                    ListRow(label: .action(title: ProseioStrings.contactsOpenSettings, icon: \.settings),
+                            kind: .button {
+                                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                            })
+                case .granted:
+                    if context.viewState.isLoading {
+                        ListRow(kind: .custom { ProgressView().frame(maxWidth: .infinity).padding() })
+                    } else if context.viewState.hasSearched, context.viewState.matches.isEmpty {
+                        ListRow(label: .plain(title: ProseioStrings.contactsNone), kind: .label)
+                    }
+                    ForEach(context.viewState.matches) { match in
+                        ListRow(label: .default(title: match.contactName,
+                                                description: handleResolver?.displayText(for: match.userID),
+                                                icon: \.userProfile),
+                                kind: .navigationLink { context.send(viewAction: .openUserProfile(userID: match.userID)) })
+                    }
+                }
+                ListRow(label: .action(title: ProseioStrings.contactsInvite, icon: \.userAdd),
+                        kind: .button { context.send(viewAction: .openInvites) })
+            } footer: {
+                Text(context.viewState.access == .denied ? ProseioStrings.contactsDenied : ProseioStrings.contactsIntro)
+                    .compoundListSectionFooter()
+            }
+            
+            Section {
+                ListRow(label: .default(title: ProseioStrings.discoveryToggle, icon: \.search),
+                        kind: .toggle($context.discoverableByPhone))
+            } footer: {
+                Text(discoveryFooter)
+                    .compoundListSectionFooter()
+            }
+        }
+        .compoundList()
+        .navigationTitle(ProseioStrings.contactsTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .alert(item: $context.alertInfo)
+        .onChange(of: context.discoverableByPhone) { context.send(viewAction: .discoverableChanged) }
+    }
+    
+    private var discoveryFooter: String {
+        switch context.viewState.phoneLinked {
+        case .some(false): "\(ProseioStrings.discoveryFooter) \(ProseioStrings.phoneNotLinked)"
+        case .some(true): "\(ProseioStrings.discoveryFooter) \(ProseioStrings.phoneLinked)"
+        case .none: ProseioStrings.discoveryFooter
+        }
+    }
+}
+
+// MARK: - Previews
+
+struct BipeContactsScreen_Previews: PreviewProvider {
+    static let viewModel = BipeContactsScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
+                                                          clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")))
+    
+    static var previews: some View {
+        ElementNavigationStack {
+            BipeContactsScreen(context: viewModel.context)
+        }
+    }
+}

@@ -8,7 +8,7 @@
 
 import Combine
 import MatrixRustSDK
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 typealias StartChatScreenViewModelType = StateStoreViewModel<StartChatScreenViewState, StartChatScreenViewAction>
@@ -165,44 +165,44 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
     private func fetchUsers() {
         guard context.searchQuery.count >= 3 else {
             state.usersSection = .init(type: .suggestions, users: suggestedUsers)
-            state.proseioHandleNotFound = nil
+            state.bipeHandleNotFound = nil
             return
         }
         
         fetchUsersTask = Task {
             let query = context.searchQuery
-            async let proseioResult = proseioLookUp(query: query)
+            async let bipeResult = bipeLookUp(query: query)
             let result = await userDiscoveryService.searchProfiles(with: query)
-            let proseioLookUp = await proseioResult
+            let bipeLookUp = await bipeResult
             
             guard !Task.isCancelled else { return }
             
-            let proseioUsers = proseioLookUp?.profile.map { [$0] } ?? []
-            state.proseioHandleNotFound = proseioLookUp?.profile == nil ? proseioLookUp?.handle : nil
+            let bipeUsers = bipeLookUp?.profile.map { [$0] } ?? []
+            state.bipeHandleNotFound = bipeLookUp?.profile == nil ? bipeLookUp?.handle : nil
             
             switch result {
             case .success(let users):
-                state.usersSection = .init(type: .searchResult, users: proseioUsers + users.filter { user in !proseioUsers.contains { $0.id == user.id } })
+                state.usersSection = .init(type: .searchResult, users: bipeUsers + users.filter { user in !bipeUsers.contains { $0.id == user.id } })
             case .failure:
-                if !proseioUsers.isEmpty {
-                    state.usersSection = .init(type: .searchResult, users: proseioUsers)
+                if !bipeUsers.isEmpty {
+                    state.usersSection = .init(type: .searchResult, users: bipeUsers)
                 }
             }
         }
     }
     
-    /// Proseio: exact handle lookup (no directory). `nil` when the query is not a handle,
+    /// Bipe: exact handle lookup (no directory). `nil` when the query is not a handle,
     /// is the user's own handle, or the lookup failed.
-    private func proseioLookUp(query: String) async -> (handle: String, profile: UserProfile?)? {
-        guard let resolver = userSession.proseioHandleResolver else { return nil }
-        let handle = ProseioHandle.sanitize(query).lowercased()
-        guard ProseioHandle.localProblem(for: handle) == nil else { return nil }
+    private func bipeLookUp(query: String) async -> (handle: String, profile: UserProfile?)? {
+        guard let resolver = userSession.bipeHandleResolver else { return nil }
+        let handle = BipeHandle.sanitize(query).lowercased()
+        guard BipeHandle.localProblem(for: handle) == nil else { return nil }
         
         let userID: String?
         do {
             userID = try await resolver.userID(forHandle: handle)
         } catch {
-            MXLog.error("Proseio handle lookup failed: \(error)")
+            MXLog.error("Bipe handle lookup failed: \(error)")
             return nil
         }
         guard let userID else { return (handle, nil) }

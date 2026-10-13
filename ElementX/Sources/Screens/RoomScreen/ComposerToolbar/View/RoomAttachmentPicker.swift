@@ -7,7 +7,7 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 import WysiwygComposer
 
@@ -45,7 +45,7 @@ struct RoomAttachmentPicker: View {
             }
             .accessibilityIdentifier(A11yIdentifiers.roomScreen.attachmentPickerPoll)
             
-            // Proseio: sticker picker (ADR 0029).
+            // Bipe: sticker picker (ADR 0029).
             Button {
                 context.send(viewAction: .attach(.sticker))
             } label: {

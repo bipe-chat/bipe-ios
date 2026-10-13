@@ -30,7 +30,7 @@ class NotificationSettingsEditScreenViewModel: NotificationSettingsEditScreenVie
         self.chatType = chatType
         self.userSession = userSession
         notificationSettingsProxy = userSession.clientProxy.notificationSettings
-        // Proseio: the main provider only lists the Conversas tab (ADR 0053), so read all rooms.
+        // Bipe: the main provider only lists the Conversas tab (ADR 0053), so read all rooms.
         roomSummaryProvider = userSession.clientProxy.staticRoomSummaryProvider
         
         super.init(initialViewState: NotificationSettingsEditScreenViewState(bindings: bindings,

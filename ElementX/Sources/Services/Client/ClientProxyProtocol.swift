@@ -121,7 +121,7 @@ protocol ClientProxyProtocol: AnyObject {
     
     var deviceID: String? { get }
     
-    /// Proseio: bearer token for the Proseio API. Never log it.
+    /// Bipe: bearer token for the Bipe API. Never log it.
     var accessToken: String? { get }
     
     var homeserver: String { get }
@@ -150,8 +150,8 @@ protocol ClientProxyProtocol: AnyObject {
     
     var roomSummaryProvider: RoomSummaryProviderProtocol { get }
     
-    /// Proseio: the Grupos tab list (ADR 0053). `roomSummaryProvider` lists the Conversas tab.
-    var proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol { get }
+    /// Bipe: the Grupos tab list (ADR 0053). `roomSummaryProvider` lists the Conversas tab.
+    var bipeGroupsRoomSummaryProvider: RoomSummaryProviderProtocol { get }
     
     /// Used for listing rooms that shouldn't be affected by the main `roomSummaryProvider` filtering
     /// But can still be filtered by queries, since this may be shared across multiple views, remember to reset
@@ -229,11 +229,11 @@ protocol ClientProxyProtocol: AnyObject {
     
     func roomForIdentifier(_ identifier: String) async -> RoomProxyType?
     
-    /// Proseio: global account data as a JSON string, `nil` when absent or on error.
-    func proseioAccountData(eventType: String) async -> String?
+    /// Bipe: global account data as a JSON string, `nil` when absent or on error.
+    func bipeAccountData(eventType: String) async -> String?
     
-    /// Proseio: writes global account data from a JSON string.
-    func proseioSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError>
+    /// Bipe: writes global account data from a JSON string.
+    func bipeSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError>
     
     func roomPreviewForIdentifier(_ identifier: String, via: [String]) async -> Result<RoomPreviewProxyProtocol, ClientProxyError>
     
@@ -328,17 +328,17 @@ protocol ClientProxyProtocol: AnyObject {
     func configurePresence(_ presence: ClientProxyPresence, sendImmediately: Bool) async -> Result<Void, ClientProxyError>
 }
 
-/// Proseio: mocks and previews share one room list and have no account data.
+/// Bipe: mocks and previews share one room list and have no account data.
 extension ClientProxyProtocol {
-    var proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol {
+    var bipeGroupsRoomSummaryProvider: RoomSummaryProviderProtocol {
         roomSummaryProvider
     }
     
-    func proseioAccountData(eventType: String) async -> String? {
+    func bipeAccountData(eventType: String) async -> String? {
         nil
     }
     
-    func proseioSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError> {
+    func bipeSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError> {
         .failure(.forbiddenAccess)
     }
 }

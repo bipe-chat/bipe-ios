@@ -7,13 +7,13 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct JoinRoomScreen: View {
     private let maxKnockMessageLength = 500
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     @ObservedObject var context: JoinRoomScreenViewModel.Context
     @FocusState private var focus: Focus?
@@ -68,7 +68,7 @@ struct JoinRoomScreen: View {
                 .accessibilityHidden(true)
             
             VStack(spacing: 8) {
-                Text(proseioHandleResolver?.displayText(for: context.viewState.title) ?? context.viewState.title)
+                Text(bipeHandleResolver?.displayText(for: context.viewState.title) ?? context.viewState.title)
                     .font(.compound.headingLGBold)
                     .foregroundStyle(.compound.textPrimary)
                     .multilineTextAlignment(.center)
@@ -111,7 +111,7 @@ struct JoinRoomScreen: View {
             }
             
             if context.viewState.isDMInvite {
-                ProseioUnverifiedRequestCard() // Proseio: no badges yet, so every account is unverified.
+                BipeUnverifiedRequestCard() // Bipe: no badges yet, so every account is unverified.
             }
             
             if context.viewState.mode == .knockable {
@@ -309,7 +309,7 @@ struct JoinRoomScreen: View {
 }
 
 private struct InviterView: View {
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     let inviter: RoomInviterDetails
     let shouldHideAvatar: Bool
@@ -338,7 +338,7 @@ private struct InviterView: View {
                         .multilineTextAlignment(.center)
                 }
                 
-                Text(proseioHandleResolver?.displayText(for: inviter.id) ?? inviter.id)
+                Text(bipeHandleResolver?.displayText(for: inviter.id) ?? inviter.id)
                     .font(.compound.bodySM)
                     .foregroundStyle(.compound.textSecondary)
                     .multilineTextAlignment(.center)

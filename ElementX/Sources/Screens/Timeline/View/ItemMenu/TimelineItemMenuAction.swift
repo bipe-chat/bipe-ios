@@ -7,7 +7,7 @@
 //
 
 import OrderedCollections
-import ProseioKit
+import BipeKit
 import SFSafeSymbols
 import SwiftUI
 
@@ -78,7 +78,7 @@ enum TimelineItemMenuAction: Identifiable, Hashable {
     case unpin
     case viewInRoomTimeline
     case downloadMedia
-    /// Proseio: add a received sticker to "Meus stickers" (ADR 0029).
+    /// Bipe: add a received sticker to "Meus stickers" (ADR 0029).
     case saveSticker
     
     var id: Self {

@@ -266,7 +266,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 authenticationFlowCoordinator.handleAppRoute(appRoute, animated: animated)
                 handled = true
             }
-        case .proseioInvite:
+        case .bipeInvite:
             // Signed out: sign-up with the code. Signed in: the session flow says the invite is not for this user.
             if let authenticationFlowCoordinator {
                 authenticationFlowCoordinator.handleAppRoute(appRoute, animated: animated)
@@ -292,7 +292,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         if let route = appRouteURLParser.route(from: url) {
             switch route {
-            case .accountProvisioningLink, .proseioHandle, .proseioInvite:
+            case .accountProvisioningLink, .bipeHandle, .bipeInvite:
                 handleAppRoute(route,
                                windowType: windowType)
             case .oAuthCallback(let url):
@@ -714,7 +714,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
     }
     
-    /// Proseio: the existing direct chat with a user, or a new one; falls back to the profile.
+    /// Bipe: the existing direct chat with a user, or a new one; falls back to the profile.
     private func openChat(with userID: String, userSession: UserSessionProtocol, flowCoordinator: UserSessionFlowCoordinator) async {
         var roomID = try? userSession.clientProxy.directRoomForUserID(userID).get()
         if roomID == nil {
@@ -723,7 +723,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         if let roomID {
             flowCoordinator.handleAppRoute(.room(roomID: roomID, via: []), animated: false)
         } else {
-            MXLog.error("Proseio: could not open a chat with the inviter \(userID)")
+            MXLog.error("Bipe: could not open a chat with the inviter \(userID)")
             flowCoordinator.handleAppRoute(.userProfile(userID: userID), animated: false)
         }
     }
@@ -740,22 +740,22 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         if storedAppRoute?.isAuthenticationRoute == false,
            let storedAppRoute = storedAppRoute.take() {
             userSessionFlowCoordinator.handleAppRoute(storedAppRoute, animated: false)
-        } else if let inviterUserID = appSettings.proseioPendingInviterUserID {
-            // Proseio ADR 0034: after a personal-invite sign-up, open a chat with the inviter. Their app accepts it without a tap.
-            appSettings.proseioPendingInviterUserID = nil
+        } else if let inviterUserID = appSettings.bipePendingInviterUserID {
+            // Bipe ADR 0034: after a personal-invite sign-up, open a chat with the inviter. Their app accepts it without a tap.
+            appSettings.bipePendingInviterUserID = nil
             await openChat(with: inviterUserID, userSession: userSession, flowCoordinator: userSessionFlowCoordinator)
         }
         
-        if userSession.clientProxy.userIDServerName == appSettings.proseioSignupServerName {
+        if userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName {
             Task {
-                await ProseioInviteJoinNotifier(apiBaseURL: appSettings.proseioAPIBaseURL,
+                await BipeInviteJoinNotifier(apiBaseURL: appSettings.bipeAPIBaseURL,
                                                 clientProxy: userSession.clientProxy,
-                                                handleResolver: userSession.proseioHandleResolver,
+                                                handleResolver: userSession.bipeHandleResolver,
                                                 userIndicatorController: userIndicatorController).run()
             }
         }
         
-        Task { await ProseioQuietGroups(clientProxy: userSession.clientProxy).run() } // Proseio: proseio#97
+        Task { await BipeQuietGroups(clientProxy: userSession.clientProxy).run() } // Bipe: proseio#97
         
         if let storedInlineReply {
             await processInlineReply(roomID: storedInlineReply.roomID, replyText: storedInlineReply.message)
@@ -806,9 +806,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 }
                 .store(in: &cancellables)
             
-            // Proseio: the notice shows the cached handle instead of the Matrix ID when one is known.
-            navigationRootCoordinator.setRootCoordinator(ProseioEnvironmentCoordinator(wrapping: coordinator,
-                                                                                       handleResolver: userSession.proseioHandleResolver))
+            // Bipe: the notice shows the cached handle instead of the Matrix ID when one is known.
+            navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: coordinator,
+                                                                                       handleResolver: userSession.bipeHandleResolver))
         }
     }
     

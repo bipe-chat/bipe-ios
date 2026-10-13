@@ -48,7 +48,7 @@ targets:
     info:
       path: Info.plist
       properties:
-        # Proseio: pt-BR is the default; the app ships only pt-BR and en (switch in iOS per-app language settings).
+        # Bipe: pt-BR is the default; the app ships only pt-BR and en (switch in iOS per-app language settings).
         CFBundleDevelopmentRegion: pt-BR
         CFBundleLocalizations: [pt-BR, en]
         UILaunchScreen:
@@ -233,7 +233,7 @@ targets:
     - package: MatrixRustSDK
       embed: true
     - package: Compound
-    - package: ProseioKit
+    - package: BipeKit
     - package: BuildExtensions
       product: Macros
     - package: Algorithms
@@ -287,7 +287,7 @@ targets:
     - path: ../../Components/Secrets/Secrets.swift
     - path: ../Resources
       excludes:
-        # Proseio ships pt-BR and en only.
+        # Bipe ships pt-BR and en only.
         - Localizations/ar.lproj
         - Localizations/be.lproj
         - Localizations/bg.lproj

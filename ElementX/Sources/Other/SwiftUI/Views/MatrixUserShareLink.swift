@@ -7,14 +7,14 @@
 //
 
 import MatrixRustSDK
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct MatrixUserShareLink<Label: View>: View {
     private let userID: String
     private let permalink: URL?
     private let label: Label
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     init(userID: String, @ViewBuilder label: () -> Label) {
         self.userID = userID
@@ -23,7 +23,7 @@ struct MatrixUserShareLink<Label: View>: View {
     }
     
     var body: some View {
-        if let profileLink = proseioHandleResolver?.profileLink(for: userID) {
+        if let profileLink = bipeHandleResolver?.profileLink(for: userID) {
             ShareLink(item: ProseioStrings.inviteFriendsText(profileLink.absoluteString)) {
                 label
             }

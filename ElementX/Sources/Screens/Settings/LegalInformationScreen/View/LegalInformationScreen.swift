@@ -7,7 +7,7 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct LegalInformationScreen: View {
@@ -24,7 +24,7 @@ struct LegalInformationScreen: View {
                 ListRow(label: .plain(title: L10n.commonPrivacyPolicy),
                         kind: .button { openURL(context.viewState.privacyURL) })
             } footer: {
-                // Proseio: name the steward (ADR 0040).
+                // Bipe: name the steward (ADR 0040).
                 Text(ProseioStrings.aboutSteward)
                     .compoundListSectionFooter()
             }

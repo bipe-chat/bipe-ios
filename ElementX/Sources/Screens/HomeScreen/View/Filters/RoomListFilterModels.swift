@@ -10,7 +10,7 @@ import Combine
 import Foundation
 import MatrixRustSDK
 import OrderedCollections
-import ProseioKit
+import BipeKit
 
 enum RoomListFilter: Int, CaseIterable, Identifiable {
     var id: Int {
@@ -42,7 +42,7 @@ enum RoomListFilter: Int, CaseIterable, Identifiable {
         case .favourites:
             return L10n.screenRoomlistFilterFavourites
         case .invites:
-            return ProseioStrings.requestsTitle // Proseio: invites are message requests.
+            return ProseioStrings.requestsTitle // Bipe: invites are message requests.
         case .lowPriority:
             return L10n.screenRoomlistFilterLowPriority
         }
@@ -92,13 +92,13 @@ struct RoomListFiltersState {
     private(set) var activeFilters: OrderedSet<RoomListFilter>
     private let userSettings: UserSettings
     
-    /// Proseio: chips hidden in a scoped home tab (ADR 0053).
-    private let proseioHiddenFilters: Set<RoomListFilter>
+    /// Bipe: chips hidden in a scoped home tab (ADR 0053).
+    private let bipeHiddenFilters: Set<RoomListFilter>
     
-    init(activeFilters: OrderedSet<RoomListFilter> = [], userSettings: UserSettings, proseioHiddenFilters: Set<RoomListFilter> = []) {
+    init(activeFilters: OrderedSet<RoomListFilter> = [], userSettings: UserSettings, bipeHiddenFilters: Set<RoomListFilter> = []) {
         self.activeFilters = .init(activeFilters)
         self.userSettings = userSettings
-        self.proseioHiddenFilters = proseioHiddenFilters
+        self.bipeHiddenFilters = bipeHiddenFilters
     }
     
     var availableFilters: [RoomListFilter] {
@@ -112,7 +112,7 @@ struct RoomListFiltersState {
             availableFilters.remove(.mentions)
         }
         
-        proseioHiddenFilters.forEach { availableFilters.remove($0) }
+        bipeHiddenFilters.forEach { availableFilters.remove($0) }
         
         for filter in activeFilters {
             availableFilters.remove(filter)

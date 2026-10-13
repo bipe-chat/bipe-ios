@@ -7,7 +7,7 @@
 //
 
 import MatrixRustSDK
-import ProseioKit
+import BipeKit
 import UIKit
 import UniformTypeIdentifiers
 
@@ -206,7 +206,7 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                              canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                              shouldBoost: eventItemProxy.shouldBoost,
                              sender: eventItemProxy.sender,
-                             content: proseioAddingScamWarning(to: buildTextTimelineItemContent(textMessageContent), eventItemProxy, isOutgoing),
+                             content: bipeAddingScamWarning(to: buildTextTimelineItemContent(textMessageContent), eventItemProxy, isOutgoing),
                              properties: .init(replyDetails: buildTimelineItemReplyDetails(messageLikeContent.inReplyTo),
                                                isThreaded: messageLikeContent.threadRoot != nil,
                                                threadSummary: buildTimelineItemThreadSummary(messageLikeContent.threadSummary),
@@ -301,7 +301,7 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                      isEditable: eventItemProxy.isEditable,
                                      canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                                      sender: eventItemProxy.sender,
-                                     content: proseioAddingScamWarning(to: buildAudioTimelineItemContent(audioMessageContent), eventItemProxy, isOutgoing),
+                                     content: bipeAddingScamWarning(to: buildAudioTimelineItemContent(audioMessageContent), eventItemProxy, isOutgoing),
                                      properties: .init(replyDetails: buildTimelineItemReplyDetails(messageLikeContent.inReplyTo),
                                                        isThreaded: messageLikeContent.threadRoot != nil,
                                                        threadSummary: buildTimelineItemThreadSummary(messageLikeContent.threadSummary),
@@ -647,23 +647,23 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         return .init(body: messageContent.body, formattedBody: formattedBody, formattedBodyHTMLString: htmlBody)
     }
     
-    /// Proseio: scam pattern check for incoming text. Runs off the main thread (TimelineController builds items in a detached task).
-    private func proseioAddingScamWarning(to content: TextRoomTimelineItemContent,
+    /// Bipe: scam pattern check for incoming text. Runs off the main thread (TimelineController builds items in a detached task).
+    private func bipeAddingScamWarning(to content: TextRoomTimelineItemContent,
                                           _ eventItemProxy: EventTimelineItemProxy,
                                           _ isOutgoing: Bool) -> TextRoomTimelineItemContent {
         guard !isOutgoing, let eventID = eventItemProxy.id.eventID else { return content }
         var content = content
-        content.proseioScamWarning = ScamDetector.warningKind(for: content.body, eventID: eventID)
+        content.bipeScamWarning = ScamDetector.warningKind(for: content.body, eventID: eventID)
         return content
     }
     
-    /// Proseio: the same check on the transcript of an incoming voice message (proseio/docs/audio.md).
-    private func proseioAddingScamWarning(to content: AudioRoomTimelineItemContent,
+    /// Bipe: the same check on the transcript of an incoming voice message (proseio/docs/audio.md).
+    private func bipeAddingScamWarning(to content: AudioRoomTimelineItemContent,
                                           _ eventItemProxy: EventTimelineItemProxy,
                                           _ isOutgoing: Bool) -> AudioRoomTimelineItemContent {
         guard !isOutgoing, let eventID = eventItemProxy.id.eventID, let transcript = content.caption else { return content }
         var content = content
-        content.proseioScamWarning = ScamDetector.warningKind(for: transcript, eventID: eventID)
+        content.bipeScamWarning = ScamDetector.warningKind(for: transcript, eventID: eventID)
         return content
     }
     

@@ -7,25 +7,25 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SFSafeSymbols
 import SwiftUI
 
 struct SettingsScreen: View {
     @Bindable var context: SettingsScreenViewModel.Context
     @Environment(\.openURL) private var openURL
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     var body: some View {
         Form {
-            if context.viewState.proseioIsInTab {
-                ProseioSelfChatSection { context.send(viewAction: .proseioSelfChat) }
+            if context.viewState.bipeIsInTab {
+                BipeSelfChatSection { context.send(viewAction: .bipeSelfChat) }
             }
             
             userSection
             
-            if let trustProfile = context.viewState.proseioTrustProfile {
-                ProseioTrustProfileSection(profile: trustProfile) { context.send(viewAction: $0) }
+            if let trustProfile = context.viewState.bipeTrustProfile {
+                BipeTrustProfileSection(profile: trustProfile) { context.send(viewAction: $0) }
             }
             
             if context.viewState.showAddAccountButton {
@@ -39,12 +39,12 @@ struct SettingsScreen: View {
             appSettingsSection
         }
         .compoundList()
-        // Proseio: reloads the handle on first show and after returning from a pushed screen.
-        .onAppear { context.send(viewAction: .proseioLoadHandle) }
-        .navigationTitle(context.viewState.proseioIsInTab ? ProseioStrings.tabYou : L10n.commonSettings)
-        .navigationBarTitleDisplayMode(context.viewState.proseioIsInTab ? .large : .inline)
+        // Bipe: reloads the handle on first show and after returning from a pushed screen.
+        .onAppear { context.send(viewAction: .bipeLoadHandle) }
+        .navigationTitle(context.viewState.bipeIsInTab ? ProseioStrings.tabYou : L10n.commonSettings)
+        .navigationBarTitleDisplayMode(context.viewState.bipeIsInTab ? .large : .inline)
         .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)
-        .toolbar { if !context.viewState.proseioIsInTab { toolbar } }
+        .toolbar { if !context.viewState.bipeIsInTab { toolbar } }
         .sheet(isPresented: $context.isPresentingStatusPicker) {
             SettingsScreenUserStatusPickerView { action in
                 context.send(viewAction: .userStatus(action))
@@ -73,7 +73,7 @@ struct SettingsScreen: View {
                                 .font(.compound.headingMD)
                                 .foregroundColor(.compound.textPrimary)
                             
-                            Text(proseioHandleResolver?.displayText(for: context.viewState.userProfile.id) ?? context.viewState.userProfile.id)
+                            Text(bipeHandleResolver?.displayText(for: context.viewState.userProfile.id) ?? context.viewState.userProfile.id)
                                 .font(.compound.bodySM)
                                 .foregroundColor(.compound.textSecondary)
                         }
@@ -191,42 +191,42 @@ struct SettingsScreen: View {
                     kind: .picker(selection: $context.appAppearance,
                                   items: AppAppearance.allCases.map { (title: $0.name, tag: $0) }))
             
-            if context.viewState.showProseioHandle {
+            if context.viewState.showBipeHandle {
                 ListRow(label: .default(title: ProseioStrings.settingsHandle,
                                         icon: \.userProfile),
-                        details: .title(context.viewState.proseioHandle.map { "@\($0)" } ?? ProseioStrings.settingsHandleNone),
+                        details: .title(context.viewState.bipeHandle.map { "@\($0)" } ?? ProseioStrings.settingsHandleNone),
                         kind: .navigationLink {
-                            context.send(viewAction: .proseioHandle)
+                            context.send(viewAction: .bipeHandle)
                         })
                 
                 ListRow(label: .default(title: ProseioStrings.settingsPublicProfile,
                                         icon: \.webBrowser),
-                        details: context.viewState.proseioPublicProfileEnabled.map { .title($0 ? ProseioStrings.publicProfileOn : ProseioStrings.publicProfileOff) },
+                        details: context.viewState.bipePublicProfileEnabled.map { .title($0 ? ProseioStrings.publicProfileOn : ProseioStrings.publicProfileOff) },
                         kind: .navigationLink {
-                            context.send(viewAction: .proseioPublicProfile)
+                            context.send(viewAction: .bipePublicProfile)
                         })
                 
                 ListRow(label: .default(title: ProseioStrings.messagingTitle,
                                         icon: \.chat),
-                        details: context.viewState.proseioWhoCanMessage.map { .title($0.title) },
+                        details: context.viewState.bipeWhoCanMessage.map { .title($0.title) },
                         kind: .navigationLink {
-                            context.send(viewAction: .proseioMessaging)
+                            context.send(viewAction: .bipeMessaging)
                         })
                 
                 ListRow(label: .default(title: ProseioStrings.invitesTitle,
                                         icon: \.userAdd),
                         kind: .navigationLink {
-                            context.send(viewAction: .proseioInvites)
+                            context.send(viewAction: .bipeInvites)
                         })
                 
                 ListRow(label: .default(title: ProseioStrings.contactsTitle,
                                         icon: \.userProfile),
                         kind: .navigationLink {
-                            context.send(viewAction: .proseioContacts)
+                            context.send(viewAction: .bipeContacts)
                         })
             }
             
-            // Proseio: pt-BR / en switch lives in iOS per-app language settings.
+            // Bipe: pt-BR / en switch lives in iOS per-app language settings.
             ListRow(label: .default(title: ProseioStrings.settingsLanguage,
                                     description: ProseioStrings.settingsLanguageFooter,
                                     icon: \.translate),

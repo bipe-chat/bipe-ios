@@ -7,13 +7,13 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct UserProfileScreen: View {
     @Bindable var context: UserProfileScreenViewModel.Context
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
-    @State private var isPresentingProseioQRCode = false
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
+    @State private var isPresentingBipeQRCode = false
     
     var body: some View {
         Form {
@@ -32,9 +32,9 @@ struct UserProfileScreen: View {
         }
         .track(screen: .User)
         .interactiveQuickLook(item: $context.mediaPreviewItem, allowEditing: false)
-        .sheet(isPresented: $isPresentingProseioQRCode) {
-            if let handle = proseioHandleResolver?.handle(for: context.viewState.userID) {
-                ProseioProfileQRCodeSheet(handle: handle)
+        .sheet(isPresented: $isPresentingBipeQRCode) {
+            if let handle = bipeHandleResolver?.handle(for: context.viewState.userID) {
+                BipeProfileQRCodeSheet(handle: handle)
                     .presentationDetents([.large])
             }
         }
@@ -53,7 +53,7 @@ struct UserProfileScreen: View {
             } footer: {
                 VStack(spacing: 0) {
                     if !context.viewState.isOwnUser {
-                        ProseioPublicProfileBioView(userID: context.viewState.userID)
+                        BipePublicProfileBioView(userID: context.viewState.userID)
                     }
                     otherUserFooter
                         .padding(.top, 8)
@@ -98,15 +98,15 @@ struct UserProfileScreen: View {
             }
             
             if let permalink = context.viewState.permalink {
-                ShareLink(item: proseioHandleResolver?.shareURL(for: permalink) ?? permalink) {
+                ShareLink(item: bipeHandleResolver?.shareURL(for: permalink) ?? permalink) {
                     CompoundIcon(\.shareIos)
                 }
                 .buttonStyle(FormActionButtonStyle(title: L10n.actionShare))
             }
             
-            if context.viewState.isOwnUser, proseioHandleResolver?.handle(for: context.viewState.userID) != nil {
+            if context.viewState.isOwnUser, bipeHandleResolver?.handle(for: context.viewState.userID) != nil {
                 Button {
-                    isPresentingProseioQRCode = true
+                    isPresentingBipeQRCode = true
                 } label: {
                     CompoundIcon(\.qrCode)
                 }

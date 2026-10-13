@@ -7,7 +7,7 @@
 //
 
 import Combine
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 enum SettingsFlowCoordinatorAction {
@@ -16,9 +16,9 @@ enum SettingsFlowCoordinatorAction {
     case runLogoutFlow
     /// Logout without a confirmation. The user forgot their PIN.
     case forceLogout
-    /// Proseio: open a user's profile in the chats tab (from the invites screen).
+    /// Bipe: open a user's profile in the chats tab (from the invites screen).
     case openUserProfile(userID: String)
-    /// Proseio: open the self-chat (ADR 0053).
+    /// Bipe: open the self-chat (ADR 0053).
     case openSelfChat
 }
 
@@ -88,7 +88,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                                                                                     isBugReportServiceEnabled: flowParameters.bugReportService.isEnabled,
                                                                                     isInSecondaryWindow: isInSecondaryWindow,
                                                                                     userIndicatorController: flowParameters.userIndicatorController,
-                                                                                    proseioIsInTab: isInTab))
+                                                                                    bipeIsInTab: isInTab))
         
         settingsScreenCoordinator.actions
             .sink { [weak self] action in
@@ -144,17 +144,17 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 case .developerOptions:
                     presentDeveloperOptions()
                     
-                case .proseioHandle:
-                    presentProseioHandleScreen()
-                case .proseioPublicProfile:
-                    presentProseioPublicProfileScreen()
-                case .proseioMessaging:
-                    presentProseioMessagingScreen()
-                case .proseioInvites:
-                    presentProseioInvitesScreen()
-                case .proseioContacts:
-                    presentProseioContactsScreen()
-                case .proseioSelfChat:
+                case .bipeHandle:
+                    presentBipeHandleScreen()
+                case .bipePublicProfile:
+                    presentBipePublicProfileScreen()
+                case .bipeMessaging:
+                    presentBipeMessagingScreen()
+                case .bipeInvites:
+                    presentBipeInvitesScreen()
+                case .bipeContacts:
+                    presentBipeContactsScreen()
+                case .bipeSelfChat:
                     actionsSubject.send(.openSelfChat)
                 }
             }
@@ -164,10 +164,10 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     /// `onDone` runs after the screen pops, e.g. to reload the screen below.
-    private func presentProseioHandleScreen(onDone: (() -> Void)? = nil) {
-        let coordinator = ProseioHandleScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+    private func presentBipeHandleScreen(onDone: (() -> Void)? = nil) {
+        let coordinator = BipeHandleScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
                                                                            clientProxy: flowParameters.userSession.clientProxy,
-                                                                           handleResolver: flowParameters.userSession.proseioHandleResolver,
+                                                                           handleResolver: flowParameters.userSession.bipeHandleResolver,
                                                                            userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in
@@ -181,29 +181,29 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.push(coordinator)
     }
     
-    private func presentProseioPublicProfileScreen() {
-        let coordinator = ProseioPublicProfileScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+    private func presentBipePublicProfileScreen() {
+        let coordinator = BipePublicProfileScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
                                                                                   userSession: flowParameters.userSession,
                                                                                   userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self, weak coordinator] action in
                 switch action {
                 case .openHandle:
-                    self?.presentProseioHandleScreen { coordinator?.reload() }
+                    self?.presentBipeHandleScreen { coordinator?.reload() }
                 }
             }
             .store(in: &cancellables)
         navigationStackCoordinator.push(coordinator)
     }
     
-    private func presentProseioMessagingScreen() {
-        let coordinator = ProseioMessagingScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+    private func presentBipeMessagingScreen() {
+        let coordinator = BipeMessagingScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
                                                                               clientProxy: flowParameters.userSession.clientProxy))
         navigationStackCoordinator.push(coordinator)
     }
     
-    private func presentProseioInvitesScreen() {
-        let coordinator = ProseioInvitesScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+    private func presentBipeInvitesScreen() {
+        let coordinator = BipeInvitesScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
                                                                             clientProxy: flowParameters.userSession.clientProxy,
                                                                             userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
@@ -217,8 +217,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.push(coordinator)
     }
     
-    private func presentProseioContactsScreen() {
-        let coordinator = ProseioContactsScreenCoordinator(parameters: .init(apiClient: ProseioAPIClient(baseURL: userSettings.app.proseioAPIBaseURL),
+    private func presentBipeContactsScreen() {
+        let coordinator = BipeContactsScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
                                                                              clientProxy: flowParameters.userSession.clientProxy))
         coordinator.actionsPublisher
             .sink { [weak self] action in
@@ -226,7 +226,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 case .openUserProfile(let userID):
                     self?.actionsSubject.send(.openUserProfile(userID: userID))
                 case .openInvites:
-                    self?.presentProseioInvitesScreen()
+                    self?.presentBipeInvitesScreen()
                 }
             }
             .store(in: &cancellables)

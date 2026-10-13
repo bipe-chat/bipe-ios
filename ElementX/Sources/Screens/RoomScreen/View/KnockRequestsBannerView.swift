@@ -7,7 +7,7 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct KnockRequestInfo: Equatable {
@@ -55,10 +55,10 @@ private struct SingleKnockRequestBannerContent: View {
     let onAccept: (@MainActor (String) -> Void)?
     let onViewAll: @MainActor () -> Void
     var mediaProvider: MediaProviderProtocol?
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     private var displayedUserID: String {
-        proseioHandleResolver?.displayText(for: request.userID) ?? request.userID
+        bipeHandleResolver?.displayText(for: request.userID) ?? request.userID
     }
     
     var body: some View {
@@ -127,7 +127,7 @@ private struct MultipleKnockRequestsBannerContent: View {
     let onDismiss: @MainActor () -> Void
     let onViewAll: @MainActor () -> Void
     var mediaProvider: MediaProviderProtocol?
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     private var avatars: [StackedAvatarInfo] {
         requests
@@ -140,7 +140,7 @@ private struct MultipleKnockRequestsBannerContent: View {
             return ""
         }
         
-        let string = first.displayName ?? proseioHandleResolver?.displayText(for: first.userID) ?? first.userID
+        let string = first.displayName ?? bipeHandleResolver?.displayText(for: first.userID) ?? first.userID
         return L10n.tr("Localizable", "screen_room_multiple_knock_requests_title", string, avatars.count - 1)
     }
     

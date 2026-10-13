@@ -6,7 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 enum SettingsScreenViewModelAction {
@@ -36,12 +36,12 @@ enum SettingsScreenViewModelAction {
     
     case developerOptions
     
-    case proseioHandle
-    case proseioPublicProfile
-    case proseioMessaging
-    case proseioInvites
-    case proseioContacts
-    case proseioSelfChat
+    case bipeHandle
+    case bipePublicProfile
+    case bipeMessaging
+    case bipeInvites
+    case bipeContacts
+    case bipeSelfChat
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -58,20 +58,20 @@ struct SettingsScreenViewState: BindableState {
     var accountProfileURL: URL?
     var showAccountDeactivation: Bool
     var showDeveloperOptions: Bool
-    /// Proseio: the username row (Proseio accounts only) and the current handle.
-    var showProseioHandle = false
-    var proseioHandle: String?
-    /// Proseio: whether the public profile is on (ADR 0041). `nil` until loaded.
-    var proseioPublicProfileEnabled: Bool?
-    /// Proseio: "Quem pode me mandar mensagem". Same visibility as the username row.
-    var proseioWhoCanMessage: ProseioWhoCanMessage?
+    /// Bipe: the username row (Bipe accounts only) and the current handle.
+    var showBipeHandle = false
+    var bipeHandle: String?
+    /// Bipe: whether the public profile is on (ADR 0041). `nil` until loaded.
+    var bipePublicProfileEnabled: Bool?
+    /// Bipe: "Quem pode me mandar mensagem". Same visibility as the username row.
+    var bipeWhoCanMessage: BipeWhoCanMessage?
     
-    /// Proseio: the "Perfil de confiança" card. Same visibility as the username row.
-    var proseioTrustProfile: ProseioTrustProfile? {
-        guard showProseioHandle else { return nil }
-        return ProseioTrustProfile(displayName: userProfile.displayName,
+    /// Bipe: the "Perfil de confiança" card. Same visibility as the username row.
+    var bipeTrustProfile: BipeTrustProfile? {
+        guard showBipeHandle else { return nil }
+        return BipeTrustProfile(displayName: userProfile.displayName,
                                    hasAvatar: userProfile.avatarURL != nil,
-                                   handle: proseioHandle)
+                                   handle: bipeHandle)
     }
     
     var securitySectionMode = SettingsScreenSecuritySectionMode.none
@@ -82,8 +82,8 @@ struct SettingsScreenViewState: BindableState {
     let isBugReportServiceEnabled: Bool
     
     let navigationBarVisibility: Visibility
-    /// Proseio: the screen is the root of the Você tab (ADR 0053), not a sheet.
-    var proseioIsInTab = false
+    /// Bipe: the screen is the root of the Você tab (ADR 0053), not a sheet.
+    var bipeIsInTab = false
     
     var bindings: SettingsScreenViewStateBindings
     
@@ -151,13 +151,13 @@ enum SettingsScreenViewAction {
     case enableDeveloperOptions
     case developerOptions
     
-    case proseioHandle
-    case proseioPublicProfile
-    case proseioMessaging
-    case proseioLoadHandle
-    case proseioInvites
-    case proseioContacts
-    case proseioSelfChat
+    case bipeHandle
+    case bipePublicProfile
+    case bipeMessaging
+    case bipeLoadHandle
+    case bipeInvites
+    case bipeContacts
+    case bipeSelfChat
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

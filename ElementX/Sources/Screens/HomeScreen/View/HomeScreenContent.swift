@@ -121,8 +121,8 @@ struct HomeScreenContent: View {
                     RoomListFiltersView(state: $context.filtersState)
                 }
                 
-                if context.viewState.shouldShowProseioRequestsRow {
-                    ProseioRequestsRow(count: context.viewState.proseioRequestCount) {
+                if context.viewState.shouldShowBipeRequestsRow {
+                    BipeRequestsRow(count: context.viewState.bipeRequestCount) {
                         context.filtersState.activateFilter(.invites)
                     }
                 }

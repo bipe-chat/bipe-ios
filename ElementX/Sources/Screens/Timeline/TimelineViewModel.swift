@@ -10,7 +10,7 @@ import Algorithms
 import Combine
 import MatrixRustSDK
 import OrderedCollections
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 typealias TimelineViewModelType = StateStoreViewModel<TimelineViewState, TimelineViewAction>
@@ -1056,9 +1056,9 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
     
     // MARK: Pills
     
-    /// Proseio: a mention pill that shows a raw Matrix ID switches to "@handle" once the handle resolves.
-    private func proseioShowHandle(in pillContext: PillContext, userID: String) {
-        guard let resolver = userSession.proseioHandleResolver, resolver.isProseioUserID(userID) else { return }
+    /// Bipe: a mention pill that shows a raw Matrix ID switches to "@handle" once the handle resolves.
+    private func bipeShowHandle(in pillContext: PillContext, userID: String) {
+        guard let resolver = userSession.bipeHandleResolver, resolver.isBipeUserID(userID) else { return }
         Task { [weak pillContext] in
             guard let handle = await resolver.resolve(userID),
                   let pillContext,
@@ -1090,10 +1090,10 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
                                                          displayText: PillUtilities.userPillDisplayText(username: profile.displayName, userID: id),
                                                          statusEmoji: profile.status.displayed?.emoji)
                         pillContext.cancellable = nil
-                        self?.proseioShowHandle(in: pillContext, userID: id)
+                        self?.bipeShowHandle(in: pillContext, userID: id)
                     }
             }
-            proseioShowHandle(in: pillContext, userID: id)
+            bipeShowHandle(in: pillContext, userID: id)
         case .allUsers:
             pillContext.viewState = .mention(isOwnMention: true, displayText: PillUtilities.atRoom, statusEmoji: nil)
         case .event(let room):
@@ -1162,7 +1162,7 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
             state.bindings.alertInfo = .init(id: type,
                                              title: message,
                                              primaryButton: .init(title: L10n.actionOk, action: nil),
-                                             secondaryButton: userSettings.app.historySharingDetailsURL.map { url in // Proseio: hidden without a help page
+                                             secondaryButton: userSettings.app.historySharingDetailsURL.map { url in // Bipe: hidden without a help page
                                                  AlertInfoButton(title: L10n.actionLearnMore) { [weak self] in
                                                      self?.appMediator.open(url)
                                                  }

@@ -92,7 +92,7 @@ struct SessionVerificationScreen: View {
                                                       isUserVerification: true,
                                                       mediaProvider: context.mediaProvider)
             case .userInitiator:
-                if let learnMoreURL = context.viewState.learnMoreURL { // Proseio: hidden without a help page
+                if let learnMoreURL = context.viewState.learnMoreURL { // Bipe: hidden without a help page
                     Button(L10n.actionLearnMore) {
                         UIApplication.shared.open(learnMoreURL)
                     }

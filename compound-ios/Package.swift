@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "Compound", targets: ["Compound"])
     ],
     dependencies: [
-        // Proseio: resolves to proseio/compound-design-tokens (Proseio açaí fork, local ~/Dev/Proseio/proseio-tokens) via the SPM mirror (Tools/XcodeGen/mirrors.json).
+        // Bipe: resolves to proseio/compound-design-tokens (Bipe açaí fork, local ~/Dev/Proseio/proseio-tokens) via the SPM mirror (Tools/XcodeGen/mirrors.json).
         .package(url: "https://github.com/element-hq/compound-design-tokens", exact: "11.3.3"),
         // .package(path: "../../compound-design-tokens"),
         .package(url: "https://github.com/siteline/SwiftUI-Introspect", exact: "27.0.0"),

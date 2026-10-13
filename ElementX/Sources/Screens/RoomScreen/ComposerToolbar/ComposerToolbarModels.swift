@@ -8,7 +8,7 @@
 
 import Compound
 import MatrixRustSDK
-import ProseioKit
+import BipeKit
 import SwiftUI
 import WysiwygComposer
 
@@ -68,7 +68,7 @@ enum ComposerAttachmentType {
     case file
     case location
     case poll
-    /// Proseio: sticker picker (ADR 0029).
+    /// Bipe: sticker picker (ADR 0029).
     case sticker
 }
 
@@ -338,7 +338,7 @@ enum ComposerMode: Equatable {
     case reply(eventID: String, replyDetails: TimelineItemReplyDetails, isThread: Bool)
     case edit(originalEventOrTransactionID: TimelineItemIdentifier.EventOrTransactionID, type: EditType)
     case recordVoiceMessage(state: AudioRecorderState)
-    /// Proseio: `transcript` is the sender-side transcript the sender can correct before sending.
+    /// Bipe: `transcript` is the sender-side transcript the sender can correct before sending.
     case previewVoiceMessage(state: AudioPlayerState, waveform: WaveformSource, isUploading: Bool, transcript: VoiceTranscriptDraft? = nil)
     
     var isEdit: Bool {

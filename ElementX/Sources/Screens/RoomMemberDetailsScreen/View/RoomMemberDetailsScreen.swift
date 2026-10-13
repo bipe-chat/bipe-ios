@@ -7,12 +7,12 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct RoomMemberDetailsScreen: View {
     @ObservedObject var context: RoomMemberDetailsScreenViewModel.Context
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     var body: some View {
         Form {
@@ -58,7 +58,7 @@ struct RoomMemberDetailsScreen: View {
                     
                     VStack(spacing: 0) {
                         if !context.viewState.isOwnMemberDetails {
-                            ProseioPublicProfileBioView(userID: memberDetails.id)
+                            BipePublicProfileBioView(userID: memberDetails.id)
                         }
                         otherUserFooter
                             .padding(.top, 8)
@@ -76,11 +76,11 @@ struct RoomMemberDetailsScreen: View {
     private var withdrawVerificationSection: some View {
         VStack(spacing: 16) {
             if let memberDetails = context.viewState.memberDetails {
-                Text(L10n.cryptoIdentityChangeProfilePinViolation(memberDetails.name ?? proseioHandleResolver?.displayText(for: memberDetails.id) ?? memberDetails.id))
+                Text(L10n.cryptoIdentityChangeProfilePinViolation(memberDetails.name ?? bipeHandleResolver?.displayText(for: memberDetails.id) ?? memberDetails.id))
                     .foregroundStyle(.compound.textCriticalPrimary)
                     .font(.compound.bodyMDSemibold)
             } else {
-                Text(L10n.cryptoIdentityChangeProfilePinViolation(proseioHandleResolver?.displayText(for: context.viewState.userID) ?? context.viewState.userID))
+                Text(L10n.cryptoIdentityChangeProfilePinViolation(bipeHandleResolver?.displayText(for: context.viewState.userID) ?? context.viewState.userID))
                     .foregroundStyle(.compound.textCriticalPrimary)
                     .font(.compound.bodyMDSemibold)
             }
@@ -127,7 +127,7 @@ struct RoomMemberDetailsScreen: View {
             }
             
             if let permalink = context.viewState.memberDetails?.permalink {
-                ShareLink(item: proseioHandleResolver?.shareURL(for: permalink) ?? permalink) {
+                ShareLink(item: bipeHandleResolver?.shareURL(for: permalink) ?? permalink) {
                     CompoundIcon(\.shareIos)
                 }
                 .buttonStyle(FormActionButtonStyle(title: L10n.actionShare))

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import ProseioKit
+import BipeKit
 
 enum SecurityAndPrivacyScreenViewModelAction {
     case displayEditAddressScreen
@@ -281,7 +281,7 @@ struct SecurityAndPrivacyScreenStrings {
         accessSectionFooterString = accessFooterString
         
         var historyFooterString = AttributedString(L10n.screenSecurityAndPrivacyRoomHistorySectionFooter(linkPlaceholder))
-        historyFooterString.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: historySharingDetailsURL)
+        historyFooterString.bipeReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: historySharingDetailsURL)
         historySectionFooterString = historyFooterString
     }
 }

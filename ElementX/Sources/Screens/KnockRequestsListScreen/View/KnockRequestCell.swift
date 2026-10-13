@@ -15,7 +15,7 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct KnockRequestCellInfo: Equatable {
@@ -33,10 +33,10 @@ struct KnockRequestCell: View {
     let onAccept: (@MainActor (String) -> Void)?
     let onDecline: (@MainActor (String) -> Void)?
     let onDeclineAndBan: (@MainActor (String) -> Void)?
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
     private var displayedUserID: String {
-        proseioHandleResolver?.displayText(for: cellInfo.userID) ?? cellInfo.userID
+        bipeHandleResolver?.displayText(for: cellInfo.userID) ?? cellInfo.userID
     }
     
     var body: some View {

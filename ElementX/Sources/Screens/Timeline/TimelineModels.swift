@@ -19,7 +19,7 @@ enum TimelineViewModelAction {
     case displayDocumentPicker
     case displayLocationPicker
     case displayNewPollForm
-    /// Proseio: sticker picker (ADR 0029).
+    /// Bipe: sticker picker (ADR 0029).
     case displayStickerPicker
     case displayEditPollForm(eventID: String, poll: Poll)
     case displayMediaUploadPreviewScreen(mediaURLs: [URL])
@@ -120,7 +120,7 @@ struct TimelineViewState: BindableState {
     var members: [String: RoomMemberState] = [:]
     var typingMembers: [String] = []
     var showLoading = false
-    var showReadReceipts = true // Proseio: receipts are always visible (ADR 0050)
+    var showReadReceipts = true // Bipe: receipts are always visible (ADR 0050)
     var isDM = false
     var timelineState: TimelineState // check the doc before changing this
     

@@ -127,7 +127,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
         Task {
             // When navigating away from the room, we need to mark the room as both read
             // and fully read for Synapse to clear this room from the app's badge count.
-            _ = await roomProxy.markAsRead(receiptType: .read) // Proseio: receipts are always public (ADR 0050)
+            _ = await roomProxy.markAsRead(receiptType: .read) // Bipe: receipts are always public (ADR 0050)
             _ = await roomProxy.markAsRead(receiptType: .fullyRead)
         }
         // Work around QLPreviewController dismissal issues, see the InteractiveQuickLookModifier.

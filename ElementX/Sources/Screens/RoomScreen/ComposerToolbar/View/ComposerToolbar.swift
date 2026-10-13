@@ -282,7 +282,7 @@ struct ComposerToolbar: View {
                 voiceMessageTrashButton
                     .scaledPadding(.vertical, buttonVerticalPadding, relativeTo: .compound.headingLG)
                 VoiceMessageRecordingComposer(recorderState: state)
-                ProseioRecordingPauseButton(recorderState: state) {
+                BipeRecordingPauseButton(recorderState: state) {
                     context.send(viewAction: .voiceMessage(.pauseRecording))
                 } resume: {
                     context.send(viewAction: .voiceMessage(.resumeRecording))
@@ -292,7 +292,7 @@ struct ComposerToolbar: View {
         case .previewVoiceMessage(let state, let waveform, let isUploading, let transcript):
             VStack(alignment: .leading, spacing: 8) {
                 if let transcript {
-                    ProseioVoiceTranscriptEditor(draft: transcript)
+                    BipeVoiceTranscriptEditor(draft: transcript)
                 }
                 topBarLayout {
                     voiceMessageTrashButton

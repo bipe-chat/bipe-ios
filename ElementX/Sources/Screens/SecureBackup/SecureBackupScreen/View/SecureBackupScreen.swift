@@ -8,7 +8,7 @@
 
 import Combine
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct SecureBackupScreen: View {
@@ -67,7 +67,7 @@ struct SecureBackupScreen: View {
     private var keyBackupDescriptionWithLearnMoreLink: AttributedString {
         let linkPlaceholder = "{link}"
         var description = AttributedString(L10n.screenChatBackupKeyBackupDescription(linkPlaceholder))
-        description.proseioReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: context.viewState.chatBackupDetailsURL)
+        description.bipeReplaceLink(linkPlaceholder, title: L10n.actionLearnMore, url: context.viewState.chatBackupDetailsURL)
         return description
     }
     

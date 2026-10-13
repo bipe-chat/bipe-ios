@@ -61,7 +61,7 @@ class ClientProxy: ClientProxyProtocol {
     // These following summary providers both operate on the same allRooms() list but
     // can apply their own filtering and pagination
     private(set) var roomSummaryProvider: RoomSummaryProviderProtocol
-    private(set) var proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol
+    private(set) var bipeGroupsRoomSummaryProvider: RoomSummaryProviderProtocol
     private(set) var alternateRoomSummaryProvider: RoomSummaryProviderProtocol
     
     private(set) var staticRoomSummaryProvider: StaticRoomSummaryProviderProtocol
@@ -252,7 +252,7 @@ class ClientProxy: ClientProxyProtocol {
         syncService = configuredAppService.syncService
         roomListService = configuredAppService.roomListService
         roomSummaryProvider = configuredAppService.roomSummaryProvider
-        proseioGroupsRoomSummaryProvider = configuredAppService.proseioGroupsRoomSummaryProvider
+        bipeGroupsRoomSummaryProvider = configuredAppService.bipeGroupsRoomSummaryProvider
         alternateRoomSummaryProvider = configuredAppService.alternateRoomSummaryProvider
         staticRoomSummaryProvider = configuredAppService.staticRoomSummaryProvider
         eventStringBuilder = configuredAppService.eventStringBuilder
@@ -683,7 +683,7 @@ class ClientProxy: ClientProxyProtocol {
         }
     }
     
-    func proseioAccountData(eventType: String) async -> String? {
+    func bipeAccountData(eventType: String) async -> String? {
         do {
             return try await client.accountData(eventType: eventType)
         } catch {
@@ -692,7 +692,7 @@ class ClientProxy: ClientProxyProtocol {
         }
     }
     
-    func proseioSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError> {
+    func bipeSetAccountData(eventType: String, content: String) async -> Result<Void, ClientProxyError> {
         do {
             try await client.setAccountData(eventType: eventType, content: content)
             return .success(())
@@ -1578,7 +1578,7 @@ private struct ClientProxyServices {
     let syncService: SyncService
     let roomListService: RoomListService
     let roomSummaryProvider: RoomSummaryProviderProtocol
-    let proseioGroupsRoomSummaryProvider: RoomSummaryProviderProtocol
+    let bipeGroupsRoomSummaryProvider: RoomSummaryProviderProtocol
     let alternateRoomSummaryProvider: RoomSummaryProviderProtocol
     let staticRoomSummaryProvider: StaticRoomSummaryProviderProtocol
     let eventStringBuilder: RoomEventStringBuilder
@@ -1606,19 +1606,19 @@ private struct ClientProxyServices {
                                                   eventStringBuilder: eventStringBuilder,
                                                   name: "AllRooms",
                                                   shouldUpdateVisibleRange: true,
-                                                  proseioScope: .chats,
+                                                  bipeScope: .chats,
                                                   notificationSettings: notificationSettings,
                                                   userSettings: userSettings)
         try await roomSummaryProvider.setRoomList(roomListService.allRooms())
         
-        proseioGroupsRoomSummaryProvider = RoomSummaryProvider(roomListService: roomListService,
+        bipeGroupsRoomSummaryProvider = RoomSummaryProvider(roomListService: roomListService,
                                                                eventStringBuilder: eventStringBuilder,
-                                                               name: "ProseioGroups",
+                                                               name: "BipeGroups",
                                                                shouldUpdateVisibleRange: true,
-                                                               proseioScope: .groups,
+                                                               bipeScope: .groups,
                                                                notificationSettings: notificationSettings,
                                                                userSettings: userSettings)
-        try await proseioGroupsRoomSummaryProvider.setRoomList(roomListService.allRooms())
+        try await bipeGroupsRoomSummaryProvider.setRoomList(roomListService.allRooms())
         
         alternateRoomSummaryProvider = RoomSummaryProvider(roomListService: roomListService,
                                                            eventStringBuilder: eventStringBuilder,

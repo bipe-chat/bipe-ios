@@ -19,23 +19,23 @@ struct VoiceMessageRoomTimelineView: View {
                 VoiceMessageRoomTimelineContent(timelineItem: timelineItem,
                                                 playerState: playerState)
 
-                proseioTranscriptAndWarning
+                bipeTranscriptAndWarning
             }
             .frame(maxWidth: 400)
         }
     }
 
-    /// Proseio: the sender-side transcript and its scam warning (proseio/docs/audio.md).
+    /// Bipe: the sender-side transcript and its scam warning (proseio/docs/audio.md).
     @ViewBuilder
-    private var proseioTranscriptAndWarning: some View {
+    private var bipeTranscriptAndWarning: some View {
         let transcript = timelineItem.content.caption.flatMap { $0.isEmpty ? nil : $0 }
-        if transcript != nil || timelineItem.content.proseioScamWarning != nil {
+        if transcript != nil || timelineItem.content.bipeScamWarning != nil {
             VStack(alignment: .leading, spacing: 8) {
                 if let transcript {
-                    ProseioVoiceTranscriptView(text: transcript)
+                    BipeVoiceTranscriptView(text: transcript)
                 }
-                if let scamWarning = timelineItem.content.proseioScamWarning {
-                    ProseioScamWarningView(kind: scamWarning)
+                if let scamWarning = timelineItem.content.bipeScamWarning {
+                    BipeScamWarningView(kind: scamWarning)
                 }
             }
             .padding(.bottom, 16) // Room for the timestamp, like the scam warning under text messages.

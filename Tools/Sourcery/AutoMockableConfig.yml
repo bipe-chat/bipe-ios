@@ -10,4 +10,4 @@ output:
   ../../ElementX/Sources/Mocks/Generated/GeneratedMocks.swift
 args:
   autoMockableImports:
-    - ProseioKit
+    - BipeKit

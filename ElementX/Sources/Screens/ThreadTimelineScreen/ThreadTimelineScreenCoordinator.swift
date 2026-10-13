@@ -35,7 +35,7 @@ enum ThreadTimelineScreenCoordinatorAction {
     case presentLocationViewer(StaticLocationData)
     case presentLiveLocationViewer(sender: TimelineItemSender, initialLiveLocationShare: LiveLocationShare)
     case presentPollForm(mode: PollFormMode)
-    /// Proseio: sticker picker (ADR 0029).
+    /// Bipe: sticker picker (ADR 0029).
     case presentStickerPicker
     case presentEmojiPicker(selectedEmojis: Set<String>, continuation: EmojiPickerScreenContinuation)
     case presentRoomMemberDetails(userID: String)

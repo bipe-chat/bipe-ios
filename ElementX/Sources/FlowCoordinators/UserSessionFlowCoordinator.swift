@@ -10,7 +10,7 @@ import AVKit
 import Combine
 import Compound
 import ElementCall
-import ProseioKit
+import BipeKit
 import SwiftState
 import SwiftUI
 
@@ -22,7 +22,7 @@ enum UserSessionFlowCoordinatorAction {
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
-    /// Proseio ADR 0053: Conversas, Grupos, Você and search. The Spaces tab is gone.
+    /// Bipe ADR 0053: Conversas, Grupos, Você and search. The Spaces tab is gone.
     enum HomeTab: Hashable { case chats, groups, you, search }
     
     private let navigationRootCoordinator: NavigationRootCoordinator
@@ -43,7 +43,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     private let groupsTabFlowCoordinator: ChatsTabFlowCoordinator
     private let groupsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     private let youTabFlowCoordinator: SettingsFlowCoordinator
-    private let proseioSelfChat: ProseioSelfChat
+    private let bipeSelfChat: BipeSelfChat
     
     private let searchScreenCoordinator: SearchScreenCoordinator?
     private let searchTabNavigationStackCoordinator: NavigationStackCoordinator?
@@ -89,8 +89,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                           userSettings: flowParameters.userSession.userSettings)
         
         navigationTabCoordinator = NavigationTabCoordinator()
-        navigationRootCoordinator.setRootCoordinator(ProseioEnvironmentCoordinator(wrapping: navigationTabCoordinator,
-                                                                                   handleResolver: flowParameters.userSession.proseioHandleResolver))
+        navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: navigationTabCoordinator,
+                                                                                   handleResolver: flowParameters.userSession.bipeHandleResolver))
         
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
@@ -100,7 +100,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         let groupsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         groupsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: groupsSplitCoordinator,
-                                                           proseioScope: .groups,
+                                                           bipeScope: .groups,
                                                            flowParameters: flowParameters)
         groupsTabDetails = .init(tag: HomeTab.groups, title: ProseioStrings.tabGroups, icon: \.group, selectedIcon: \.group)
         groupsTabDetails.navigationSplitCoordinator = groupsSplitCoordinator
@@ -112,7 +112,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                                         navigationStackCoordinator: youStackCoordinator,
                                                         flowParameters: flowParameters)
         let youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: ProseioStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
-        proseioSelfChat = ProseioSelfChat(clientProxy: flowParameters.userSession.clientProxy)
+        bipeSelfChat = BipeSelfChat(clientProxy: flowParameters.userSession.clientProxy)
         
         if flowParameters.userSession.userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
             let searchCoordinator = SearchScreenCoordinator(parameters: .init(roomSummaryProvider: flowParameters.userSession.clientProxy.alternateRoomSummaryProvider,
@@ -171,7 +171,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             if ProcessInfo.processInfo.isiOSAppOnMac, flowParameters.windowManager.secondaryWindowsEnabled {
                 startSettingsFlow(detached: true)
             } else {
-                // Proseio ADR 0053: settings live in the Você tab, not in a sheet.
+                // Bipe ADR 0053: settings live in the Você tab, not in a sheet.
                 clearPresentedSheets(animated: animated)
                 navigationTabCoordinator.selectedTab = .you
                 if case .chatBackupSettings = appRoute {
@@ -185,14 +185,14 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
              .event, .eventOnRoomAlias, .childEvent, .childEventOnRoomAlias,
              .share, .transferOwnership, .thread:
             clearPresentedSheets(animated: animated) // Make sure the presented route is visible.
-            let tab = proseioRoomTab(for: appRoute)
+            let tab = bipeRoomTab(for: appRoute)
             roomListFlowCoordinator(for: tab).handleAppRoute(appRoute, animated: animated)
             if navigationTabCoordinator.selectedTab != tab {
                 navigationTabCoordinator.selectedTab = tab
             }
-        case .proseioHandle(let handle):
-            Task { await openProseioHandle(handle, animated: animated) }
-        case .proseioInvite:
+        case .bipeHandle(let handle):
+            Task { await openBipeHandle(handle, animated: animated) }
+        case .bipeInvite:
             flowParameters.userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.inviteAlreadySignedIn))
         case .search:
             // Switch to the dedicated search tab when it's available (iOS 26 + flag), otherwise ignore.
@@ -233,8 +233,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     
     // MARK: - Private
     
-    /// Proseio ADR 0053: a room opens in the tab that lists it. Routes into an open room stay in the current tab.
-    private func proseioRoomTab(for appRoute: AppRoute) -> HomeTab {
+    /// Bipe ADR 0053: a room opens in the tab that lists it. Routes into an open room stay in the current tab.
+    private func bipeRoomTab(for appRoute: AppRoute) -> HomeTab {
         let currentTab: HomeTab = navigationTabCoordinator.selectedTab == .groups ? .groups : .chats
         
         let roomID: String? = switch appRoute {
@@ -244,9 +244,9 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         guard let roomID else { return currentTab }
         // The self-chat has one member, so the SDK files it as a group. It opens in Conversas.
-        if roomID == proseioSelfChat.cachedRoomID { return .chats }
+        if roomID == bipeSelfChat.cachedRoomID { return .chats }
         guard let summary = userSession.clientProxy.roomSummaryForIdentifier(roomID) else { return currentTab }
-        return ProseioRoomListScope(summary: summary) == .groups ? .groups : .chats
+        return BipeRoomListScope(summary: summary) == .groups ? .groups : .chats
     }
     
     private func roomListFlowCoordinator(for tab: HomeTab) -> ChatsTabFlowCoordinator {
@@ -254,18 +254,18 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     private func openSelfChat() async {
-        guard let roomID = await proseioSelfChat.roomID() else {
+        guard let roomID = await bipeSelfChat.roomID() else {
             flowParameters.userIndicatorController.submitIndicator(.init(title: ProseioStrings.selfChatError))
             return
         }
         handleAppRoute(.room(roomID: roomID, via: []), animated: true)
     }
     
-    /// Proseio: a `proseio.com.br/@handle` link opens that user's profile.
-    private func openProseioHandle(_ handle: String, animated: Bool) async {
-        let userID = try? await flowParameters.userSession.proseioHandleResolver?.userID(forHandle: handle)
+    /// Bipe: a `proseio.com.br/@handle` link opens that user's profile.
+    private func openBipeHandle(_ handle: String, animated: Bool) async {
+        let userID = try? await flowParameters.userSession.bipeHandleResolver?.userID(forHandle: handle)
         guard let userID else {
-            MXLog.info("No user for a Proseio handle link")
+            MXLog.info("No user for a Bipe handle link")
             flowParameters.userIndicatorController.submitIndicator(.init(title: ProseioStrings.linkHandleNotFound(handle)))
             return
         }
@@ -612,11 +612,11 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 
                 let badgeCount = Int(userSession.clientProxy.totalUnreadNotifications)
                 
-                // Proseio ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
+                // Bipe ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
                 var chatsCount = 0
                 var groupsCount = 0
                 for summary in roomSummaries {
-                    switch ProseioRoomListScope(summary: summary) {
+                    switch BipeRoomListScope(summary: summary) {
                     case .chats: chatsCount += Int(summary.unreadNotificationsCount)
                     case .groups: groupsCount += Int(summary.unreadNotificationsCount)
                     }

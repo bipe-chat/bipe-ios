@@ -20,8 +20,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     private let analyticsService: AnalyticsServiceProtocol
     private let bugReportService: BugReportServiceProtocol
     private let userSettings: UserSettings
-    private let proseioInvitePairs: ProseioInvitePairs
-    private let proseioSelfChat: ProseioSelfChat
+    private let bipeInvitePairs: BipeInvitePairs
+    private let bipeSelfChat: BipeSelfChat
     private let notificationManager: NotificationManagerProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     
@@ -40,7 +40,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
          bugReportService: BugReportServiceProtocol,
          notificationManager: NotificationManagerProtocol,
          userIndicatorController: UserIndicatorControllerProtocol,
-         proseioScope: ProseioRoomListScope = .chats) {
+         bipeScope: BipeRoomListScope = .chats) {
         self.userSession = userSession
         self.availableSessionsPublisher = availableSessionsPublisher
         self.analyticsService = analyticsService
@@ -51,22 +51,22 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         spaceFilterSubject = CurrentValueSubject<SpaceServiceFilter?, Never>(nil)
         
-        roomSummaryProvider = switch proseioScope {
+        roomSummaryProvider = switch bipeScope {
         case .chats: userSession.clientProxy.roomSummaryProvider
-        case .groups: userSession.clientProxy.proseioGroupsRoomSummaryProvider
+        case .groups: userSession.clientProxy.bipeGroupsRoomSummaryProvider
         }
         
-        proseioInvitePairs = ProseioInvitePairs(clientProxy: userSession.clientProxy, apiBaseURL: userSettings.app.proseioAPIBaseURL)
-        proseioSelfChat = ProseioSelfChat(clientProxy: userSession.clientProxy)
+        bipeInvitePairs = BipeInvitePairs(clientProxy: userSession.clientProxy, apiBaseURL: userSettings.app.bipeAPIBaseURL)
+        bipeSelfChat = BipeSelfChat(clientProxy: userSession.clientProxy)
         
         super.init(initialViewState: .init(userProfile: userSession.clientProxy.userProfilePublisher.value,
-                                           proseioScope: proseioScope,
+                                           bipeScope: bipeScope,
                                            bindings: .init(filtersState: .init(userSettings: userSession.userSettings,
-                                                                               proseioHiddenFilters: proseioScope.hiddenFilters))),
+                                                                               bipeHiddenFilters: bipeScope.hiddenFilters))),
                    mediaProvider: userSession.mediaProvider)
         
         Task { [weak self] in
-            guard let self, await proseioSelfChat.refresh() else { return }
+            guard let self, await bipeSelfChat.refresh() else { return }
             updateRooms()
         }
         
@@ -75,7 +75,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         }
         
         Task { [weak self] in
-            guard let self, await proseioInvitePairs.refresh() else { return }
+            guard let self, await bipeInvitePairs.refresh() else { return }
             updateRooms()
         }
         
@@ -298,7 +298,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                 case .success:
                     analyticsService.trackInteraction(name: .MobileRoomListRoomContextMenuUnreadToggle)
                     
-                    // Proseio: receipts are always public (ADR 0050)
+                    // Bipe: receipts are always public (ADR 0050)
                     if case .failure(let error) = await roomProxy.markAsRead(receiptType: .read) {
                         MXLog.error("Failed marking room \(roomIdentifier) as read with error: \(error)")
                     }
@@ -414,12 +414,12 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         var rooms = [HomeScreenRoom]()
         let seenInvites = userSettings.app.seenInvites
-        // Proseio: DM invites are requests (usernames.md "First contact"). They only show under the Pedidos filter.
+        // Bipe: DM invites are requests (usernames.md "First contact"). They only show under the Pedidos filter.
         // The SDK has no cheap "shares a joined room" check, so every DM invite counts as a request.
         let showsRequests = state.bindings.filtersState.isFilterActive(.invites)
         var requestCount = 0
-        // Proseio ADR 0053: the self-chat lives in the Você tab only.
-        let selfChatRoomID = proseioSelfChat.cachedRoomID
+        // Bipe ADR 0053: the self-chat lives in the Você tab only.
+        let selfChatRoomID = bipeSelfChat.cachedRoomID
         
         for summary in roomSummaryProvider.roomListPublisher.value {
             if summary.id == selfChatRoomID {
@@ -427,11 +427,11 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             }
             
             if summary.isDirect, case .invite(let inviter) = summary.joinRequestType {
-                // Proseio ADR 0034: a chat from an invite pair skips Pedidos and is accepted without a tap.
-                if proseioInvitePairs.contains(inviter?.userID) {
-                    proseioInvitePairs.autoAccept(roomID: summary.id)
+                // Bipe ADR 0034: a chat from an invite pair skips Pedidos and is accepted without a tap.
+                if bipeInvitePairs.contains(inviter?.userID) {
+                    bipeInvitePairs.autoAccept(roomID: summary.id)
                 } else {
-                    proseioInvitePairs.recheck(roomID: summary.id) { [weak self] in self?.updateRooms() }
+                    bipeInvitePairs.recheck(roomID: summary.id) { [weak self] in self?.updateRooms() }
                     if !showsRequests {
                         requestCount += 1
                         continue
@@ -446,7 +446,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         }
         
         state.rooms = rooms
-        state.proseioRequestCount = requestCount
+        state.bipeRequestCount = requestCount
     }
     
     private func markRoomAsFavourite(_ roomID: String, isFavourite: Bool) async {

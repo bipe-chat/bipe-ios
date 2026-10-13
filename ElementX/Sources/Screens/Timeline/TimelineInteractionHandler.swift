@@ -7,7 +7,7 @@
 //
 
 import Combine
-import ProseioKit
+import BipeKit
 import UIKit
 
 enum TimelineInteractionHandlerAction {
@@ -60,7 +60,7 @@ class TimelineInteractionHandler {
     }
     
     private var resumeVoiceMessagePlaybackAfterScrubbing = false
-    /// Proseio: the sender-side transcript of the recording in preview.
+    /// Bipe: the sender-side transcript of the recording in preview.
     private var voiceTranscriptDraft: VoiceTranscriptDraft?
     
     /// The voice message playback that was last asked for, and whether the player has begun it.
@@ -773,7 +773,7 @@ private struct ReplyInfo {
     let isThread: Bool
 }
 
-// MARK: - Proseio
+// MARK: - Bipe
 
 extension TimelineInteractionHandler {
     /// Downloads the sticker and adds it to "Meus stickers" (ADR 0029). The same file twice is kept once.
@@ -783,7 +783,7 @@ extension TimelineInteractionHandler {
             userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaveFailed))
             return
         }
-        switch await ProseioStickerSaver(clientProxy: userSession.clientProxy).add([candidate]) {
+        switch await BipeStickerSaver(clientProxy: userSession.clientProxy).add([candidate]) {
         case .success:
             userIndicatorController.submitIndicator(UserIndicator(title: ProseioStrings.stickerSaved, icon: \.checkCircle))
         case .failure:

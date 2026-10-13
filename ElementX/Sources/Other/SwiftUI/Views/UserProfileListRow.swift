@@ -8,7 +8,7 @@
 
 import Compound
 import MatrixRustSDK
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct UserProfileListRow: View {
@@ -17,15 +17,15 @@ struct UserProfileListRow: View {
     let mediaProvider: MediaProviderProtocol?
     
     let kind: ListRow<LoadableAvatarImage, EmptyView, EmptyView, Bool>.Kind<EmptyView, Bool>
-    @Environment(\.proseioHandleResolver) private var proseioHandleResolver
+    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
-    /// Proseio: "@handle" in place of the Matrix ID when the handle is known.
+    /// Bipe: "@handle" in place of the Matrix ID when the handle is known.
     private var displayedUserID: String {
-        proseioHandleResolver?.displayText(for: user.id) ?? user.id
+        bipeHandleResolver?.displayText(for: user.id) ?? user.id
     }
     
     var isUnknownProfile: Bool {
-        // Proseio: a known handle proves the account exists.
+        // Bipe: a known handle proves the account exists.
         !user.isVerified && membership == nil && displayedUserID == user.id
     }
     

@@ -184,7 +184,7 @@ protocol JoinedRoomProxyProtocol: RoomProxyProtocol {
     func sendLiveLocation(geoURI: GeoURI) async -> Result<Void, RoomProxyError>
     func stopLiveLocationShare() async -> Result<Void, RoomProxyError>
     
-    /// Proseio: sends a raw event. `m.sticker` needs it (ADR 0033): the SDK has no typed sticker send.
+    /// Bipe: sends a raw event. `m.sticker` needs it (ADR 0033): the SDK has no typed sticker send.
     /// The SDK encrypts it in encrypted rooms. It skips the send queue, so there is no local echo or retry.
     func sendRaw(eventType: String, content: String) async -> Result<Void, RoomProxyError>
 }

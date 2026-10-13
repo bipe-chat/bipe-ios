@@ -7,7 +7,7 @@
 //
 
 import Compound
-import ProseioKit
+import BipeKit
 import SwiftUI
 
 struct StartChatScreen: View {
@@ -133,7 +133,7 @@ struct StartChatScreen: View {
     }
     
     private var noResultsContent: some View {
-        Text(context.viewState.proseioHandleNotFound.map(ProseioStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
+        Text(context.viewState.bipeHandleNotFound.map(ProseioStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
             .font(.compound.bodyLG)
             .foregroundColor(.compound.textSecondary)
             .frame(maxWidth: .infinity)

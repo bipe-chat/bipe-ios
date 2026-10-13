@@ -1,23 +1,23 @@
 # TestFlight plan (11 October 2026)
 
-Goal: friends install Proseio on iPhone and use `proseio.com.br` during the 11-day dev-server window.
+Goal: friends install Bipe on iPhone and use `proseio.com.br` during the 11-day dev-server window.
 
 ## Distribution model
 
-- **Team:** Centaur Labs OU (`992N457T8D`) until Proseio has its own Apple organisation account.
+- **Team:** Centaur Labs OU (`992N457T8D`) until Bipe has its own Apple organisation account.
 - **Bundle ID:** `br.com.proseio.app.dev` (already registered under Centaur). The production ID `br.com.proseio.app` stays unregistered.
-- **App Store Connect record name: "Bipe Chat"** (MZ, 12 Oct 2026; was "Proseio"; Apple refused "Bipe" because another account uses it). The name under the icon is "Bipe" (`APP_DISPLAY_NAME`). The record sits under Centaur for now; it moves to Proseio's own account later through Apple's app transfer.
+- **App Store Connect record name: "Bipe Chat"** (MZ, 12 Oct 2026; was "Bipe"; Apple refused "Bipe" because another account uses it). The name under the icon is "Bipe" (`APP_DISPLAY_NAME`). The record sits under Centaur for now; it moves to Bipe's own account later through Apple's app transfer.
 - **Testers:** friends are **external testers** through a **public TestFlight link**. External testing needs Beta App Review for the first build of each version. Internal testing (no review) is only for App Store Connect users of the Centaur team.
 
 ## Blockers before the first upload
 
 | # | Item | Owner | Why |
 |---|---|---|---|
-| 1 | Create the App Store Connect app record "Proseio" for `br.com.proseio.app.dev`, primary language pt-BR | MZ (Centaur account) | Creating records and accepting agreements is the account holder's step |
+| 1 | Create the App Store Connect app record "Bipe" for `br.com.proseio.app.dev`, primary language pt-BR | MZ (Centaur account) | Creating records and accepting agreements is the account holder's step |
 | 2 | Beta App Information: description, feedback email, privacy policy URL, test-account sign-in details for the reviewer | MZ + me (text drafted by me) | Required for external testing review |
 | 3 | **Privacy policy page** at `https://proseio.com.br/privacidade` (the app already links there) | Me (page), MZ (approve copy) | Reviewers and testers need a reachable policy |
 | 4 | **Reviewer account:** a demo account on `proseio.com.br` with credentials given to Apple | Me (issue a token; account created by MZ) | Sign-up is invite-only; review fails without a way in |
-| 5 | Export compliance answer for end-to-end encryption | MZ (legal call) | The app uses standard encryption (Matrix Olm/Megolm); Element declares `ITSAppUsesNonExemptEncryption = false`. Confirm the same answer applies to Proseio |
+| 5 | Export compliance answer for end-to-end encryption | MZ (legal call) | The app uses standard encryption (Matrix Olm/Megolm); Element declares `ITSAppUsesNonExemptEncryption = false`. Confirm the same answer applies to Bipe |
 | 6 | Build number increments on every upload (`CURRENT_PROJECT_VERSION`) | Me | App Store Connect rejects duplicate builds |
 
 ## Strongly recommended before friends join
@@ -31,7 +31,7 @@ Goal: friends install Proseio on iPhone and use `proseio.com.br` during the 11-d
 
 ## Upload pipeline
 
-1. Archive Release with the Centaur team (as in PROSEIO.md, ad-hoc section).
+1. Archive Release with the Centaur team (as in BIPE.md, ad-hoc section).
 2. Export with an App Store Connect export options plist (`method: app-store-connect`, `destination: upload`), `-allowProvisioningUpdates`. Xcode uploads with the signed-in Apple account on this Mac.
 3. Wait for processing in App Store Connect, add the build to the external group, submit for Beta App Review.
 4. After approval, share the public link.
@@ -51,13 +51,13 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 
 ## Status of my part of #60 (11 October 2026)
 
-- Done: default server `proseio.com.br`, server picker hidden, push gateway pointed at our own host, telemetry off, upload script `Tools/Proseio/testflight.sh`.
+- Done: default server `proseio.com.br`, server picker hidden, push gateway pointed at our own host, telemetry off, upload script `Tools/Bipe/testflight.sh`.
 - Published 11 Oct 2026: `https://proseio.com.br/privacidade` and `/termos` (pt-BR, English under `/en/`), contact contact@envisioning.com. Legal review still advisable before public launch.
 - Reviewer access: a single-use registration token (60 days) is in MZ's Keychain as `proseio-review-token`. In the Beta App Review notes: "Choose Create account, then use this registration token: <token>". The reviewer creates their own account.
 
 ## App Store Connect record (11 October 2026)
 
-- Created by me in the browser: "Proseio", Apple ID `6821694616`, iOS, primary language Portuguese (Brazil), bundle `br.com.proseio.app.dev`, SKU `proseio-dev`, Full Access.
+- Created by me in the browser: "Bipe", Apple ID `6821694616`, iOS, primary language Portuguese (Brazil), bundle `br.com.proseio.app.dev`, SKU `proseio-dev`, Full Access.
 - Test Information saved: description (below), feedback email, marketing URL `https://proseio.com.br`, privacy URL `/privacidade`, review notes without the token.
 - Beta App Review contact: MZ (saved 11 Oct 2026).
 - Still empty: the token at the end of the review notes. MZ pastes it.
@@ -66,7 +66,7 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 
 ## Beta App Information (as saved)
 
-- **Beta App Description (pt-BR):** Proseio é um aplicativo de mensagens brasileiro, com servidores no Brasil e conversas privadas criptografadas de ponta a ponta. Nesta fase de testes, o acesso é só por convite.
+- **Beta App Description (pt-BR):** Bipe é um aplicativo de mensagens brasileiro, com servidores no Brasil e conversas privadas criptografadas de ponta a ponta. Nesta fase de testes, o acesso é só por convite.
 - **What to Test:** criar conta com o código de convite, enviar mensagens e fotos, criar um grupo, fazer uma chamada de voz.
 - **Feedback email:** contact@envisioning.com
 
@@ -81,4 +81,4 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 
 - Build `202610112038` (no invite field) was removed from review: the server requires invite codes again.
 - Build `202610120012` (invite codes, App Attest, handles, Pedidos, scam warnings, trust card) submitted for Beta App Review in Amigos. Review notes give a 2-use invite code (Keychain `proseio-review-invite`).
-- Uploads sign in with the App Store Connect API key and manual App Store profiles (see PROSEIO.md).
+- Uploads sign in with the App Store Connect API key and manual App Store profiles (see BIPE.md).

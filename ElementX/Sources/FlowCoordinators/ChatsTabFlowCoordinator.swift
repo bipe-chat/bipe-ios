@@ -24,8 +24,8 @@ enum ChatsTabFlowCoordinatorAction {
 class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
     private let navigationSplitCoordinator: NavigationSplitCoordinator
     private let flowParameters: CommonFlowParameters
-    /// Proseio: the same flow runs the Conversas and the Grupos tab (ADR 0053).
-    private let proseioScope: ProseioRoomListScope
+    /// Bipe: the same flow runs the Conversas and the Grupos tab (ADR 0053).
+    private let bipeScope: BipeRoomListScope
     
     private var userSession: UserSessionProtocol {
         flowParameters.userSession
@@ -55,11 +55,11 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     init(navigationSplitCoordinator: NavigationSplitCoordinator,
-         proseioScope: ProseioRoomListScope = .chats,
+         bipeScope: BipeRoomListScope = .chats,
          flowParameters: CommonFlowParameters) {
         stateMachine = flowParameters.stateMachineFactory.makeChatsTabFlowStateMachine()
         self.navigationSplitCoordinator = navigationSplitCoordinator
-        self.proseioScope = proseioScope
+        self.bipeScope = bipeScope
         self.flowParameters = flowParameters
         
         sidebarNavigationStackCoordinator = NavigationStackCoordinator(navigationSplitCoordinator: navigationSplitCoordinator)
@@ -172,7 +172,7 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .chatBackupSettings:
             actionsSubject.send(.showChatBackupSettings)
-        case .accountProvisioningLink, .oAuthCallback, .settings, .call, .search, .proseioHandle, .proseioInvite:
+        case .accountProvisioningLink, .oAuthCallback, .settings, .call, .search, .bipeHandle, .bipeInvite:
             break // These routes cannot be handled.
         }
     }
@@ -385,7 +385,7 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
                                                          analyticsService: flowParameters.analytics,
                                                          notificationManager: flowParameters.notificationManager,
                                                          userIndicatorController: flowParameters.userIndicatorController,
-                                                         proseioScope: proseioScope)
+                                                         bipeScope: bipeScope)
         let coordinator = HomeScreenCoordinator(parameters: parameters)
         
         coordinator.actions

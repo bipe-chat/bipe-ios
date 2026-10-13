@@ -48,10 +48,10 @@ struct TextRoomTimelineView: View, TextBasedRoomTimelineViewProtocol {
                     .padding(.bottom, 16)
                 }
 
-                if let scamWarning = timelineItem.content.proseioScamWarning {
-                    ProseioScamWarningView(kind: scamWarning)
+                if let scamWarning = timelineItem.content.bipeScamWarning {
+                    BipeScamWarningView(kind: scamWarning)
                         .frame(maxWidth: TimelineMediaFrame.maxLinkPreviewWidth)
-                        .padding(.bottom, 16) // Proseio: room for the timestamp, like the link previews above.
+                        .padding(.bottom, 16) // Bipe: room for the timestamp, like the link previews above.
                 }
             }
         }

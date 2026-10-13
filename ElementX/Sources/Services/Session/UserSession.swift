@@ -8,7 +8,7 @@
 
 import Combine
 import Foundation
-import ProseioKit
+import BipeKit
 
 class UserSession: UserSessionProtocol {
     private var cancellables = Set<AnyCancellable>()
@@ -23,7 +23,7 @@ class UserSession: UserSessionProtocol {
     let liveLocationManager: LiveLocationManagerProtocol
     /// Scans media content, `nil` when no content scanner is configured for the server.
     let contentScannerService: ContentScannerServiceProtocol?
-    let proseioHandleResolver: ProseioHandleResolver?
+    let bipeHandleResolver: BipeHandleResolver?
     
     let callbacks = PassthroughSubject<UserSessionCallback, Never>()
     
@@ -37,14 +37,14 @@ class UserSession: UserSessionProtocol {
          mediaProvider: MediaProviderProtocol,
          voiceMessageMediaManager: VoiceMessageMediaManagerProtocol,
          liveLocationManager: LiveLocationManagerProtocol,
-         proseioHandleResolver: ProseioHandleResolver? = nil) {
+         bipeHandleResolver: BipeHandleResolver? = nil) {
         self.clientProxy = clientProxy
         self.userSettings = userSettings
         
         self.mediaProvider = mediaProvider
         self.voiceMessageMediaManager = voiceMessageMediaManager
         self.liveLocationManager = liveLocationManager
-        self.proseioHandleResolver = proseioHandleResolver
+        self.bipeHandleResolver = bipeHandleResolver
         contentScannerService = clientProxy.contentScanner.map(ContentScannerService.init)
         
         authErrorCancellable = clientProxy.actionsPublisher
