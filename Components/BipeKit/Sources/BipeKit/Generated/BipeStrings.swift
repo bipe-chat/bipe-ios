@@ -707,4 +707,24 @@ public enum BipeStrings {
     public static var mailNoticeEmailRemoved: String { NSLocalizedString("bipe_mail_notice_email_removed", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var mailFooter: String { NSLocalizedString("bipe_mail_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var startBegin: String { NSLocalizedString("bipe_start_begin", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var startHaveAccount: String { NSLocalizedString("bipe_start_have_account", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func startJoinInvite(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_start_join_invite", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var signupInviteTitle: String { NSLocalizedString("bipe_signup_invite_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupInviteBody: String { NSLocalizedString("bipe_signup_invite_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupInviteNone: String { NSLocalizedString("bipe_signup_invite_none", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupInviteNoneBody: String { NSLocalizedString("bipe_signup_invite_none_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupNameTitle: String { NSLocalizedString("bipe_signup_name_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupCreating: String { NSLocalizedString("bipe_signup_creating", tableName: "Bipe", bundle: .module, comment: "") }
 }

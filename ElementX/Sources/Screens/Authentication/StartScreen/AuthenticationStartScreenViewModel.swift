@@ -74,7 +74,7 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
         var bipeViewState = initialViewState
         if appSettings.usesBipeSignup {
             // Bipe ADR 0057: no login screen. The button opens the ways back into an account.
-            bipeViewState.bipeLoginButtonTitle = BipeStrings.recoveryTitle
+            bipeViewState.bipeLoginButtonTitle = BipeStrings.startHaveAccount
         }
         super.init(initialViewState: bipeViewState, mediaProvider: mediaProvider)
         
@@ -114,6 +114,11 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
             guard let classicAppDeepLinkURL = InfoPlistReader.main.classicAppDeepLinkURL else { return }
             appMediator.open(classicAppDeepLinkURL)
         }
+    }
+    
+    /// Bipe: names the inviter on the main button, or clears it with `nil`.
+    func bipeShowInvite(inviterHandle: String?) {
+        state.bipeInviterHandle = inviterHandle
     }
     
     // MARK: - Private
