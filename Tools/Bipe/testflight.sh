@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-# Version and build number come from bipe-shared (ADR 0072): node tools/bump-build.mjs there, then commit
+# Version and build number come from bipe-shared (ADR 0076): node tools/bump-build.mjs there, then commit
 # and push bipe-shared and this repo before you upload. App Store Connect rejects a build number it has seen.
 # shellcheck source=version.env
 . Tools/Bipe/version.env
