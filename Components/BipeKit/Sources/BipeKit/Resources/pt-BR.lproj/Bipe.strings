@@ -37,7 +37,7 @@
 "bipe_charge_status_paid" = "Pago";
 "bipe_charge_status_pending" = "Pendente";
 "bipe_settings_language" = "Idioma";
-"bipe_settings_language_footer" = "Escolha entre português e inglês nos ajustes do iPhone.";
+"bipe_settings_language_footer" = "Escolha entre português e inglês nos Ajustes do iPhone.";
 "bipe_settings_share_presence_footer" = "Se desligar, ninguém te vê digitando e você não vê os outros digitando. A confirmação de leitura fica sempre ligada.";
 "bipe_about_steward" = "O Bipe é um experimento da Envisioning, que cuida dele mas não quer ser dona. Os servidores ficam no Brasil.";
 "bipe_signup_title" = "Criar conta";
@@ -74,11 +74,11 @@
 "bipe_messaging_contacts" = "Só contatos";
 "bipe_messaging_contacts_body" = "Quem está em algum grupo ou conversa com você, quem você convidou e quem te convidou.";
 "bipe_error_invite_invalid" = "Esse convite não vale mais ou já foi usado.";
-"bipe_error_email_taken" = "Já existe uma conta com este e-mail. Entre com ele.";
+"bipe_error_email_taken" = "Este e-mail já está em outra conta do Bipe. Use outro e-mail.";
 "bipe_error_password_weak" = "Senha fraca. Escolha uma mais longa ou menos óbvia.";
 "bipe_error_handle_cooldown" = "Você mudou o nome de usuário há pouco tempo. Tente de novo mais tarde.";
 "bipe_error_rate_limited" = "Muitas tentativas. Espere um pouco e tente de novo.";
-"bipe_error_unauthorized" = "Sua sessão expirou. Saia e entre de novo.";
+"bipe_error_unauthorized" = "Sua conta saiu deste aparelho. Volte para sua conta para continuar.";
 "bipe_error_network" = "Sem conexão com o Bipe. Confira a internet e tente de novo.";
 "bipe_error_generic" = "Algo deu errado. Tente de novo.";
 "bipe_error_attestation_invalid" = "Não deu para confirmar que este é o app oficial do Bipe. Atualize o app e tente de novo.";
@@ -137,7 +137,7 @@
 "bipe_public_profile_off" = "Desligado";
 "bipe_public_profile_toggle" = "Mostrar meu perfil público";
 "bipe_public_profile_footer" = "Quem abre o seu link vê o nome, a foto e a bio que você colocar aqui. Ninguém acha seu perfil por busca. Dá para desligar quando quiser.";
-"bipe_public_profile_needs_handle" = "Escolha um nome de usuário antes. O link do perfil usa ele.";
+"bipe_public_profile_needs_handle" = "Escolha um nome de usuário antes. O link do perfil usa o seu @.";
 "bipe_public_profile_name" = "Nome";
 "bipe_public_profile_bio" = "Bio";
 "bipe_public_profile_bio_placeholder" = "Conte um pouco sobre você";
@@ -194,14 +194,14 @@
 "bipe_sticker_save_failed" = "O sticker não foi salvo. Tente de novo.";
 "bipe_stickers_from_photo" = "Criar de uma foto";
 "bipe_contacts_title" = "Contatos no Bipe";
-"bipe_contacts_intro" = "Veja quem dos seus contatos já está no Bipe. Os números só são comparados no servidor e não ficam guardados.";
+"bipe_contacts_intro" = "Veja quem dos seus contatos já está no Bipe. O servidor só compara os números e não guarda nenhum.";
 "bipe_contacts_allow" = "Permitir acesso aos contatos";
 "bipe_contacts_denied" = "O Bipe não tem acesso aos seus contatos. Você pode liberar nos Ajustes do iPhone.";
 "bipe_contacts_open_settings" = "Abrir Ajustes";
 "bipe_contacts_none" = "Nenhum contato seu está no Bipe ainda.";
 "bipe_contacts_invite" = "Convidar quem não está";
 "bipe_discovery_toggle" = "Quem tem meu número pode me encontrar";
-"bipe_discovery_footer" = "Ninguém vê o seu número. Só quem já tem ele salvo consegue te achar.";
+"bipe_discovery_footer" = "Ninguém vê o seu número. Só quem já salvou seu número consegue te achar.";
 "bipe_phone_not_linked" = "Seu número ainda não está vinculado, então ninguém te encontra por ele por enquanto.";
 "bipe_phone_linked" = "Seu número está vinculado.";
 "bipe_tab_chats" = "Conversas";
@@ -264,7 +264,7 @@
 "bipe_recovery_email_field" = "Seu e-mail de recuperação";
 "bipe_recovery_email_sent" = "Se esse e-mail estiver numa conta do Bipe, o link chega em alguns minutos. Abra o link neste celular.";
 "bipe_recovery_guardians" = "Com meus guardiões";
-"bipe_recovery_guardians_body" = "Um guardião aprova no celular dele. Se você tem dois ou mais, dois precisam aprovar. Depois vem a senha e uma espera de %1$@ horas.";
+"bipe_recovery_guardians_body" = "Um guardião aprova pelo próprio celular. Se você tem dois ou mais, dois precisam aprovar. Depois vem a senha e uma espera de %1$@ horas.";
 "bipe_recovery_cpf" = "Com meu CPF";
 "bipe_recovery_cpf_body" = "Verifique o CPF de novo. Depois vem a senha e uma espera de %1$@ horas.";
 "bipe_recovery_new_pin_title" = "Crie uma senha nova";

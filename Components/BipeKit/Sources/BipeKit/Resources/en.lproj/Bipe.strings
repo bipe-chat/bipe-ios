@@ -74,11 +74,11 @@
 "bipe_messaging_contacts" = "Contacts only";
 "bipe_messaging_contacts_body" = "People in a group or chat with you, people you invited and whoever invited you.";
 "bipe_error_invite_invalid" = "This invite is not valid or was already used.";
-"bipe_error_email_taken" = "An account with this email already exists. Sign in with it.";
+"bipe_error_email_taken" = "This email is already on another Bipe account. Use a different email.";
 "bipe_error_password_weak" = "This password is too weak. Pick a longer or less obvious one.";
 "bipe_error_handle_cooldown" = "You changed your username recently. Try again later.";
 "bipe_error_rate_limited" = "Too many tries. Wait a bit and try again.";
-"bipe_error_unauthorized" = "Your session expired. Sign out and sign in again.";
+"bipe_error_unauthorized" = "Your account left this device. Get back into your account to continue.";
 "bipe_error_network" = "Cannot reach Bipe. Check your connection and try again.";
 "bipe_error_generic" = "Something went wrong. Try again.";
 "bipe_error_attestation_invalid" = "We couldn't confirm this is the official Bipe app. Update the app and try again.";
@@ -137,7 +137,7 @@
 "bipe_public_profile_off" = "Off";
 "bipe_public_profile_toggle" = "Show my public profile";
 "bipe_public_profile_footer" = "Anyone who opens your link sees the name, photo and bio you put here. Nobody can find your profile by search. You can turn it off any time.";
-"bipe_public_profile_needs_handle" = "Choose a username first. Your profile link uses it.";
+"bipe_public_profile_needs_handle" = "Choose a username first. Your profile link uses your @.";
 "bipe_public_profile_name" = "Name";
 "bipe_public_profile_bio" = "Bio";
 "bipe_public_profile_bio_placeholder" = "Say a little about yourself";
@@ -155,7 +155,7 @@
 "bipe_trust_step_email" = "Email confirmed";
 "bipe_trust_step_email_body" = "Open a link we send to your email.";
 "bipe_trust_step_pix" = "Pix";
-"bipe_trust_step_pix_body" = "A R$0.01 Pix from your bank account verifies your name.";
+"bipe_trust_step_pix_body" = "A R$ 0.01 Pix from your bank account verifies your name.";
 "bipe_trust_step_govbr" = "gov.br";
 "bipe_trust_step_govbr_body" = "A signature with your gov.br account verifies your name.";
 "bipe_trust_coming_soon" = "Coming soon";
@@ -194,7 +194,7 @@
 "bipe_sticker_save_failed" = "The sticker was not saved. Try again.";
 "bipe_stickers_from_photo" = "Make from a photo";
 "bipe_contacts_title" = "Contacts on Bipe";
-"bipe_contacts_intro" = "See which of your contacts are already on Bipe. Numbers are only compared on the server and are not stored.";
+"bipe_contacts_intro" = "See which of your contacts are already on Bipe. The server only compares the numbers and stores none of them.";
 "bipe_contacts_allow" = "Allow access to contacts";
 "bipe_contacts_denied" = "Bipe has no access to your contacts. You can allow it in iPhone Settings.";
 "bipe_contacts_open_settings" = "Open Settings";
