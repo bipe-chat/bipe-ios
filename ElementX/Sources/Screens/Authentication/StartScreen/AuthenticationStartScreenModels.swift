@@ -35,8 +35,13 @@ struct AuthenticationStartScreenViewState: BindableState {
     
     var bindings = AuthenticationStartScreenViewStateBindings()
     
+    /// Bipe: "Get back into your account" instead of "Sign in to …".
+    var bipeLoginButtonTitle: String?
+    
     var loginButtonTitle: String {
-        if let serverNameOrBaseURL {
+        if let bipeLoginButtonTitle {
+            bipeLoginButtonTitle
+        } else if let serverNameOrBaseURL {
             L10n.screenOnboardingSignInTo(serverNameOrBaseURL)
         } else if showQRCodeLoginButton {
             L10n.screenOnboardingSignInManually

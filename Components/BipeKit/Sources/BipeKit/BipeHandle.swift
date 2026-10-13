@@ -53,8 +53,6 @@ public nonisolated enum BipeHandle {
 
 /// Client-side checks for the sign-up form. Limits come from the API contract (`SignupRequest`).
 public nonisolated enum BipeSignupRules {
-    public static let passwordMinLength = 8
-    public static let passwordMaxLength = 256
     public static let inviteCodeMaxLength = 64
     public static let emailMaxLength = 254
     public static let displayNameMaxLength = 100
@@ -63,10 +61,6 @@ public nonisolated enum BipeSignupRules {
     public static func isPlausibleEmail(_ email: String) -> Bool {
         guard email.count <= emailMaxLength else { return false }
         return email.range(of: #"^[^@\s]+@[^@\s]+\.[^@\s]+$"#, options: .regularExpression) != nil
-    }
-
-    public static func isValidPassword(_ password: String) -> Bool {
-        (passwordMinLength...passwordMaxLength).contains(password.count)
     }
 }
 

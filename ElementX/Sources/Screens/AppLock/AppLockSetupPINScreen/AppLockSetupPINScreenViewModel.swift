@@ -25,7 +25,11 @@ class AppLockSetupPINScreenViewModel: AppLockSetupPINScreenViewModelType, AppLoc
     init(initialMode: AppLockSetupPINScreenMode, isMandatory: Bool, appLockService: AppLockServiceProtocol) {
         self.appLockService = appLockService
         
-        super.init(initialViewState: AppLockSetupPINScreenViewState(mode: initialMode, isMandatory: isMandatory, bindings: .init(pinCode: "")))
+        super.init(initialViewState: AppLockSetupPINScreenViewState(mode: initialMode,
+                                                                    isMandatory: isMandatory,
+                                                                    storedPINCodeLength: appLockService.pinCodeLength,
+                                                                    newPINCodeLength: appLockService.newPINCodeLength,
+                                                                    bindings: .init(pinCode: "")))
         
         appLockService.numberOfPINAttempts
             .weakAssign(to: \.state.numberOfUnlockAttempts, on: self)
@@ -36,8 +40,8 @@ class AppLockSetupPINScreenViewModel: AppLockSetupPINScreenViewModelType, AppLoc
             .removeDuplicates()
             .debounce(for: 0.1, scheduler: DispatchQueue.main) // Show the last digit for long enough to be read.
             .sink { [weak self] pinCode in
-                guard pinCode.count == 4 else { return }
-                self?.submit()
+                guard let self, pinCode.count == state.pinCodeLength else { return }
+                submit()
             }
             .store(in: &cancellables)
     }

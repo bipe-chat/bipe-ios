@@ -42,6 +42,7 @@ enum SettingsScreenViewModelAction {
     case bipeInvites
     case bipeContacts
     case bipeSelfChat
+    case bipeAccount
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -158,6 +159,7 @@ enum SettingsScreenViewAction {
     case bipeInvites
     case bipeContacts
     case bipeSelfChat
+    case bipeAccount
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

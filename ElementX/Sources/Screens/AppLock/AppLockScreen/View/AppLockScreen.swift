@@ -38,7 +38,7 @@ struct AppLockScreen: View {
                     .accessibilityLabel(L10n.a11yPinField)
                     .accessibilityValue(L10n.a11yDigitsEntered(context.viewState.numberOfDigitsEntered))
                 
-                AppLockScreenPINKeypad(pinCode: $context.pinCode)
+                AppLockScreenPINKeypad(pinCode: $context.pinCode, maxLength: context.viewState.pinCodeLength)
             }
         } bottomContent: {
             Button(L10n.screenAppLockForgotPin) {
@@ -90,21 +90,15 @@ struct AppLockScreen: View {
     
     /// The row of dots showing how many digits have been entered.
     var pinInputField: some View {
-        HStack(spacing: 24) {
+        // Bipe: one dot per digit of the stored PIN (8 for the account PIN).
+        HStack(spacing: context.viewState.pinCodeLength > 4 ? 14 : 24) {
             // The size of each dot within the PIN input field.
             let pinDotSize: CGFloat = 14
-            Circle()
-                .fill(context.viewState.numberOfDigitsEntered > 0 ? .compound.iconPrimary : .compound.bgSubtlePrimary)
-                .scaledFrame(size: pinDotSize)
-            Circle()
-                .fill(context.viewState.numberOfDigitsEntered > 1 ? .compound.iconPrimary : .compound.bgSubtlePrimary)
-                .scaledFrame(size: pinDotSize)
-            Circle()
-                .fill(context.viewState.numberOfDigitsEntered > 2 ? .compound.iconPrimary : .compound.bgSubtlePrimary)
-                .scaledFrame(size: pinDotSize)
-            Circle()
-                .fill(context.viewState.numberOfDigitsEntered > 3 ? .compound.iconPrimary : .compound.bgSubtlePrimary)
-                .scaledFrame(size: pinDotSize)
+            ForEach(0..<context.viewState.pinCodeLength, id: \.self) { index in
+                Circle()
+                    .fill(context.viewState.numberOfDigitsEntered > index ? .compound.iconPrimary : .compound.bgSubtlePrimary)
+                    .scaledFrame(size: pinDotSize)
+            }
         }
     }
     

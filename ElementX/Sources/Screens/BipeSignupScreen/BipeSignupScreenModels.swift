@@ -9,27 +9,26 @@ import BipeKit
 import SwiftUI
 
 enum BipeSignupScreenViewModelAction: CustomStringConvertible {
-    /// The account exists. Continue with MAS login, pre-filled with the email.
-    case continueWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
+    /// The account exists and this device signed in with its hidden password.
+    case signedIn(UserSessionProtocol)
     /// The account came from a personal invite. The app opens the inviter's profile after the first sign-in.
     case createdWithInvite(inviterUserID: String)
 
     var description: String {
         switch self {
-        case .continueWithOAuth: "continueWithOAuth"
+        case .signedIn: "signedIn"
         case .createdWithInvite: "createdWithInvite"
         }
     }
 }
 
 struct BipeSignupScreenViewState: BindableState {
-    var window: UIWindow?
     var handleStatus = BipeHandleStatus.empty
-    /// The API created the account. Submitting again only restarts the login.
+    /// The API created the account. Submitting again only retries the sign-in.
     var isAccountCreated = false
 
     var emailError: String?
-    var passwordError: String?
+    var pinError: String?
     var handleError: String?
     var inviteCodeError: String?
     /// The inviter's handle, from the invite preview.
@@ -37,8 +36,21 @@ struct BipeSignupScreenViewState: BindableState {
 
     var bindings = BipeSignupScreenViewStateBindings()
 
-    var passwordMismatch: Bool {
-        !bindings.passwordConfirmation.isEmpty && bindings.password != bindings.passwordConfirmation
+    var trimmedEmail: String {
+        bindings.email.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// The PIN rule's message once all digits are typed.
+    var pinProblem: BipePinProblem? {
+        bindings.pin.count < BipeRegistries.pinLength ? nil : BipePIN.problem(for: bindings.pin)
+    }
+
+    var pinFooter: String {
+        pinError ?? pinProblem?.localizedMessage ?? BipeStrings.pinCreateBody(String(BipeRegistries.pinLength))
+    }
+
+    var pinMismatch: Bool {
+        bindings.pinConfirmation.count == BipeRegistries.pinLength && bindings.pin != bindings.pinConfirmation
     }
 
     var handleFooter: String {
@@ -67,9 +79,9 @@ struct BipeSignupScreenViewState: BindableState {
         let displayName = bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         return !displayName.isEmpty
             && displayName.count <= BipeSignupRules.displayNameMaxLength
-            && BipeSignupRules.isPlausibleEmail(bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
-            && BipeSignupRules.isValidPassword(bindings.password)
-            && bindings.password == bindings.passwordConfirmation
+            && (trimmedEmail.isEmpty || BipeSignupRules.isPlausibleEmail(trimmedEmail))
+            && BipePIN.problem(for: bindings.pin) == nil
+            && bindings.pin == bindings.pinConfirmation
             && !handleStatus.isBlocking
             && isInviteCodeAcceptable
             && inviteCodeError == nil
@@ -77,11 +89,11 @@ struct BipeSignupScreenViewState: BindableState {
 }
 
 struct BipeSignupScreenViewStateBindings {
-    var email = ""
-    var password = ""
-    var passwordConfirmation = ""
-    var handle = ""
     var displayName = ""
+    var handle = ""
+    var email = ""
+    var pin = ""
+    var pinConfirmation = ""
     var inviteCode = ""
 
     var alertInfo: AlertInfo<BipeSignupScreenAlertType>?
@@ -92,7 +104,6 @@ enum BipeSignupScreenAlertType: Hashable {
 }
 
 enum BipeSignupScreenViewAction {
-    case updateWindow(UIWindow)
     case handleChanged
     case inviteCodeChanged
     case clearFieldErrors

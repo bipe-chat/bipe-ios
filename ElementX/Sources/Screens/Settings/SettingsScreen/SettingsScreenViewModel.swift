@@ -168,6 +168,8 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             actionsSubject.send(.bipeContacts)
         case .bipeSelfChat:
             actionsSubject.send(.bipeSelfChat)
+        case .bipeAccount:
+            actionsSubject.send(.bipeAccount)
         }
     }
     

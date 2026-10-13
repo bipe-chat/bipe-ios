@@ -194,6 +194,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             Task { await openBipeHandle(handle, animated: animated) }
         case .bipeInvite:
             flowParameters.userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.inviteAlreadySignedIn))
+        case .bipeRecoveryLink:
+            break // A signed-in device has nothing to recover.
         case .search:
             // Switch to the dedicated search tab when it's available (iOS 26 + flag), otherwise ignore.
             if searchTabNavigationStackCoordinator != nil {

@@ -50,6 +50,7 @@ enum SettingsScreenCoordinatorAction {
     case bipeInvites
     case bipeContacts
     case bipeSelfChat
+    case bipeAccount
 }
 
 final class SettingsScreenCoordinator: CoordinatorProtocol {
@@ -133,6 +134,8 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.bipeContacts)
                 case .bipeSelfChat:
                     actionsSubject.send(.bipeSelfChat)
+                case .bipeAccount:
+                    actionsSubject.send(.bipeAccount)
                 }
             }
             .store(in: &cancellables)

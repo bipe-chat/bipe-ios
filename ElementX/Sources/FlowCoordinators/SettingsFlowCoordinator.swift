@@ -156,6 +156,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     presentBipeContactsScreen()
                 case .bipeSelfChat:
                     actionsSubject.send(.openSelfChat)
+                case .bipeAccount:
+                    presentBipeAccountScreen()
                 }
             }
             .store(in: &cancellables)
@@ -193,6 +195,14 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 }
             }
             .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presentBipeAccountScreen() {
+        let coordinator = BipeAccountScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
+                                                                         clientProxy: flowParameters.userSession.clientProxy,
+                                                                         appLockService: appLockService,
+                                                                         userIndicatorController: flowParameters.userIndicatorController))
         navigationStackCoordinator.push(coordinator)
     }
     

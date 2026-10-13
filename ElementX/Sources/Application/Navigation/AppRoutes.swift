@@ -61,12 +61,15 @@ enum AppRoute: Hashable {
     case bipeHandle(String)
     /// Bipe: a `bipe.chat/convite/<code>` invite link (or the old `proseio.com.br`). Opens sign-up with the code, or tells a signed-in user it is not for them.
     case bipeInvite(code: BipeInviteCode)
+    /// Bipe: a `bipe.chat/recuperar/#<token>` link from the recovery email (ADR 0057). Opens the recovery screen when signed out.
+    case bipeRecoveryLink(BipeRecoveryLinkToken)
     
     /// Whether or not the route should be handled by the authentication flow.
     var isAuthenticationRoute: Bool {
         switch self {
         case .accountProvisioningLink: true
         case .oAuthCallback: true
+        case .bipeRecoveryLink: true
         default: false
         }
     }
@@ -91,6 +94,7 @@ struct AppRouteURLParser {
             AppGroupURLParser(),
             BipeHandleURLParser(),
             BipeInviteURLParser(),
+            BipeRecoveryURLParser(),
             MatrixPermalinkParser(),
             ElementWebURLParser(domains: appSettings.elementWebHosts),
             AccountProvisioningURLParser(domain: appSettings.accountProvisioningHost),
@@ -215,6 +219,13 @@ private struct AccountProvisioningURLParser: URLParser {
 private struct BipeHandleURLParser: URLParser {
     func route(from url: URL) -> AppRoute? {
         BipeProfileLink.handle(from: url).map(AppRoute.bipeHandle)
+    }
+}
+
+/// Bipe: the parser for `https://bipe.chat/recuperar/#<token>` recovery links.
+private struct BipeRecoveryURLParser: URLParser {
+    func route(from url: URL) -> AppRoute? {
+        BipeRecoveryLinkToken(url: url).map(AppRoute.bipeRecoveryLink)
     }
 }
 

@@ -11,6 +11,8 @@ import SwiftUI
 /// The custom keypad shown on the App Lock screen when biometrics are disabled.
 struct AppLockScreenPINKeypad: View {
     @Binding var pinCode: String
+    /// Bipe: 8 for the account PIN, 4 for an older app lock PIN.
+    var maxLength = 4
     @FocusState private var isFocused
     
     var body: some View {
@@ -65,7 +67,7 @@ struct AppLockScreenPINKeypad: View {
     }
     
     func press(_ digit: Int) {
-        guard pinCode.count < 4 else { return }
+        guard pinCode.count < maxLength else { return }
         UIDevice.current.playInputClick()
         pinCode.append("\(digit)")
     }

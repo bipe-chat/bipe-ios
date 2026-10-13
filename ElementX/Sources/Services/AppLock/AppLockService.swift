@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import LocalAuthentication
 
@@ -59,6 +60,14 @@ class AppLockService: AppLockServiceProtocol {
         return state == context.evaluatedPolicyDomainState
     }
     
+    var pinCodeLength: Int {
+        keychainController.pinCode()?.count ?? newPINCodeLength
+    }
+    
+    var newPINCodeLength: Int {
+        appSettings.appLockPINCodeLength
+    }
+    
     var numberOfPINAttempts: AnyPublisher<Int, Never> {
         appSettings.appLockNumberOfPINAttemptsPublisher
     }
@@ -87,8 +96,9 @@ class AppLockService: AppLockServiceProtocol {
     }
     
     func validate(_ pinCode: String) -> Result<Void, AppLockServiceError> {
-        guard pinCode.count == 4, pinCode.allSatisfy(\.isNumber) else { return .failure(.invalidPIN) }
+        guard pinCode.count == newPINCodeLength, pinCode.allSatisfy(\.isNumber) else { return .failure(.invalidPIN) }
         guard !appSettings.appLockPINCodeBlockList.contains(pinCode) else { return .failure(.weakPIN) }
+        guard BipePIN.problem(for: pinCode) == nil else { return .failure(.weakPIN) } // Bipe: shared PIN rule (ADR 0057)
         return .success(())
     }
     

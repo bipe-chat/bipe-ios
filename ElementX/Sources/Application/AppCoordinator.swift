@@ -7,6 +7,7 @@
 //
 
 import AnalyticsEvents
+import BipeKit
 import BackgroundTasks
 import Combine
 import Intents
@@ -47,6 +48,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     private var appLockSetupFlowCoordinator: AppLockSetupFlowCoordinator?
     private var userSessionFlowCoordinator: UserSessionFlowCoordinator?
     private var softLogoutCoordinator: SoftLogoutScreenCoordinator?
+    /// Bipe: recovery alerts for this device (ADR 0057) and the handle change history (ADR 0066) of the active session.
+    private var bipeRecoveryAlerts: BipeRecoveryAlerts?
+    private var bipeHandleChanges: BipeHandleChangeStore?
     private var appDelegateObserver: AnyCancellable?
     private var userSessionObserver: AnyCancellable?
     /// Becomes `true` once the app is no longer waiting on a session restore, whatever the outcome.
@@ -266,6 +270,15 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 authenticationFlowCoordinator.handleAppRoute(appRoute, animated: animated)
                 handled = true
             }
+        case .bipeRecoveryLink:
+            // Signed out only. A signed-in device has nothing to recover.
+            if let authenticationFlowCoordinator {
+                authenticationFlowCoordinator.handleAppRoute(appRoute, animated: animated)
+                handled = true
+            } else if userSessionFlowCoordinator != nil {
+                MXLog.info("Ignoring a Bipe recovery link: already signed in")
+                handled = true
+            }
         case .bipeInvite:
             // Signed out: sign-up with the code. Signed in: the session flow says the invite is not for this user.
             if let authenticationFlowCoordinator {
@@ -292,7 +305,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         if let route = appRouteURLParser.route(from: url) {
             switch route {
-            case .accountProvisioningLink, .bipeHandle, .bipeInvite:
+            case .accountProvisioningLink, .bipeHandle, .bipeInvite, .bipeRecoveryLink:
                 handleAppRoute(route,
                                windowType: windowType)
             case .oAuthCallback(let url):
@@ -702,7 +715,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                         appMediator: appMediator,
                                                         appSettings: appSettings,
                                                         appHooks: appHooks,
-                                                        userIndicatorController: userIndicatorController)
+                                                        userIndicatorController: userIndicatorController,
+                                                        appLockService: appLockFlowCoordinator.appLockService)
         coordinator.delegate = self
         
         authenticationFlowCoordinator = coordinator
@@ -757,9 +771,45 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         Task { await BipeQuietGroups(clientProxy: userSession.clientProxy).run() } // Bipe: bipe#97
         
+        if userSession.bipeHandleResolver != nil {
+            bipeRecoveryAlerts = BipeRecoveryAlerts(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
+                                                    clientProxy: userSession.clientProxy,
+                                                    navigationRootCoordinator: navigationRootCoordinator,
+                                                    userIndicatorController: userIndicatorController)
+            Task { await bipeRecoveryAlerts?.check() }
+            Task { await refreshBipeHandleChangesAfterSync(clientProxy: userSession.clientProxy) }
+        }
+        
         if let storedInlineReply {
             await processInlineReply(roomID: storedInlineReply.roomID, replyText: storedInlineReply.message)
         }
+    }
+    
+    /// Bipe: one handle change store per session (ADR 0066). Only accounts on the Bipe server have handles.
+    private func makeBipeHandleChanges(for userSession: UserSessionProtocol) -> BipeHandleChangeStore? {
+        guard userSession.bipeHandleResolver != nil else {
+            bipeHandleChanges = nil
+            return nil
+        }
+        let store = BipeHandleChangeStore(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
+                                          userID: userSession.clientProxy.userID,
+                                          cacheDirectory: .cachesDirectory) { [weak clientProxy = userSession.clientProxy] in
+            clientProxy?.accessToken
+        }
+        bipeHandleChanges = store
+        return store
+    }
+    
+    /// Bipe: after the room list loads, fetches the history of the people already cached and of each room's heroes.
+    /// Opening a room fetches its full member list (`TimelineController`).
+    private func refreshBipeHandleChangesAfterSync(clientProxy: ClientProxyProtocol) async {
+        let provider = clientProxy.staticRoomSummaryProvider
+        for await state in provider.statePublisher.values where state.isLoaded {
+            break
+        }
+        guard let store = bipeHandleChanges else { return }
+        let heroes = provider.roomListPublisher.value.filter(\.isJoined).flatMap { $0.heroes.map(\.id) }
+        await store.refresh(userIDs: store.knownUserIDs.union(heroes))
     }
     
     private func startAuthenticationSoftLogout() {
@@ -829,7 +879,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                   availableSessionsPublisher: userSessionManager.sessionsPublisher.map { $0.map(UserSessionDetails.init) },
                                                   bugReportService: bugReportService,
                                                   elementCallService: elementCallService,
-                                                  timelineControllerFactory: TimelineControllerFactory(userSettings: userSession.userSettings),
+                                                  timelineControllerFactory: TimelineControllerFactory(userSettings: userSession.userSettings,
+                                                                                                       bipeHandleChanges: makeBipeHandleChanges(for: userSession)),
                                                   emojiProvider: EmojiProvider(userSettings: userSession.userSettings),
                                                   linkMetadataProvider: LinkMetadataProvider(),
                                                   appMediator: appMediator,
@@ -850,10 +901,12 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 
                 switch action {
                 case .logout:
+                    BipeCredentialStore.bipeApp.deletePassword() // Bipe: the next sign-in needs the token and the PIN.
                     stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: false))
                 case .clearCache:
                     stateMachine.processEvent(.clearCache)
                 case .forceLogout:
+                    BipeCredentialStore.bipeApp.deletePassword()
                     stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: true))
                 }
             }
@@ -923,6 +976,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         userSessionObserver?.cancel()
         
         userSessionFlowCoordinator = nil
+        bipeRecoveryAlerts = nil
+        bipeHandleChanges = nil
         
         notificationManager.setUserSession(nil)
     }
@@ -1003,6 +1058,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             case .unlockApp:
                 windowManager.switchToMain()
             case .forceLogout:
+                BipeCredentialStore.bipeApp.deletePassword() // Bipe: a forgotten app lock PIN must not sign in again silently.
                 stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: true))
             }
         }
@@ -1290,6 +1346,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     @objc
     private func applicationDidBecomeActive() {
         MXLog.info("Application did become active")
+        Task { await bipeRecoveryAlerts?.check() } // Bipe: waiting recoveries of this account (ADR 0057)
     }
     
     private func endActiveBackgroundTask() {

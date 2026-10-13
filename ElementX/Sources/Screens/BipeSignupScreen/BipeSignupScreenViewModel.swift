@@ -10,15 +10,18 @@ import SwiftUI
 
 typealias BipeSignupScreenViewModelType = StateStoreViewModelV2<BipeSignupScreenViewState, BipeSignupScreenViewAction>
 
+/// Device-first sign-up (ADR 0057, ADR 0059): name, optional handle and email, invite, App Attest and an 8-digit PIN.
+/// The API returns a hidden password and a recovery token once. The app keeps both in the keychain and signs in
+/// with the password (`m.login.password`), so no browser opens.
 class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreenViewModelProtocol {
     private let apiClient: BipeAPIClient
-    private let authenticationService: AuthenticationServiceProtocol
-    private let serverNameOrBaseURL: String
+    private let signIn: BipeAccountSignIn
+    private let appLockService: AppLockServiceProtocol?
     private let userIndicatorController: UserIndicatorControllerProtocol
 
     private let handleChecker: BipeHandleAvailabilityChecker
-    /// The email the account was created with. The login hint uses it, even if the field changes later.
-    private var createdEmail: String?
+    /// The new account's PIN, kept in memory until the sign-in succeeds. Then it becomes the app lock PIN.
+    private var pendingAppLockPIN: String?
 
     private let actionsSubject: PassthroughSubject<BipeSignupScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeSignupScreenViewModelAction, Never> {
@@ -27,12 +30,12 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
 
     init(inviteCode: BipeInviteCode? = nil,
          apiClient: BipeAPIClient,
-         authenticationService: AuthenticationServiceProtocol,
-         serverNameOrBaseURL: String,
+         signIn: BipeAccountSignIn,
+         appLockService: AppLockServiceProtocol?,
          userIndicatorController: UserIndicatorControllerProtocol) {
         self.apiClient = apiClient
-        self.authenticationService = authenticationService
-        self.serverNameOrBaseURL = serverNameOrBaseURL
+        self.signIn = signIn
+        self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
         handleChecker = BipeHandleAvailabilityChecker(apiClient: apiClient)
 
@@ -47,9 +50,6 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
 
     override func process(viewAction: BipeSignupScreenViewAction) {
         switch viewAction {
-        case .updateWindow(let window):
-            guard state.window != window else { return }
-            state.window = window
         case .handleChanged:
             state.handleError = nil
             handleChecker.check(state.bindings.handle) { [weak self] status in
@@ -65,7 +65,11 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             }
         case .clearFieldErrors:
             state.emailError = nil
-            state.passwordError = nil
+            state.pinError = nil
+            let pin = BipePIN.sanitize(state.bindings.pin)
+            if pin != state.bindings.pin { state.bindings.pin = pin }
+            let confirmation = BipePIN.sanitize(state.bindings.pinConfirmation)
+            if confirmation != state.bindings.pinConfirmation { state.bindings.pinConfirmation = confirmation }
         case .submit:
             Task { await submit() }
         }
@@ -76,20 +80,26 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     private func submit() async {
         guard state.canSubmit else { return }
 
-        if !state.isAccountCreated {
-            guard await createAccount() else { return }
-        }
-
-        await startLogin()
-    }
-
-    private func createAccount() async -> Bool {
-        let email = state.bindings.email.trimmingCharacters(in: .whitespacesAndNewlines)
-        let handle = BipeHandle.sanitize(state.bindings.handle)
-        let displayName = state.bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-
         startLoading()
         defer { stopLoading() }
+
+        if !state.isAccountCreated {
+            guard let credentials = await createAccount() else { return }
+            pendingAppLockPIN = state.bindings.pin
+            state.bindings.pin = ""
+            state.bindings.pinConfirmation = ""
+            await finishSignIn(signIn.signIn(with: credentials))
+        } else if let result = await signIn.signInWithStoredPassword() {
+            await finishSignIn(result)
+        } else {
+            state.bindings.alertInfo = AlertInfo(id: .error)
+        }
+    }
+
+    private func createAccount() async -> BipeCredentials? {
+        let handle = BipeHandle.sanitize(state.bindings.handle)
+        let displayName = state.bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let email = state.trimmedEmail
 
         do {
             // Unsupported (simulator): sign up without it and let the server decide. A failure on a supported device stops sign-up.
@@ -98,26 +108,41 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                 attestation = try await BipeAppAttest.attestation(api: apiClient)
             }
             let request = BipeSignupRequest(inviteCode: state.inviteCode?.value,
-                                               email: email,
-                                               password: state.bindings.password,
-                                               handle: handle.isEmpty ? nil : handle,
-                                               displayName: displayName.isEmpty ? nil : displayName,
-                                               attestation: attestation)
+                                            email: email.isEmpty ? nil : email,
+                                            pin: state.bindings.pin,
+                                            handle: handle.isEmpty ? nil : handle,
+                                            displayName: displayName.isEmpty ? nil : displayName,
+                                            attestation: attestation)
             let response = try await apiClient.signup(request)
             MXLog.info("Bipe sign-up created \(response.userId)")
-            createdEmail = email
+            guard let credentials = response.credentials else {
+                MXLog.error("Bipe sign-up returned no device-first credentials")
+                state.bindings.alertInfo = AlertInfo(id: .error)
+                return nil
+            }
             state.isAccountCreated = true
             if let inviterUserID = response.inviterUserId {
                 actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
             }
-            state.bindings.password = ""
-            state.bindings.passwordConfirmation = ""
-            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.signupSuccess, icon: \.checkCircle))
-            return true
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.signupDeviceSuccess, icon: \.checkCircle))
+            return credentials
         } catch {
             MXLog.error("Bipe sign-up failed: \(error)")
             show(error)
-            return false
+            return nil
+        }
+    }
+
+    private func finishSignIn(_ result: Result<UserSessionProtocol, AuthenticationServiceError>) async {
+        switch result {
+        case .success(let userSession):
+            if let pin = pendingAppLockPIN.take() {
+                appLockService?.bipeUseAccountPIN(pin)
+            }
+            actionsSubject.send(.signedIn(userSession))
+        case .failure(let error):
+            MXLog.error("Bipe sign-in after sign-up failed: \(error)")
+            state.bindings.alertInfo = AlertInfo(id: .error)
         }
     }
 
@@ -132,30 +157,6 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         }
     }
 
-    private func startLogin() async {
-        guard let window = state.window else {
-            MXLog.error("No window available for OAuth presentation")
-            state.bindings.alertInfo = AlertInfo(id: .error)
-            return
-        }
-
-        startLoading()
-        defer { stopLoading() }
-
-        guard case .success = await authenticationService.configure(for: serverNameOrBaseURL, flow: .login) else {
-            state.bindings.alertInfo = AlertInfo(id: .error)
-            return
-        }
-
-        // MAS (v1.26) pre-fills its login form when login_hint is a plain email address.
-        switch await authenticationService.urlForOAuthLogin(loginHint: createdEmail) {
-        case .success(let oAuthData):
-            actionsSubject.send(.continueWithOAuth(data: oAuthData, window: window))
-        case .failure:
-            state.bindings.alertInfo = AlertInfo(id: .error)
-        }
-    }
-
     private func show(_ error: BipeAPIError) {
         let message = error.localizedMessage
 
@@ -164,8 +165,8 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             case .emailTaken:
                 state.emailError = message
                 return
-            case .passwordWeak:
-                state.passwordError = message
+            case .pinWeak:
+                state.pinError = message
                 return
             case .handleTaken, .handleInvalid:
                 state.handleError = message

@@ -78,7 +78,7 @@ Entitlements removed from the fork (they block provisioning outside Element's te
 - Element Classic app group and keychain group in the app entitlements (`group.im.vector`, owned by Element's team).
 
 Element leftovers cleaned up (11 October 2026):
-- **Associated domains:** only `applinks:bipe.chat`. Link parsers also accept `proseio.com.br` links, which redirect to `bipe.chat`. Element domains, `applinks:matrix.to` and `webcredentials:*.element.io` are gone. matrix.to links inside messages still open in the app: that is URL parsing (`AppRoutes.swift`), not universal links.
+- **Associated domains:** `applinks:bipe.chat` and `webcredentials:bipe.chat` (since bipe#153). Link parsers also accept `proseio.com.br` links, which redirect to `bipe.chat`. Element domains, `applinks:matrix.to` and `webcredentials:*.element.io` are gone. matrix.to links inside messages still open in the app: that is URL parsing (`AppRoutes.swift`), not universal links.
 - **Background tasks:** `BGTaskSchedulerPermittedIdentifiers` are `$(BASE_BUNDLE_IDENTIFIER).background.refresh` and `.background.search-backfill`. `AppSettings` derives the same IDs from `InfoPlistReader.main.baseBundleIdentifier`.
 - **Help links:** `encryptionURL`, `deviceVerificationURL`, `chatBackupDetailsURL`, `identityPinningViolationDetailsURL` and `historySharingDetailsURL` are `nil` in `AppSettings`, so their "Learn more" links are hidden (`AttributedString.bipeReplaceLink` in BipeKit). Set a URL when Bipe has a help page. Terms, privacy and copyright point at `bipe.chat`.
 - **Matrix IDs:** the identity-reset warning in member details and the soft-logout notice show the handle when the resolver knows it.
@@ -108,6 +108,26 @@ Not done (needs the domain, Apple team or brand):
 - **Animated WebP:** `LoadableImage` loads `image/webp` as data, like GIF. More than one frame plays in `BipeAnimatedImage` (ImageIO `CGAnimateImageDataWithBlock`); Kingfisher animates GIF only.
 - **Make from a photo:** the picker's "+" menu → PhotosPicker → `StickerMaker` (BipeKit) cuts out the subject with Vision (`VNGenerateForegroundInstanceMaskRequest`), or crops a centred square when there is no subject, fits it on a transparent 512 × 512 canvas and encodes PNG. On the device, nothing leaves it before the upload.
 - **Save a received sticker:** timeline menu action `.saveSticker` → `TimelineInteractionHandler.saveSticker` downloads the image and adds it. `BipeStickerSaver` is the one place that adds stickers to the pack (import, photo, save).
+
+## Device-first accounts (ADR 0057, ADR 0059, bipe#153)
+
+- **Sign-up:** `BipeSignupScreen`: name, optional handle, 8-digit PIN twice, optional recovery email, invite code, App Attest. `POST /v1/signup` without `password`. The API returns the hidden password and a recovery token once. The PIN is checked with `BipePIN.problem(for:)` (BipeKit, cases in `test-vectors/pins.json`).
+- **Keychain:** `BipeCredentialStore` (BipeKit). The hidden password is `AfterFirstUnlockThisDeviceOnly` and never syncs. The recovery token is `kSecAttrSynchronizable` (iCloud Keychain). A pending email recovery (its claim secret) stays on the device. Nothing is shown or logged. ADR 0059 overrides ADR 0057 here: the password does not sync.
+- **Password login without a browser:** `BipeAccountSignIn` calls `AuthenticationService.configure(for:flow:)` and then `login(username:password:…)` with the Matrix ID. That is the SDK's `Client.login`, a plain `m.login.password` to `/_matrix/client/v3/login`. MAS answers it through its compatibility layer (`passwords.enabled: true`). The SDK does not force OAuth for this call; OAuth support only changes what Element's own login screens offer. Element's guard stays: a login that returns a refresh token is signed out again.
+- **App start without a session** (`AuthenticationFlowCoordinator.resumeBipeAccount`): a pending email recovery opens the wait screen; else the password on this device signs in silently; else a synced token opens the PIN prompt (`POST /v1/recovery/token`, new password and token).
+- **Sign-out** deletes the password on this device (`AppCoordinator`, user sign-out and forced sign-out). The token stays, so the next sign-in needs the PIN. An auth error from the server keeps the password.
+- **Recovery screen** (`BipeRecoveryScreen`, start screen button "Voltar pra sua conta"): token and PIN; old phone (QR, the old phone shows the code); recovery email (`POST /v1/recovery/email`); "Entrar manualmente" for beta accounts (MAS OAuth). Link `https://bipe.chat/recuperar/#<token>` → `AppRoute.bipeRecoveryLink` → PIN, or a new PIN after "Esqueci minha senha" → `POST /v1/recovery/email/confirm` → wait screen that polls `/claim` every minute.
+- **App lock:** the account PIN is the app lock PIN (`AppLockServiceProtocol.bipeUseAccountPIN`), with biometric unlock on when the device has it. A new app lock PIN has 8 digits and passes the shared rule. An older 4-digit app lock PIN still unlocks (`pinCodeLength` follows the stored PIN).
+- **Settings → "Trocar senha":** `BipeAccountScreen`. Device owner check (Face ID or passcode), then `PUT /v1/me/pin`. Blocked PIN state from `GET /v1/me/account`. Beta accounts: "Crie sua senha" sets the PIN, then `POST /v1/me/device-first` and stores the returned credentials. Recovery email: add, change, remove.
+- **Old devices:** `BipeRecoveryAlerts` reads `GET /v1/me/account` after sign-in and on every foreground. A waiting recovery shows `bipe_recovery_alert_*` with "Cancelar, não fui eu" (`POST /v1/me/recoveries/{id}/cancel`). A completed token recovery shows once. The device's own token recovery, and recoveries that existed before this device's first check, do not alert.
+- **Password saving:** `webcredentials:bipe.chat` in the associated domains; the AASA lists both app IDs (bipe-infra).
+- Not built: guardian and CPF recovery (no API yet), QR sign-in checks from bipe#152, the fallback prompt after sign-up (the optional email on the form is the only fallback).
+
+## Handle change lines (ADR 0066, bipe#166)
+
+- `BipeHandleChangeStore` (BipeKit): one per session, made in `AppCoordinator.setupUserSession`, cached in `Caches/bipe-handle-changes-<user>.json`. `POST /v1/handle-changes` in chunks of 100. People without a cached change go without `since`; the others share the oldest of their latest cached times.
+- Fetch: on room open, for the joined members (`TimelineController`); after the room list loads, for the cached people plus every joined room's heroes (`AppCoordinator.refreshBipeHandleChangesAfterSync`).
+- Display: `TimelineController.bipeInsertingHandleChanges` adds a local `StateRoomTimelineItem` (virtual ID) at `at` in the room's main timeline. Rules in `BipeHandleChangePlacement`: current members only, inside the loaded range (after the end only on the live timeline), not before a join seen in the loaded items. Text: `bipe_handle_set`, `bipe_handle_changed`, `bipe_handle_removed` with the member's display name in the room.
 
 ## Groups MVP (bipe/docs/groups.md, ADR 0026)
 

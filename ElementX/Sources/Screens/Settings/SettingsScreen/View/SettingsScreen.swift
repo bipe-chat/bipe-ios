@@ -224,6 +224,14 @@ struct SettingsScreen: View {
                         kind: .navigationLink {
                             context.send(viewAction: .bipeContacts)
                         })
+                
+                // Bipe ADR 0057: PIN, recovery email, and the move from a beta password to a PIN.
+                ListRow(label: .default(title: BipeStrings.pinChangeTitle,
+                                        description: BipeStrings.emailTitle,
+                                        icon: \.lock),
+                        kind: .navigationLink {
+                            context.send(viewAction: .bipeAccount)
+                        })
             }
             
             // Bipe: pt-BR / en switch lives in iOS per-app language settings.

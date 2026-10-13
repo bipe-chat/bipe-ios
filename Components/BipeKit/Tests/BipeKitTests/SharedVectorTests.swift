@@ -56,6 +56,16 @@ struct SharedVectorTests {
     }
 
     @Test
+    func pins() throws {
+        let cases = try SharedVectors.array("pins.json", key: "cases")
+        #expect(!cases.isEmpty)
+        for vector in cases {
+            let input = try #require(vector["input"] as? String)
+            #expect(BipePIN.problem(for: input)?.rawValue == vector["problem"] as? String, "pinProblem(\(input))")
+        }
+    }
+
+    @Test
     func badges() throws {
         let file = try SharedVectors.object("badges.json")
         let now = Date(timeIntervalSince1970: try #require(file["now"] as? Double))

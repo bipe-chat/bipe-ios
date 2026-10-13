@@ -67,6 +67,11 @@ protocol AppLockServiceProtocol: AnyObject {
     /// to re-enter their PIN code to re-enable the feature (i.e. to accept a new face or fingerprint).
     var biometricUnlockTrusted: Bool { get }
     
+    /// Bipe: the number of digits of the stored PIN (an older app lock PIN has 4), or of a new PIN when none is stored.
+    var pinCodeLength: Int { get }
+    /// Bipe: the number of digits of a new PIN.
+    var newPINCodeLength: Int { get }
+    
     /// Sets the user's PIN code used to unlock the app.
     func setupPINCode(_ pinCode: String) -> Result<Void, AppLockServiceError>
     /// Validates the supplied PIN code is long enough, only contains digits and isn't a weak choice.
@@ -117,6 +122,8 @@ extension AppLockServiceMock {
         mock.biometryType = biometryType
         mock.biometricUnlockEnabled = biometryType != .none
         mock.unlockWithClosure = { $0 == pinCode }
+        mock.pinCodeLength = pinCode?.count ?? 4
+        mock.newPINCodeLength = 4
         return mock
     }
 }

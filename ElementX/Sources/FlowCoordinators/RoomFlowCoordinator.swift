@@ -206,7 +206,7 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .roomAlias, .childRoomAlias, .eventOnRoomAlias, .childEventOnRoomAlias:
             break // These are converted to a room ID route one level above.
-        case .accountProvisioningLink, .oAuthCallback, .roomList, .userProfile, .call, .settings, .chatBackupSettings, .search, .bipeHandle, .bipeInvite:
+        case .accountProvisioningLink, .oAuthCallback, .roomList, .userProfile, .call, .settings, .chatBackupSettings, .search, .bipeHandle, .bipeInvite, .bipeRecoveryLink:
             break // These routes can't be handled.
         case .transferOwnership(let roomID):
             guard self.roomID == roomID else { fatalError("Navigation route doesn't belong to this room flow.") }

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
 import IntentsUI
@@ -46,14 +47,20 @@ class TimelineController: TimelineControllerProtocol {
     
     let allowedGalleryItemTypes: [TimelineAllowedGalleryItemType]?
     
+    /// Bipe: handle change history for the local timeline lines (ADR 0066). `nil` outside the room's main timeline.
+    private let bipeHandleChanges: BipeHandleChangeStore?
+    private var bipeHandleChangesCancellable: AnyCancellable?
+    
     init(roomProxy: JoinedRoomProxyProtocol,
          timelineProxy: TimelineProxyProtocol,
          initialFocussedEventID: String?,
          timelineItemFactory: RoomTimelineItemFactoryProtocol,
          mediaProvider: MediaProviderProtocol,
          userSettings: UserSettings,
-         allowedGalleryItemTypes: [TimelineAllowedGalleryItemType]? = nil) {
+         allowedGalleryItemTypes: [TimelineAllowedGalleryItemType]? = nil,
+         bipeHandleChanges: BipeHandleChangeStore? = nil) {
         self.allowedGalleryItemTypes = allowedGalleryItemTypes
+        self.bipeHandleChanges = bipeHandleChanges
         self.roomProxy = roomProxy
         liveTimelineItemProvider = timelineProxy.timelineItemProvider
         self.timelineItemFactory = timelineItemFactory
@@ -62,6 +69,8 @@ class TimelineController: TimelineControllerProtocol {
         
         activeTimeline = timelineProxy
         activeTimelineItemProvider = liveTimelineItemProvider
+        
+        observeBipeHandleChanges()
         
         // No need for a detached timeline when the live one has already loaded the event.
         guard let initialFocussedEventID, !liveTimelineItemProvider.containsEvent(initialFocussedEventID) else {
@@ -568,6 +577,13 @@ class TimelineController: TimelineControllerProtocol {
             return newTimelineItems
         }.value
         
+        if let bipeHandleChanges {
+            newTimelineItems = bipeInsertingHandleChanges(from: bipeHandleChanges,
+                                                          into: newTimelineItems,
+                                                          itemProxies: itemProxies,
+                                                          includesEnd: activeTimelineItemProvider.kind == .live || paginationState.forward == .endReached)
+        }
+        
         // Check if we need to add anything to the top of the timeline.
         switch paginationState.backward {
         case .paginating:
@@ -587,6 +603,76 @@ class TimelineController: TimelineControllerProtocol {
         
         callbacks.send(.updatedTimelineItems(timelineItems: newTimelineItems, isSwitchingTimelines: isNewTimeline))
         self.paginationState = paginationState
+    }
+    
+    // MARK: - Bipe handle changes (ADR 0066)
+    
+    /// Fetches the history of the room's members, and redraws the timeline when new changes arrive.
+    private func observeBipeHandleChanges() {
+        guard let bipeHandleChanges else { return }
+        
+        bipeHandleChangesCancellable = bipeHandleChanges.changesPublisher.sink { [weak self] in
+            Task { await self?.bipeRedrawTimeline() }
+        }
+        
+        Task { [weak self, roomProxy] in
+            let members = roomProxy.membersPublisher.value.isEmpty ? await roomProxy.members() ?? [] : roomProxy.membersPublisher.value
+            let memberIDs = members.filter { $0.membership == .join }.map(\.userID)
+            await bipeHandleChanges.refresh(userIDs: memberIDs)
+            // The member names may have arrived after the first render, with changes already cached.
+            if !bipeHandleChanges.changes(for: Set(memberIDs)).isEmpty {
+                await self?.bipeRedrawTimeline()
+            }
+        }
+    }
+    
+    private func bipeRedrawTimeline() async {
+        guard !timelineItems.isEmpty else { return }
+        let provider = activeTimelineItemProvider
+        await updateTimelineItems(itemProxies: provider.itemProxies, paginationState: provider.paginationState)
+    }
+    
+    /// Local lines at the time of each change, for people who are members now, inside the loaded range and after they joined.
+    private func bipeInsertingHandleChanges(from store: BipeHandleChangeStore,
+                                            into items: [RoomTimelineItemProtocol],
+                                            itemProxies: [TimelineItemProxy],
+                                            includesEnd: Bool) -> [RoomTimelineItemProtocol] {
+        let names = Dictionary(roomProxy.membersPublisher.value.filter { $0.membership == .join }.map { ($0.userID, $0.displayName) }) { first, _ in first }
+        let changes = store.changes(for: Set(names.keys))
+        guard !changes.isEmpty else { return items }
+        
+        var joinedAt: [String: Date] = [:]
+        for case .event(let eventItem) in itemProxies {
+            if case .roomMembership(let userID, _, let change, _) = eventItem.content, change == .joined || change == .invitationAccepted {
+                joinedAt[userID] = eventItem.timestamp
+            }
+        }
+        
+        let anchors = items.map { item in
+            let timestamp: Date? = switch item {
+            case let item as EventBasedTimelineItemProtocol: item.timestamp
+            case let item as CollapsibleTimelineItem: (item.items.first as? EventBasedTimelineItemProtocol)?.timestamp
+            case let item as SeparatorRoomTimelineItem: item.timestamp
+            default: nil
+            }
+            return BipeHandleChangePlacement.Anchor(timestamp: timestamp)
+        }
+        
+        var result = items
+        let placements = BipeHandleChangePlacement.placements(of: changes, in: anchors, members: Set(names.keys), joinedAt: joinedAt, includesEnd: includesEnd)
+        for placement in placements.reversed() {
+            let name = names[placement.change.userId].flatMap(\.self) ?? placement.change.new.map { "@\($0)" } ?? placement.change.old.map { "@\($0)" } ?? ""
+            guard let line = placement.change.line(name: name) else { continue }
+            let item = StateRoomTimelineItem(id: .virtual(uniqueID: .init(placement.change.lineID)),
+                                             body: line,
+                                             timestamp: placement.change.at,
+                                             isOutgoing: false,
+                                             isEditable: false,
+                                             canBeRepliedTo: false,
+                                             sender: TimelineItemSender(id: placement.change.userId, displayName: names[placement.change.userId].flatMap(\.self)))
+            result.insert(item, at: placement.index)
+        }
+        return result
     }
     
     private nonisolated func buildTimelineItem(for itemProxy: TimelineItemProxy,

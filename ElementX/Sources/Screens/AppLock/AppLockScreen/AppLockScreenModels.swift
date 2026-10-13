@@ -27,6 +27,8 @@ enum AppLockScreenMode {
 struct AppLockScreenViewState: BindableState {
     /// The context in which the screen is being shown.
     var mode: AppLockScreenMode = .appUnlock
+    /// Bipe: the number of digits of the stored PIN.
+    var pinCodeLength = 4
     
     /// The number of attempts allowed to unlock the app.
     let maximumAttempts = 3

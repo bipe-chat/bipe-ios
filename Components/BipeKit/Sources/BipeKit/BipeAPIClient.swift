@@ -29,6 +29,87 @@ public struct BipeAPIClient: Sendable {
         return response.challenge
     }
 
+    // MARK: - Device-first accounts (ADR 0057, ADR 0059)
+
+    /// `GET /v1/me/account`. PIN state, recovery email and the recoveries of the last 7 days.
+    public func account(accessToken: String) async throws(BipeAPIError) -> BipeAccountStatus {
+        try await send(method: "GET", path: ["v1", "me", "account"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `PUT /v1/me/pin`. Set or change the PIN. The app checks the device owner first (biometrics).
+    public func setPIN(_ pin: String, accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "PUT", path: ["v1", "me", "pin"], body: PINRequest(pin: pin), accessToken: accessToken)
+    }
+
+    /// `POST /v1/me/device-first`. Moves a beta account to a hidden password. Needs a PIN first.
+    public func moveToDeviceFirst(accessToken: String) async throws(BipeAPIError) -> BipeCredentials {
+        try await send(method: "POST", path: ["v1", "me", "device-first"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `POST /v1/me/recovery-token`. A new token; the old one stops working.
+    public func newRecoveryToken(accessToken: String) async throws(BipeAPIError) -> String {
+        let response: RecoveryTokenResponse = try await send(method: "POST", path: ["v1", "me", "recovery-token"], body: Empty?.none, accessToken: accessToken)
+        return response.recoveryToken
+    }
+
+    /// `PUT /v1/me/email`. The server sends a link to confirm the address.
+    public func setRecoveryEmail(_ email: String, accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "PUT", path: ["v1", "me", "email"],
+                                          body: EmailRequest(email: email, lang: Self.emailLanguage),
+                                          accessToken: accessToken)
+    }
+
+    /// `DELETE /v1/me/email`.
+    public func removeRecoveryEmail(accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "DELETE", path: ["v1", "me", "email"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `POST /v1/me/recoveries/{id}/cancel`. An old device cancels a waiting recovery.
+    public func cancelRecovery(id: String, accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "POST", path: ["v1", "me", "recoveries", id, "cancel"], body: Empty?.none, accessToken: accessToken)
+    }
+
+    /// `POST /v1/recovery/token`. No auth. The synced token, then the PIN. Returns new credentials once.
+    public func recoverWithToken(_ token: String, pin: String) async throws(BipeAPIError) -> BipeCredentials {
+        try await send(method: "POST", path: ["v1", "recovery", "token"], body: TokenRecoveryRequest(recoveryToken: token, pin: pin))
+    }
+
+    /// `POST /v1/recovery/email`. No auth. Always 202 for a well-formed address.
+    public func requestRecoveryEmail(_ email: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "POST", path: ["v1", "recovery", "email"], body: RecoveryEmailRequest(email: email))
+    }
+
+    /// `POST /v1/recovery/email/confirm`. No auth. The link token and exactly one of `pin` (access) or `newPIN` (PIN reset).
+    public func confirmRecoveryEmail(linkToken: String, pin: String?, newPIN: String?) async throws(BipeAPIError) -> BipeRecoveryStarted {
+        try await send(method: "POST", path: ["v1", "recovery", "email", "confirm"],
+                       body: EmailConfirmRequest(token: linkToken, pin: pin, newPin: newPIN))
+    }
+
+    /// `POST /v1/recovery/{id}/claim`. No auth. Polls a recovery; returns the credentials once when the delay has ended.
+    public func claimRecovery(id: String, claimSecret: String) async throws(BipeAPIError) -> BipeRecoveryClaim {
+        try await send(method: "POST", path: ["v1", "recovery", id, "claim"], body: ClaimRequest(claimSecret: claimSecret))
+    }
+
+    /// The `lang` for emails Bipe sends: English for English devices, else Portuguese (the app's fallback).
+    public static var emailLanguage: String {
+        Locale.preferredLanguages.first?.hasPrefix("en") == true ? "en" : "pt"
+    }
+
+    // MARK: - Handle changes (ADR 0066)
+
+    /// `POST /v1/handle-changes`. At most ``BipeHandleChange/batchSize`` IDs. Oldest first.
+    public func handleChanges(userIDs: [String], since: Date?, accessToken: String) async throws(BipeAPIError) -> [BipeHandleChange] {
+        let response: HandleChangesResponse = try await send(method: "POST", path: ["v1", "handle-changes"],
+                                                             body: HandleChangesRequest(userIds: userIDs, since: since.map(Self.formatDate)),
+                                                             accessToken: accessToken)
+        return response.changes
+    }
+
+    /// `DELETE /v1/me/handle`. Removes the caller's handle.
+    public func removeMyHandle(accessToken: String) async throws(BipeAPIError) -> BipeMyHandle {
+        try await send(method: "DELETE", path: ["v1", "me", "handle"], body: Empty?.none, accessToken: accessToken)
+    }
+
     // MARK: - Invites
 
     /// `GET /v1/invites/{code}`. No auth. Validity and the inviter's handle.
@@ -207,9 +288,56 @@ public struct BipeAPIClient: Sendable {
         let handle: String
     }
 
+    private struct PINRequest: Encodable {
+        let pin: String
+    }
+
+    private struct RecoveryTokenResponse: Decodable {
+        let recoveryToken: String
+    }
+
+    private struct EmailRequest: Encodable {
+        let email: String
+        let lang: String
+    }
+
+    private struct TokenRecoveryRequest: Encodable {
+        let recoveryToken: String
+        let pin: String
+    }
+
+    private struct RecoveryEmailRequest: Encodable {
+        let email: String
+    }
+
+    private struct EmailConfirmRequest: Encodable {
+        let token: String
+        let pin: String?
+        let newPin: String?
+    }
+
+    private struct ClaimRequest: Encodable {
+        let claimSecret: String
+    }
+
+    private struct HandleChangesRequest: Encodable {
+        let userIds: [String]
+        let since: String?
+    }
+
+    private struct HandleChangesResponse: Decodable {
+        let changes: [BipeHandleChange]
+    }
+
+    private static func formatDate(_ date: Date) -> String {
+        date.formatted(Date.ISO8601FormatStyle(includingFractionalSeconds: true))
+    }
+
     private struct ErrorBody: Decodable {
         let error: String
         let reason: String?
+        /// With `pin_wrong`: wrong PINs left before the PIN blocks.
+        let triesLeft: Int?
     }
 
     private func send<Body: Encodable, Response: Decodable>(method: String,
@@ -258,14 +386,16 @@ public struct BipeAPIClient: Sendable {
 
         guard (200..<300).contains(httpResponse.statusCode) else {
             if let errorBody = try? Self.decoder.decode(ErrorBody.self, from: data) {
-                throw .server(BipeAPIErrorCode(rawValue: errorBody.error) ?? .internal,
-                              reason: errorBody.reason,
-                              statusCode: httpResponse.statusCode)
+                let code = BipeAPIErrorCode(rawValue: errorBody.error) ?? .internal
+                // pin_wrong carries tries_left, not a reason. See BipeAPIError.pinTriesLeft.
+                let reason = code == .pinWrong ? errorBody.triesLeft.map(String.init) : errorBody.reason
+                throw .server(code, reason: reason, statusCode: httpResponse.statusCode)
             }
             throw .unexpectedResponse(statusCode: httpResponse.statusCode)
         }
 
-        if httpResponse.statusCode == 204, let noContent = NoContent() as? Response {
+        // 204, and 202 without a body.
+        if httpResponse.statusCode == 204 || data.isEmpty, let noContent = NoContent() as? Response {
             return noContent
         }
 
@@ -302,31 +432,41 @@ public struct BipeAPIClient: Sendable {
 
 // MARK: - Models
 
+/// Device-first sign-up (ADR 0057): no `password`. The server makes the password and returns it once.
 public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
     /// Optional while the server runs open sign-up (beta).
     public let inviteCode: String?
-    public let email: String
-    public let password: String
+    /// A recovery fallback only, never a login. The server sends a link to confirm it.
+    public let email: String?
+    /// Legacy beta sign-up only. The app never sends it.
+    public let password: String?
+    /// Set at once. Must pass ``BipePIN/problem(for:)``.
+    public let pin: String?
+    /// Language of the emails Bipe sends to `email`.
+    public let lang: String?
     public let handle: String?
     public let displayName: String?
     /// Absent where App Attest is not supported (simulator). The server decides whether to accept that.
     public let attestation: BipeAttestation?
 
     public init(inviteCode: String? = nil,
-                email: String,
-                password: String,
+                email: String?,
+                pin: String?,
+                lang: String? = BipeAPIClient.emailLanguage,
                 handle: String?,
                 displayName: String?,
                 attestation: BipeAttestation? = nil) {
         self.inviteCode = inviteCode
         self.email = email
-        self.password = password
+        password = nil
+        self.pin = pin
+        self.lang = lang
         self.handle = handle
         self.displayName = displayName
         self.attestation = attestation
     }
 
-    /// Never prints the password or the email.
+    /// Never prints the PIN or the email.
     public var description: String { "BipeSignupRequest" }
 }
 
@@ -348,11 +488,24 @@ public struct BipeAttestation: Encodable, Sendable, CustomStringConvertible {
     public var description: String { "BipeAttestation" }
 }
 
-public struct BipeSignupResponse: Decodable, Sendable {
+public struct BipeSignupResponse: Decodable, Sendable, CustomStringConvertible {
     public let userId: String
     public let handle: String?
     /// Present when a personal invite was used.
     public let inviterUserId: String?
+    /// Device-first only. The hidden MAS password, shown once. Keep it on this device only.
+    public let password: String?
+    /// Device-first only. Shown once. Sync it (iCloud Keychain).
+    public let recoveryToken: String?
+
+    /// The credentials of a device-first account. `nil` for a legacy response.
+    public var credentials: BipeCredentials? {
+        guard let password, let recoveryToken else { return nil }
+        return BipeCredentials(userId: userId, password: password, recoveryToken: recoveryToken)
+    }
+
+    /// Never prints the password or the token.
+    public var description: String { "BipeSignupResponse(\(userId))" }
 }
 
 public struct BipeContactMatch: Decodable, Sendable, Hashable {
@@ -540,6 +693,12 @@ public enum BipeAPIErrorCode: String, Sendable {
     case notFound = "not_found"
     case rateLimited = "rate_limited"
     case `internal`
+    case pinWeak = "pin_weak"
+    case pinWrong = "pin_wrong"
+    case pinBlocked = "pin_blocked"
+    case pinNotSet = "pin_not_set"
+    case recoveryInvalid = "recovery_invalid"
+    case emailUnavailable = "email_unavailable"
 }
 
 public enum BipeAPIError: Error, Sendable, Equatable {
@@ -561,6 +720,12 @@ public enum BipeAPIError: Error, Sendable, Equatable {
         }
     }
 
+    /// With `pin_wrong`: wrong PINs left before the server blocks the PIN.
+    public var pinTriesLeft: Int? {
+        guard case .server(.pinWrong, let reason, _) = self else { return nil }
+        return reason.flatMap(Int.init)
+    }
+
     /// User-facing message (pt-BR / en).
     public var localizedMessage: String {
         switch self {
@@ -578,6 +743,12 @@ public enum BipeAPIError: Error, Sendable, Equatable {
             case .photoInvalid: BipeStrings.publicProfilePhotoInvalid
             case .rateLimited: BipeStrings.errorRateLimited
             case .unauthorized: BipeStrings.errorUnauthorized
+            case .pinWeak: (reason.flatMap(BipePinProblem.init(rawValue:)) ?? .sequence).localizedMessage
+            case .pinWrong: BipeStrings.pinWrong(reason ?? "0")
+            case .pinBlocked: BipeStrings.pinBlockedBody(String(BipeRegistries.pinMaxWrongTries))
+            case .pinNotSet: BipeStrings.pinCreateBody(String(BipeRegistries.pinLength))
+            case .recoveryInvalid: BipeStrings.errorRecoveryInvalid
+            case .emailUnavailable: BipeStrings.errorEmailUnavailable
             case .badRequest, .notFound, .internal: BipeStrings.errorGeneric
             }
         case .network:

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -51,7 +52,7 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
             // The assumption here being that if you're running a custom app, your users will already be created.
             AuthenticationStartScreenViewState(serverNameOrBaseURL: appSettings.accountProviders.count == 1 ? appSettings.accountProviders[0].serverNameOrBaseURL : nil,
                                                showCreateAccountButton: appSettings.usesBipeSignup, // Bipe: invite sign-up
-                                               showQRCodeLoginButton: isQRCodeScanningSupported,
+                                               showQRCodeLoginButton: isQRCodeScanningSupported && !appSettings.usesBipeSignup, // Bipe: QR is on the recovery screen
                                                classicAppMode: isClassicAppAccountAllowed ? authenticationService.classicAppAccount.map { .welcomeBack($0) } : nil,
                                                hideBrandChrome: appSettings.hideBrandChrome)
         } else if let provisioningParameters {
@@ -70,7 +71,12 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
                                                hideBrandChrome: appSettings.hideBrandChrome)
         }
         
-        super.init(initialViewState: initialViewState, mediaProvider: mediaProvider)
+        var bipeViewState = initialViewState
+        if appSettings.usesBipeSignup {
+            // Bipe ADR 0057: no login screen. The button opens the ways back into an account.
+            bipeViewState.bipeLoginButtonTitle = BipeStrings.recoveryTitle
+        }
+        super.init(initialViewState: bipeViewState, mediaProvider: mediaProvider)
         
         notificationCenter.publisher(for: UIApplication.didBecomeActiveNotification)
             .sink { [weak self] _ in
@@ -121,6 +127,8 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
                                     loginHint: "mxid:\(classicAppAccount.userID)",
                                     fallbackHomeserverURL: classicAppAccount.homeserverURL)
             }
+        } else if state.bipeLoginButtonTitle != nil {
+            actionsSubject.send(.login) // Bipe: the flow coordinator opens the recovery screen.
         } else if let serverNameOrBaseURL = state.serverNameOrBaseURL {
             await loginDirectly(using: serverNameOrBaseURL, loginHint: provisioningParameters?.loginHint)
         } else {

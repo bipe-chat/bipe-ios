@@ -12,19 +12,19 @@ struct BipeSignupScreenCoordinatorParameters {
     /// From an invite link. Pre-fills the code field.
     var inviteCode: BipeInviteCode?
     let apiClient: BipeAPIClient
-    let authenticationService: AuthenticationServiceProtocol
-    /// The Bipe account provider. Login after sign-up goes there.
-    let serverNameOrBaseURL: String
+    let signIn: BipeAccountSignIn
+    /// The new account's PIN also locks the app.
+    let appLockService: AppLockServiceProtocol?
     let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum BipeSignupScreenCoordinatorAction: CustomStringConvertible {
-    case continueWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
+    case signedIn(UserSessionProtocol)
     case createdWithInvite(inviterUserID: String)
     
     var description: String {
         switch self {
-        case .continueWithOAuth: "continueWithOAuth"
+        case .signedIn: "signedIn"
         case .createdWithInvite: "createdWithInvite"
         }
     }
@@ -45,10 +45,10 @@ final class BipeSignupScreenCoordinator: CoordinatorProtocol {
         self.parameters = parameters
         
         viewModel = BipeSignupScreenViewModel(inviteCode: parameters.inviteCode,
-                                                 apiClient: parameters.apiClient,
-                                                 authenticationService: parameters.authenticationService,
-                                                 serverNameOrBaseURL: parameters.serverNameOrBaseURL,
-                                                 userIndicatorController: parameters.userIndicatorController)
+                                              apiClient: parameters.apiClient,
+                                              signIn: parameters.signIn,
+                                              appLockService: parameters.appLockService,
+                                              userIndicatorController: parameters.userIndicatorController)
     }
     
     func start() {
@@ -57,8 +57,8 @@ final class BipeSignupScreenCoordinator: CoordinatorProtocol {
             
             guard let self else { return }
             switch action {
-            case .continueWithOAuth(let data, let window):
-                actionsSubject.send(.continueWithOAuth(data: data, window: window))
+            case .signedIn(let userSession):
+                actionsSubject.send(.signedIn(userSession))
             case .createdWithInvite(let inviterUserID):
                 actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
             }

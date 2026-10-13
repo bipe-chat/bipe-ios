@@ -34,6 +34,12 @@ struct AppLockSetupPINScreenViewState: BindableState {
     var mode: AppLockSetupPINScreenMode
     /// Whether the screen is mandatory or can be cancelled.
     let isMandatory: Bool
+    /// Bipe: the number of digits of the stored PIN and of a new PIN.
+    var storedPINCodeLength = 4
+    var newPINCodeLength = 4
+    var pinCodeLength: Int {
+        mode == .unlock ? storedPINCodeLength : newPINCodeLength
+    }
     /// The number of attempts the user has made in the `confirm` mode.
     var numberOfConfirmAttempts = 0
     /// The number of attempts the user has made in the `unlock` mode.

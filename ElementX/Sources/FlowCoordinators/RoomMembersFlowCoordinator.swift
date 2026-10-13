@@ -121,7 +121,7 @@ final class RoomMembersFlowCoordinator: FlowCoordinatorProtocol {
         case .accountProvisioningLink, .oAuthCallback,
              .roomList, .room, .roomDetails, .event,
              .userProfile, .call, .settings, .chatBackupSettings,
-             .share, .transferOwnership, .thread, .search, .bipeHandle, .bipeInvite:
+             .share, .transferOwnership, .thread, .search, .bipeHandle, .bipeInvite, .bipeRecoveryLink:
             break
         }
     }

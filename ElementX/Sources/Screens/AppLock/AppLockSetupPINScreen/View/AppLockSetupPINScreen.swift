@@ -33,7 +33,9 @@ struct AppLockSetupPINScreen: View {
                 header
                 
                 PINTextField(pinCode: $context.pinCode,
-                             isSecure: true)
+                             isSecure: true,
+                             maxLength: context.viewState.pinCodeLength,
+                             size: context.viewState.pinCodeLength > 4 ? .small : .medium)
                     .focused($textFieldFocus)
                 
                 if context.viewState.mode == .unlock {

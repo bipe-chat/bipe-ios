@@ -12,7 +12,7 @@ struct BipeSignupScreen: View {
     @Bindable var context: BipeSignupScreenViewModel.Context
 
     private enum Field: Hashable {
-        case email, password, passwordConfirmation, handle, displayName, inviteCode
+        case displayName, handle, email, pin, pinConfirmation, inviteCode
     }
 
     @FocusState private var focusedField: Field?
@@ -35,13 +35,11 @@ struct BipeSignupScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(BipeStrings.signupTitle)
         .alert(item: $context.alertInfo)
-        .introspect(.window, on: .supportedVersions) { window in
-            context.send(viewAction: .updateWindow(window))
-        }
         .onChange(of: context.handle) { context.send(viewAction: .handleChanged) }
         .onChange(of: context.inviteCode) { context.send(viewAction: .inviteCodeChanged) }
         .onChange(of: context.email) { context.send(viewAction: .clearFieldErrors) }
-        .onChange(of: context.password) { context.send(viewAction: .clearFieldErrors) }
+        .onChange(of: context.pin) { context.send(viewAction: .clearFieldErrors) }
+        .onChange(of: context.pinConfirmation) { context.send(viewAction: .clearFieldErrors) }
     }
 
     private var header: some View {
@@ -49,7 +47,7 @@ struct BipeSignupScreen: View {
             BigIcon(icon: \.userProfileSolid)
                 .padding(.bottom, 8)
 
-            Text(context.viewState.inviterHandle.map(BipeStrings.signupInvitedBy) ?? BipeStrings.signupHeader)
+            Text(context.viewState.inviterHandle.map(BipeStrings.signupInvitedBy) ?? BipeStrings.signupDeviceHeader)
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textSecondary)
@@ -77,36 +75,6 @@ struct BipeSignupScreen: View {
                                           footerText: BipeStrings.signupDisplayNameFooter))
                 .textContentType(.name)
                 .submitLabel(.next)
-                .onSubmit { focusedField = .email }
-            
-            TextField(text: $context.email) { placeholder("") }
-                .focused($focusedField, equals: .email)
-                .textFieldStyle(.compound(labelText: BipeStrings.signupEmail,
-                                          footerText: context.viewState.emailError ?? BipeStrings.signupEmailFooter,
-                                          state: context.viewState.emailError == nil ? .default : .error))
-                .keyboardType(.emailAddress)
-                .textContentType(.username)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .submitLabel(.next)
-                .onSubmit { focusedField = .password }
-
-            SecureField(text: $context.password) { placeholder("") }
-                .focused($focusedField, equals: .password)
-                .textFieldStyle(.compound(labelText: BipeStrings.signupPassword,
-                                          footerText: context.viewState.passwordError ?? BipeStrings.signupPasswordFooter(String(BipeSignupRules.passwordMinLength)),
-                                          state: context.viewState.passwordError == nil ? .default : .error))
-                .textContentType(.newPassword)
-                .submitLabel(.next)
-                .onSubmit { focusedField = .passwordConfirmation }
-
-            SecureField(text: $context.passwordConfirmation) { placeholder("") }
-                .focused($focusedField, equals: .passwordConfirmation)
-                .textFieldStyle(.compound(labelText: BipeStrings.signupPasswordConfirm,
-                                          footerText: context.viewState.passwordMismatch ? BipeStrings.signupPasswordMismatch : nil,
-                                          state: context.viewState.passwordMismatch ? .error : .default))
-                .textContentType(.newPassword)
-                .submitLabel(.next)
                 .onSubmit { focusedField = .handle }
 
             TextField(text: $context.handle) { placeholder(BipeStrings.handlePlaceholder) }
@@ -114,6 +82,35 @@ struct BipeSignupScreen: View {
                 .textFieldStyle(.compound(labelText: BipeStrings.signupHandle,
                                           footerText: context.viewState.handleFooter,
                                           state: context.viewState.handleFieldState))
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.next)
+                .onSubmit { focusedField = .pin }
+
+            // The PIN is not a password: no password autofill, no saving in a password manager.
+            SecureField(text: $context.pin) { placeholder("") }
+                .focused($focusedField, equals: .pin)
+                .textFieldStyle(.compound(labelText: BipeStrings.pinCreateTitle,
+                                          footerText: context.viewState.pinFooter,
+                                          state: context.viewState.pinError != nil || context.viewState.pinProblem != nil ? .error : .default))
+                .keyboardType(.numberPad)
+                .textContentType(.oneTimeCode)
+
+            SecureField(text: $context.pinConfirmation) { placeholder("") }
+                .focused($focusedField, equals: .pinConfirmation)
+                .textFieldStyle(.compound(labelText: BipeStrings.pinConfirmTitle,
+                                          footerText: context.viewState.pinMismatch ? BipeStrings.pinMismatch : nil,
+                                          state: context.viewState.pinMismatch ? .error : .default))
+                .keyboardType(.numberPad)
+                .textContentType(.oneTimeCode)
+
+            TextField(text: $context.email) { placeholder("") }
+                .focused($focusedField, equals: .email)
+                .textFieldStyle(.compound(labelText: BipeStrings.signupEmailOptional,
+                                          footerText: context.viewState.emailError ?? BipeStrings.signupEmailOptionalFooter,
+                                          state: context.viewState.emailError == nil ? .default : .error))
+                .keyboardType(.emailAddress)
+                .textContentType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .submitLabel(.next)
@@ -158,9 +155,9 @@ struct BipeSignupScreen: View {
 
 struct BipeSignupScreen_Previews: PreviewProvider {
     static let viewModel = BipeSignupScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                        authenticationService: AuthenticationService.mock,
-                                                        serverNameOrBaseURL: "example.com",
-                                                        userIndicatorController: UserIndicatorControllerMock())
+                                                     signIn: BipeAccountSignIn(authenticationService: AuthenticationService.mock, appSettings: .volatile()),
+                                                     appLockService: nil,
+                                                     userIndicatorController: UserIndicatorControllerMock())
 
     static var previews: some View {
         ElementNavigationStack {

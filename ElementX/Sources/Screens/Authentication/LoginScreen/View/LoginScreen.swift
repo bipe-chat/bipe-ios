@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -62,7 +63,8 @@ struct LoginScreen: View {
     var loginForm: some View {
         VStack(alignment: .leading, spacing: 0) {
             TextField(text: $context.username) {
-                Text(L10n.commonUsername).foregroundColor(.compound.textSecondary)
+                // Bipe: beta accounts sign in with their email; handles never work here.
+                Text(BipeStrings.signupEmail).foregroundColor(.compound.textSecondary)
             }
             .focused($isUsernameFocused)
             .textFieldStyle(.compound(labelText: L10n.screenLoginFormHeader, accessibilityIdentifier: A11yIdentifiers.loginScreen.emailUsername))

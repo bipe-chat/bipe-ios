@@ -25,6 +25,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private let homeserverHistoryManager: HomeserverHistoryManager
     private let appHooks: AppHooks
     private let userIndicatorController: UserIndicatorControllerProtocol
+    /// Bipe: the account PIN also locks the app (ADR 0057).
+    private let appLockService: AppLockServiceProtocol?
     
     enum State: StateType {
         /// The state machine hasn't started.
@@ -44,6 +46,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         /// Bipe: invite-based sign-up through the Bipe API.
         case bipeSignupScreen
+        /// Bipe: the ways back into a device-first account (ADR 0057).
+        case bipeRecoveryScreen
         
         /// The screen to report an error.
         case bugReportFlow
@@ -80,6 +84,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         case bipeSignup
         /// Bipe: the invite sign-up was aborted.
         case cancelledBipeSignup
+        /// Bipe: show the recovery screen. The user info is a `BipeRecoveryScreenMode`.
+        case bipeRecovery
+        /// Bipe: the recovery screen was closed.
+        case cancelledBipeRecovery
         
         /// The user encountered a problem.
         case reportProblem
@@ -113,8 +121,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
          appMediator: AppMediatorProtocol,
          appSettings: AppSettings,
          appHooks: AppHooks,
-         userIndicatorController: UserIndicatorControllerProtocol) {
+         userIndicatorController: UserIndicatorControllerProtocol,
+         appLockService: AppLockServiceProtocol? = nil) {
         self.authenticationService = authenticationService
+        self.appLockService = appLockService
         self.bugReportService = bugReportService
         self.navigationRootCoordinator = navigationRootCoordinator
         self.appMediator = appMediator
@@ -155,6 +165,12 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 clearRoute(animated: animated)
             }
             stateMachine.tryEvent(.bipeSignup)
+        case .bipeRecoveryLink(let token):
+            guard appSettings.usesBipeSignup else { return }
+            if stateMachine.state != .startScreen {
+                clearRoute(animated: animated)
+            }
+            stateMachine.tryEvent(.bipeRecovery, userInfo: BipeRecoveryScreenMode.emailLink(token))
         default:
             fatalError()
         }
@@ -173,7 +189,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             navigationStackCoordinator.popToRoot(animated: animated)
         case .loginScreen:
             navigationStackCoordinator.popToRoot(animated: animated)
-        case .bipeSignupScreen:
+        case .bipeSignupScreen, .bipeRecoveryScreen:
             navigationStackCoordinator.popToRoot(animated: animated)
         case .bugReportFlow:
             navigationStackCoordinator.setSheetCoordinator(nil)
@@ -237,6 +253,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             self?.showBipeSignupScreen()
         }
         stateMachine.addRoutes(event: .cancelledBipeSignup, transitions: [.bipeSignupScreen => .startScreen])
+        stateMachine.addRoutes(event: .bipeRecovery, transitions: [.startScreen => .bipeRecoveryScreen]) { [weak self] context in
+            self?.showBipeRecoveryScreen(mode: context.userInfo as? BipeRecoveryScreenMode ?? .choose)
+        }
+        stateMachine.addRoutes(event: .cancelledBipeRecovery, transitions: [.bipeRecoveryScreen => .startScreen])
         
         // Bug Report
         
@@ -258,7 +278,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                                                                .serverSelectionScreen => .complete, // OAuth authentication
                                                                .startScreen => .complete, // Direct OAuth authentication
                                                                .loginScreen => .complete,
-                                                               .bipeSignupScreen => .complete]) { [weak self] context in
+                                                               .bipeSignupScreen => .complete,
+                                                               .bipeRecoveryScreen => .complete]) { [weak self] context in
             guard let userSession = context.userInfo as? UserSessionProtocol else { fatalError("The user session wasn't included in the context") }
             self?.userHasSignedIn(userSession: userSession)
         }
@@ -305,7 +326,11 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 case .loginWithQR:
                     stateMachine.tryEvent(.loginWithQR)
                 case .login:
-                    stateMachine.tryEvent(.selectServer(.login))
+                    if appSettings.usesBipeSignup {
+                        stateMachine.tryEvent(.bipeRecovery, userInfo: BipeRecoveryScreenMode.choose)
+                    } else {
+                        stateMachine.tryEvent(.selectServer(.login))
+                    }
                 case .register:
                     if appSettings.usesBipeSignup {
                         stateMachine.tryEvent(.bipeSignup)
@@ -330,6 +355,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         if fromState == .initial {
             navigationRootCoordinator.setRootCoordinator(navigationStackCoordinator)
+            if appSettings.usesBipeSignup {
+                Task { await resumeBipeAccount() }
+            }
         }
     }
     
@@ -457,17 +485,17 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         let inviteCode = pendingInviteCode
         pendingInviteCode = nil
         let parameters = BipeSignupScreenCoordinatorParameters(inviteCode: inviteCode,
-                                                                  apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
-                                                                  authenticationService: authenticationService,
-                                                                  serverNameOrBaseURL: appSettings.defaultAccountProvider.serverNameOrBaseURL,
-                                                                  userIndicatorController: userIndicatorController)
+                                                               apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
+                                                               signIn: BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings),
+                                                               appLockService: appLockService,
+                                                               userIndicatorController: userIndicatorController)
         let coordinator = BipeSignupScreenCoordinator(parameters: parameters)
         
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {
-                case .continueWithOAuth(let oAuthData, let window):
-                    self?.showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
+                case .signedIn(let userSession):
+                    self?.stateMachine.tryEvent(.signedIn, userInfo: userSession)
                 case .createdWithInvite(let inviterUserID):
                     self?.appSettings.bipePendingInviterUserID = inviterUserID
                 }
@@ -476,6 +504,65 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationStackCoordinator.push(coordinator) { [weak self] in
             self?.stateMachine.tryEvent(.cancelledBipeSignup)
+        }
+    }
+    
+    // MARK: - Bipe Recovery
+    
+    /// At app start without a session: a pending email recovery, then the password stored on this device (silent sign-in),
+    /// then a synced recovery token (asks for the PIN). ADR 0057 "Old phone lost, credential synced", with ADR 0059's token.
+    private func resumeBipeAccount() async {
+        let store = BipeCredentialStore.bipeApp
+        guard stateMachine.state == .startScreen else { return }
+        
+        if let pending = store.pendingRecovery() {
+            stateMachine.tryEvent(.bipeRecovery, userInfo: BipeRecoveryScreenMode.waiting(pending))
+            return
+        }
+        
+        if store.password() != nil {
+            let loadingIndicatorID = "BipeResumeAccount"
+            userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID, type: .modal, title: L10n.commonLoading, persistent: true))
+            let result = await BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings).signInWithStoredPassword()
+            userIndicatorController.retractIndicatorWithId(loadingIndicatorID)
+            if case .success(let userSession) = result, stateMachine.state == .startScreen {
+                stateMachine.tryEvent(.signedIn, userInfo: userSession)
+                return
+            }
+        }
+        
+        if let token = store.recoveryToken(), stateMachine.state == .startScreen {
+            stateMachine.tryEvent(.bipeRecovery, userInfo: BipeRecoveryScreenMode.token(userID: token.userID))
+        }
+    }
+    
+    private func showBipeRecoveryScreen(mode: BipeRecoveryScreenMode) {
+        let parameters = BipeRecoveryScreenCoordinatorParameters(mode: mode,
+                                                                 apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
+                                                                 signIn: BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings),
+                                                                 serverNameOrBaseURL: appSettings.defaultAccountProvider.serverNameOrBaseURL,
+                                                                 appLockService: appLockService,
+                                                                 userIndicatorController: userIndicatorController)
+        let coordinator = BipeRecoveryScreenCoordinator(parameters: parameters)
+        
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                guard let self else { return }
+                switch action {
+                case .signedIn(let userSession):
+                    stateMachine.tryEvent(.signedIn, userInfo: userSession)
+                case .loginWithQR:
+                    // The pop moves the state back to the start screen synchronously; QR sign-in starts from there.
+                    navigationStackCoordinator.pop(animated: false)
+                    stateMachine.tryEvent(.loginWithQR)
+                case .continueWithOAuth(let oAuthData, let window):
+                    showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
+                }
+            }
+            .store(in: &cancellables)
+        
+        navigationStackCoordinator.push(coordinator) { [weak self] in
+            self?.stateMachine.tryEvent(.cancelledBipeRecovery)
         }
     }
     

@@ -6,11 +6,14 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 import MatrixRustSDK
 
 struct TimelineControllerFactory: TimelineControllerFactoryProtocol {
     let userSettings: UserSettings
+    /// Bipe: handle change lines in the room's main timeline (ADR 0066).
+    var bipeHandleChanges: BipeHandleChangeStore?
     
     func buildTimelineController(roomProxy: JoinedRoomProxyProtocol,
                                  initialFocussedEventID: String?,
@@ -21,7 +24,8 @@ struct TimelineControllerFactory: TimelineControllerFactoryProtocol {
                            initialFocussedEventID: initialFocussedEventID,
                            timelineItemFactory: timelineItemFactory,
                            mediaProvider: mediaProvider,
-                           userSettings: userSettings)
+                           userSettings: userSettings,
+                           bipeHandleChanges: bipeHandleChanges)
     }
     
     func buildThreadTimelineController(threadRootEventID: String,

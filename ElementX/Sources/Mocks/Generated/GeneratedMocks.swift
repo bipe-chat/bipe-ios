@@ -706,6 +706,16 @@ nonisolated class AppLockServiceMock: AppLockServiceProtocol, @unchecked Sendabl
         set(value) { underlyingBiometricUnlockTrusted = value }
     }
     nonisolated(unsafe) var underlyingBiometricUnlockTrusted: Bool!
+    var pinCodeLength: Int {
+        get { return underlyingPinCodeLength }
+        set(value) { underlyingPinCodeLength = value }
+    }
+    nonisolated(unsafe) var underlyingPinCodeLength: Int!
+    var newPINCodeLength: Int {
+        get { return underlyingNewPINCodeLength }
+        set(value) { underlyingNewPINCodeLength = value }
+    }
+    nonisolated(unsafe) var underlyingNewPINCodeLength: Int!
     var numberOfPINAttempts: AnyPublisher<Int, Never> {
         get { return underlyingNumberOfPINAttempts }
         set(value) { underlyingNumberOfPINAttempts = value }

@@ -192,6 +192,9 @@ final nonisolated class AppSettings: @unchecked Sendable {
     let appLockGracePeriod: TimeInterval = 0
     /// Any codes that the user isn't allowed to use for their PIN.
     let appLockPINCodeBlockList = ["0000", "1234"]
+    /// Bipe: a new app lock PIN is the account PIN (ADR 0057): 8 digits, checked with the shared PIN rule.
+    /// Same value as `BipeRegistries.pinLength`; the extensions that compile this file do not link BipeKit.
+    let appLockPINCodeLength = 8
     /// The number of attempts the user has made to unlock the app with a PIN code (resets when unlocked).
     @UserPreference(defaultValue: 0)
     var appLockNumberOfPINAttempts: Int

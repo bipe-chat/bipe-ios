@@ -172,7 +172,7 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .chatBackupSettings:
             actionsSubject.send(.showChatBackupSettings)
-        case .accountProvisioningLink, .oAuthCallback, .settings, .call, .search, .bipeHandle, .bipeInvite:
+        case .accountProvisioningLink, .oAuthCallback, .settings, .call, .search, .bipeHandle, .bipeInvite, .bipeRecoveryLink:
             break // These routes cannot be handled.
         }
     }
