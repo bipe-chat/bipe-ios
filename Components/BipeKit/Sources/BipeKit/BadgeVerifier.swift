@@ -7,8 +7,8 @@
 import CryptoKit
 import Foundation
 
-/// Verifies signed badge envelopes (proseio-shared/docs/badge-attestation.md, v1).
-/// Must match proseio-shared/test-vectors/badges.json.
+/// Verifies signed badge envelopes (bipe-shared/docs/badge-attestation.md, v1).
+/// Must match bipe-shared/test-vectors/badges.json.
 public nonisolated struct BadgeVerifier: Sendable {
     public enum KeyError: Error, Equatable {
         case invalidPublicKey(kid: String)

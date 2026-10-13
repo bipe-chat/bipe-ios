@@ -755,7 +755,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             }
         }
         
-        Task { await BipeQuietGroups(clientProxy: userSession.clientProxy).run() } // Bipe: proseio#97
+        Task { await BipeQuietGroups(clientProxy: userSession.clientProxy).run() } // Bipe: bipe#97
         
         if let storedInlineReply {
             await processInlineReply(roomID: storedInlineReply.roomID, replyText: storedInlineReply.message)

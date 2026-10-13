@@ -5,15 +5,15 @@ This repo is Bipe's iOS app: a fork of Element X iOS (AGPL-3.0). Upstream conven
 ## Rules
 
 - **All Bipe code lives in `Components/BipeKit`** (local Swift package, linked into the ElementX target). Element X sources get small hooks only. Keep the upstream diff small so rebases stay cheap.
-- **Never hand-edit `Components/BipeKit/Sources/BipeKit/Generated/`.** It comes from `../proseio-shared` (`node tools/gen.mjs`). Change registries and strings there.
+- **Never hand-edit `Components/BipeKit/Sources/BipeKit/Generated/`.** It comes from `../bipe-shared` (`node tools/gen.mjs`). Change registries and strings there.
 - Bipe UI strings come from `BipeStrings` (generated), not `Untranslated.strings` and not Localazy.
-- Platform logic (badge verification, normalisation, scam detection) must pass `../proseio-shared/test-vectors/`. Android mirrors the same vectors.
+- Platform logic (badge verification, normalisation, scam detection) must pass `../bipe-shared/test-vectors/`. Android mirrors the same vectors.
 - Build settings, identifiers and entitlements: `app.yml`, `project.yml`, `target.yml`, then `xcodegen`. Never edit `ElementX.xcodeproj` directly.
 - The `Enterprise/` submodule (private Element repo) is not used. `Package.swift` skips it when absent.
 
 ## Upstream
 
-- `upstream` = element-hq/element-x-ios (push disabled). `origin` = bipe-chat/proseio-ios. Local `main` tracks `origin/main`.
+- `upstream` = element-hq/element-x-ios (push disabled). `origin` = bipe-chat/bipe-ios. Local `main` tracks `origin/main`.
 - Rebase: `git fetch upstream && git rebase upstream/develop`.
 - git-lfs is not installed on the dev Mac. The LFS filter is overridden in this clone's local config; LFS files (snapshots, dev media) are pointers. Snapshot tests need git-lfs.
 
@@ -23,7 +23,7 @@ This repo is Bipe's iOS app: a fork of Element X iOS (AGPL-3.0). Upstream conven
 xcodebuild -project ElementX.xcodeproj -scheme ElementX -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
-Shared test vectors (ADR 0031 rule 4): `Components/BipeKit/Tests/BipeKitTests/SharedVectorTests.swift` reads `../proseio-shared/test-vectors` directly. Run it after any registry, vector or BipeKit logic change:
+Shared test vectors (ADR 0031 rule 4): `Components/BipeKit/Tests/BipeKitTests/SharedVectorTests.swift` reads `../bipe-shared/test-vectors` directly. Run it after any registry, vector or BipeKit logic change:
 
 ```bash
 cd Components/BipeKit && swift test
@@ -69,9 +69,9 @@ Devices must be registered in the Centaur Labs team (automatic signing does this
 Done: display name and production app name ("Bipe", ADR 0054; the code name stays Bipe), dev bundle ID and app group, Element's team ID replaced.
 
 - **OAuth login:** redirect is the private-use scheme `<bundle id>:/oauth/callback` (RFC 8252); client URI, logo, terms and privacy URLs are on `https://bipe.chat/...` (client URI `https://bipe.chat/apps/ios`) because MAS requires them on the client URI host and requires the scheme to be the reverse of that host. Pages do not exist yet. **Verified 11 October 2026:** sign-in to matrix.org works end to end on a device (MAS dynamic registration accepted the client).
-- **Accent colour:** açaí `acai.1100` (`#80307B` light, `#D993D2` dark; high contrast `#5D1D59` / `#ECC0E7`) in `accent-color.colorset`. See proseio/docs/design/identity.md.
-- **Welcome screen:** `BipeWelcomeView` and `BipeWelcomeBackground` (`Screens/Authentication/StartScreen/View`) replace Element's logo, welcome text and launch artwork on the start screen. Copy: `bipe_onboarding_*` in proseio-shared. Android: `BipeWelcomeView` in libraries/bipe.
-- **App icon:** the web mark (`proseio-web/public/brand/app-icon.svg`, white seal-tail bubble on `acai.1100`, tight corner top left so it reads as a "b") rendered full-bleed at 1024 px; iOS applies the corner mask. iOS and web share one icon. Final designer artwork replaces both at once.
+- **Accent colour:** açaí `acai.1100` (`#80307B` light, `#D993D2` dark; high contrast `#5D1D59` / `#ECC0E7`) in `accent-color.colorset`. See bipe/docs/design/identity.md.
+- **Welcome screen:** `BipeWelcomeView` and `BipeWelcomeBackground` (`Screens/Authentication/StartScreen/View`) replace Element's logo, welcome text and launch artwork on the start screen. Copy: `bipe_onboarding_*` in bipe-shared. Android: `BipeWelcomeView` in libraries/bipe.
+- **App icon:** the web mark (`bipe-web/public/brand/app-icon.svg`, white seal-tail bubble on `acai.1100`, tight corner top left so it reads as a "b") rendered full-bleed at 1024 px; iOS applies the corner mask. iOS and web share one icon. Final designer artwork replaces both at once.
 
 Entitlements removed from the fork (they block provisioning outside Element's team):
 - `com.apple.developer.usernotifications.filtering` (NSE). Apple grants it on request only. Without it the NSE cannot silently drop notifications. Request it for Bipe later.
@@ -92,7 +92,7 @@ Not done (needs the domain, Apple team or brand):
 - Element Classic migration settings in `app.yml`
 - Final app icon artwork
 
-## Voice messages (proseio/docs/audio.md, ADR 0023)
+## Voice messages (bipe/docs/audio.md, ADR 0023)
 
 - **Transcript:** `VoiceTranscriber` and `VoiceTranscriptDraft` in BipeKit. On-device Apple Speech only; no model, no transcript. The draft starts in `TimelineInteractionHandler` when a recording stops, rides in `ComposerMode.previewVoiceMessage(transcript:)`, and goes out as the event caption through `sendVoiceMessage(caption:)` on the recorder, controller and proxy.
 - **Display and scam check:** `BipeVoiceTranscriptView` under `VoiceMessageRoomTimelineView`; `RoomTimelineItemFactory.bipeAddingScamWarning(to: AudioRoomTimelineItemContent…)`.
@@ -109,7 +109,7 @@ Not done (needs the domain, Apple team or brand):
 - **Make from a photo:** the picker's "+" menu → PhotosPicker → `StickerMaker` (BipeKit) cuts out the subject with Vision (`VNGenerateForegroundInstanceMaskRequest`), or crops a centred square when there is no subject, fits it on a transparent 512 × 512 canvas and encodes PNG. On the device, nothing leaves it before the upload.
 - **Save a received sticker:** timeline menu action `.saveSticker` → `TimelineInteractionHandler.saveSticker` downloads the image and adds it. `BipeStickerSaver` is the one place that adds stickers to the pack (import, photo, save).
 
-## Groups MVP (proseio/docs/groups.md, ADR 0026)
+## Groups MVP (bipe/docs/groups.md, ADR 0026)
 
 - **Quiet by default (#97):** `BipeQuietGroups` runs once per account from `AppCoordinator.runPostSessionSetupTasks`. It sets the group default to mentions and keywords and adds the override push rule `chat.bipe.poll_start` (`*.poll.start`) so new polls notify. It does nothing until `canPushEncryptedEventsToDevice()` is true: mentions in encrypted rooms need Synapse `msc4028_push_encrypted_events`, or mentions-only silences the group. Turn that server flag on only after Apple grants the NSE filtering entitlement (see Rebrand status), or the NSE cannot drop the other pushes. Android ships the same feature (#97, #98).
 - **"O que você perdeu" (#98):** `BipeMissedSummary` (rules) and `BipeMissedSummaryView` sit above the read marker in `RoomTimelineItemView`. Shown in groups on the live timeline when at least 20 loaded messages follow the marker. Lines: mentions of you or @room, replies to you, open polls you have not voted in. Pins are not in it yet.
@@ -126,7 +126,7 @@ Not done (needs the domain, Apple team or brand):
 
 ## Design tokens
 
-- Compound tokens come from the Bipe fork **proseio/compound-design-tokens** (local clone `~/Dev/Proseio/proseio-tokens`, notes in its `PROSEIO.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
+- Compound tokens come from the Bipe fork **bipe-chat/compound-design-tokens** (local clone `~/Dev/Bipe/bipe-tokens`, notes in its `BIPE.md`). The repo keeps the upstream name on purpose: SwiftPM names a mirrored package after the mirror's repo, and `compound-ios` and `element-call-ios` both expect `compound-design-tokens`.
 - `Tools/XcodeGen/mirrors.json` maps Element's URL to the fork for every package. `postGenCommand.sh` copies it into the workspace on each `xcodegen`.
 - `compound-ios/Package.swift` pins the fork's version tag (`exact:`). Bump it when the fork gets a new tag.
 - `ORGANIZATIONNAME` in `project.yml` (file headers)
@@ -141,7 +141,7 @@ Not done (needs the domain, Apple team or brand):
 
 ## Differences from Android (ADR 0031)
 
-Each line is a deliberate difference with its reason. A difference not listed here is a bug. Android's list: `../proseio-android/PROSEIO.md`.
+Each line is a deliberate difference with its reason. A difference not listed here is a bug. Android's list: `../bipe-android/BIPE.md`.
 
 | Area | iOS | Android | Reason |
 |---|---|---|---|

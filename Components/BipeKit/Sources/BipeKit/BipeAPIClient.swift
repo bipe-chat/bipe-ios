@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// Client for the Bipe API. Contract: proseio-shared/api/openapi.yaml.
+/// Client for the Bipe API. Contract: bipe-shared/api/openapi.yaml.
 public struct BipeAPIClient: Sendable {
     public let baseURL: URL
     private let session: URLSession

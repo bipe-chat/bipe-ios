@@ -9,7 +9,7 @@ import DeviceCheck
 import Foundation
 
 /// Apple App Attest for sign-up: proves the request comes from the genuine app on a real Apple device.
-/// Server side: proseio-api/src/attest.ts.
+/// Server side: bipe-api/src/attest.ts.
 public enum BipeAppAttest {
     /// False on the simulator and on devices without the Secure Enclave support App Attest needs.
     public static var isSupported: Bool {

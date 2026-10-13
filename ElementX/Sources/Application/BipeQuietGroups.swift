@@ -7,7 +7,7 @@
 import MatrixRustSDK
 import SwiftUI
 
-/// Groups MVP (proseio#97): groups notify only for mentions, replies and new polls. Runs once per account.
+/// Groups MVP (bipe#97): groups notify only for mentions, replies and new polls. Runs once per account.
 ///
 /// Mentions in encrypted rooms need the server to push every encrypted event so the NSE can check them after decryption
 /// (Synapse `msc4028_push_encrypted_events`). Without it, mentions-only silences an encrypted group completely, so this

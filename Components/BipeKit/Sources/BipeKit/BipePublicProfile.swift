@@ -6,7 +6,7 @@
 
 import SwiftUI
 
-/// Same ids as `profileProblem()` in proseio-shared/tools/lib/registries.mjs and the API's `ProfileProblem`.
+/// Same ids as `profileProblem()` in bipe-shared/tools/lib/registries.mjs and the API's `ProfileProblem`.
 public enum BipeProfileProblem: String, Sendable, Equatable {
     case nameEmpty = "name_empty"
     case nameTooLong = "name_too_long"

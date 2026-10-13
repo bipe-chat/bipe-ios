@@ -7,7 +7,7 @@
 import Compound
 import SwiftUI
 
-/// Bipe: pause a voice message recording and continue it later (proseio/docs/audio.md).
+/// Bipe: pause a voice message recording and continue it later (bipe/docs/audio.md).
 struct BipeRecordingPauseButton: View {
     @ObservedObject var recorderState: AudioRecorderState
     let pause: () -> Void

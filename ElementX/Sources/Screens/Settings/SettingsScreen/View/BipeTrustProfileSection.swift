@@ -8,7 +8,7 @@ import Compound
 import BipeKit
 import SwiftUI
 
-/// Bipe: the "Perfil de confiança" card at the top of Settings (proseio/docs/trust-levels.md).
+/// Bipe: the "Perfil de confiança" card at the top of Settings (bipe/docs/trust-levels.md).
 struct BipeTrustProfileSection: View {
     let profile: BipeTrustProfile
     let send: (SettingsScreenViewAction) -> Void

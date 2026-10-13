@@ -25,7 +25,7 @@ struct VoiceMessageRoomTimelineView: View {
         }
     }
 
-    /// Bipe: the sender-side transcript and its scam warning (proseio/docs/audio.md).
+    /// Bipe: the sender-side transcript and its scam warning (bipe/docs/audio.md).
     @ViewBuilder
     private var bipeTranscriptAndWarning: some View {
         let transcript = timelineItem.content.caption.flatMap { $0.isEmpty ? nil : $0 }

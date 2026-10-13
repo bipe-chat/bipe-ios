@@ -7,7 +7,7 @@
 import Foundation
 
 /// Flags payment-scam signals in a message.
-/// Must match proseio-shared/test-vectors/scam-detection.json.
+/// Must match bipe-shared/test-vectors/scam-detection.json.
 public nonisolated enum ScamDetector {
     /// Match IDs in reference order: `<patternGroup>:<id>` for regexes, then `urgency:<phrase>`, then `receipt:<keyword>`.
     public static func matchIDs(in message: String) -> [String] {
@@ -42,7 +42,7 @@ public nonisolated enum ScamDetector {
             ("boletoPatterns", BipeRegistries.boletoPatterns),
             ("linkPatterns", BipeRegistries.linkPatterns)
         ]
-        // proseio-shared validates every regex at generation time, so a compile failure here is not expected.
+        // bipe-shared validates every regex at generation time, so a compile failure here is not expected.
         return groups.flatMap { group in
             group.patterns.compactMap { pattern in
                 (try? NSRegularExpression(pattern: pattern.regex)).map {

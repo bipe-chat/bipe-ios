@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// The "Perfil de confiança" ladder from proseio/docs/trust-levels.md. Only the account owner sees it.
+/// The "Perfil de confiança" ladder from bipe/docs/trust-levels.md. Only the account owner sees it.
 /// Step 2 is computed here from the Matrix profile and the handle; steps 3 to 5 wait for the API.
 /// Android mirrors the same step and item ids.
 public nonisolated struct BipeTrustProfile: Sendable, Equatable {

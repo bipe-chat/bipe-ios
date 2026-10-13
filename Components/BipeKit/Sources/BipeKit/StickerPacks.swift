@@ -6,7 +6,7 @@
 
 import Foundation
 
-// Sticker packs per MSC2545 (proseio/docs/adr/0033-sticker-packs-msc2545.md).
+// Sticker packs per MSC2545 (bipe/docs/adr/0033-sticker-packs-msc2545.md).
 
 public enum StickerPackEventType {
     /// Global account data: the user's own pack.

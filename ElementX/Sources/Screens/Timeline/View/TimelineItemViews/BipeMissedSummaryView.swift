@@ -8,7 +8,7 @@ import Compound
 import BipeKit
 import SwiftUI
 
-/// The "O que você perdeu" block above the read marker (proseio#98). Each line opens its message.
+/// The "O que você perdeu" block above the read marker (bipe#98). Each line opens its message.
 struct BipeMissedSummaryView: View {
     let summary: BipeMissedSummary
     let onTap: (String) -> Void

@@ -9,7 +9,7 @@ import Observation
 import Speech
 import Synchronization
 
-/// On-device speech to text for voice messages (proseio/docs/audio.md). Audio never leaves the phone.
+/// On-device speech to text for voice messages (bipe/docs/audio.md). Audio never leaves the phone.
 public nonisolated enum VoiceTranscriber {
     /// The transcript, or `nil` when permission is denied, no on-device model fits, or nothing was said.
     public static func transcribe(fileURL: URL) async -> String? {

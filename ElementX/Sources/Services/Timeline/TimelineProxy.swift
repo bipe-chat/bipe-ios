@@ -433,7 +433,7 @@ final class TimelineProxy: TimelineProxyProtocol {
         MXLog.info("Sending voice message")
         
         do {
-            // Bipe: the caption carries the sender-side transcript (proseio/docs/audio.md).
+            // Bipe: the caption carries the sender-side transcript (bipe/docs/audio.md).
             let handle = try timeline.sendVoiceMessage(params: .init(source: .file(filename: url.path(percentEncoded: false)),
                                                                      caption: caption,
                                                                      formattedCaption: nil,

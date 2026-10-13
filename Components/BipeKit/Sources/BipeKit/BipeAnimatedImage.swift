@@ -9,7 +9,7 @@ import ImageIO
 import SwiftUI
 
 /// Plays an animated image (animated WebP, APNG, GIF) with ImageIO. Kingfisher animates GIF only,
-/// and WhatsApp stickers are animated WebP (proseio/docs/adr/0029-stickers-in-core.md).
+/// and WhatsApp stickers are animated WebP (bipe/docs/adr/0029-stickers-in-core.md).
 public struct BipeAnimatedImage: UIViewRepresentable {
     private let data: Data
 

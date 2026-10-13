@@ -3,7 +3,7 @@
 import PackageDescription
 
 // Bipe-specific code. Registries and strings in Sources/BipeKit/Generated
-// come from proseio-shared (node tools/gen.mjs). Do not edit them by hand.
+// come from bipe-shared (node tools/gen.mjs). Do not edit them by hand.
 let package = Package(
     name: "BipeKit",
     defaultLocalization: "pt-BR",
@@ -21,7 +21,7 @@ let package = Package(
                     .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
                     .enableUpcomingFeature("InferIsolatedConformances")
                 ]),
-        // Reads ../../../proseio-shared/test-vectors directly (ADR 0031 rule 4). Run: swift test
+        // Reads ../../../bipe-shared/test-vectors directly (ADR 0031 rule 4). Run: swift test
         .testTarget(name: "BipeKitTests",
                     dependencies: ["BipeKit"])
     ]

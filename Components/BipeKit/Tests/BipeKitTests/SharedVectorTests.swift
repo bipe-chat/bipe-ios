@@ -8,7 +8,7 @@ import Foundation
 @testable import BipeKit
 import Testing
 
-/// Every case in proseio-shared/test-vectors must pass (ADR 0031, rule 4). Android runs the same files.
+/// Every case in bipe-shared/test-vectors must pass (ADR 0031, rule 4). Android runs the same files.
 struct SharedVectorTests {
     @Test
     func normalization() throws {
@@ -77,17 +77,17 @@ struct SharedVectorTests {
     }
 }
 
-/// Loads proseio-shared/test-vectors next to this repo. BIPE_SHARED overrides the proseio-shared path.
+/// Loads bipe-shared/test-vectors next to this repo. BIPE_SHARED overrides the bipe-shared path.
 enum SharedVectors {
     static var directory: URL {
         if let path = ProcessInfo.processInfo.environment["BIPE_SHARED"] {
             return URL(filePath: path).appending(path: "test-vectors")
         }
-        // Tests/BipeKitTests/<file> -> BipeKit -> Components -> proseio-ios -> Bipe
+        // Tests/BipeKitTests/<file> -> BipeKit -> Components -> bipe-ios -> Bipe
         return URL(filePath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            .appending(path: "proseio-shared/test-vectors")
+            .appending(path: "bipe-shared/test-vectors")
     }
 
     static func object(_ name: String) throws -> [String: Any] {

@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// Same ids as `handleProblem()` in proseio-shared/tools/lib/registries.mjs and the API's `HandleProblem`.
+/// Same ids as `handleProblem()` in bipe-shared/tools/lib/registries.mjs and the API's `HandleProblem`.
 public enum BipeHandleProblem: String, Sendable, Equatable {
     case tooShort = "too_short"
     case tooLong = "too_long"

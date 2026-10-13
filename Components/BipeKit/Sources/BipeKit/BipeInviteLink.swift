@@ -9,7 +9,7 @@ import Foundation
 /// Invite links: `https://bipe.chat/convite/XXXX-XXXX-XXXX`. The web page there explains how to install;
 /// the app opens it as a universal link and pre-fills the sign-up code.
 public nonisolated enum BipeInviteLink {
-    /// Rule: proseio-shared/registries/invite-codes.json (generated). Cases: test-vectors/invite-codes.json.
+    /// Rule: bipe-shared/registries/invite-codes.json (generated). Cases: test-vectors/invite-codes.json.
     private static let pattern = try? NSRegularExpression(pattern: BipeRegistries.inviteCodePattern)
 
     /// The invite code in a link, normalised, or `nil` when the URL is not an invite link.

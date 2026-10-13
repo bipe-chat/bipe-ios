@@ -55,7 +55,7 @@ public extension ScamDetector {
     }
 
     /// Picks the most actionable warning from `matchIDs(in:)` output.
-    /// Must match proseio-shared/test-vectors/scam-warnings.json.
+    /// Must match bipe-shared/test-vectors/scam-warnings.json.
     static func warningKind(forMatchIDs matchIDs: [String], message: String) -> ScamWarningKind? {
         let groups = Set(matchIDs.compactMap { $0.split(separator: ":", maxSplits: 1).first.map(String.init) })
         let phrases = matchIDs.compactMap { $0.hasPrefix("urgency:") ? String($0.dropFirst("urgency:".count)) : nil }
@@ -91,11 +91,11 @@ public extension ScamDetector {
         let plain: String
     }
 
-    /// Every link host in the message. Must match proseio-shared `linkHosts`.
+    /// Every link host in the message. Must match bipe-shared `linkHosts`.
     static func linkHosts(in message: String) -> [LinkHost] {
         let plain = NameNormalizer.normalize(message, homoglyphs: [:]) as NSString
         let folded = NameNormalizer.normalize(message, homoglyphs: BipeRegistries.hostHomoglyphs) as NSString
-        // proseio-shared validates that host folding keeps every UTF-16 index. An empty plain host is never official.
+        // bipe-shared validates that host folding keeps every UTF-16 index. An empty plain host is never official.
         let aligned = plain.length == folded.length
         return linkExpressions.flatMap { expression in
             expression.matches(in: folded as String, range: NSRange(location: 0, length: folded.length)).map {
@@ -114,7 +114,7 @@ public extension ScamDetector {
     private static let maxCachedEvents = 2000
     private static let warningCache = Mutex<[String: CachedWarning]>([:])
 
-    /// proseio-shared validates that the priority lists every kind once, so `compactMap` drops nothing.
+    /// bipe-shared validates that the priority lists every kind once, so `compactMap` drops nothing.
     private static let warningKindPriority = BipeRegistries.scamWarningKindPriority.compactMap(ScamWarningKind.init(rawValue:))
 
     private static let deliveryWordLists = [
@@ -128,7 +128,7 @@ public extension ScamDetector {
         BipeRegistries.bankAlertThreatWords
     ]
 
-    // proseio-shared validates every regex at generation time, so a compile failure here is not expected.
+    // bipe-shared validates every regex at generation time, so a compile failure here is not expected.
     private static let linkExpressions = BipeRegistries.linkPatterns.compactMap { try? NSRegularExpression(pattern: $0.regex) }
 
     /// True when the host copies a brand: its folded form names a brand and its plain form is not that brand's domain.

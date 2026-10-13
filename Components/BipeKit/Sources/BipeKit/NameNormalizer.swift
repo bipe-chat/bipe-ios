@@ -6,8 +6,8 @@
 
 import Foundation
 
-/// Port of `normalize()` in proseio-shared/tools/lib/registries.mjs.
-/// Must match proseio-shared/test-vectors/normalization.json.
+/// Port of `normalize()` in bipe-shared/tools/lib/registries.mjs.
+/// Must match bipe-shared/test-vectors/normalization.json.
 public nonisolated enum NameNormalizer {
     /// NFKD, strip combining marks, lowercase, fold homoglyphs, collapse whitespace, trim.
     /// Pass an empty `homoglyphs` map to skip folding (scam phrase matching does this).

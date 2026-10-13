@@ -20,7 +20,7 @@ class AudioRecorderState: ObservableObject, Identifiable {
     let id = UUID()
     
     @Published private(set) var recordingState: AudioRecorderRecordingState = .stopped
-    /// Bipe: the sender paused the recording and can resume it (proseio/docs/audio.md).
+    /// Bipe: the sender paused the recording and can resume it (bipe/docs/audio.md).
     @Published private(set) var isPaused = false
     @Published private(set) var duration = 0.0
     @Published private(set) var waveformSamples: [Float] = []

@@ -8,7 +8,7 @@ import Compound
 import BipeKit
 import SwiftUI
 
-/// Bipe: the sender-side transcript under a voice message (proseio/docs/audio.md).
+/// Bipe: the sender-side transcript under a voice message (bipe/docs/audio.md).
 struct BipeVoiceTranscriptView: View {
     let text: String
 

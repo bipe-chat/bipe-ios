@@ -657,7 +657,7 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         return content
     }
     
-    /// Bipe: the same check on the transcript of an incoming voice message (proseio/docs/audio.md).
+    /// Bipe: the same check on the transcript of an incoming voice message (bipe/docs/audio.md).
     private func bipeAddingScamWarning(to content: AudioRoomTimelineItemContent,
                                           _ eventItemProxy: EventTimelineItemProxy,
                                           _ isOutgoing: Bool) -> AudioRoomTimelineItemContent {

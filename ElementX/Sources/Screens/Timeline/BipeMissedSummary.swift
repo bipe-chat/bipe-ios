@@ -6,7 +6,7 @@
 
 import SwiftUI
 
-/// Groups MVP (proseio#98): what a member missed since the last visit, built from the loaded items after the read marker.
+/// Groups MVP (bipe#98): what a member missed since the last visit, built from the loaded items after the read marker.
 /// Fixed rules over decrypted items on the device. Nothing goes to the server.
 struct BipeMissedSummary: Equatable {
     struct Line: Equatable, Identifiable {

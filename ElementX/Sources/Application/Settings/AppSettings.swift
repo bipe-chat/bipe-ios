@@ -238,7 +238,7 @@ final nonisolated class AppSettings: @unchecked Sendable {
         pushGatewayBaseURL.appending(path: "_matrix/push/v1/notify")
     }
     
-    /// Bipe API (sign-up, handles). Contract: proseio-shared/api/openapi.yaml.
+    /// Bipe API (sign-up, handles). Contract: bipe-shared/api/openapi.yaml.
     private(set) var bipeAPIBaseURL: URL = "https://api.bipe.net.br" // Bipe
     /// Bipe: "Create account" for this provider opens the invite sign-up screen instead of MAS registration.
     private(set) var bipeSignupServerName = "bipe.net.br"

@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// Phone numbers for contact discovery: Brazilian mobiles in any local format, other countries only when written with `+` or `00`. Rule: proseio-shared/registries/phone-numbers.json (generated);
+/// Phone numbers for contact discovery: Brazilian mobiles in any local format, other countries only when written with `+` or `00`. Rule: bipe-shared/registries/phone-numbers.json (generated);
 /// cases: test-vectors/phone-numbers.json. Same result as the API's `normalizePhone`.
 public nonisolated enum BipePhoneNumber {
     /// E.164 (`+5511987654321`) from an address-book entry, or `nil`.
