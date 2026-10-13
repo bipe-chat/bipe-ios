@@ -8,7 +8,7 @@ import BipeKit
 import Compound
 import SwiftUI
 
-/// Bipe's welcome content on the start screen: the logo, the welcome line, the promise and three value points.
+/// Bipe's welcome content on the start screen: the logo, one headline and three value points.
 /// Android: `BipeWelcomeView` in libraries/bipe.
 struct BipeWelcomeView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -22,13 +22,8 @@ struct BipeWelcomeView: View {
                     .padding(.bottom, 32)
             }
 
+            // One headline (bipe#195): the welcome line, at heading size.
             Text(BipeStrings.onboardingWelcome)
-                .font(.compound.bodyLGSemibold)
-                .foregroundStyle(.compound.textPrimary)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 8)
-
-            Text(BipeStrings.onboardingTitle)
                 .font(.compound.headingXLBold)
                 .foregroundStyle(.compound.textPrimary)
                 .multilineTextAlignment(.center)
