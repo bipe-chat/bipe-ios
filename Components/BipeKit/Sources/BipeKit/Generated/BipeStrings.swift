@@ -296,6 +296,12 @@ public enum BipeStrings {
 
     public static var invitesRevoke: String { NSLocalizedString("bipe_invites_revoke", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var invitesQrAction: String { NSLocalizedString("bipe_invites_qr_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesQrTitle: String { NSLocalizedString("bipe_invites_qr_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesQrFooter: String { NSLocalizedString("bipe_invites_qr_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var invitesChat: String { NSLocalizedString("bipe_invites_chat", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var errorInviteQuota: String { NSLocalizedString("bipe_error_invite_quota", tableName: "Bipe", bundle: .module, comment: "") }
