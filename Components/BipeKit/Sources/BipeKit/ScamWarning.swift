@@ -9,8 +9,11 @@ import Synchronization
 
 /// The scam pattern a message looks like (security.md rule 9). Friction, not protection.
 public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
+    case extortion
     case pixCode
     case boleto
+    case remoteApp
+    case pinRequest
     case pixKey
     case deliveryFee
     case lookalikeLink
@@ -22,8 +25,11 @@ public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
     /// The pt-BR first explanation. It never says the message IS a scam.
     public var message: String {
         switch self {
+        case .extortion: BipeStrings.scamWarningExtortion
         case .pixCode: BipeStrings.scamWarningPixCode
         case .boleto: BipeStrings.scamWarningBoleto
+        case .remoteApp: BipeStrings.scamWarningRemoteApp
+        case .pinRequest: BipeStrings.scamWarningPinRequest
         case .pixKey: BipeStrings.scamWarningPixKey
         case .deliveryFee: BipeStrings.scamWarningDeliveryFee
         case .lookalikeLink: BipeStrings.scamWarningLookalikeLink
@@ -64,8 +70,20 @@ public extension ScamDetector {
 
         return warningKindPriority.first { kind in
             switch kind {
+            // A threat with a payment demand (sextortion, "I know where you live"). A threat alone is not this kind.
+            case .extortion: containsAny(normalized, BipeRegistries.extortionThreatPhrases)
+                && containsAny(normalized, BipeRegistries.extortionDemandWords)
             case .pixCode: groups.contains("pixCopyPastePatterns")
             case .boleto: groups.contains("boletoPatterns")
+            // A request to install a remote-access app: by name, or by a link that is not an official or app-store
+            // address in a message about a bank, a card or Pix.
+            case .remoteApp: containsWord(normalized, BipeRegistries.remoteAppInstallWords)
+                && (containsWord(normalized, BipeRegistries.remoteAppNames)
+                    || (hosts.contains { !isUnder($0.plain, installSafeDomains) } && containsAny(normalized, BipeRegistries.remoteAppBankWords)))
+            // Fake support asks for the PIN or a code. Bipe never asks for either.
+            case .pinRequest: containsAny(normalized, BipeRegistries.pinRequestAskPhrases)
+                && containsWord(normalized, BipeRegistries.pinRequestSecretWords)
+                && containsWord(normalized, BipeRegistries.pinRequestSupportWords)
             // A phone number or e-mail alone is normal chat. Warn only when the message also talks about Pix.
             case .pixKey: groups.contains("pixKeyPatterns") && containsAny(normalized, BipeRegistries.pixKeyContextWords)
             // The fake-delivery fee scam: a link, and the message talks about a held parcel and a fee.
@@ -123,6 +141,8 @@ public extension ScamDetector {
         BipeRegistries.deliveryFeeWords
     ]
 
+    private static let installSafeDomains = BipeRegistries.officialDomains + BipeRegistries.appStoreDomains
+
     private static let bankAlertWordLists = [
         BipeRegistries.bankAlertSubjectWords,
         BipeRegistries.bankAlertThreatWords
@@ -132,10 +152,19 @@ public extension ScamDetector {
     private static let linkExpressions = BipeRegistries.linkPatterns.compactMap { try? NSRegularExpression(pattern: $0.regex) }
 
     /// True when the host copies a brand: its folded form names a brand and its plain form is not that brand's domain.
+    /// A short host label ("bcb", "gov") must be a whole label, so "receitas.globo.com" does not match "receita".
     private static func isLookalike(_ host: LinkHost) -> Bool {
         let squashed = host.folded.replacingOccurrences(of: ".", with: "").replacingOccurrences(of: "-", with: "")
-        guard BipeRegistries.lookalikeBrandTokens.contains(where: { containsCodeUnits(squashed, $0) }) else { return false }
-        return !BipeRegistries.officialDomains.contains { host.plain == $0 || host.plain.hasSuffix(".\($0)") }
+        let labels = host.folded.split(omittingEmptySubsequences: false) { $0 == "." || $0 == "-" }.map(String.init)
+        let namesBrand = BipeRegistries.lookalikeBrandTokens.contains { containsCodeUnits(squashed, $0) }
+            || labels.contains { BipeRegistries.lookalikeHostLabels.contains($0) }
+        guard namesBrand else { return false }
+        return !isUnder(host.plain, BipeRegistries.officialDomains)
+    }
+
+    /// True when the plain host is one of `domains` or a subdomain of one.
+    private static func isUnder(_ plain: String, _ domains: [String]) -> Bool {
+        domains.contains { plain == $0 || plain.hasSuffix(".\($0)") }
     }
 
     private static func containsAny(_ normalized: String, _ words: [String]) -> Bool {
