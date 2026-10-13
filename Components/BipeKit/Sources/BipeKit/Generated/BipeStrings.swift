@@ -104,23 +104,9 @@ public enum BipeStrings {
 
     public static var signupTitle: String { NSLocalizedString("bipe_signup_title", tableName: "Bipe", bundle: .module, comment: "") }
 
-    public static var signupHeader: String { NSLocalizedString("bipe_signup_header", tableName: "Bipe", bundle: .module, comment: "") }
-
     public static var signupEmail: String { NSLocalizedString("bipe_signup_email", tableName: "Bipe", bundle: .module, comment: "") }
 
-    public static var signupEmailFooter: String { NSLocalizedString("bipe_signup_email_footer", tableName: "Bipe", bundle: .module, comment: "") }
-
     public static var signupEmailInvalid: String { NSLocalizedString("bipe_signup_email_invalid", tableName: "Bipe", bundle: .module, comment: "") }
-
-    public static var signupPassword: String { NSLocalizedString("bipe_signup_password", tableName: "Bipe", bundle: .module, comment: "") }
-
-    public static func signupPasswordFooter(_ p1: String) -> String {
-        String(format: NSLocalizedString("bipe_signup_password_footer", tableName: "Bipe", bundle: .module, comment: ""), p1)
-    }
-
-    public static var signupPasswordConfirm: String { NSLocalizedString("bipe_signup_password_confirm", tableName: "Bipe", bundle: .module, comment: "") }
-
-    public static var signupPasswordMismatch: String { NSLocalizedString("bipe_signup_password_mismatch", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var signupHandle: String { NSLocalizedString("bipe_signup_handle", tableName: "Bipe", bundle: .module, comment: "") }
 
@@ -129,8 +115,6 @@ public enum BipeStrings {
     public static var signupDisplayName: String { NSLocalizedString("bipe_signup_display_name", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var signupSubmit: String { NSLocalizedString("bipe_signup_submit", tableName: "Bipe", bundle: .module, comment: "") }
-
-    public static var signupSuccess: String { NSLocalizedString("bipe_signup_success", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var handlePlaceholder: String { NSLocalizedString("bipe_handle_placeholder", tableName: "Bipe", bundle: .module, comment: "") }
 
