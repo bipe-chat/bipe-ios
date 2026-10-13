@@ -5,8 +5,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-# Unique, increasing build number per upload (App Store Connect rejects duplicates).
-BUILD_NUMBER=$(date -u +%Y%m%d%H%M)
+# Version and build number come from bipe-shared (ADR 0088): node tools/bump-build.mjs there, then commit
+# and push bipe-shared and this repo before you upload. App Store Connect rejects a build number it has seen.
+# shellcheck source=version.env
+. Tools/Bipe/version.env
+if [ -n "$(git status --porcelain -- Tools/Bipe/version.env)" ]; then
+  echo "Tools/Bipe/version.env has uncommitted changes. Commit and push the bump first." >&2
+  exit 1
+fi
+BUILD_NUMBER=$BIPE_BUILD
 ARCHIVE=build/Bipe-$BUILD_NUMBER.xcarchive
 PACKAGES=${CLONED_SOURCE_PACKAGES:-}
 
@@ -20,15 +27,15 @@ if [ -f "$ASC_KEY_PATH" ]; then
   AUTH+=(-authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
 fi
 
-echo "Archiving build $BUILD_NUMBER"
+echo "Archiving $BIPE_VERSION ($BUILD_NUMBER)"
 xcodebuild archive -project ElementX.xcodeproj -scheme ElementX -configuration Release \
   -destination 'generic/platform=iOS' -archivePath "$ARCHIVE" "${AUTH[@]}" \
   ${PACKAGES:+-clonedSourcePackagesDirPath "$PACKAGES"} \
-  CURRENT_PROJECT_VERSION="$BUILD_NUMBER" "$@"
+  MARKETING_VERSION="$BIPE_VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" "$@"
 
 echo "Uploading to App Store Connect"
 xcodebuild -exportArchive -archivePath "$ARCHIVE" \
   -exportOptionsPlist Tools/Bipe/ExportAppStore.plist \
   -exportPath "build/appstore-$BUILD_NUMBER" "${AUTH[@]}"
 
-echo "Uploaded build $BUILD_NUMBER. Add it to the external TestFlight group in App Store Connect."
+echo "Uploaded $BIPE_VERSION ($BUILD_NUMBER). Add it to the external TestFlight group in App Store Connect."
