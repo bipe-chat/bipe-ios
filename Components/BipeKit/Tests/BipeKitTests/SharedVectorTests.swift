@@ -11,6 +11,19 @@ import Testing
 /// Every case in bipe-shared/test-vectors must pass (ADR 0031, rule 4). Android runs the same files.
 struct SharedVectorTests {
     @Test
+    func trustFacts() throws {
+        let vectors = try SharedVectors.array("trust-facts.json", key: "vectors")
+        #expect(!vectors.isEmpty)
+        for vector in vectors {
+            let inputData = try JSONSerialization.data(withJSONObject: #require(vector["input"]))
+            let expectedData = try JSONSerialization.data(withJSONObject: #require(vector["expected"]))
+            let input = try JSONDecoder().decode(BipeTrustInput.self, from: inputData)
+            let expected = try JSONDecoder().decode(BipeTrustFacts.self, from: expectedData)
+            #expect(BipeTrustFacts.evaluate(input) == expected, "trust facts \(vector["name"] ?? "")")
+        }
+    }
+
+    @Test
     func normalization() throws {
         for vector in try SharedVectors.array("normalization.json", key: "vectors") {
             let input = try #require(vector["input"] as? String)
