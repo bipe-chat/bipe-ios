@@ -171,6 +171,8 @@ struct BipeSignupScreen: View {
 
             if let footer = context.viewState.pinFooter {
                 errorText(footer)
+            } else {
+                hintText(BipeStrings.pinNeverAsked)
             }
         }
     }
@@ -183,6 +185,8 @@ struct BipeSignupScreen: View {
 
             if context.viewState.pinMismatch {
                 errorText(BipeStrings.pinMismatch)
+            } else {
+                hintText(BipeStrings.pinNeverAsked)
             }
 
             // The account exists but the sign-in failed: try the sign-in again.
@@ -215,6 +219,13 @@ struct BipeSignupScreen: View {
             .font(.compound.bodyMD)
             .multilineTextAlignment(.center)
             .foregroundColor(.compound.textCriticalPrimary)
+    }
+
+    private func hintText(_ text: String) -> some View {
+        Text(text)
+            .font(.compound.bodyMD)
+            .multilineTextAlignment(.center)
+            .foregroundColor(.compound.textSecondary)
     }
 
     private func placeholder(_ text: String) -> Text {

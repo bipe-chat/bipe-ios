@@ -330,6 +330,22 @@ public enum BipeRegistries {
         "bipe",
     ]
 
+    /// Short public-body and bank names for the "lookalike link" kind, matched as a whole label of a folded link host.
+    public static let lookalikeHostLabels: Set<String> = [
+        "bcb",
+        "bacen",
+        "gov",
+        "inss",
+        "receita",
+        "rfb",
+        "detran",
+        "sefaz",
+        "bb",
+        "cef",
+        "c6",
+        "btg",
+    ]
+
     /// Real domains of those brands. A host that is one of them, or a subdomain of one, is not a lookalike.
     public static let officialDomains: [String] = [
         "gov.br",
@@ -363,6 +379,12 @@ public enum BipeRegistries {
         "bipe.chat",
         "bipe.net.br",
         "proseio.com.br",
+    ]
+
+    /// App store hosts. An install link to one of them, or a subdomain of one, does not count for the "remote app" kind.
+    public static let appStoreDomains: [String] = [
+        "apps.apple.com",
+        "play.google.com",
     ]
 
     /// Normalised words for the "bank alert" kind. It needs a link and an entry from each of the two lists.
@@ -405,10 +427,128 @@ public enum BipeRegistries {
         "nao reconhec",
     ]
 
+    /// Normalised substrings for the "extortion" kind: a threat phrase and a payment demand.
+    public static let extortionThreatPhrases: [String] = [
+        "mando pra todos",
+        "mando para todos",
+        "mando pros seus",
+        "mando para os seus",
+        "mando pra sua",
+        "mando para sua",
+        "vou mandar pra todos",
+        "vou mandar para todos",
+        "vou mandar pros seus",
+        "vou mandar pra sua familia",
+        "vou mandar para sua familia",
+        "vou espalhar",
+        "vou divulgar",
+        "vou publicar",
+        "vou postar",
+        "vou vazar",
+        "vou expor",
+        "todo mundo vai ver",
+        "sua familia vai ver",
+        "seus contatos vao ver",
+        "sei onde voce mora",
+        "sei onde voce trabalha",
+        "sei onde seu filho",
+        "sei onde sua filha",
+        "sei onde seus filhos",
+        "vai se arrepender",
+    ]
+    public static let extortionDemandWords: [String] = [
+        "pix",
+        "pagar",
+        "pague",
+        "pagamento",
+        "r$",
+        "dinheiro",
+        "reais",
+        "deposit",
+        "transfer",
+    ]
+
+    /// The "remote app" kind: an install word (whole word) and an app name (whole word), or a link that is not
+    /// official or an app store and a bank word (substring).
+    public static let remoteAppInstallWords: Set<String> = [
+        "instala",
+        "instale",
+        "instalar",
+        "baixa",
+        "baixe",
+        "baixar",
+        "download",
+    ]
+    public static let remoteAppNames: Set<String> = [
+        "anydesk",
+        "any desk",
+        "teamviewer",
+        "team viewer",
+        "rustdesk",
+        "quicksupport",
+        "quick support",
+        "airdroid",
+        "ammyy",
+        "acesso remoto",
+    ]
+    public static let remoteAppBankWords: [String] = [
+        "banco",
+        "cartao",
+        "pix",
+        "fatura",
+        "estorno",
+        "seguranca",
+        "protecao",
+    ]
+
+    /// The "PIN request" kind: an ask phrase (substring), a secret (whole word) and a support word (whole word).
+    public static let pinRequestAskPhrases: [String] = [
+        "me passa",
+        "me passe",
+        "me manda",
+        "me mande",
+        "me envia",
+        "me envie",
+        "me fala",
+        "me fale",
+        "me diz",
+        "me diga",
+        "me informa",
+        "me informe",
+        "informe",
+        "confirme",
+        "digite",
+        "qual e a sua",
+        "qual a sua",
+        "qual e sua",
+        "qual sua",
+        "preciso da sua",
+        "preciso do seu",
+    ]
+    public static let pinRequestSecretWords: Set<String> = [
+        "senha",
+        "pin",
+        "codigo",
+        "token",
+        "chave de recuperacao",
+        "8 numeros",
+        "oito numeros",
+        "8 digitos",
+    ]
+    public static let pinRequestSupportWords: Set<String> = [
+        "suporte",
+        "bipe",
+        "atendimento",
+        "atendente",
+    ]
+
     /// Scam warning kind raw values, most actionable first. The first kind whose rule applies wins.
     public static let scamWarningKindPriority: [String] = [
+        "extortion",
         "pixCode",
         "boleto",
+        "remoteApp",
+        "pinRequest",
         "pixKey",
         "deliveryFee",
         "lookalikeLink",

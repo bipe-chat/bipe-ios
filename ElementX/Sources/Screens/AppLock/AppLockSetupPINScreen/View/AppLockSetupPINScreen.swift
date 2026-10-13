@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -74,6 +75,12 @@ struct AppLockSetupPINScreen: View {
                 .font(.compound.bodyMD)
                 .multilineTextAlignment(.center)
                 .foregroundColor(subtitleColor)
+
+            // Bipe: nobody from Bipe asks for the PIN (bipe#182).
+            Text(BipeStrings.pinNeverAsked)
+                .font(.compound.bodySM)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.compound.textSecondary)
         }
     }
     

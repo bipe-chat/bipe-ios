@@ -79,6 +79,9 @@ struct BipeAccountScreen: View {
                     Text(footer)
                         .compoundListSectionFooter()
                         .foregroundStyle(.compound.textCriticalPrimary)
+                } else {
+                    Text(BipeStrings.pinNeverAsked)
+                        .compoundListSectionFooter()
                 }
             }
 

@@ -11,6 +11,7 @@ import SwiftUI
 struct BipeInvitesScreen: View {
     @Bindable var context: BipeInvitesScreenViewModel.Context
     @Environment(\.bipeHandleResolver) private var handleResolver
+    @State private var qrCodeInvite: QRCodeInvite?
     
     var body: some View {
         Form {
@@ -38,6 +39,10 @@ struct BipeInvitesScreen: View {
         .navigationTitle(BipeStrings.invitesTitle)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
+        .sheet(item: $qrCodeInvite) { invite in
+            BipeInviteQRCodeSheet(url: invite.url, shareTitle: L10n.actionShare)
+                .presentationDetents([.large])
+        }
     }
     
     @ViewBuilder
@@ -53,6 +58,12 @@ struct BipeInvitesScreen: View {
                     if let url = context.viewState.shareURLs[invite.id] {
                         ShareLink(item: BipeStrings.invitesShareMessage(url.absoluteString)) {
                             Label(L10n.actionShare, icon: \.shareIos)
+                        }
+                        .buttonStyle(.compound(.secondary, size: .medium))
+                        Button {
+                            qrCodeInvite = QRCodeInvite(id: invite.id, url: url)
+                        } label: {
+                            Label(BipeStrings.invitesQrAction, icon: \.qrCode)
                         }
                         .buttonStyle(.compound(.secondary, size: .medium))
                     }
@@ -80,6 +91,11 @@ struct BipeInvitesScreen: View {
                     kind: .label)
         }
     }
+}
+
+private struct QRCodeInvite: Identifiable {
+    let id: String
+    let url: URL
 }
 
 // MARK: - Previews
