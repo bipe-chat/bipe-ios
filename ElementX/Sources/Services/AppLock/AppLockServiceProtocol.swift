@@ -122,8 +122,8 @@ extension AppLockServiceMock {
         mock.biometryType = biometryType
         mock.biometricUnlockEnabled = biometryType != .none
         mock.unlockWithClosure = { $0 == pinCode }
-        mock.pinCodeLength = pinCode?.count ?? 4
-        mock.newPINCodeLength = 4
+        mock.pinCodeLength = pinCode?.count ?? 8
+        mock.newPINCodeLength = 8
         return mock
     }
 }

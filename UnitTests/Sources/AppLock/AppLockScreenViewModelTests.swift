@@ -30,7 +30,7 @@ final class AppLockScreenViewModelTests {
     @Test
     func unlock() async throws {
         // Given a valid PIN code.
-        let pinCode = "2023"
+        let pinCode = "73914862"
         keychainController.pinCodeReturnValue = pinCode
         keychainController.containsPINCodeBiometricStateReturnValue = false
         
@@ -78,8 +78,8 @@ final class AppLockScreenViewModelTests {
     @Test
     func unlockFailure() async throws {
         // Given an invalid PIN code.
-        let pinCode = "2024"
-        keychainController.pinCodeReturnValue = "2023"
+        let pinCode = "40817352"
+        keychainController.pinCodeReturnValue = "73914862"
         keychainController.containsPINCodeBiometricStateReturnValue = false
         #expect(context.viewState.numberOfPINAttempts == 0, "The shouldn't be any attempts yet.")
         #expect(!context.viewState.isSubtitleWarning, "No warning should be shown yet.")
@@ -115,12 +115,12 @@ final class AppLockScreenViewModelTests {
     @Test
     func forceQuitRequiresLogout() async throws {
         // Given an app with a PIN set where the user attempted to unlock 3 times.
-        keychainController.pinCodeReturnValue = "2023"
+        keychainController.pinCodeReturnValue = "73914862"
         keychainController.containsPINCodeBiometricStateReturnValue = false
         appSettings.appLockNumberOfPINAttempts = 2
         #expect(context.alertInfo == nil)
         let deferred = deferFulfillment(context.$viewState) { $0.numberOfPINAttempts == 3 }
-        viewModel.context.pinCode = "0000"
+        viewModel.context.pinCode = "00000000"
         try await deferred.fulfill()
         #expect(appSettings.appLockNumberOfPINAttempts == 3, "The app should have 3 failed attempts before the force quit.")
         #expect(context.alertInfo?.id == .forcedLogout, "The app should be showing the alert before the force quit.")

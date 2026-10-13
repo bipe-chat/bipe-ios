@@ -28,7 +28,7 @@ final class AppLockSetupPINScreenViewModelTests {
         
         // When entering an new PIN.
         let createDeferred = deferFulfillment(context.$viewState) { $0.mode == .confirm }
-        context.pinCode = "2023"
+        context.pinCode = "73914862"
         try await createDeferred.fulfill()
         
         // Then the screen should transition to the confirm mode.
@@ -36,7 +36,7 @@ final class AppLockSetupPINScreenViewModelTests {
         
         // When re-entering that PIN.
         let confirmDeferred = deferFulfillment(viewModel.actions) { $0 == .complete }
-        context.pinCode = "2023"
+        context.pinCode = "73914862"
         
         // Then the screen should signal it is complete.
         try await confirmDeferred.fulfill()
@@ -52,7 +52,7 @@ final class AppLockSetupPINScreenViewModelTests {
         
         // When entering a weak PIN on the blocklist.
         let deferred = deferFulfillment(context.$viewState) { $0.bindings.alertInfo != nil }
-        context.pinCode = "0000"
+        context.pinCode = "00000000"
         try await deferred.fulfill()
         
         // Then the PIN should be rejected and the user alerted.
@@ -69,7 +69,7 @@ final class AppLockSetupPINScreenViewModelTests {
         #expect(context.alertInfo == nil, "There shouldn't be an alert to begin with.")
         
         let createDeferred = deferFulfillment(context.$viewState) { $0.mode == .confirm }
-        context.pinCode = "2023"
+        context.pinCode = "73914862"
         try await createDeferred.fulfill()
         #expect(context.viewState.mode == .confirm, "The mode should transition to confirmation.")
         #expect(context.viewState.numberOfConfirmAttempts == 0, "The mode should start with zero attempts.")
@@ -77,7 +77,7 @@ final class AppLockSetupPINScreenViewModelTests {
         
         // When entering the new PIN incorrectly
         var deferred = deferFulfillment(context.$viewState) { $0.numberOfConfirmAttempts == 1 }
-        context.pinCode = "2024"
+        context.pinCode = "40817352"
         try await deferred.fulfill()
         
         // Then the user should be alerted.
@@ -87,11 +87,11 @@ final class AppLockSetupPINScreenViewModelTests {
         // When dismissing the alert and repeating twice more.
         context.alertInfo?.primaryButton.action?()
         deferred = deferFulfillment(context.$viewState) { $0.numberOfConfirmAttempts == 2 }
-        context.pinCode = "2024"
+        context.pinCode = "40817352"
         try await deferred.fulfill()
         context.alertInfo?.primaryButton.action?()
         deferred = deferFulfillment(context.$viewState) { $0.numberOfConfirmAttempts == 3 }
-        context.pinCode = "2024"
+        context.pinCode = "40817352"
         try await deferred.fulfill()
         #expect(context.viewState.numberOfConfirmAttempts == 3, "All the mismatches should be counted.")
         #expect(context.alertInfo?.id == .pinMismatch, "A PIN mismatch should be rejected.")
@@ -106,7 +106,7 @@ final class AppLockSetupPINScreenViewModelTests {
         setup(mode: .unlock)
         
         // Given the screen in unlock mode.
-        let pinCode = "2023"
+        let pinCode = "73914862"
         keychainController.pinCodeReturnValue = pinCode
         keychainController.containsPINCodeReturnValue = true
         keychainController.containsPINCodeBiometricStateReturnValue = false
@@ -148,7 +148,7 @@ final class AppLockSetupPINScreenViewModelTests {
         setup(mode: .unlock)
         
         // Given the screen in unlock mode.
-        keychainController.pinCodeReturnValue = "2023"
+        keychainController.pinCodeReturnValue = "73914862"
         keychainController.containsPINCodeReturnValue = true
         keychainController.containsPINCodeBiometricStateReturnValue = false
         #expect(context.viewState.numberOfUnlockAttempts == 0, "The screen should start with zero attempts.")
@@ -156,8 +156,8 @@ final class AppLockSetupPINScreenViewModelTests {
         #expect(!context.viewState.isLoggingOut, "The view should not start disabled.")
         
         // When entering a different PIN.
-        var deferred = deferFulfillment(context.$viewState, keyPath: \.bindings.pinCode, transitionValues: ["", "2024", ""])
-        context.pinCode = "2024"
+        var deferred = deferFulfillment(context.$viewState, keyPath: \.bindings.pinCode, transitionValues: ["", "40817352", ""])
+        context.pinCode = "40817352"
         try await deferred.fulfill()
         
         // Then the PIN should be rejected and the user notified.
@@ -166,11 +166,11 @@ final class AppLockSetupPINScreenViewModelTests {
         #expect(!context.viewState.isLoggingOut, "The view should still work.")
         
         // When entering the same incorrect PIN twice more
-        deferred = deferFulfillment(context.$viewState, keyPath: \.bindings.pinCode, transitionValues: ["", "2024", ""])
-        context.pinCode = "2024"
+        deferred = deferFulfillment(context.$viewState, keyPath: \.bindings.pinCode, transitionValues: ["", "40817352", ""])
+        context.pinCode = "40817352"
         try await deferred.fulfill()
-        deferred = deferFulfillment(context.$viewState, keyPath: \.bindings.pinCode, transitionValues: ["", "2024", ""])
-        context.pinCode = "2024"
+        deferred = deferFulfillment(context.$viewState, keyPath: \.bindings.pinCode, transitionValues: ["", "40817352", ""])
+        context.pinCode = "40817352"
         try await deferred.fulfill()
         
         // Then the user should be alerted that they're being signed out.

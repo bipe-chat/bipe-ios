@@ -59,6 +59,8 @@ final class AuthenticationStartScreenViewModelTests {
     @Test
     func provisionedOAuthState() async throws {
         // Given a view model that has been provisioned with a server that supports OAuth.
+        // Bipe: a non-Bipe default provider, else the login button opens the Bipe recovery screen (ADR 0057).
+        setAllowedAccountProviders([.generic("company.com")])
         await setupViewModel(provisioningParameters: .init(accountProvider: "company.com", loginHint: "user@company.com"))
         #expect(authenticationService.homeserver.value.loginMode == .unknown)
         #expect(client.urlForOauthOauthConfigurationPromptLoginHintDeviceIdAdditionalScopesCallsCount == 0)
@@ -79,6 +81,8 @@ final class AuthenticationStartScreenViewModelTests {
     @Test
     func provisionedPasswordState() async throws {
         // Given a view model that has been provisioned with a server that does not support OAuth.
+        // Bipe: a non-Bipe default provider, else the login button opens the Bipe recovery screen (ADR 0057).
+        setAllowedAccountProviders([.generic("company.com")])
         await setupViewModel(provisioningParameters: .init(accountProvider: "company.com", loginHint: "user@company.com"), supportsOAuth: false)
         #expect(authenticationService.homeserver.value.loginMode == .unknown)
         #expect(client.urlForOauthOauthConfigurationPromptLoginHintDeviceIdAdditionalScopesCallsCount == 0)

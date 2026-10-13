@@ -35,7 +35,7 @@ final class AppLockServiceTests {
         #expect(!service.isEnabled, "The service shouldn't be enabled to begin with.")
         
         // When setting a PIN code.
-        let pinCode = "2023" // Highly secure PIN that is rotated every 12 months.
+        let pinCode = "73914862" // Bipe: 8 digits that pass the shared PIN rule (ADR 0057).
         guard case .success = service.setupPINCode(pinCode) else {
             Issue.record("The PIN should be valid.")
             return
@@ -44,9 +44,9 @@ final class AppLockServiceTests {
         // Then service should be enabled and only the provided PIN should work to unlock the app.
         #expect(service.isEnabled, "The service should become enabled when setting a PIN.")
         #expect(service.unlock(with: pinCode), "The provided PIN code should work.")
-        #expect(!service.unlock(with: "2024"), "No other PIN code should work.")
-        #expect(!service.unlock(with: "1234"), "No other PIN code should work.")
-        #expect(!service.unlock(with: "9999"), "No other PIN code should work.")
+        #expect(!service.unlock(with: "40817352"), "No other PIN code should work.")
+        #expect(!service.unlock(with: "12345678"), "No other PIN code should work.")
+        #expect(!service.unlock(with: "99999999"), "No other PIN code should work.")
     }
     
     @Test
@@ -54,8 +54,8 @@ final class AppLockServiceTests {
         // Given a service that hasn't been enabled.
         #expect(!service.isEnabled, "The service shouldn't be enabled to begin with.")
         
-        // When setting a PIN code that is in the block list.
-        let pinCode = appSettings.appLockPINCodeBlockList[0]
+        // When setting a weak PIN code.
+        let pinCode = "12345678" // Bipe: a sequence, weak by the shared PIN rule (ADR 0057).
         let result = service.setupPINCode(pinCode)
         
         // Then the setup should fail and the service be left as disabled.
@@ -106,8 +106,8 @@ final class AppLockServiceTests {
     @Test
     func changePINCode() {
         // Given a service that is already enabled with a PIN.
-        let pinCode = "2023"
-        let newPINCode = "2024"
+        let pinCode = "73914862"
+        let newPINCode = "40817352"
         guard case .success = service.setupPINCode(pinCode) else {
             Issue.record("The PIN should be valid.")
             return
@@ -131,8 +131,8 @@ final class AppLockServiceTests {
     @Test
     func invalidChangePINCode() {
         // Given a service that is already enabled with a PIN.
-        let pinCode = "2023"
-        let invalidPIN = appSettings.appLockPINCodeBlockList[0]
+        let pinCode = "73914862"
+        let invalidPIN = "12345678" // Bipe: a sequence, weak by the shared PIN rule (ADR 0057).
         guard case .success = service.setupPINCode(pinCode) else {
             Issue.record("The PIN should be valid.")
             return
@@ -141,7 +141,7 @@ final class AppLockServiceTests {
         #expect(service.unlock(with: pinCode), "The initial PIN should work.")
         #expect(!service.unlock(with: invalidPIN), "The PIN we're about to set should not work.")
         
-        // When updating the PIN code that is in the block list.
+        // When updating to a weak PIN code.
         let result = service.setupPINCode(invalidPIN)
         
         // Then it should fail and nothing should change.
@@ -158,7 +158,7 @@ final class AppLockServiceTests {
     @Test
     func disablePINCode() {
         // Given a service that is already enabled with a PIN.
-        let pinCode = "2023"
+        let pinCode = "73914862"
         guard case .success = service.setupPINCode(pinCode) else {
             Issue.record("The PIN should be valid.")
             return
@@ -183,7 +183,7 @@ final class AppLockServiceTests {
         context.biometryTypeValue = .touchID
         context.evaluatedPolicyDomainStateValue = Data("👆".utf8)
         service = AppLockService(keychainController: keychainController, appSettings: appSettings, context: context)
-        guard case .success = service.setupPINCode("2023") else {
+        guard case .success = service.setupPINCode("73914862") else {
             Issue.record("The PIN should be valid.")
             return
         }
@@ -216,7 +216,7 @@ final class AppLockServiceTests {
         context.biometryTypeValue = .touchID
         context.evaluatedPolicyDomainStateValue = Data("👆".utf8)
         service = AppLockService(keychainController: keychainController, appSettings: appSettings, context: context)
-        let pinCode = "2023"
+        let pinCode = "73914862"
         guard case .success = service.setupPINCode(pinCode) else {
             Issue.record("The PIN should be valid.")
             return
@@ -256,7 +256,7 @@ final class AppLockServiceTests {
         context.biometryTypeValue = .touchID
         context.evaluatedPolicyDomainStateValue = Data("👆".utf8)
         service = AppLockService(keychainController: keychainController, appSettings: appSettings, context: context)
-        guard case .success = service.setupPINCode("2023") else {
+        guard case .success = service.setupPINCode("73914862") else {
             Issue.record("The PIN should be valid.")
             return
         }
@@ -286,7 +286,7 @@ final class AppLockServiceTests {
         context.biometryTypeValue = .touchID
         context.evaluatedPolicyDomainStateValue = Data("👆".utf8)
         service = AppLockService(keychainController: keychainController, appSettings: appSettings, context: context)
-        guard case .success = service.setupPINCode("2023") else {
+        guard case .success = service.setupPINCode("73914862") else {
             Issue.record("The PIN should be valid.")
             return
         }
@@ -312,7 +312,7 @@ final class AppLockServiceTests {
     @Test
     func resetAttemptsOnUnlock() {
         // Given a service that is enabled and has failed unlock attempts.
-        let pinCode = "2023"
+        let pinCode = "73914862"
         guard case .success = service.setupPINCode(pinCode) else {
             Issue.record("The PIN should be valid.")
             return
@@ -331,7 +331,7 @@ final class AppLockServiceTests {
     @Test
     func resetAttemptsOnDisable() {
         // Given a service that is enabled and has failed unlock attempts.
-        let pinCode = "2023"
+        let pinCode = "73914862"
         guard case .success = service.setupPINCode(pinCode) else {
             Issue.record("The PIN should be valid.")
             return
@@ -431,7 +431,7 @@ final class AppLockServiceTests {
         let context = LAContextMock()
         context.canEvaluatePolicyReturnValue = false
         service = AppLockService(keychainController: keychainController, appSettings: appSettings, context: context)
-        guard case .success = service.setupPINCode("2023") else {
+        guard case .success = service.setupPINCode("73914862") else {
             Issue.record("The PIN should be valid.")
             return
         }

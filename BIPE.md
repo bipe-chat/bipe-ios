@@ -125,6 +125,8 @@ Not done (needs the domain, Apple team or brand):
 
 ## Handle change lines (ADR 0066, bipe#166)
 
+- **Remove the handle:** "Remover nome de usuário" on `BipeHandleScreen`, also during the cooldown. A confirmation alert (`bipe_handle_remove_body`), then `DELETE /v1/me/handle`. Same flow on Android.
+
 - `BipeHandleChangeStore` (BipeKit): one per session, made in `AppCoordinator.setupUserSession`, cached in `Caches/bipe-handle-changes-<user>.json`. `POST /v1/handle-changes` in chunks of 100. People without a cached change go without `since`; the others share the oldest of their latest cached times.
 - Fetch: on room open, for the joined members (`TimelineController`); after the room list loads, for the cached people plus every joined room's heroes (`AppCoordinator.refreshBipeHandleChangesAfterSync`).
 - Display: `TimelineController.bipeInsertingHandleChanges` adds a local `StateRoomTimelineItem` (virtual ID) at `at` in the room's main timeline. Rules in `BipeHandleChangePlacement`: current members only, inside the loaded range (after the end only on the live timeline), not before a join seen in the loaded items. Text: `bipe_handle_set`, `bipe_handle_changed`, `bipe_handle_removed` with the member's display name in the room.

@@ -52,6 +52,15 @@ class BipeHandleScreenViewModel: BipeHandleScreenViewModelType, BipeHandleScreen
             }
         case .save:
             Task { await save() }
+        case .removeHandle:
+            guard let handle = state.currentHandle else { return }
+            state.bindings.alertInfo = AlertInfo(id: .removeHandle,
+                                                 title: BipeStrings.handleRemove,
+                                                 message: BipeStrings.handleRemoveBody(handle),
+                                                 primaryButton: .init(title: BipeStrings.handleRemove, role: .destructive) { [weak self] in
+                                                     Task { await self?.removeHandle() }
+                                                 },
+                                                 secondaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil))
         }
     }
     
@@ -91,6 +100,30 @@ class BipeHandleScreenViewModel: BipeHandleScreenViewModelType, BipeHandleScreen
             actionsSubject.send(.done)
         } catch {
             MXLog.error("Bipe handle change failed: \(error)")
+            show(error)
+        }
+    }
+    
+    /// `DELETE /v1/me/handle` (ADR 0066). The cooldown stays.
+    private func removeHandle() async {
+        guard state.canRemove else { return }
+        
+        state.isLoading = true
+        startLoading()
+        defer {
+            stopLoading()
+            state.isLoading = false
+        }
+        
+        do {
+            let myHandle = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeMyHandle in
+                try await apiClient.removeMyHandle(accessToken: token)
+            }
+            apply(myHandle)
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.handleRemoveDone, icon: \.checkCircle))
+            actionsSubject.send(.done)
+        } catch {
+            MXLog.error("Bipe handle removal failed: \(error)")
             show(error)
         }
     }

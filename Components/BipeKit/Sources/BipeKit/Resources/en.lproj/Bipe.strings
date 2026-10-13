@@ -58,6 +58,9 @@
 "bipe_handle_cooldown_until" = "You can change it again on %1$@.";
 "bipe_handle_saved" = "Username saved.";
 "bipe_handle_screen_footer" = "This is how people find you on Bipe. After a change, you wait 30 days to change it again.";
+"bipe_handle_remove" = "Remove username";
+"bipe_handle_remove_body" = "Nobody can find you by @%1$@ anymore, and your chats show that you no longer use it.";
+"bipe_handle_remove_done" = "Username removed.";
 "bipe_handle_set" = "%1$@ is now @%2$@";
 "bipe_handle_changed" = "%1$@ is now @%2$@ (was @%3$@)";
 "bipe_handle_removed" = "%1$@ no longer uses @%2$@";

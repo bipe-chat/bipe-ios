@@ -28,7 +28,7 @@ struct AppLockSetupSettingsScreenViewModelTests {
     @Test
     func disablingShowsAlert() {
         // Given a fresh screen with the PIN code enabled.
-        let pinCode = "2023"
+        let pinCode = "73914862"
         keychainController.pinCodeReturnValue = pinCode
         keychainController.containsPINCodeReturnValue = true
         

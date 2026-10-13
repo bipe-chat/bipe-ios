@@ -22,6 +22,11 @@ struct BipeHandleScreenViewState: BindableState {
     
     var bindings = BipeHandleScreenViewStateBindings()
     
+    /// ADR 0066: a removal is allowed at any time, also during the cooldown.
+    var canRemove: Bool {
+        !isLoading && currentHandle != nil
+    }
+    
     var isInCooldown: Bool {
         guard let changeableAt else { return false }
         return changeableAt > .now
@@ -56,9 +61,11 @@ struct BipeHandleScreenViewStateBindings {
 
 enum BipeHandleScreenAlertType: Hashable {
     case error
+    case removeHandle
 }
 
 enum BipeHandleScreenViewAction {
     case handleChanged
     case save
+    case removeHandle
 }

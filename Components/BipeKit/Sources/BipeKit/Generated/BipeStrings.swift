@@ -144,6 +144,14 @@ public enum BipeStrings {
 
     public static var handleScreenFooter: String { NSLocalizedString("bipe_handle_screen_footer", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var handleRemove: String { NSLocalizedString("bipe_handle_remove", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func handleRemoveBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_handle_remove_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var handleRemoveDone: String { NSLocalizedString("bipe_handle_remove_done", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static func handleSet(_ p1: String, _ p2: String) -> String {
         String(format: NSLocalizedString("bipe_handle_set", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
     }

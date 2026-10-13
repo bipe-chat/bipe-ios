@@ -17,6 +17,14 @@ struct BipeHandleScreen: View {
             VStack(spacing: 32) {
                 handleField
                 if let handle = context.viewState.currentHandle {
+                    // Bipe ADR 0066: removal is allowed at any time, also during the cooldown.
+                    Button(role: .destructive) {
+                        context.send(viewAction: .removeHandle)
+                    } label: {
+                        Label(BipeStrings.handleRemove, icon: \.delete)
+                    }
+                    .buttonStyle(.compound(.tertiary, size: .medium))
+                    .disabled(!context.viewState.canRemove)
                     profileLinkSection(handle: handle)
                 }
             }
