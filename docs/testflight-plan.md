@@ -82,3 +82,9 @@ Invite-only. A registration token for 10 sign-ups, valid 12 days, is in MZ's Key
 - Build `202610112038` (no invite field) was removed from review: the server requires invite codes again.
 - Build `202610120012` (invite codes, App Attest, handles, Pedidos, scam warnings, trust card) submitted for Beta App Review in Amigos. Review notes give a 2-use invite code (Keychain `proseio-review-invite`).
 - Uploads sign in with the App Store Connect API key and manual App Store profiles (see BIPE.md).
+
+## Status (13 October 2026)
+
+- Build `202610121820` (version 26.10.1, bundle `br.com.proseio.app.dev`, uploaded 12 Oct 2026) is approved by Beta App Review. It is in Amigos (external, public link on) and Equipe (internal). No testers, feedback or crashes yet.
+- The App Store Connect record "Bipe Chat" (`6821694616`) has bundle ID `br.com.proseio.app.dev`, not `chat.bipe.app.dev`. App Store Connect cannot change the bundle ID of a record after a build is uploaded.
+- Since `cde6178ba` (12 Oct 2026) the app builds as `chat.bipe.app.dev`, and bipe-infra (App Attest, Sygnal, AASA) accepts only `chat.bipe.app.dev`. Builds from main need a new App Store Connect record for `chat.bipe.app.dev`.
