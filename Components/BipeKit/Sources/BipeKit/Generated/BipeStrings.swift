@@ -160,6 +160,18 @@ public enum BipeStrings {
 
     public static var handleScreenFooter: String { NSLocalizedString("bipe_handle_screen_footer", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static func handleSet(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_handle_set", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static func handleChanged(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_handle_changed", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
+
+    public static func handleRemoved(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_handle_removed", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
     public static var settingsHandle: String { NSLocalizedString("bipe_settings_handle", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var settingsHandleNone: String { NSLocalizedString("bipe_settings_handle_none", tableName: "Bipe", bundle: .module, comment: "") }
