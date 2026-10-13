@@ -109,6 +109,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private var oAuthPresenter: OAuthAuthenticationPresenter?
     /// Bipe: the code from an invite link, handed to the next sign-up screen.
     private var pendingInviteCode: BipeInviteCode?
+    /// Bipe: the start screen, to name the inviter of a pending invite (bipe#195).
+    private weak var bipeStartScreenCoordinator: AuthenticationStartScreenCoordinator?
     
     // periphery:ignore - retaining purpose
     private var bugReportFlowCoordinator: BugReportFlowCoordinator?
@@ -352,6 +354,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             .store(in: &cancellables)
         
         navigationStackCoordinator.setRootCoordinator(coordinator)
+        bipeStartScreenCoordinator = coordinator
         
         if fromState == .initial {
             navigationRootCoordinator.setRootCoordinator(navigationStackCoordinator)
@@ -482,9 +485,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     // MARK: - Bipe Sign-up
     
     private func showBipeSignupScreen() {
-        let inviteCode = pendingInviteCode
-        pendingInviteCode = nil
-        let parameters = BipeSignupScreenCoordinatorParameters(inviteCode: inviteCode,
+        // The code stays pending until sign-in, so backing out to the start screen keeps it (bipe#195).
+        let parameters = BipeSignupScreenCoordinatorParameters(inviteCode: pendingInviteCode,
                                                                apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
                                                                signIn: BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings),
                                                                appLockService: appLockService,
@@ -495,6 +497,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             .sink { [weak self] action in
                 switch action {
                 case .signedIn(let userSession):
+                    self?.pendingInviteCode = nil
                     self?.stateMachine.tryEvent(.signedIn, userInfo: userSession)
                 case .createdWithInvite(let inviterUserID):
                     self?.appSettings.bipePendingInviterUserID = inviterUserID
@@ -504,6 +507,20 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationStackCoordinator.push(coordinator) { [weak self] in
             self?.stateMachine.tryEvent(.cancelledBipeSignup)
+            Task { await self?.showPendingInviteOnStartScreen() }
+        }
+    }
+    
+    /// Names the inviter on the start screen's main button. A code that no longer works is dropped.
+    private func showPendingInviteOnStartScreen() async {
+        guard let code = pendingInviteCode else { return }
+        let apiClient = BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL)
+        guard let preview = try? await apiClient.invitePreview(code: code.value), pendingInviteCode == code else { return }
+        if preview.valid {
+            bipeStartScreenCoordinator?.bipeShowInvite(inviterHandle: preview.inviterHandle)
+        } else {
+            pendingInviteCode = nil
+            bipeStartScreenCoordinator?.bipeShowInvite(inviterHandle: nil)
         }
     }
     

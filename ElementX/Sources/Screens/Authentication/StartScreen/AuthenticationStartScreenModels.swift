@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 enum AuthenticationStartScreenViewModelAction: Equatable {
@@ -35,8 +36,15 @@ struct AuthenticationStartScreenViewState: BindableState {
     
     var bindings = AuthenticationStartScreenViewStateBindings()
     
-    /// Bipe: "Get back into your account" instead of "Sign in to …".
+    /// Bipe: "Já tenho conta" instead of "Sign in to …". Set only when the app uses Bipe sign-up.
     var bipeLoginButtonTitle: String?
+    /// Bipe: the inviter of a pending invite (bipe#195). The main button then names them.
+    var bipeInviterHandle: String?
+    
+    /// Bipe: the main button starts a new account (bipe#195).
+    var bipeRegisterButtonTitle: String {
+        bipeInviterHandle.map(BipeStrings.startJoinInvite) ?? BipeStrings.startBegin
+    }
     
     var loginButtonTitle: String {
         if let bipeLoginButtonTitle {

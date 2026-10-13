@@ -79,6 +79,11 @@ final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
             .store(in: &cancellables)
     }
     
+    /// Bipe: names the inviter of a pending invite on the main button (bipe#195).
+    func bipeShowInvite(inviterHandle: String?) {
+        viewModel.bipeShowInvite(inviterHandle: inviterHandle)
+    }
+    
     func toPresentable() -> AnyView {
         AnyView(AuthenticationStartScreen(context: viewModel.context))
     }

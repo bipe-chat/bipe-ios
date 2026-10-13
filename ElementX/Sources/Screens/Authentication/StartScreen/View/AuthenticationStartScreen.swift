@@ -70,6 +70,50 @@ struct AuthenticationStartScreen: View {
     /// The main action buttons.
     var buttons: some View {
         VStack(spacing: 16) {
+            if context.viewState.bipeLoginButtonTitle != nil {
+                bipeButtons
+            } else {
+                elementButtons
+            }
+            
+            // Bipe: no version line in release builds (bipe#195). Element keeps it for bug reports.
+            if context.viewState.bipeLoginButtonTitle == nil || AppSettings.appBuildType != .release {
+                versionText
+                    .font(.compound.bodySM)
+                    .foregroundColor(.compound.textSecondary)
+                    .onTapGesture(count: 7) {
+                        context.send(viewAction: .reportProblem)
+                    }
+                    .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.appVersion)
+                    .overlay(alignment: .trailing) {
+                        developerOptionsButton
+                            .scaledOffset(x: 32, y: -0.5, relativeTo: .compound.bodySM)
+                    }
+                    .padding(.top, 16)
+            }
+        }
+        .padding(.horizontal, verticalSizeClass == .compact ? 128 : 24)
+        .readableFrame()
+    }
+    
+    /// Bipe (bipe#195): one clear action for a new account, then the way back for a returning user.
+    @ViewBuilder
+    var bipeButtons: some View {
+        Button { context.send(viewAction: .register) } label: {
+            Text(context.viewState.bipeRegisterButtonTitle)
+        }
+        .buttonStyle(.compound(.primary))
+        
+        Button { context.send(viewAction: .login) } label: {
+            Text(context.viewState.loginButtonTitle)
+        }
+        .buttonStyle(.compound(.secondary))
+        .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.signIn)
+    }
+    
+    @ViewBuilder
+    var elementButtons: some View {
+        Group {
             if context.viewState.showQRCodeLoginButton {
                 Button { context.send(viewAction: .loginWithQR) } label: {
                     Label(L10n.screenOnboardingSignInWithQrCode, icon: \.qrCode)
@@ -90,22 +134,7 @@ struct AuthenticationStartScreen: View {
                 }
                 .buttonStyle(.compound(.tertiary))
             }
-            
-            versionText
-                .font(.compound.bodySM)
-                .foregroundColor(.compound.textSecondary)
-                .onTapGesture(count: 7) {
-                    context.send(viewAction: .reportProblem)
-                }
-                .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.appVersion)
-                .overlay(alignment: .trailing) {
-                    developerOptionsButton
-                        .scaledOffset(x: 32, y: -0.5, relativeTo: .compound.bodySM)
-                }
-                .padding(.top, 16)
         }
-        .padding(.horizontal, verticalSizeClass == .compact ? 128 : 24)
-        .readableFrame()
     }
     
     var versionText: Text {
