@@ -515,4 +515,17 @@ public enum BipeRegistries {
     public static let phoneMaxInputLength = 64
     public static let phoneInternationalMinDigits = 8
     public static let phoneInternationalMaxDigits = 15
+
+    /// Device-first accounts (ADR 0057, ADR 0059; registries/accounts.json). Check PINs with the rule there;
+    /// test-vectors/pins.json has the cases. The server is the authority.
+    public static let pinLength = 8
+    public static let pinMaxWrongTries = 5
+    public static let pinDateYearMin = 1900
+    public static let pinDateYearMax = 2099
+    public static let recoveryDelayHoursEmail = 24
+    public static let recoveryDelayHoursGuardian = 24
+    public static let recoveryDelayHoursCpf = 72
+    public static let guardianApprovalsMax = 2
+    public static let recoveryLinkMinutes = 60
+    public static let emailVerifyLinkHours = 24
 }

@@ -499,4 +499,206 @@ public enum BipeStrings {
     public static var onboardingPointHandle: String { NSLocalizedString("bipe_onboarding_point_handle", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var onboardingPointNoAds: String { NSLocalizedString("bipe_onboarding_point_no_ads", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupDeviceHeader: String { NSLocalizedString("bipe_signup_device_header", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupEmailOptional: String { NSLocalizedString("bipe_signup_email_optional", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupEmailOptionalFooter: String { NSLocalizedString("bipe_signup_email_optional_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupDeviceSuccess: String { NSLocalizedString("bipe_signup_device_success", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinCreateTitle: String { NSLocalizedString("bipe_pin_create_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func pinCreateBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_pin_create_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var pinConfirmTitle: String { NSLocalizedString("bipe_pin_confirm_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinMismatch: String { NSLocalizedString("bipe_pin_mismatch", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinProblemNotDigits: String { NSLocalizedString("bipe_pin_problem_not_digits", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func pinProblemWrongLength(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_pin_problem_wrong_length", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var pinProblemRepeatedDigit: String { NSLocalizedString("bipe_pin_problem_repeated_digit", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinProblemSequence: String { NSLocalizedString("bipe_pin_problem_sequence", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinProblemDate: String { NSLocalizedString("bipe_pin_problem_date", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinEnterTitle: String { NSLocalizedString("bipe_pin_enter_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func pinWrong(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_pin_wrong", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var pinBlockedTitle: String { NSLocalizedString("bipe_pin_blocked_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func pinBlockedBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_pin_blocked_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var pinForgot: String { NSLocalizedString("bipe_pin_forgot", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinChangeTitle: String { NSLocalizedString("bipe_pin_change_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinChangeBiometricReason: String { NSLocalizedString("bipe_pin_change_biometric_reason", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pinChanged: String { NSLocalizedString("bipe_pin_changed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var fallbackTitle: String { NSLocalizedString("bipe_fallback_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var fallbackBody: String { NSLocalizedString("bipe_fallback_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var fallbackEmail: String { NSLocalizedString("bipe_fallback_email", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func fallbackEmailBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_fallback_email_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var fallbackGuardians: String { NSLocalizedString("bipe_fallback_guardians", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func fallbackGuardiansBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_fallback_guardians_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var fallbackRecoveryKey: String { NSLocalizedString("bipe_fallback_recovery_key", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var fallbackRecoveryKeyBody: String { NSLocalizedString("bipe_fallback_recovery_key_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var fallbackSkip: String { NSLocalizedString("bipe_fallback_skip", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var fallbackReminder: String { NSLocalizedString("bipe_fallback_reminder", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var emailTitle: String { NSLocalizedString("bipe_email_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var emailFooter: String { NSLocalizedString("bipe_email_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func emailSent(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_email_sent", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var emailPending: String { NSLocalizedString("bipe_email_pending", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var emailConfirmed: String { NSLocalizedString("bipe_email_confirmed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var emailRemove: String { NSLocalizedString("bipe_email_remove", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var emailLinkInvalid: String { NSLocalizedString("bipe_email_link_invalid", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var errorEmailUnavailable: String { NSLocalizedString("bipe_error_email_unavailable", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryTitle: String { NSLocalizedString("bipe_recovery_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryQr: String { NSLocalizedString("bipe_recovery_qr", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryQrBody: String { NSLocalizedString("bipe_recovery_qr_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryQrNeverFromOthers: String { NSLocalizedString("bipe_recovery_qr_never_from_others", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryTokenFound: String { NSLocalizedString("bipe_recovery_token_found", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryEmail: String { NSLocalizedString("bipe_recovery_email", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func recoveryEmailBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_email_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var recoveryEmailField: String { NSLocalizedString("bipe_recovery_email_field", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryEmailSent: String { NSLocalizedString("bipe_recovery_email_sent", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryGuardians: String { NSLocalizedString("bipe_recovery_guardians", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func recoveryGuardiansBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_guardians_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var recoveryCpf: String { NSLocalizedString("bipe_recovery_cpf", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func recoveryCpfBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_cpf_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var recoveryNewPinTitle: String { NSLocalizedString("bipe_recovery_new_pin_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryWaitingTitle: String { NSLocalizedString("bipe_recovery_waiting_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func recoveryWaitingBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_waiting_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func recoveryWaitingPinBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_waiting_pin_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var recoveryReady: String { NSLocalizedString("bipe_recovery_ready", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryPinReady: String { NSLocalizedString("bipe_recovery_pin_ready", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryHistoryNote: String { NSLocalizedString("bipe_recovery_history_note", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryCancelled: String { NSLocalizedString("bipe_recovery_cancelled", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var errorRecoveryInvalid: String { NSLocalizedString("bipe_error_recovery_invalid", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryAlertTitle: String { NSLocalizedString("bipe_recovery_alert_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func recoveryAlertEmail(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_alert_email", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func recoveryAlertGuardian(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_alert_guardian", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func recoveryAlertCpf(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_alert_cpf", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func recoveryAlertPinReset(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_alert_pin_reset", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var recoveryAlertToken: String { NSLocalizedString("bipe_recovery_alert_token", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryAlertCancel: String { NSLocalizedString("bipe_recovery_alert_cancel", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryAlertKeep: String { NSLocalizedString("bipe_recovery_alert_keep", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryAlertCancelled: String { NSLocalizedString("bipe_recovery_alert_cancelled", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var mailRecoverySubject: String { NSLocalizedString("bipe_mail_recovery_subject", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func mailRecoveryBody(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_mail_recovery_body", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
+
+    public static var mailVerifySubject: String { NSLocalizedString("bipe_mail_verify_subject", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func mailVerifyBody(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_mail_verify_body", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static var mailNoticeSubject: String { NSLocalizedString("bipe_mail_notice_subject", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func mailNoticeRecoveryStarted(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_mail_notice_recovery_started", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func mailNoticePinResetStarted(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_mail_notice_pin_reset_started", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var mailNoticeNewDevice: String { NSLocalizedString("bipe_mail_notice_new_device", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var mailNoticePinChanged: String { NSLocalizedString("bipe_mail_notice_pin_changed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var mailNoticeEmailRemoved: String { NSLocalizedString("bipe_mail_notice_email_removed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var mailFooter: String { NSLocalizedString("bipe_mail_footer", tableName: "Bipe", bundle: .module, comment: "") }
 }
