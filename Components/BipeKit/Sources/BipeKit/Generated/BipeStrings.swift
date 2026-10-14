@@ -727,4 +727,22 @@ public enum BipeStrings {
     }
 
     public static var mailFooter: String { NSLocalizedString("bipe_mail_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustIdentityBody: String { NSLocalizedString("bipe_trust_identity_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustContactBody: String { NSLocalizedString("bipe_trust_contact_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustContactUnconfirmed: String { NSLocalizedString("bipe_trust_contact_unconfirmed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustContactConfirmAction: String { NSLocalizedString("bipe_trust_contact_confirm_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustIdentityChanged: String { NSLocalizedString("bipe_trust_identity_changed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustChangeConfirmAction: String { NSLocalizedString("bipe_trust_change_confirm_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustLifecycleUnknown: String { NSLocalizedString("bipe_trust_lifecycle_unknown", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustLifecycleRetryAction: String { NSLocalizedString("bipe_trust_lifecycle_retry_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustWarningAbsenceBody: String { NSLocalizedString("bipe_trust_warning_absence_body", tableName: "Bipe", bundle: .module, comment: "") }
 }
