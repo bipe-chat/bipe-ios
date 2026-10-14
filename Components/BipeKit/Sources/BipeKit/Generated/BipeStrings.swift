@@ -296,6 +296,12 @@ public enum BipeStrings {
 
     public static var invitesRevoke: String { NSLocalizedString("bipe_invites_revoke", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var invitesQrAction: String { NSLocalizedString("bipe_invites_qr_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesQrTitle: String { NSLocalizedString("bipe_invites_qr_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesQrFooter: String { NSLocalizedString("bipe_invites_qr_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var invitesChat: String { NSLocalizedString("bipe_invites_chat", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var errorInviteQuota: String { NSLocalizedString("bipe_error_invite_quota", tableName: "Bipe", bundle: .module, comment: "") }
@@ -713,6 +719,12 @@ public enum BipeStrings {
     public static var mailNoticePinChanged: String { NSLocalizedString("bipe_mail_notice_pin_changed", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var mailNoticeEmailRemoved: String { NSLocalizedString("bipe_mail_notice_email_removed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var mailWaitlistSubject: String { NSLocalizedString("bipe_mail_waitlist_subject", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func mailWaitlistBody(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_mail_waitlist_body", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
 
     public static var mailFooter: String { NSLocalizedString("bipe_mail_footer", tableName: "Bipe", bundle: .module, comment: "") }
 
