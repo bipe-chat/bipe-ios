@@ -723,13 +723,15 @@ public enum BipeAPIError: Error, Sendable, Equatable {
     case unexpectedResponse(statusCode: Int?)
     /// The device could not produce an App Attest attestation.
     case attestationFailed
+    /// Apple's App Attest service did not answer (`DCError.serverUnavailable`).
+    case attestationServiceDown
 
     /// HTTP 401: the access token was rejected.
     public var isUnauthorized: Bool {
         switch self {
         case .server(_, _, let statusCode): statusCode == 401
         case .unexpectedResponse(let statusCode): statusCode == 401
-        case .network, .attestationFailed: false
+        case .network, .attestationFailed, .attestationServiceDown: false
         }
     }
 
@@ -768,7 +770,7 @@ public enum BipeAPIError: Error, Sendable, Equatable {
             BipeStrings.errorNetwork
         case .unexpectedResponse:
             BipeStrings.errorGeneric
-        case .attestationFailed:
+        case .attestationFailed, .attestationServiceDown:
             BipeStrings.errorAttestationFailed
         }
     }

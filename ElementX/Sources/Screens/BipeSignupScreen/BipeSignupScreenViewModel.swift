@@ -22,6 +22,8 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     private let handleChecker: BipeHandleAvailabilityChecker
     /// The new account's PIN, kept in memory until the sign-in succeeds. Then it becomes the app lock PIN.
     private var pendingAppLockPIN: String?
+    /// The new account's credentials, kept in memory until the sign-in succeeds.
+    private var createdCredentials: BipeCredentials?
 
     private let actionsSubject: PassthroughSubject<BipeSignupScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeSignupScreenViewModelAction, Never> {
@@ -85,12 +87,16 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
 
         if !state.isAccountCreated {
             guard let (credentials, pin) = await createAccount() else { return }
+            createdCredentials = credentials
             pendingAppLockPIN = pin
             state.bindings.pin = ""
             state.bindings.pinConfirmation = ""
             await finishSignIn(signIn.signIn(with: credentials))
         } else if let result = await signIn.signInWithStoredPassword() {
             await finishSignIn(result)
+        } else if let credentials = createdCredentials {
+            // The keychain did not keep the password: sign in with the copy in memory.
+            await finishSignIn(signIn.signIn(with: credentials))
         } else {
             state.bindings.alertInfo = AlertInfo(id: .error)
         }
@@ -110,6 +116,12 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             pending.pin = state.bindings.pin
         }
         let pin = pending.pin ?? state.bindings.pin
+        if pin != state.bindings.pin {
+            // The first try may have made the account with that PIN, so it stays the PIN.
+            MXLog.info("Bipe sign-up uses the PIN of the first try")
+            state.bindings.pin = pin
+            state.bindings.pinConfirmation = pin
+        }
 
         do {
             let response = try await signupRetryingLostAnswers { () async throws(BipeAPIError) -> BipeSignupRequest in
@@ -117,7 +129,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                 // Unsupported (simulator): sign up without it and let the server decide. A failure on a supported device stops sign-up.
                 var attestation: BipeAttestation?
                 if BipeAppAttest.isSupported {
-                    attestation = try await BipeAppAttest.attestation(api: apiClient)
+                    attestation = try await BipeAppAttest.attestationUnlessServiceDown(api: apiClient)
                 }
                 return BipeSignupRequest(inviteCode: state.inviteCode?.value,
                                          email: email.isEmpty ? nil : email,
@@ -141,8 +153,9 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             return (credentials, pin)
         } catch {
             MXLog.error("Bipe sign-up failed: \(error)")
-            if case .server(let code, let reason, _) = error, !(code == .rateLimited && reason == "signup_in_progress") {
-                // The server answered and made nothing, so the next try takes the PIN from the form again.
+            if case .server(let code, _, _) = error, code != .rateLimited, code != .internal {
+                // A field error: the server made nothing, so the next try takes the PIN from the form again.
+                // A limit or a server failure proves nothing, so the PIN of the first try stays.
                 credentialStore.updatePendingSignupPIN(nil)
             }
             show(error)
@@ -175,10 +188,13 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     private func finishSignIn(_ result: Result<UserSessionProtocol, AuthenticationServiceError>) async {
         switch result {
         case .success(let userSession):
+            createdCredentials = nil
             if let pin = pendingAppLockPIN.take() {
                 appLockService?.bipeUseAccountPIN(pin)
             }
-            signIn.credentialStore.deletePendingSignup()
+            if signIn.credentialStore.password() != nil {
+                signIn.credentialStore.deletePendingSignup()
+            }
             actionsSubject.send(.signedIn(userSession))
         case .failure(let error):
             MXLog.error("Bipe sign-in after sign-up failed: \(error)")

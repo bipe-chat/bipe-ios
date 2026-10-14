@@ -558,7 +558,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         if let pin = pending.pin {
             appLockService?.bipeUseAccountPIN(pin)
         }
-        store.deletePendingSignup()
+        // Without a stored password the pending sign-up is the only way to get it back (POST /v1/signup/resume).
+        if store.password() != nil {
+            store.deletePendingSignup()
+        }
     }
     
     private func showBipeRecoveryScreen(mode: BipeRecoveryScreenMode) {
