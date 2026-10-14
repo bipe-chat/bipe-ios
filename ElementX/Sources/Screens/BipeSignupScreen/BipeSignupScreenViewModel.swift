@@ -84,8 +84,8 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         defer { stopLoading() }
 
         if !state.isAccountCreated {
-            guard let credentials = await createAccount() else { return }
-            pendingAppLockPIN = state.bindings.pin
+            guard let (credentials, pin) = await createAccount() else { return }
+            pendingAppLockPIN = pin
             state.bindings.pin = ""
             state.bindings.pinConfirmation = ""
             await finishSignIn(signIn.signIn(with: credentials))
@@ -96,24 +96,37 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         }
     }
 
-    private func createAccount() async -> BipeCredentials? {
+    /// The new account's credentials and the PIN it really has. On a retry after a lost answer the server returns the
+    /// account of the first try (ADR 0094), so the PIN is the one that try sent.
+    private func createAccount() async -> (BipeCredentials, String)? {
         let handle = BipeHandle.sanitize(state.bindings.handle)
         let displayName = state.bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         let email = state.trimmedEmail
+        let credentialStore = signIn.credentialStore
+        // Stored before the first request goes out, so a lost answer can be fetched again (ADR 0094).
+        var pending = credentialStore.pendingSignup(pin: state.bindings.pin)
+        if pending.pin == nil {
+            credentialStore.updatePendingSignupPIN(state.bindings.pin)
+            pending.pin = state.bindings.pin
+        }
+        let pin = pending.pin ?? state.bindings.pin
 
         do {
-            // Unsupported (simulator): sign up without it and let the server decide. A failure on a supported device stops sign-up.
-            var attestation: BipeAttestation?
-            if BipeAppAttest.isSupported {
-                attestation = try await BipeAppAttest.attestation(api: apiClient)
+            let response = try await signupRetryingLostAnswers { () async throws(BipeAPIError) -> BipeSignupRequest in
+                // A new attestation for every try: the server spends each challenge once.
+                // Unsupported (simulator): sign up without it and let the server decide. A failure on a supported device stops sign-up.
+                var attestation: BipeAttestation?
+                if BipeAppAttest.isSupported {
+                    attestation = try await BipeAppAttest.attestation(api: apiClient)
+                }
+                return BipeSignupRequest(inviteCode: state.inviteCode?.value,
+                                         email: email.isEmpty ? nil : email,
+                                         pin: pin,
+                                         handle: handle.isEmpty ? nil : handle,
+                                         displayName: displayName.isEmpty ? nil : displayName,
+                                         attestation: attestation,
+                                         signupKey: pending.key)
             }
-            let request = BipeSignupRequest(inviteCode: state.inviteCode?.value,
-                                            email: email.isEmpty ? nil : email,
-                                            pin: state.bindings.pin,
-                                            handle: handle.isEmpty ? nil : handle,
-                                            displayName: displayName.isEmpty ? nil : displayName,
-                                            attestation: attestation)
-            let response = try await apiClient.signup(request)
             MXLog.info("Bipe sign-up created \(response.userId)")
             guard let credentials = response.credentials else {
                 MXLog.error("Bipe sign-up returned no device-first credentials")
@@ -125,11 +138,37 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                 actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
             }
             userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.signupDeviceSuccess, icon: \.checkCircle))
-            return credentials
+            return (credentials, pin)
         } catch {
             MXLog.error("Bipe sign-up failed: \(error)")
+            if case .server(let code, let reason, _) = error, !(code == .rateLimited && reason == "signup_in_progress") {
+                // The server answered and made nothing, so the next try takes the PIN from the form again.
+                credentialStore.updatePendingSignupPIN(nil)
+            }
             show(error)
             return nil
+        }
+    }
+
+    /// Mobile data drops often. A try without an answer may still have made the account, and the same key returns it,
+    /// so a few quiet retries are safe (ADR 0094).
+    private func signupRetryingLostAnswers(_ makeRequest: () async throws(BipeAPIError) -> BipeSignupRequest) async throws(BipeAPIError) -> BipeSignupResponse {
+        var attempt = 0
+        while true {
+            attempt += 1
+            do {
+                return try await apiClient.signup(makeRequest())
+            } catch {
+                let retryable = switch error {
+                case .network, .unexpectedResponse: true
+                case .server(.rateLimited, let reason, _): reason == "signup_in_progress"
+                case .server(.internal, _, _): true
+                default: false
+                }
+                guard retryable, attempt < 4 else { throw error }
+                MXLog.info("Bipe sign-up try \(attempt) got no answer, trying again")
+                try? await Task.sleep(for: .seconds(2 * attempt))
+            }
         }
     }
 
@@ -139,6 +178,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             if let pin = pendingAppLockPIN.take() {
                 appLockService?.bipeUseAccountPIN(pin)
             }
+            signIn.credentialStore.deletePendingSignup()
             actionsSubject.send(.signedIn(userSession))
         case .failure(let error):
             MXLog.error("Bipe sign-in after sign-up failed: \(error)")

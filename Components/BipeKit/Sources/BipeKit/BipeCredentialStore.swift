@@ -29,6 +29,17 @@ public nonisolated struct BipeCredentialStore: Sendable {
         case password = "chat.bipe.account.password"
         case recoveryToken = "chat.bipe.account.recovery-token"
         case pendingRecovery = "chat.bipe.account.pending-recovery"
+        case pendingSignup = "chat.bipe.account.pending-signup"
+    }
+
+    /// A sign-up whose credentials are not stored yet (ADR 0094). The key makes a retry return the same account.
+    /// The PIN is the one the first try sent, so the app lock gets the PIN the account really has.
+    public struct PendingSignup: Codable, Sendable, Equatable, CustomStringConvertible {
+        public let key: String
+        public var pin: String?
+
+        /// Never prints the key or the PIN.
+        public var description: String { "PendingSignup" }
     }
 
     /// `accessGroup`: the app's keychain access group. `nil` uses the first group in the entitlements.
@@ -39,9 +50,12 @@ public nonisolated struct BipeCredentialStore: Sendable {
     // MARK: - Credentials
 
     /// Stores the password on this device and syncs the token. Replaces what was stored before.
-    public func save(_ credentials: BipeCredentials) {
+    /// `false` when the password cannot be read back: keep any pending sign-up, it is the only other copy.
+    @discardableResult
+    public func save(_ credentials: BipeCredentials) -> Bool {
         write(.password, account: credentials.userId, value: Data(credentials.password.utf8), synchronizable: false)
         saveRecoveryToken(credentials.recoveryToken, for: credentials.userId)
+        return password() == Item(userID: credentials.userId, secret: credentials.password)
     }
 
     public func saveRecoveryToken(_ token: String, for userID: String) {
@@ -66,6 +80,44 @@ public nonisolated struct BipeCredentialStore: Sendable {
     /// After the API rejected the token (`recovery_invalid`).
     public func deleteRecoveryToken() {
         delete(.recoveryToken)
+    }
+
+    // MARK: - Pending sign-up
+
+    /// The pending sign-up, or a new one with a fresh key. A new one is stored before the first request goes out.
+    public func pendingSignup(pin: String?) -> PendingSignup {
+        if let pending = pendingSignup() { return pending }
+        var bytes = [UInt8](repeating: 0, count: 32)
+        guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else {
+            fatalError("SecRandomCopyBytes failed")
+        }
+        let key = Data(bytes).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        let pending = PendingSignup(key: key, pin: pin)
+        savePendingSignup(pending)
+        return pending
+    }
+
+    public func pendingSignup() -> PendingSignup? {
+        read(.pendingSignup).flatMap { try? Self.decoder.decode(PendingSignup.self, from: $0.data) }
+    }
+
+    /// After the server said it made nothing (a 4xx answer): the next try may send a different PIN.
+    public func updatePendingSignupPIN(_ pin: String?) {
+        guard var pending = pendingSignup() else { return }
+        pending.pin = pin
+        savePendingSignup(pending)
+    }
+
+    public func deletePendingSignup() {
+        delete(.pendingSignup)
+    }
+
+    private func savePendingSignup(_ pending: PendingSignup) {
+        guard let data = try? Self.encoder.encode(pending) else { return }
+        write(.pendingSignup, account: "pending", value: data, synchronizable: false)
     }
 
     // MARK: - Pending recovery

@@ -27,8 +27,29 @@ struct BipeAccountSignIn {
 
     /// Keeps the credentials (password on this device, token synced) and signs in with them.
     func signIn(with credentials: BipeCredentials) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
-        credentialStore.save(credentials)
+        // A pending sign-up stays until the caller has signed in and set the app lock: it holds the PIN, and
+        // POST /v1/signup/resume can still return these credentials if the keychain lost them (ADR 0094).
+        if !credentialStore.save(credentials) {
+            MXLog.error("Bipe: the keychain did not keep the password of \(credentials.userId)")
+        }
         return await signIn(userID: credentials.userId, password: credentials.password)
+    }
+
+    /// Finishes a sign-up whose answer never reached this device (ADR 0094). `nil` when there is nothing to finish.
+    func resumePendingSignup(apiClient: BipeAPIClient) async -> Result<UserSessionProtocol, AuthenticationServiceError>? {
+        guard let pending = credentialStore.pendingSignup() else { return nil }
+        do {
+            let response = try await apiClient.resumeSignup(signupKey: pending.key)
+            guard let credentials = response.credentials else { return nil }
+            MXLog.info("Bipe: finishing the sign-up of \(response.userId)")
+            return await signIn(with: credentials)
+        } catch .server(.notFound, _, _) {
+            credentialStore.deletePendingSignup()
+            return nil
+        } catch {
+            MXLog.error("Bipe: could not resume a pending sign-up: \(error)")
+            return nil
+        }
     }
 
     /// Signs in with the password stored on this device. `nil` when there is none.

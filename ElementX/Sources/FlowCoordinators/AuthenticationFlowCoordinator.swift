@@ -520,12 +520,28 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             return
         }
         
+        // A sign-up whose answer never arrived (ADR 0094): the account exists, so finish it instead of showing the form again.
+        if store.password() == nil, store.pendingSignup() != nil {
+            let loadingIndicatorID = "BipeResumeSignup"
+            userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID, type: .modal, title: L10n.commonLoading, persistent: true))
+            let signIn = BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings)
+            let resumed = await signIn.resumePendingSignup(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL))
+            userIndicatorController.retractIndicatorWithId(loadingIndicatorID)
+            if case .success(let userSession) = resumed, stateMachine.state == .startScreen {
+                finishBipeSignup(store)
+                stateMachine.tryEvent(.signedIn, userInfo: userSession)
+                return
+            }
+        }
+        
         if store.password() != nil {
             let loadingIndicatorID = "BipeResumeAccount"
             userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID, type: .modal, title: L10n.commonLoading, persistent: true))
             let result = await BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings).signInWithStoredPassword()
             userIndicatorController.retractIndicatorWithId(loadingIndicatorID)
             if case .success(let userSession) = result, stateMachine.state == .startScreen {
+                // The app closed between sign-up and sign-in: the pending sign-up still holds the PIN for the app lock.
+                finishBipeSignup(store)
                 stateMachine.tryEvent(.signedIn, userInfo: userSession)
                 return
             }
@@ -534,6 +550,15 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         if let token = store.recoveryToken(), stateMachine.state == .startScreen {
             stateMachine.tryEvent(.bipeRecovery, userInfo: BipeRecoveryScreenMode.token(userID: token.userID))
         }
+    }
+    
+    /// The account PIN of a finished sign-up becomes the app lock PIN (ADR 0057). Then the pending sign-up goes.
+    private func finishBipeSignup(_ store: BipeCredentialStore) {
+        guard let pending = store.pendingSignup() else { return }
+        if let pin = pending.pin {
+            appLockService?.bipeUseAccountPIN(pin)
+        }
+        store.deletePendingSignup()
     }
     
     private func showBipeRecoveryScreen(mode: BipeRecoveryScreenMode) {

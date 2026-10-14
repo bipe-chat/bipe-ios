@@ -23,6 +23,11 @@ public struct BipeAPIClient: Sendable {
         try await send(method: "POST", path: ["v1", "signup"], body: request)
     }
 
+    /// `POST /v1/signup/resume`. No auth. The answer of an earlier sign-up with this key (ADR 0094); `not_found` when none.
+    public func resumeSignup(signupKey: String) async throws(BipeAPIError) -> BipeSignupResponse {
+        try await send(method: "POST", path: ["v1", "signup", "resume"], body: SignupResumeRequest(signupKey: signupKey))
+    }
+
     /// `POST /v1/attest/challenge`. No auth. One-time App Attest challenge, valid 5 minutes.
     public func attestChallenge() async throws(BipeAPIError) -> String {
         let response: AttestChallengeResponse = try await send(method: "POST", path: ["v1", "attest", "challenge"], body: Empty?.none)
@@ -448,6 +453,8 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
     public let displayName: String?
     /// Absent where App Attest is not supported (simulator). The server decides whether to accept that.
     public let attestation: BipeAttestation?
+    /// Same key on a retry: the same account (ADR 0094). From ``BipeCredentialStore/pendingSignup()``.
+    public let signupKey: String?
 
     public init(inviteCode: String? = nil,
                 email: String?,
@@ -455,7 +462,9 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
                 lang: String? = BipeAPIClient.emailLanguage,
                 handle: String?,
                 displayName: String?,
-                attestation: BipeAttestation? = nil) {
+                attestation: BipeAttestation? = nil,
+                signupKey: String? = nil) {
+        self.signupKey = signupKey
         self.inviteCode = inviteCode
         self.email = email
         password = nil
@@ -468,6 +477,10 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
 
     /// Never prints the PIN or the email.
     public var description: String { "BipeSignupRequest" }
+}
+
+private struct SignupResumeRequest: Encodable {
+    let signupKey: String
 }
 
 /// Apple App Attest result for sign-up. Contract: `Attestation`.
