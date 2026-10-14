@@ -49,6 +49,41 @@ struct SharedVectorTests {
         }
     }
 
+    @Test
+    func pixCheck() throws {
+        let vectors = try SharedVectors.array("pix-check.json", key: "vectors")
+        #expect(!vectors.isEmpty)
+        for vector in vectors {
+            let text = try #require(vector["text"] as? String)
+            let result = PixCheck.check(text)
+            let label = "pixCheck(\(text.prefix(40)))"
+
+            if let expected = vector["code"] as? [String: Any] {
+                let code = try #require(result.code, "\(label) code")
+                #expect(code.status.rawValue == expected["status"] as? String, "\(label) status")
+                if code.status != .malformed {
+                    #expect(code.dynamic == expected["dynamic"] as? Bool, "\(label) dynamic")
+                    #expect(code.singleUse == expected["singleUse"] as? Bool, "\(label) singleUse")
+                    #expect(code.key == expected["key"] as? String, "\(label) key")
+                    #expect(code.keyType?.rawValue == expected["keyType"] as? String, "\(label) keyType")
+                    #expect(code.url == expected["url"] as? String, "\(label) url")
+                    #expect(code.name == expected["name"] as? String, "\(label) name")
+                    #expect(code.city == expected["city"] as? String, "\(label) city")
+                    #expect(code.amount == expected["amount"] as? String, "\(label) amount")
+                    #expect(code.txid == expected["txid"] as? String, "\(label) txid")
+                    #expect(code.info == expected["info"] as? String, "\(label) info")
+                }
+            } else {
+                #expect(result.code == nil, "\(label) code")
+            }
+
+            let keys = try #require(vector["keys"] as? [[String: Any]])
+            #expect(result.keys.map(\.value) == keys.map { $0["value"] as? String ?? "" }, "\(label) keys")
+            #expect(result.keys.map { $0.types.map(\.rawValue) } == keys.map { $0["types"] as? [String] ?? [] }, "\(label) key types")
+            #expect(result.warning?.rawValue == vector["warning"] as? String, "\(label) warning")
+        }
+    }
+
     /// The client checks length and characters only. Reserved names and lookalikes are the server's call.
     @Test
     func handles() throws {

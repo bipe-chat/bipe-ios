@@ -34,6 +34,7 @@ targets:
     dependencies:
       - package: MatrixRustSDK
       - package: Compound
+      - package: BipeKit
       - package: Collections
       - package: KeychainAccess
       - package: BuildExtensions

@@ -745,4 +745,60 @@ public enum BipeStrings {
     public static var trustLifecycleRetryAction: String { NSLocalizedString("bipe_trust_lifecycle_retry_action", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var trustWarningAbsenceBody: String { NSLocalizedString("bipe_trust_warning_absence_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckTitle: String { NSLocalizedString("bipe_pix_check_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckNothingFound: String { NSLocalizedString("bipe_pix_check_nothing_found", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckCodeTitle: String { NSLocalizedString("bipe_pix_check_code_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckCodeDynamic: String { NSLocalizedString("bipe_pix_check_code_dynamic", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckCodeBadCrc: String { NSLocalizedString("bipe_pix_check_code_bad_crc", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckCodeMalformed: String { NSLocalizedString("bipe_pix_check_code_malformed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckFieldName: String { NSLocalizedString("bipe_pix_check_field_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckFieldCity: String { NSLocalizedString("bipe_pix_check_field_city", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckFieldAmount: String { NSLocalizedString("bipe_pix_check_field_amount", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckAmountOpen: String { NSLocalizedString("bipe_pix_check_amount_open", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckFieldKey: String { NSLocalizedString("bipe_pix_check_field_key", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckFieldChargeHost: String { NSLocalizedString("bipe_pix_check_field_charge_host", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckFieldInfo: String { NSLocalizedString("bipe_pix_check_field_info", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckFieldTxid: String { NSLocalizedString("bipe_pix_check_field_txid", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckKeysTitle: String { NSLocalizedString("bipe_pix_check_keys_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckKeyTypeCpf: String { NSLocalizedString("bipe_pix_check_key_type_cpf", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckKeyTypeCnpj: String { NSLocalizedString("bipe_pix_check_key_type_cnpj", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckKeyTypePhone: String { NSLocalizedString("bipe_pix_check_key_type_phone", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckKeyTypeEmail: String { NSLocalizedString("bipe_pix_check_key_type_email", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckKeyTypeRandom: String { NSLocalizedString("bipe_pix_check_key_type_random", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckKeyTypeUnknown: String { NSLocalizedString("bipe_pix_check_key_type_unknown", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func pixCheckKeyTypesOr(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_pix_check_key_types_or", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static var pixCheckNameHint: String { NSLocalizedString("bipe_pix_check_name_hint", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckBankName: String { NSLocalizedString("bipe_pix_check_bank_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckPrivate: String { NSLocalizedString("bipe_pix_check_private", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckSendToChat: String { NSLocalizedString("bipe_pix_check_send_to_chat", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var pixCheckClose: String { NSLocalizedString("bipe_pix_check_close", tableName: "Bipe", bundle: .module, comment: "") }
 }

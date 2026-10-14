@@ -133,6 +133,11 @@ Not done (needs the domain, Apple team or brand):
 - **Quiet by default (#97):** `BipeQuietGroups` runs once per account from `AppCoordinator.runPostSessionSetupTasks`. It sets the group default to mentions and keywords and adds the override push rule `chat.bipe.poll_start` (`*.poll.start`) so new polls notify. It does nothing until `canPushEncryptedEventsToDevice()` is true: mentions in encrypted rooms need Synapse `msc4028_push_encrypted_events`, or mentions-only silences the group. Turn that server flag on only after Apple grants the NSE filtering entitlement (see Rebrand status), or the NSE cannot drop the other pushes. Android ships the same feature (#97, #98).
 - **"O que você perdeu" (#98):** `BipeMissedSummary` (rules) and `BipeMissedSummaryView` sit above the read marker in `RoomTimelineItemView`. Shown in groups on the live timeline when at least 20 loaded messages follow the marker. Lines: mentions of you or @room, replies to you, open polls you have not voted in. Pins are not in it yet.
 
+## "Conferir no Bipe" (bipe ADR 0091, bipe#294)
+
+- **Share target:** the existing share extension. `ShareExtensionViewController.bipePixCheck(for:)` reads shared text, or the QR codes in shared images (`PixCheck.qrPayloads`, Core Image). When it finds a Pix code or key it shows `BipePixCheckView` in the extension and does not open the app. "Enviar para uma conversa" continues to Element's share flow. No account and no network needed.
+- **Logic:** `PixCheck` in BipeKit (BR Code TLV, CRC-16, key types, keys in the text, the rule 9 warning without `pixCode` and `pixKey`). Cases: `bipe-shared/test-vectors/pix-check.json`.
+
 ## Tab bar (bipe ADR 0053)
 
 - **Tabs:** Conversas, Grupos, Você, plus search (`UserSessionFlowCoordinator.HomeTab`). The Spaces tab is not created; `SpacesTabFlowCoordinator` stays in the tree for rebases.

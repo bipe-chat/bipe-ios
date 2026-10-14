@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import IntentsUI
 import SwiftUI
@@ -24,7 +25,7 @@ class ShareExtensionViewController: UIViewController {
     private let keychainController = KeychainController(service: .sessions,
                                                         accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier)
     
-    private let hostingController = UIHostingController(rootView: ShareExtensionView())
+    private let hostingController = UIHostingController(rootView: AnyView(ShareExtensionView()))
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,11 +59,37 @@ class ShareExtensionViewController: UIViewController {
         
         Task {
             if let payload = await prepareSharePayload() {
+                // Bipe: a shared Pix code or key gets checked here first (bipe ADR 0091). It needs no account.
+                if let check = bipePixCheck(for: payload) {
+                    showBipePixCheck(check, payload: payload)
+                    return
+                }
                 await self.openMainApp(payload: payload)
             }
             
             self.dismiss()
         }
+    }
+    
+    // MARK: - Bipe
+    
+    private func bipePixCheck(for payload: ShareExtensionPayload) -> PixCheck? {
+        let texts = switch payload {
+        case .text(_, let text): [text]
+        case .mediaFiles(_, let mediaFiles): mediaFiles.flatMap { PixCheck.qrPayloads(inImageAt: $0.url) }
+        }
+        return texts.lazy.map(PixCheck.check).first { $0.foundPix }
+    }
+    
+    private func showBipePixCheck(_ check: PixCheck, payload: ShareExtensionPayload) {
+        hostingController.rootView = AnyView(BipePixCheckView(check: check,
+                                                              close: { [weak self] in self?.dismiss() },
+                                                              sendToChat: { [weak self] in
+                                                                  Task {
+                                                                      await self?.openMainApp(payload: payload)
+                                                                      self?.dismiss()
+                                                                  }
+                                                              }))
     }
     
     // MARK: - Private

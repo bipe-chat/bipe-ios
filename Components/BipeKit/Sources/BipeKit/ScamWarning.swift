@@ -60,16 +60,17 @@ public extension ScamDetector {
         return kind
     }
 
-    /// Picks the most actionable warning from `matchIDs(in:)` output.
+    /// Picks the most actionable warning from `matchIDs(in:)` output. Kinds in `skipping` are passed over.
     /// Must match bipe-shared/test-vectors/scam-warnings.json.
-    static func warningKind(forMatchIDs matchIDs: [String], message: String) -> ScamWarningKind? {
+    static func warningKind(forMatchIDs matchIDs: [String], message: String, skipping: Set<ScamWarningKind> = []) -> ScamWarningKind? {
         let groups = Set(matchIDs.compactMap { $0.split(separator: ":", maxSplits: 1).first.map(String.init) })
         let phrases = matchIDs.compactMap { $0.hasPrefix("urgency:") ? String($0.dropFirst("urgency:".count)) : nil }
         let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
         let hosts = linkHosts(in: message)
 
         return warningKindPriority.first { kind in
-            switch kind {
+            if skipping.contains(kind) { return false }
+            return switch kind {
             // A threat with a payment demand (sextortion, "I know where you live"). A threat alone is not this kind.
             case .extortion: containsAny(normalized, BipeRegistries.extortionThreatPhrases)
                 && containsAny(normalized, BipeRegistries.extortionDemandWords)
