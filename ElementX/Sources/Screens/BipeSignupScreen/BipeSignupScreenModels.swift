@@ -26,6 +26,8 @@ struct BipeSignupScreenViewState: BindableState {
     var handleStatus = BipeHandleStatus.empty
     /// The API created the account. Submitting again only retries the sign-in.
     var isAccountCreated = false
+    /// From `GET /v1/signup/config` (ADR 0072). `true` until the server says otherwise, and after an error.
+    var isInviteRequired = true
 
     var emailError: String?
     var pinError: String?
@@ -66,12 +68,27 @@ struct BipeSignupScreenViewState: BindableState {
         BipeInviteCode(bindings.inviteCode)
     }
 
-    var isInviteCodeAcceptable: Bool {
-        bindings.inviteCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || inviteCode != nil
+    var isInviteCodeEmpty: Bool {
+        bindings.inviteCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    var isInviteCodeAcceptable: Bool {
+        inviteCode != nil || (isInviteCodeEmpty && !isInviteRequired)
+    }
+
+    var inviteCodeLabel: String {
+        isInviteRequired ? BipeStrings.signupInviteCode : BipeStrings.signupInviteCodeOptional
+    }
+
+    /// Never "opcional" when the server requires an invite (ADR 0072): an empty field says why a code is needed.
     var inviteCodeFooter: String? {
-        inviteCodeError ?? (isInviteCodeAcceptable ? nil : BipeStrings.errorInviteInvalid)
+        if let inviteCodeError { return inviteCodeError }
+        if isInviteCodeEmpty { return isInviteRequired ? BipeStrings.signupInviteRequired : nil }
+        return inviteCode == nil ? BipeStrings.errorInviteInvalid : nil
+    }
+
+    var isInviteCodeFooterError: Bool {
+        inviteCodeError != nil || (!isInviteCodeEmpty && inviteCode == nil)
     }
 
     var canSubmit: Bool {

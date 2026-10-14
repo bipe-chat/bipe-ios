@@ -23,6 +23,11 @@ public struct BipeAPIClient: Sendable {
         try await send(method: "POST", path: ["v1", "signup"], body: request)
     }
 
+    /// `GET /v1/signup/config`. No auth. The sign-up mode (ADR 0072).
+    public func signupConfig() async throws(BipeAPIError) -> BipeSignupConfig {
+        try await send(method: "GET", path: ["v1", "signup", "config"], body: Empty?.none)
+    }
+
     /// `POST /v1/signup/resume`. No auth. The answer of an earlier sign-up with this key (ADR 0094); `not_found` when none.
     public func resumeSignup(signupKey: String) async throws(BipeAPIError) -> BipeSignupResponse {
         try await send(method: "POST", path: ["v1", "signup", "resume"], body: SignupResumeRequest(signupKey: signupKey))
@@ -499,6 +504,12 @@ public struct BipeAttestation: Encodable, Sendable, CustomStringConvertible {
 
     /// Never prints the attestation data.
     public var description: String { "BipeAttestation" }
+}
+
+/// The server's sign-up mode. Contract: `SignupConfig`.
+public struct BipeSignupConfig: Decodable, Sendable, Equatable {
+    /// `true`: sign-up fails without a valid invite code. An app that cannot read the mode assumes `true`.
+    public let inviteRequired: Bool
 }
 
 public struct BipeSignupResponse: Decodable, Sendable, CustomStringConvertible {

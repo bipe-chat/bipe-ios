@@ -119,9 +119,9 @@ struct BipeSignupScreen: View {
             VStack(alignment: .leading, spacing: 8) {
                 TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
                     .focused($focusedField, equals: .inviteCode)
-                    .textFieldStyle(.compound(labelText: BipeStrings.signupInviteCode,
+                    .textFieldStyle(.compound(labelText: context.viewState.inviteCodeLabel,
                                               footerText: context.viewState.inviteCodeFooter,
-                                              state: context.viewState.inviteCodeFooter == nil ? .default : .error))
+                                              state: context.viewState.isInviteCodeFooterError ? .error : .default))
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
                     .submitLabel(.done)

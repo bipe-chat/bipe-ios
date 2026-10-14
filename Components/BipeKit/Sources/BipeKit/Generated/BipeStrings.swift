@@ -258,6 +258,10 @@ public enum BipeStrings {
 
     public static var signupInviteCode: String { NSLocalizedString("bipe_signup_invite_code", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var signupInviteCodeOptional: String { NSLocalizedString("bipe_signup_invite_code_optional", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupInviteRequired: String { NSLocalizedString("bipe_signup_invite_required", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static func signupInvitedBy(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_signup_invited_by", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }

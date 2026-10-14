@@ -48,6 +48,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         if let inviteCode {
             Task { await loadInvitePreview(inviteCode) }
         }
+        Task { await loadSignupConfig() }
     }
 
     override func process(viewAction: BipeSignupScreenViewAction) {
@@ -200,6 +201,12 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             MXLog.error("Bipe sign-in after sign-up failed: \(error)")
             state.bindings.alertInfo = AlertInfo(id: .error)
         }
+    }
+
+    /// An error keeps the default: an invite is required (ADR 0072).
+    private func loadSignupConfig() async {
+        guard let config = try? await apiClient.signupConfig() else { return }
+        state.isInviteRequired = config.inviteRequired
     }
 
     /// Shows who invited the user, or marks a code that no longer works. Failures stay silent: sign-up checks the code again.
