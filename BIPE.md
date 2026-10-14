@@ -161,20 +161,31 @@ Not done (needs the domain, Apple team or brand):
 
 ## Differences from Android (ADR 0031)
 
-Each line is a deliberate difference with its reason. A difference not listed here is a bug. Android's list: `../bipe-android/BIPE.md`.
+Each line is a difference with its reason. A difference not listed here is a bug. The table is generated from `bipe-shared/product/parity.json` (ADR 0092): change it there, then run `node tools/parity.mjs --write` in bipe-shared. Android's list: `../bipe-android/BIPE.md`.
+
+<!-- parity:differences (generated from bipe-shared/product/parity.json by tools/parity.mjs --write; do not edit) -->
 
 | Area | iOS | Android | Reason |
 |---|---|---|---|
-| Dev bundle ID | `chat.bipe.app.dev` | `chat.bipe.app.debug` | Element's build-type suffix on each platform |
+| Dev app ID | `chat.bipe.app.dev` | `chat.bipe.app.debug` | Element's build-type suffix on each platform |
 | OAuth redirect | `<bundle id>:/oauth/callback` | `<application id>:/` | Element's default per platform; both are reverse-domain private-use schemes |
-| Push | APNs through Sygnal | FCM through Sygnal; UnifiedPush optional | OS push channel (#90) |
-| Sign-up attestation | App Attest | None yet | Play Integrity not built on Android (#92) |
+| Push | APNs through Sygnal | FCM through Sygnal; UnifiedPush optional | OS push channel (#89, #90, #91) |
+| Sign-up attestation | App Attest | None yet | Play Integrity not built on Android (#92) **Gap** |
+| Synced recovery token | iCloud Keychain | Block Store (gplay); none in the F-Droid build | Platform credential store (ADR 0059). F-Droid has no Google Play services |
+| App lock | Element's lock screen, the account PIN, biometrics on | Element's lock screen, 8-digit account PIN, biometric option | Element X lock screen per platform |
+| Check before a PIN change | Biometrics or the phone's passcode | Biometrics or the phone's screen lock; else the app lock PIN | `LAContext` on iOS, `BiometricPrompt` with `DEVICE_CREDENTIAL` on Android |
 | Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
-| Unencrypted room option | Still offered | Removed | Not done on iOS (#78). **Gap** |
-| Sticker from a photo | Subject cut-out (Vision) | Centred square crop | Cut-out needs ML Kit, not decided |
+| Voice messages | Sender-side transcription, pause and resume | Shows the transcript and checks it for scams; no sender-side transcription | On-device recognition on low-end Android unmeasured (#80, #81) **Gap** |
+| Help links | Hidden | Still point to element.io | Not done on Android (#205) **Gap** |
+| Unencrypted room option | Still offered | Removed | Not done on iOS (#78) **Gap** |
+| Sign-up form | One form | Name, then PIN | Not done on iOS (#196) **Gap** |
+| bipe.chat/@handle link | Opens the profile | Opens the app, goes nowhere | Not done on Android (#299) **Gap** |
+| Sticker from a photo | Subject cut-out (Vision) | Centred square crop | Cut-out needs ML Kit, not decided (#101) **Undecided** |
 | Sticker import | Chat export ZIP or files | Chat export ZIP or files; picker opens in WhatsApp's stickers folder | iOS apps cannot read WhatsApp's files |
-| Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) |
-| Language fallback | pt-BR for other device languages | en | Undecided (#102) |
-| Handle lookup | Start chat only | Every user search | Undecided (#102) |
+| Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) **Undecided** |
+| Language fallback | pt-BR for other device languages | Bipe strings pt-BR, Element strings en | Undecided (#102) **Undecided** |
+| Handle lookup | Start chat only | Every user search | Undecided (#102) **Undecided** |
+| Search | Search tab (iOS 26+), inline before iOS 26 | Search button in the top bar of Conversas and Grupos | Platform idiom (ADR 0053) |
 | Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/bipe; same result for the user |
-| Search | Search tab (iOS 26+), inline before iOS 26 | Search in the top bar | Platform idiom (ADR 0053) |
+
+<!-- /parity:differences -->
