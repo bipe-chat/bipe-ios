@@ -192,5 +192,6 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Handle lookup | Start chat only | Every user search | Undecided (#102) **Undecided** |
 | Search | Search tab (iOS 26+), inline before iOS 26 | Search button in the top bar of Conversas and Grupos | Platform idiom (ADR 0053) |
 | Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/bipe; same result for the user |
+| Conferir no Bipe: close | Back to the app that shared | Back to Bipe | The iOS check runs in the share extension; Android shows it in the app (ADR 0091) |
 
 <!-- /parity:differences -->
