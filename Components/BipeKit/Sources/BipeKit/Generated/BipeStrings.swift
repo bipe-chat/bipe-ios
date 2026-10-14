@@ -720,5 +720,11 @@ public enum BipeStrings {
 
     public static var mailNoticeEmailRemoved: String { NSLocalizedString("bipe_mail_notice_email_removed", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var mailWaitlistSubject: String { NSLocalizedString("bipe_mail_waitlist_subject", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func mailWaitlistBody(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_mail_waitlist_body", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
     public static var mailFooter: String { NSLocalizedString("bipe_mail_footer", tableName: "Bipe", bundle: .module, comment: "") }
 }
