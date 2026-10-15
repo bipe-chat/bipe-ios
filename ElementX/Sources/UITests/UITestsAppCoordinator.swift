@@ -214,7 +214,7 @@ class MockScreen: Identifiable {
                                                 context: context)
             
             if id == .appLockFlowAlternateWindow {
-                let pinCode = "2023"
+                let pinCode = "73914862"
                 guard case .success = appLockService.setupPINCode(pinCode),
                       appLockService.unlock(with: pinCode) else {
                     fatalError("Failed to preset the PIN code.")
@@ -268,7 +268,7 @@ class MockScreen: Identifiable {
             let appLockService = AppLockService(keychainController: keychainController,
                                                 appSettings: appSettings,
                                                 context: context)
-            if id == .appLockSetupFlowUnlock, case .failure = appLockService.setupPINCode("2023") {
+            if id == .appLockSetupFlowUnlock, case .failure = appLockService.setupPINCode("73914862") {
                 fatalError("Failed to pre-set the PIN code")
             }
             
@@ -786,7 +786,7 @@ class MockScreen: Identifiable {
             
             // Set an App Lock PIN for the dedicated variant so linking requires it (and forced logout can be tested).
             // Without a PIN the service is disabled, so verification is unavailable and linking proceeds.
-            if id == .linkNewDeviceWithAppLockPIN, case .failure = appLockService.setupPINCode("2023") {
+            if id == .linkNewDeviceWithAppLockPIN, case .failure = appLockService.setupPINCode("73914862") {
                 fatalError("Failed to preset the PIN code.")
             }
             

@@ -90,14 +90,13 @@ class LinkNewDeviceTests: XCTestCase {
     // MARK: - Helpers
     
     private func enterPIN(_ app: XCUIApplication) {
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(2)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(2)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(3)].tap()
+        for digit in [7, 3, 9, 1, 4, 8, 6, 2] {
+            app.buttons[A11yIdentifiers.appLockScreen.numpad(digit)].tap()
+        }
     }
     
     private func enterWrongPIN(_ app: XCUIApplication) {
-        for _ in 0..<4 {
+        for _ in 0..<8 {
             app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
         }
     }

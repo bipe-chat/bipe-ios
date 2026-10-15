@@ -148,13 +148,13 @@ class AppLockSetupUITests: XCTestCase {
         let textField = app.secureTextFields[A11yIdentifiers.appLockSetupPINScreen.textField]
         XCTAssert(textField.waitForExistence(timeout: 10))
         
-        textField.clearAndTypeText("2023", app: app, verifyingValue: false)
+        textField.clearAndTypeText("73914862", app: app, verifyingValue: false)
     }
     
     private func enterDifferentPIN() {
         let textField = app.secureTextFields[A11yIdentifiers.appLockSetupPINScreen.textField]
         XCTAssert(textField.waitForExistence(timeout: 10))
         
-        textField.clearAndTypeText("2233", app: app, verifyingValue: false)
+        textField.clearAndTypeText("40817352", app: app, verifyingValue: false)
     }
 }

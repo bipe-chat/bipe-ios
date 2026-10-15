@@ -134,16 +134,14 @@ class AppLockUITests: XCTestCase {
     // MARK: - Helpers
     
     func enterPIN() {
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(2)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(2)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(3)].tap()
+        for digit in [7, 3, 9, 1, 4, 8, 6, 2] {
+            app.buttons[A11yIdentifiers.appLockScreen.numpad(digit)].tap()
+        }
     }
     
     func enterWrongPIN() {
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
-        app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
+        for _ in 0..<8 {
+            app.buttons[A11yIdentifiers.appLockScreen.numpad(0)].tap()
+        }
     }
 }
