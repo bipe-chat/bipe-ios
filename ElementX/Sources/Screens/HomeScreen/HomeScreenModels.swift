@@ -25,6 +25,8 @@ enum HomeScreenViewModelAction {
     case presentSettingsScreen
     case presentFeedbackScreen
     case presentStartChatScreen
+    /// Bipe: the Grupos empty state opens the create room screen directly (ADR 0053).
+    case presentCreateGroupScreen
     case logout
 }
 
@@ -37,6 +39,7 @@ enum HomeScreenViewAction {
     case reportRoom(roomIdentifier: String)
     case showSettings
     case startChat
+    case createGroup
     case setupRecovery
     case confirmRecoveryKey
     case resetEncryption

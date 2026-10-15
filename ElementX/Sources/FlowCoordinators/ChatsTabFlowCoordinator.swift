@@ -42,6 +42,8 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
     private var encryptionResetFlowCoordinator: EncryptionResetFlowCoordinator?
     // periphery:ignore - retaining purpose
     private var startChatFlowCoordinator: StartChatFlowCoordinator?
+    /// Bipe: the entry point of the next start chat flow. The Grupos empty state skips the start chat screen.
+    private var startChatEntryPoint = StartChatFlowCoordinatorEntryPoint.startChat
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -419,6 +421,10 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
                 case .presentEncryptionResetScreen:
                     stateMachine.processEvent(.startEncryptionResetFlow)
                 case .presentStartChatScreen:
+                    startChatEntryPoint = .startChat
+                    stateMachine.processEvent(.startStartChatFlow)
+                case .presentCreateGroupScreen:
+                    startChatEntryPoint = .createRoom
                     stateMachine.processEvent(.startStartChatFlow)
                 case .logout:
                     actionsSubject.send(.logout)
@@ -620,7 +626,7 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
     
     private func startStartChatFlow(animated: Bool) {
         let navigationStackCoordinator = NavigationStackCoordinator()
-        let coordinator = StartChatFlowCoordinator(entryPoint: .startChat,
+        let coordinator = StartChatFlowCoordinator(entryPoint: startChatEntryPoint,
                                                    userDiscoveryService: UserDiscoveryService(clientProxy: userSession.clientProxy),
                                                    navigationStackCoordinator: navigationStackCoordinator,
                                                    flowParameters: flowParameters)

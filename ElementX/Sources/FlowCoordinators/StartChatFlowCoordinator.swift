@@ -24,6 +24,8 @@ enum StartChatFlowCoordinatorAction {
 /// A value that represents where the flow will be started.
 enum StartChatFlowCoordinatorEntryPoint {
     case startChat
+    /// Bipe: the create room screen without the start chat screen below it.
+    case createRoom
     case createSpace
     case createRoomInSpace(SpaceServiceRoom)
 }
@@ -99,6 +101,8 @@ class StartChatFlowCoordinator: FlowCoordinatorProtocol {
         switch entryPoint {
         case .startChat:
             stateMachine.tryEvent(.start)
+        case .createRoom:
+            stateMachine.tryEvent(.createRoom(isSpace: false))
         case .createSpace:
             stateMachine.tryEvent(.createRoom(isSpace: true))
         case .createRoomInSpace(let space):
@@ -141,9 +145,8 @@ class StartChatFlowCoordinator: FlowCoordinatorProtocol {
         }
         stateMachine.addRoutes(event: .createRoom(isSpace: false), transitions: [.initial => .createRoom]) { [weak self] context in
             guard context.fromState == .initial else { return } // Required check because the event is used in another route.
-            guard let space = context.userInfo as? SpaceServiceRoom else {
-                fatalError("This transition only supports creating a room in a pre-selected space.")
-            }
+            // Bipe: the .createRoom entry point has no space.
+            let space = context.userInfo as? SpaceServiceRoom
             self?.presentCreateRoomScreen(isSpace: false, spaceSelectionMode: .editableSpacesList(preSelectedSpace: space), isRoot: true)
         }
         

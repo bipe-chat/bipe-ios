@@ -508,6 +508,12 @@ public enum BipeStrings {
 
     public static var tabYou: String { NSLocalizedString("bipe_tab_you", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var groupsEmptyTitle: String { NSLocalizedString("bipe_groups_empty_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var groupsEmptyBody: String { NSLocalizedString("bipe_groups_empty_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var groupsEmptyAction: String { NSLocalizedString("bipe_groups_empty_action", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var selfChatTitle: String { NSLocalizedString("bipe_self_chat_title", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var selfChatSubtitle: String { NSLocalizedString("bipe_self_chat_subtitle", tableName: "Bipe", bundle: .module, comment: "") }

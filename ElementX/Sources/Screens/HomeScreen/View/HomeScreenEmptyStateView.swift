@@ -6,29 +6,33 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Compound
 import SwiftUI
 
 /// The view shown when the user isn't part of any rooms.
+/// Bipe: the Grupos tab has its own text and a create group button (ADR 0053).
 struct HomeScreenEmptyStateView: View {
     let context: HomeScreenViewModel.Context
     
+    private var isGroups: Bool { context.viewState.bipeScope == .groups }
+    
     var body: some View {
         VStack(spacing: 2) {
-            Text(L10n.screenRoomlistEmptyTitle)
+            Text(isGroups ? BipeStrings.groupsEmptyTitle : L10n.screenRoomlistEmptyTitle)
                 .font(.compound.bodyLG)
                 .foregroundColor(.compound.textSecondary)
                 .multilineTextAlignment(.center)
             
-            Text(L10n.screenRoomlistEmptyMessage)
+            Text(isGroups ? BipeStrings.groupsEmptyBody : L10n.screenRoomlistEmptyMessage)
                 .font(.compound.bodyLG)
                 .foregroundColor(.compound.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 16)
             
-            Button { context.send(viewAction: .startChat) } label: {
-                Label(L10n.actionStartChat, icon: \.chat)
+            Button { context.send(viewAction: isGroups ? .createGroup : .startChat) } label: {
+                Label(isGroups ? BipeStrings.groupsEmptyAction : L10n.actionStartChat, icon: isGroups ? \.plus : \.chat)
                     .font(.compound.bodyLGSemibold)
                     .foregroundColor(.compound.textOnSolidPrimary)
                     .padding(.vertical, 6)
