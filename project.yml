@@ -128,21 +128,12 @@ packages:
   Dynamic:
     url: https://github.com/mhdhejazi/Dynamic
     exactVersion: 1.2
-  GZIP:
-    url: https://github.com/nicklockwood/GZIP
-    exactVersion: 1.3.2
   KeychainAccess:
     url: https://github.com/kishikawakatsumi/KeychainAccess
     exactVersion: 4.2.2
   Kingfisher:
     url: https://github.com/onevcat/Kingfisher
     exactVersion: 8.13.0
-  KZFileWatchers:
-    url: https://github.com/krzysztofzablocki/KZFileWatchers
-    exactVersion: 1.2.0
-  LoremSwiftum:
-    url: https://github.com/lukaskubanek/LoremSwiftum
-    exactVersion: 2.2.3
   LRUCache:
     url: https://github.com/nicklockwood/LRUCache
     exactVersion: 1.3.0

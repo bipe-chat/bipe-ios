@@ -1,5 +1,5 @@
 {
-  "originHash" : "6d43f6f171b62d8a58adfdee334d7996e61cf66e969c0e2264fc56118ed6ac40",
+  "originHash" : "00915d7d308d9c6a7eb89658b63f802c32960e3aca651069bcf358cecd4ca9b3",
   "pins" : [
     {
       "identity" : "compound-design-tokens",
@@ -82,15 +82,6 @@
       }
     },
     {
-      "identity" : "gzip",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nicklockwood/GZIP",
-      "state" : {
-        "revision" : "f710a37aa978a93b815a4f64bd504dc4c3256312",
-        "version" : "1.3.2"
-      }
-    },
-    {
       "identity" : "keychainaccess",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kishikawakatsumi/KeychainAccess",
@@ -106,24 +97,6 @@
       "state" : {
         "revision" : "8648fe649c5d62be38721110f835821906e9242a",
         "version" : "8.13.0"
-      }
-    },
-    {
-      "identity" : "kzfilewatchers",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/krzysztofzablocki/KZFileWatchers",
-      "state" : {
-        "revision" : "d27a9557427d261adccdf4b566acc9d9c0fec6f4",
-        "version" : "1.2.0"
-      }
-    },
-    {
-      "identity" : "loremswiftum",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/lukaskubanek/LoremSwiftum",
-      "state" : {
-        "revision" : "a293c2339552c8cfb715e7f76c511feec02782ad",
-        "version" : "2.2.3"
       }
     },
     {

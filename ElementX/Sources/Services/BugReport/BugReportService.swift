@@ -8,7 +8,6 @@
 
 import Combine
 import Foundation
-import GZIP
 import UIKit
 
 class BugReportService: NSObject, BugReportServiceProtocol {
@@ -224,15 +223,14 @@ class BugReportService: NSObject, BugReportServiceProtocol {
         let fileHandle = try FileHandle(forReadingFrom: url)
         
         while let data = try fileHandle.readToEnd() {
-            if let zippedData = (data as NSData).gzipped() {
-                let zippedURL = URL.temporaryDirectory.appending(path: url.lastPathComponent)
-                
-                // Remove old zipped file if exists
-                try? FileManager.default.removeItem(at: zippedURL)
-                
-                try zippedData.write(to: zippedURL)
-                await zippedFiles.appendFile(at: zippedURL, zippedSize: zippedData.count, originalSize: data.count)
-            }
+            // Bipe: no GZIP package. Bug reports are off (rageshake URL nil), so logs go uncompressed.
+            let zippedURL = URL.temporaryDirectory.appending(path: url.lastPathComponent)
+            
+            // Remove old zipped file if exists
+            try? FileManager.default.removeItem(at: zippedURL)
+            
+            try data.write(to: zippedURL)
+            await zippedFiles.appendFile(at: zippedURL, zippedSize: data.count, originalSize: data.count)
         }
     }
     

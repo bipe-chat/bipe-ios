@@ -32,9 +32,7 @@ targets:
     - package: DeviceKit
     - package: KeychainAccess
     - package: Kingfisher
-    - package: KZFileWatchers
     - package: SwiftState
-    - package: GZIP
     - package: SnapshotTesting
     - package: Collections
     - package: SwiftOGG

@@ -36,7 +36,6 @@ targets:
     - package: KeychainAccess
     - package: Kingfisher
     - package: SwiftState
-    - package: GZIP
     - package: Collections
 
     info:

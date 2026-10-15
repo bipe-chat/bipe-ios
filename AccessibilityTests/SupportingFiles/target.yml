@@ -27,7 +27,6 @@ targets:
 
     dependencies:
     - target: ElementX
-    - package: KZFileWatchers
 
     info:
       path: ../SupportingFiles/Info.plist

@@ -245,8 +245,6 @@ targets:
     - package: EmbeddedElementCall
     - package: KeychainAccess
     - package: Kingfisher
-    - package: KZFileWatchers
-    - package: LoremSwiftum
     - package: LRUCache
     - package: Mantis
     - target: MapLibreInterface
@@ -264,7 +262,6 @@ targets:
     - package: ElementCall
       product: ElementCall
     - package: SwiftState
-    - package: GZIP
     - package: Version
     - package: Emojibase
     - package: WysiwygComposer

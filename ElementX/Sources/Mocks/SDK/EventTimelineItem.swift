@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import LoremSwiftum
 import MatrixRustSDK
 import MatrixRustSDKMocks
 
@@ -55,7 +54,7 @@ nonisolated extension EventTimelineItem {
     }
     
     static var mockMessage: EventTimelineItem {
-        let body = Lorem.sentences(Int.random(in: 1...5))
+        let body = Array(repeating: "Lorem ipsum dolor sit amet consectetur.", count: Int.random(in: 1...5)).joined(separator: " ")
         let messageType = MessageType.text(content: .init(body: body, formatted: nil))
         
         let content = TimelineItemContent.msgLike(content: .init(kind: .message(content: .init(msgType: messageType,

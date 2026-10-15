@@ -7,7 +7,6 @@
 //
 
 import Combine
-import KZFileWatchers
 import SwiftUI
 
 extension Notification.Name: @retroactive Codable { }
@@ -63,7 +62,7 @@ enum UITestsSignalling {
     @MainActor
     class Client {
         /// The file watcher responsible for receiving signals.
-        private let fileWatcher: FileWatcher.Local
+        private let fileWatcher: FileWatcher
         
         /// The file name used for the connection.
         ///
@@ -103,8 +102,8 @@ enum UITestsSignalling {
                 try send(.ready)
             }
             
-            try fileWatcher.start { [weak self] result in
-                self?.handleFileRefresh(result)
+            fileWatcher.start { [weak self] data in
+                self?.processFileData(data)
             }
         }
         
@@ -120,7 +119,7 @@ enum UITestsSignalling {
         
         /// Stops listening for signals.
         func stop() throws {
-            try fileWatcher.stop()
+            fileWatcher.stop()
         }
         
         /// Sends a signal.
@@ -168,17 +167,6 @@ enum UITestsSignalling {
             }
         }
         
-        /// Handles a file refresh to receive a new signal.
-        fileprivate func handleFileRefresh(_ result: FileWatcher.RefreshResult) {
-            switch result {
-            case .noChanges:
-                guard let data = try? Data(contentsOf: fileURL) else { return }
-                processFileData(data)
-            case .updated(let data):
-                processFileData(data)
-            }
-        }
-        
         /// Processes string data from the file and publishes its signal.
         private func processFileData(_ data: Data) {
             guard let rawMessage = String(data: data, encoding: .utf8),
@@ -194,5 +182,41 @@ enum UITestsSignalling {
             
             NSLog("UITestsSignalling: Received \(rawMessage)")
         }
+    }
+}
+
+/// Bipe: replaces the KZFileWatchers package. Polls the file and reports its contents when its modification date changes.
+@MainActor
+private final class FileWatcher {
+    private let path: String
+    private var timer: Timer?
+    private var lastModificationDate: Date?
+    private var handler: ((Data) -> Void)?
+    
+    init(path: String) {
+        self.path = path
+    }
+    
+    func start(_ handler: @escaping (Data) -> Void) {
+        self.handler = handler
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refresh() }
+        }
+    }
+    
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+        handler = nil
+    }
+    
+    private func refresh() {
+        guard let date = (try? FileManager.default.attributesOfItem(atPath: path))?[.modificationDate] as? Date,
+              date != lastModificationDate,
+              let data = FileManager.default.contents(atPath: path) else {
+            return
+        }
+        lastModificationDate = date
+        handler?(data)
     }
 }
