@@ -145,15 +145,14 @@ class StartChatFlowCoordinator: FlowCoordinatorProtocol {
         }
         stateMachine.addRoutes(event: .createRoom(isSpace: false), transitions: [.initial => .createRoom]) { [weak self] context in
             guard context.fromState == .initial else { return } // Required check because the event is used in another route.
-            // Bipe: the .createRoom entry point has no space.
-            let space = context.userInfo as? SpaceServiceRoom
-            self?.presentCreateRoomScreen(isSpace: false, spaceSelectionMode: .editableSpacesList(preSelectedSpace: space), isRoot: true)
+            // Bipe ADR 0053: no spaces in the create-group screen, so no space picker and no "space members" access.
+            self?.presentCreateRoomScreen(isSpace: false, spaceSelectionMode: .none, isRoot: true)
         }
         
         stateMachine.addRoutes(event: .createRoom(isSpace: false), transitions: [.startChat => .createRoom]) { [weak self] context in
             guard let self, context.fromState == .startChat else { return } // Required check because the event is used in another route.
             presentCreateRoomScreen(isSpace: false,
-                                    spaceSelectionMode: .editableSpacesList(preSelectedSpace: nil),
+                                    spaceSelectionMode: .none, // Bipe ADR 0053
                                     isRoot: false)
         }
         stateMachine.addRoutes(event: .dismissedCreateRoom, transitions: [.createRoom => .startChat]) { [weak self] _ in

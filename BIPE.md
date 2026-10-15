@@ -29,10 +29,14 @@ Shared test vectors (ADR 0031 rule 4): `Components/BipeKit/Tests/BipeKitTests/Sh
 cd Components/BipeKit && swift test
 ```
 
-Device builds (signed, automatic provisioning with the Centaur Labs team):
+Device builds (signed, automatic provisioning with the Centaur Labs team). Always Release on a phone, never Debug: a Debug build on MZ Air broke typing (15 Oct 2026).
 
 ```bash
-xcodebuild -project ElementX.xcodeproj -scheme ElementX -configuration Debug -destination 'platform=iOS,name=MZ Air' -allowProvisioningUpdates build
+xcodebuild -project ElementX.xcodeproj -scheme ElementX -configuration Release -destination 'platform=iOS,name=MZ Air' -allowProvisioningUpdates -derivedDataPath build/device build
+```
+
+```bash
+xcrun devicectl device install app --device <UDID> build/device/Build/Products/Release-iphoneos/ElementX.app
 ```
 
 ### Ad-hoc build signed as CENTAUR LABS OU
@@ -145,6 +149,8 @@ Not done (needs the domain, Apple team or brand):
 - **Conversas and Grupos** are two `ChatsTabFlowCoordinator`s with a `BipeRoomListScope`. `clientProxy.roomSummaryProvider` lists Conversas (SDK category `people`, plus every invite); `bipeGroupsRoomSummaryProvider` lists Grupos (category `group`, joined). `NotificationSettingsEditScreenViewModel` reads `staticRoomSummaryProvider`, because the main provider no longer lists all rooms.
 - **Routing:** `.room`, `.event`, `.roomDetails` and `.thread` open in the tab that lists the room (`bipeRoomTab(for:)`). Other room routes stay in the current tab.
 - **Badges:** each tab sums `unreadNotificationsCount` of its own rooms. The app icon badge stays the total.
+- **Trap: the room count is not the tab's.** `RoomSummaryProviderState.loaded(totalNumberOfRooms:)` comes from the SDK and counts every room in the account, whatever the tab's filter. Never read it as "this tab has rooms". On 15 Oct 2026 Grupos showed skeletons forever for an account with chats and no groups: the home screen waited for rooms that the filter never published. `HomeScreenViewModel.scheduleBipeEmptyTabFallback` now shows the empty state after one second.
+- **No spaces in the create-group screen:** `StartChatFlowCoordinator` passes `spaceSelectionMode: .none`, so the space picker and the "space members" access types do not show. Spaces come back only as Comunidade inside Grupos (ADR 0084).
 - **Você** is `SettingsFlowCoordinator(isInTab: true)` in a stack in the tab: no close button, title "Você". `.settings` and `.chatBackupSettings` routes select the tab. On a Mac with secondary windows, settings still open in a window.
 - **Self-chat:** `BipeSelfChat`. Account data `chat.bipe.self_chat` = `{"room_id": "..."}` (same on Android). Created on first tap as a private encrypted room named "Anotações". The room lists hide it by a cached ID in `UserDefaults`; it opens in Conversas.
 - **Search:** the search tab needs iOS 26 (`globalSearchEnabled`, on by default). On iOS 18 to 25 search stays inline in the room list.
