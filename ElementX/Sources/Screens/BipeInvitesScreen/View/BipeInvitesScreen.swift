@@ -118,9 +118,11 @@ struct BipeInvitesScreen: View {
     }
     
     private func description(for invite: BipeInvite) -> String {
+        let age = invite.createdAt.formatted(.relative(presentation: .named))
         let expiry = BipeStrings.invitesExpires(invite.expiresAt.formatted(date: .abbreviated, time: .omitted))
-        guard context.viewState.shareURLs[invite.id] == nil else { return expiry }
-        return "\(expiry). \(BipeStrings.invitesOtherDevice)"
+        let summary = "\(age) · \(expiry)"
+        guard context.viewState.shareURLs[invite.id] == nil else { return summary }
+        return "\(summary). \(BipeStrings.invitesOtherDevice)"
     }
 }
 
