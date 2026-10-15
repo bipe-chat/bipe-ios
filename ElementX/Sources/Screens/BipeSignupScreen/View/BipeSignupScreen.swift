@@ -24,7 +24,11 @@ struct BipeSignupScreen: View {
                     .padding(.top, UIConstants.titleTopPaddingToNavigationBar)
                     .padding(.bottom, 32)
 
-                form
+                switch context.viewState.step {
+                case .form: formStep
+                case .pin: pinStep
+                case .fallback: fallbackStep
+                }
             }
             .readableFrame()
             .padding(.horizontal, 16)
@@ -34,109 +38,220 @@ struct BipeSignupScreen: View {
         .background(Color.compound.bgCanvasDefault.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(BipeStrings.signupTitle)
+        .navigationBarBackButtonHidden(context.viewState.step != .form)
+        .toolbar { toolbar }
         .alert(item: $context.alertInfo)
         .onChange(of: context.handle) { context.send(viewAction: .handleChanged) }
         .onChange(of: context.inviteCode) { context.send(viewAction: .inviteCodeChanged) }
         .onChange(of: context.email) { context.send(viewAction: .clearFieldErrors) }
         .onChange(of: context.pin) { context.send(viewAction: .clearFieldErrors) }
         .onChange(of: context.pinConfirmation) { context.send(viewAction: .clearFieldErrors) }
+        .onChange(of: context.viewState.step) { _, step in
+            focusedField = switch step {
+            case .form: nil
+            case .pin: .pin
+            case .fallback: nil
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
+        if context.viewState.step != .form {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    context.send(viewAction: .back)
+                } label: {
+                    CompoundIcon(\.chevronLeft)
+                }
+                .accessibilityLabel(L10n.actionBack)
+            }
+        }
     }
 
     private var header: some View {
         VStack(spacing: 8) {
-            BigIcon(icon: \.userProfileSolid)
+            BigIcon(icon: headerIcon)
                 .padding(.bottom, 8)
 
-            Text(context.viewState.inviterHandle.map(BipeStrings.signupInvitedBy) ?? BipeStrings.signupDeviceHeader)
+            if let headerTitle {
+                Text(headerTitle)
+                    .font(.compound.headingMDBold)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.compound.textPrimary)
+            }
+
+            Text(headerBody)
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textSecondary)
         }
     }
 
-    private var form: some View {
-        VStack(alignment: .leading, spacing: 32) {
-            fields
-                .disabled(context.viewState.isAccountCreated)
-            
-            Button(action: submit) {
-                Text(context.viewState.isAccountCreated ? L10n.actionContinue : BipeStrings.signupSubmit)
-            }
-            .buttonStyle(.compound(.primary))
-            .disabled(!context.viewState.canSubmit)
+    private var headerIcon: KeyPath<CompoundIcons, Image> {
+        switch context.viewState.step {
+        case .form: \.userProfileSolid
+        case .pin: \.lockSolid
+        case .fallback: \.keySolid
         }
     }
-    
-    private var fields: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            TextField(text: $context.displayName) { placeholder("") }
-                .focused($focusedField, equals: .displayName)
-                .textFieldStyle(.compound(labelText: BipeStrings.signupDisplayName,
-                                          footerText: BipeStrings.signupDisplayNameFooter))
-                .textContentType(.name)
-                .submitLabel(.next)
-                .onSubmit { focusedField = .handle }
 
-            TextField(text: $context.handle) { placeholder(BipeStrings.handlePlaceholder) }
-                .focused($focusedField, equals: .handle)
-                .textFieldStyle(.compound(labelText: BipeStrings.signupHandle,
-                                          footerText: context.viewState.handleFooter,
-                                          state: context.viewState.handleFieldState))
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .submitLabel(.next)
-                .onSubmit { focusedField = .pin }
+    private var headerTitle: String? {
+        switch context.viewState.step {
+        case .form: nil
+        case .pin: BipeStrings.pinCreateTitle
+        case .fallback: BipeStrings.fallbackTitle
+        }
+    }
 
-            // The PIN is not a password: no password autofill, no saving in a password manager.
-            SecureField(text: $context.pin) { placeholder("") }
-                .focused($focusedField, equals: .pin)
-                .textFieldStyle(.compound(labelText: BipeStrings.pinCreateTitle,
-                                          footerText: context.viewState.pinFooter,
-                                          state: context.viewState.pinError != nil || context.viewState.pinProblem != nil ? .error : .default))
-                .keyboardType(.numberPad)
-                .textContentType(.oneTimeCode)
+    private var headerBody: String {
+        switch context.viewState.step {
+        case .form: context.viewState.inviterHandle.map(BipeStrings.signupInvitedBy) ?? BipeStrings.signupDeviceHeader
+        case .pin: BipeStrings.pinCreateBody(String(BipeRegistries.pinLength))
+        case .fallback: BipeStrings.fallbackBody
+        }
+    }
 
-            SecureField(text: $context.pinConfirmation) { placeholder("") }
-                .focused($focusedField, equals: .pinConfirmation)
-                .textFieldStyle(.compound(labelText: BipeStrings.pinConfirmTitle,
-                                          footerText: context.viewState.pinMismatch ? BipeStrings.pinMismatch : BipeStrings.pinNeverAsked,
-                                          state: context.viewState.pinMismatch ? .error : .default))
-                .keyboardType(.numberPad)
-                .textContentType(.oneTimeCode)
+    // MARK: Form
 
-            TextField(text: $context.email) { placeholder("") }
-                .focused($focusedField, equals: .email)
-                .textFieldStyle(.compound(labelText: BipeStrings.signupEmailOptional,
-                                          footerText: context.viewState.emailError ?? BipeStrings.signupEmailOptionalFooter,
-                                          state: context.viewState.emailError == nil ? .default : .error))
-                .keyboardType(.emailAddress)
-                .textContentType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .submitLabel(.next)
-                .onSubmit { focusedField = .inviteCode }
+    private var formStep: some View {
+        VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: 20) {
+                TextField(text: $context.displayName) { placeholder("") }
+                    .focused($focusedField, equals: .displayName)
+                    .textFieldStyle(.compound(labelText: BipeStrings.signupDisplayName,
+                                              footerText: BipeStrings.signupDisplayNameFooter))
+                    .textContentType(.name)
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .handle }
 
-            VStack(alignment: .leading, spacing: 8) {
-                TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
-                    .focused($focusedField, equals: .inviteCode)
-                    .textFieldStyle(.compound(labelText: context.viewState.inviteCodeLabel,
-                                              footerText: context.viewState.inviteCodeFooter,
-                                              state: context.viewState.isInviteCodeFooterError ? .error : .default))
-                    .textInputAutocapitalization(.characters)
+                TextField(text: $context.handle) { placeholder(BipeStrings.handlePlaceholder) }
+                    .focused($focusedField, equals: .handle)
+                    .textFieldStyle(.compound(labelText: BipeStrings.signupHandle,
+                                              footerText: context.viewState.handleFooter,
+                                              state: context.viewState.handleFieldState))
+                    .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                    .submitLabel(.done)
-                    .onSubmit(submit)
-                
-                // PasteButton reads the clipboard without the system paste prompt. It takes a link or a whole message.
-                if context.viewState.inviteCode == nil {
-                    PasteButton(payloadType: String.self) { strings in
-                        guard let code = strings.lazy.compactMap(BipeInviteCode.init).first else { return }
-                        context.inviteCode = code.value
-                    }
-                    .labelStyle(.titleAndIcon)
-                    .buttonBorderShape(.capsule)
-                }
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .inviteCode }
+
+                inviteCodeField
+
+                emailField
+                    .submitLabel(.continue)
+                    .onSubmit(continueStep)
             }
+            .disabled(context.viewState.isAccountCreated)
+
+            Button(L10n.actionContinue, action: continueStep)
+                .buttonStyle(.compound(.primary))
+                .disabled(!context.viewState.canContinueForm)
+        }
+    }
+
+    private var inviteCodeField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
+                .focused($focusedField, equals: .inviteCode)
+                .textFieldStyle(.compound(labelText: context.viewState.inviteCodeLabel,
+                                          footerText: context.viewState.inviteCodeFooter,
+                                          state: context.viewState.isInviteCodeFooterError ? .error : .default))
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+                .submitLabel(.next)
+                .onSubmit { focusedField = .email }
+
+            // PasteButton reads the clipboard without the system paste prompt. It takes a link or a whole message.
+            if context.viewState.inviteCode == nil {
+                PasteButton(payloadType: String.self) { strings in
+                    guard let code = strings.lazy.compactMap(BipeInviteCode.init).first else { return }
+                    context.inviteCode = code.value
+                }
+                .labelStyle(.titleAndIcon)
+                .buttonBorderShape(.capsule)
+            }
+        }
+    }
+
+    private var emailField: some View {
+        TextField(text: $context.email) { placeholder("") }
+            .focused($focusedField, equals: .email)
+            .textFieldStyle(.compound(labelText: BipeStrings.signupEmailOptional,
+                                      footerText: context.viewState.emailError ?? emailFooter,
+                                      state: context.viewState.emailError == nil && context.viewState.isEmailAcceptable ? .default : .error))
+            .keyboardType(.emailAddress)
+            .textContentType(.emailAddress)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+    }
+
+    private var emailFooter: String {
+        context.viewState.isEmailAcceptable ? BipeStrings.signupEmailOptionalFooter : BipeStrings.signupEmailInvalid
+    }
+
+    // MARK: PIN
+
+    private var pinStep: some View {
+        VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: 20) {
+                // The PIN is not a password: no password autofill, no saving in a password manager.
+                SecureField(text: $context.pin) { placeholder("") }
+                    .focused($focusedField, equals: .pin)
+                    .textFieldStyle(.compound(labelText: BipeStrings.pinCreateTitle,
+                                              footerText: context.viewState.pinFooter,
+                                              state: context.viewState.pinError != nil || context.viewState.pinProblem != nil ? .error : .default))
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+
+                SecureField(text: $context.pinConfirmation) { placeholder("") }
+                    .focused($focusedField, equals: .pinConfirmation)
+                    .textFieldStyle(.compound(labelText: BipeStrings.pinConfirmTitle,
+                                              footerText: context.viewState.pinMismatch ? BipeStrings.pinMismatch : BipeStrings.pinNeverAsked,
+                                              state: context.viewState.pinMismatch ? .error : .default))
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+            }
+            .disabled(context.viewState.isAccountCreated)
+
+            Button(L10n.actionContinue, action: continueStep)
+                .buttonStyle(.compound(.primary))
+                .disabled(!context.viewState.isPINValid && !context.viewState.isAccountCreated)
+        }
+        .onChange(of: context.pin) { _, pin in
+            // A full PIN moves on to the second field.
+            if pin.count == BipeRegistries.pinLength, context.viewState.pinProblem == nil { focusedField = .pinConfirmation }
+        }
+    }
+
+    // MARK: Fallback
+
+    private var fallbackStep: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            if context.viewState.isFallbackEmailOpen {
+                Text(BipeStrings.fallbackEmailBody(String(BipeRegistries.recoveryDelayHoursEmail)))
+                    .font(.compound.bodyMD)
+                    .foregroundColor(.compound.textSecondary)
+
+                emailField
+                    .submitLabel(.done)
+                    .onSubmit(continueStep)
+
+                Button(BipeStrings.signupSubmit, action: continueStep)
+                    .buttonStyle(.compound(.primary))
+                    .disabled(!context.viewState.canSubmitFallbackEmail && !context.viewState.isAccountCreated)
+            } else {
+                Button(BipeStrings.fallbackEmail) {
+                    context.send(viewAction: .openFallbackEmail)
+                    focusedField = .email
+                }
+                .buttonStyle(.compound(.primary))
+            }
+
+            Button(BipeStrings.fallbackSkip) {
+                focusedField = nil
+                context.send(viewAction: .skipFallback)
+            }
+            .buttonStyle(.compound(.tertiary))
         }
     }
 
@@ -144,10 +259,9 @@ struct BipeSignupScreen: View {
         Text(text).foregroundColor(.compound.textSecondary)
     }
 
-    private func submit() {
-        guard context.viewState.canSubmit else { return }
+    private func continueStep() {
         focusedField = nil
-        context.send(viewAction: .submit)
+        context.send(viewAction: .continue)
     }
 }
 

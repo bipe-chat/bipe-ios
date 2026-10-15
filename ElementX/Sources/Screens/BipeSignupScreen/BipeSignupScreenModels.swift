@@ -22,7 +22,20 @@ enum BipeSignupScreenViewModelAction: CustomStringConvertible {
     }
 }
 
+/// Sign-up in short steps (bipe#196), the same as Android.
+enum BipeSignupStep {
+    /// Name, optional @, invite code, optional email.
+    case form
+    /// The 8-digit PIN, typed twice.
+    case pin
+    /// No email given: "If you lose your phone", with "Add an email" and "Not now".
+    case fallback
+}
+
 struct BipeSignupScreenViewState: BindableState {
+    var step = BipeSignupStep.form
+    /// The fallback step shows the email field.
+    var isFallbackEmailOpen = false
     var handleStatus = BipeHandleStatus.empty
     /// The API created the account. Submitting again only retries the sign-in.
     var isAccountCreated = false
@@ -91,17 +104,32 @@ struct BipeSignupScreenViewState: BindableState {
         inviteCodeError != nil || (!isInviteCodeEmpty && inviteCode == nil)
     }
 
-    var canSubmit: Bool {
-        if isAccountCreated { return true }
+    /// Blank, or a plausible address.
+    var isEmailAcceptable: Bool {
+        trimmedEmail.isEmpty || BipeSignupRules.isPlausibleEmail(trimmedEmail)
+    }
+
+    var canContinueForm: Bool {
         let displayName = bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         return !displayName.isEmpty
             && displayName.count <= BipeSignupRules.displayNameMaxLength
-            && (trimmedEmail.isEmpty || BipeSignupRules.isPlausibleEmail(trimmedEmail))
-            && BipePIN.problem(for: bindings.pin) == nil
-            && bindings.pin == bindings.pinConfirmation
+            && isEmailAcceptable
             && !handleStatus.isBlocking
             && isInviteCodeAcceptable
             && inviteCodeError == nil
+    }
+
+    var isPINValid: Bool {
+        BipePIN.problem(for: bindings.pin) == nil && bindings.pin == bindings.pinConfirmation
+    }
+
+    /// The fallback step's email: required there, unlike on the form.
+    var canSubmitFallbackEmail: Bool {
+        !trimmedEmail.isEmpty && BipeSignupRules.isPlausibleEmail(trimmedEmail)
+    }
+
+    var canSubmit: Bool {
+        isAccountCreated || (canContinueForm && isPINValid)
     }
 }
 
@@ -124,7 +152,14 @@ enum BipeSignupScreenViewAction {
     case handleChanged
     case inviteCodeChanged
     case clearFieldErrors
-    case submit
+    /// Next step, or create the account on the last one.
+    case `continue`
+    /// Back one step.
+    case back
+    /// Fallback step: show the email field.
+    case openFallbackEmail
+    /// Fallback step: "Not now". Creates the account without an email.
+    case skipFallback
 }
 
 extension BipeHandleStatus {

@@ -10,7 +10,8 @@ import SwiftUI
 
 typealias BipeSignupScreenViewModelType = StateStoreViewModelV2<BipeSignupScreenViewState, BipeSignupScreenViewAction>
 
-/// Device-first sign-up (ADR 0057, ADR 0059): name, optional handle and email, invite, App Attest and an 8-digit PIN.
+/// Device-first sign-up (ADR 0057, ADR 0059) in short steps (bipe#196): name, optional handle and email, and invite;
+/// then an 8-digit PIN; then, without an email, the fallback prompt. App Attest runs when the account is created.
 /// The API returns a hidden password and a recovery token once. The app keeps both in the keychain and signs in
 /// with the password (`m.login.password`), so no browser opens.
 class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreenViewModelProtocol {
@@ -73,12 +74,41 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             if pin != state.bindings.pin { state.bindings.pin = pin }
             let confirmation = BipePIN.sanitize(state.bindings.pinConfirmation)
             if confirmation != state.bindings.pinConfirmation { state.bindings.pinConfirmation = confirmation }
-        case .submit:
+        case .continue:
+            continueStep()
+        case .back:
+            state.step = switch state.step {
+            case .form, .pin: .form
+            case .fallback: .pin
+            }
+        case .openFallbackEmail:
+            state.isFallbackEmailOpen = true
+        case .skipFallback:
+            state.bindings.email = ""
+            state.isFallbackEmailOpen = false
             Task { await submit() }
         }
     }
 
     // MARK: - Private
+
+    private func continueStep() {
+        switch state.step {
+        case .form:
+            guard state.canContinueForm else { return }
+            state.step = .pin
+        case .pin:
+            guard state.isPINValid else { return }
+            if state.trimmedEmail.isEmpty, !state.isAccountCreated {
+                state.step = .fallback
+            } else {
+                Task { await submit() }
+            }
+        case .fallback:
+            guard state.canSubmitFallbackEmail || state.isAccountCreated else { return }
+            Task { await submit() }
+        }
+    }
 
     private func submit() async {
         guard state.canSubmit else { return }
@@ -225,17 +255,26 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
 
         if case .server(let code, _, _) = error {
             switch code {
+            // A field error opens the step that holds the field.
             case .emailTaken:
                 state.emailError = message
+                if state.step == .fallback {
+                    state.isFallbackEmailOpen = true
+                } else {
+                    state.step = .form
+                }
                 return
             case .pinWeak:
                 state.pinError = message
+                state.step = .pin
                 return
             case .handleTaken, .handleInvalid:
                 state.handleError = message
+                state.step = .form
                 return
             case .inviteInvalid:
                 state.inviteCodeError = message
+                state.step = .form
                 return
             default:
                 break
