@@ -15,8 +15,6 @@ struct LabsScreen: View {
     var body: some View {
         Form {
             header
-            threadsSection
-            gallerySection
             knockingSection
         }
         .compoundList()
@@ -45,31 +43,6 @@ struct LabsScreen: View {
                 .compoundListSectionHeader()
             }
             .frame(maxWidth: .infinity)
-        }
-    }
-    
-    private var threadsSection: some View {
-        Section {
-            ListRow(label: .default(title: L10n.screenLabsEnableThreads,
-                                    icon: \.threads),
-                    kind: .toggle($context.threadsEnabled))
-        } footer: {
-            Text(L10n.screenLabsEnableThreadsDescription)
-                .compoundListSectionFooter()
-        }
-        .onChange(of: context.threadsEnabled) { _, _ in
-            context.send(viewAction: .clearCache)
-        }
-    }
-    
-    private var gallerySection: some View {
-        Section {
-            ListRow(label: .default(title: L10n.screenLabsEnableGallery,
-                                    icon: \.image),
-                    kind: .toggle($context.galleryEnabled))
-        } footer: {
-            Text(L10n.screenLabsEnableGalleryDescription)
-                .compoundListSectionFooter()
         }
     }
     

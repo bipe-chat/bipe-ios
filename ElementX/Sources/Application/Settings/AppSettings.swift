@@ -412,8 +412,13 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference(defaultValue: false)
     var knockingEnabled: Bool
     
-    @UserPreference(defaultValue: false)
+    /// Bipe: threads are on for everyone. The V2 key drops any old Labs opt-out.
+    @UserPreference(key: "threadsEnabledV2", defaultValue: true)
     var threadsEnabled: Bool
+    
+    /// Bipe: reads the old Labs key. False means the event cache was built without threads and needs one rebuild.
+    @UserPreference(key: "threadsEnabled", defaultValue: false)
+    var isEventCacheBuiltWithThreads: Bool
     
     @UserPreference(defaultValue: false)
     var messageMultiSelectEnabled: Bool
@@ -429,7 +434,8 @@ final nonisolated class AppSettings: @unchecked Sendable {
     
     /// Enables *sending* gallery messages (multiple media in a single message).
     /// Received galleries are always rendered regardless of this flag.
-    @UserPreference(defaultValue: false)
+    /// Bipe: on for everyone. The V2 key drops any old Labs opt-out.
+    @UserPreference(key: "galleryEnabledV2", defaultValue: true)
     var galleryEnabled: Bool
     
     @UserPreference(defaultValue: false)

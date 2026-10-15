@@ -153,6 +153,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         } else {
             // The app has been deleted since the previous run. Reset everything.
             wipeUserData(includingSettings: true)
+            appSettings.isEventCacheBuiltWithThreads = true
         }
         appSettings.lastVersionLaunched = currentVersion.description
         
@@ -527,6 +528,16 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         userSessionMigrationsOldVersion = nil
     }
     
+    /// Bipe: threads left Labs and are on by default. A cache built with threads off must be cleared once,
+    /// the same way the old Labs toggle did.
+    private func rebuildEventCacheForThreadsIfNeeded() {
+        guard !appSettings.isEventCacheBuiltWithThreads else { return }
+        
+        MXLog.info("Clearing the cache to rebuild it with threads enabled.")
+        appSettings.isEventCacheBuiltWithThreads = true
+        stateMachine.processEvent(.clearCache)
+    }
+    
     /// This could be removed once the adoption of 25.06.x is widespread.
     private func performSettingsToAccountDataMigration(userSession: UserSessionProtocol) {
         guard let userDefaults = UserDefaults(suiteName: InfoPlistReader.main.appGroupIdentifier) else {
@@ -634,6 +645,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             case (.initial, .startWithAuthentication, .signedOut):
                 startAuthentication()
             case (.signedOut, .createdUserSession, .signedIn):
+                appSettings.isEventCacheBuiltWithThreads = true
                 setupUserSession(isNewLogin: true)
             case (.initial, .startWithExistingSession, .restoringSession):
                 restoreUserSession()
@@ -679,6 +691,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 userSessionManager.add(userSession)
                 configureActiveSession()
                 stateMachine.processEvent(.createdUserSession)
+                rebuildEventCacheForThreadsIfNeeded()
             case .failure:
                 MXLog.error("Failed to restore an existing session.")
                 stateMachine.processEvent(.failedRestoringSession)
