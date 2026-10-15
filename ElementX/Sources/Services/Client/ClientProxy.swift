@@ -527,7 +527,7 @@ class ClientProxy: ClientProxyProtocol {
         do {
             let parameters = CreateRoomParameters(name: nil,
                                                   topic: nil,
-                                                  isEncrypted: !userSettings.app.forceDisableE2EE.publisher.value,
+                                                  isEncrypted: true, // Bipe: never unencrypted, whatever the server says (bipe#78)
                                                   isDirect: true,
                                                   visibility: .private,
                                                   preset: .trustedPrivateChat,
@@ -570,7 +570,7 @@ class ClientProxy: ClientProxyProtocol {
             
             let parameters = CreateRoomParameters(name: name,
                                                   topic: topic,
-                                                  isEncrypted: !userSettings.app.forceDisableE2EE.publisher.value && accessType.isEncrypted,
+                                                  isEncrypted: true, // Bipe: every room is encrypted, public ones too (bipe#78)
                                                   isDirect: false,
                                                   visibility: accessType.visibility,
                                                   preset: accessType.preset,
@@ -1715,15 +1715,6 @@ private extension ClientProxyPresence {
 }
 
 private extension CreateRoomAccessType {
-    var isEncrypted: Bool {
-        switch self {
-        case .public:
-            false
-        default:
-            true
-        }
-    }
-    
     var visibility: RoomVisibility {
         isVisibilityPrivate ? .private : .public
     }
