@@ -98,7 +98,6 @@ actor NotificationServiceExtensionActor {
                 guard state == nil else { return }
                 state = Target.nse.configure(logLevel: appSettings.logLevel,
                                              traceLogPacks: appSettings.traceLogPacks,
-                                             sentryURL: nil,
                                              rageshakeURL: appSettings.bugReportRageshakeURL,
                                              appHooks: appHooks)
             }

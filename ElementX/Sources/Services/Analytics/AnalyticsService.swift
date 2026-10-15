@@ -8,7 +8,6 @@
 
 import AnalyticsEvents
 import Combine
-import PostHog
 
 class AnalyticsService: AnalyticsServiceProtocol {
     /// The analytics client to send events with.
@@ -39,7 +38,7 @@ class AnalyticsService: AnalyticsServiceProtocol {
     func optOut() {
         appSettings.analyticsConsentState = .optedOut
         
-        // The order is important here. PostHog ignores the reset if stopped.
+        // The order is important here. The client ignores the reset if stopped.
         reset()
         client.stop()
         
@@ -60,7 +59,7 @@ class AnalyticsService: AnalyticsServiceProtocol {
     /// Resets any IDs and event queues in the analytics client. This method should
     /// be called on sign-out to ensure the next
     /// account used isn't associated with the previous one.
-    /// Note: **MUST** be called before stopping PostHog or the reset is ignored.
+    /// Note: **MUST** be called before stopping the client or the reset is ignored.
     private func reset() {
         client.reset()
         MXLog.info("Reset.")

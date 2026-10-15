@@ -285,8 +285,6 @@ final nonisolated class AppSettings: @unchecked Sendable {
     // MARK: - Bug report
     
     let bugReportRageshakeURL: RemotePreference<RageshakeConfiguration> = .init(Secrets.rageshakeURL.map { .url(URL(string: $0)!) } ?? .disabled) // swiftlint:disable:this force_unwrapping
-    let bugReportSentryURL: URL? = Secrets.sentryDSN.map { URL(string: $0)! } // swiftlint:disable:this force_unwrapping
-    let bugReportSentryRustURL: URL? = Secrets.sentryRustDSN.map { URL(string: $0)! } // swiftlint:disable:this force_unwrapping
     /// The name allocated by the bug report server
     private(set) var bugReportApplicationID = "element-x-ios"
     
@@ -304,18 +302,13 @@ final nonisolated class AppSettings: @unchecked Sendable {
     
     // MARK: - Analytics
     
-    /// The configuration to use for analytics. Set to `nil` to disable analytics.
-    let analyticsConfiguration: AnalyticsConfiguration? = AppSettings.makeAnalyticsConfiguration()
+    /// The configuration to use for analytics. Bipe: always `nil`, the app has no analytics (bipe#55).
+    let analyticsConfiguration: AnalyticsConfiguration? = nil
     /// The URL to open with more information about analytics terms. When this is `nil` the "Learn more" link will be hidden.
     private(set) var analyticsTermsURL: URL? = nil // Bipe: no analytics
-    /// Whether or not there the app is able ask for user consent to enable analytics or sentry reporting.
+    /// Whether or not there the app is able ask for user consent to enable analytics.
     var canPromptForAnalytics: Bool {
-        analyticsConfiguration != nil || bugReportSentryURL != nil
-    }
-    
-    private static func makeAnalyticsConfiguration() -> AnalyticsConfiguration? {
-        guard let host = Secrets.postHogHost, let apiKey = Secrets.postHogAPIKey else { return nil }
-        return AnalyticsConfiguration(host: host, apiKey: apiKey)
+        analyticsConfiguration != nil
     }
     
     /// Whether the user has opted in to send analytics.
@@ -374,11 +367,6 @@ final nonisolated class AppSettings: @unchecked Sendable {
     // swiftlint:disable:next force_unwrapping
     let elementCallBaseURL: URL = EmbeddedElementCall.appURL!
     #endif
-    
-    // These are publicly availble on https://call.element.io so we don't neeed to treat them as secrets
-    let elementCallPosthogAPIHost = "https://posthog-element-call.element.io"
-    let elementCallPosthogAPIKey = "phc_rXGHx9vDmyEvyRxPziYtdVIv0ahEv8A9uLWFcCi1WcU"
-    let elementCallPosthogSentryDSN = "https://3bd2f95ba5554d4497da7153b552ffb5@sentry.tools.element.io/41"
     
     @UserPreference
     var elementCallBaseURLOverride: URL?

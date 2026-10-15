@@ -6,14 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import CryptoKit
-import Sentry
-
-/// A simple wrapper around Sentry for easy instrumentation
+/// Performance instrumentation points. Bipe: no Sentry (bipe#55), so the calls record nothing.
 class Signposter {
-    private var transactions = [TransactionName: any Sentry.Span]()
-    
-    private var globalTags = [TagName: String]()
     
     enum TransactionName: Hashable {
         case cachedRoomList
@@ -43,11 +37,7 @@ class Signposter {
     }
     
     struct Span {
-        fileprivate let innerSpan: Sentry.Span
-        
-        func finish() {
-            innerSpan.finish()
-        }
+        func finish() { }
     }
     
     enum TagName: String {
@@ -56,56 +46,19 @@ class Signposter {
     
     // MARK: - Transactions
     
-    func startTransaction(_ transactionName: TransactionName, operation: String = "ux", tags: [TagName: String] = [:]) {
-        let span = SentrySDK.startTransaction(name: transactionName.id, operation: operation)
-        
-        tags
-            .merging(globalTags) { tagValue, _ in
-                tagValue
-            }
-            .forEach { (key: TagName, value: String) in
-                span.setTag(value: value, key: key.rawValue)
-            }
-        
-        transactions[transactionName] = span
-    }
+    func startTransaction(_ transactionName: TransactionName, operation: String = "ux", tags: [TagName: String] = [:]) { }
     
-    func finishTransaction(_ transactionName: TransactionName) {
-        transactions[transactionName]?.finish()
-        transactions[transactionName] = nil
-    }
+    func finishTransaction(_ transactionName: TransactionName) { }
     
-    func resetTransactions() {
-        transactions.removeAll()
-    }
+    func resetTransactions() { }
     
     // MARK: - Spans
     
     func addSpan(_ spanName: SpanName, toTransaction transactionName: TransactionName) -> Span? {
-        guard let transaction = transactions[transactionName] else {
-            MXLog.error("Transaction not started or already finished")
-            return nil
-        }
-        
-        return Span(innerSpan: transaction.startChild(operation: spanName.rawValue))
+        nil
     }
     
     // MARK: - Tags
     
-    func addGlobalTag(_ tagName: TagName, value: String) {
-        let value = switch tagName {
-        case .homeserver:
-            sha512(value)
-        }
-        
-        globalTags[tagName] = value
-    }
-    
-    // MARK: - Private
-    
-    func sha512(_ string: String) -> String {
-        let data = Data(string.utf8)
-        let hash = SHA512.hash(data: data)
-        return hash.map { String(format: "%02x", $0) }.joined()
-    }
+    func addGlobalTag(_ tagName: TagName, value: String) { }
 }

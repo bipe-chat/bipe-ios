@@ -9,7 +9,7 @@
 import AnalyticsEvents
 import SwiftUI
 
-/// `ScreenTrackerViewModifier` is a helper class used to track PostHog screen from SwiftUI screens.
+/// `ScreenTrackerViewModifier` is a helper class used to track analytics screens from SwiftUI screens.
 struct ScreenTrackerViewModifier: ViewModifier {
     @Environment(\.analyticsService) private var analyticsService
     
