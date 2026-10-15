@@ -183,8 +183,6 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
 | Voice messages | Sender-side transcription, pause and resume | Shows the transcript and checks it for scams; no sender-side transcription | On-device recognition on low-end Android unmeasured (#80, #81) **Gap** |
 | Help links | Hidden | Still point to element.io | Not done on Android (#205) **Gap** |
-| Sign-up form | One form | Name, then PIN | Not done on iOS (#196) **Gap** |
-| bipe.chat/@handle link | Opens the profile | Opens the app, goes nowhere | Not done on Android (#299) **Gap** |
 | Sticker from a photo | Subject cut-out (Vision) | Centred square crop | Cut-out needs ML Kit, not decided (#101) **Undecided** |
 | Sticker import | Chat export ZIP or files | Chat export ZIP or files; picker opens in WhatsApp's stickers folder | iOS apps cannot read WhatsApp's files |
 | Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) **Undecided** |
