@@ -1003,4 +1003,154 @@ public enum BipeStrings {
     public static var catalogPhotoFailed: String { NSLocalizedString("bipe_catalog_photo_failed", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var catalogLoadFailed: String { NSLocalizedString("bipe_catalog_load_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaActivate: String { NSLocalizedString("bipe_agenda_activate", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaPickTemplate: String { NSLocalizedString("bipe_agenda_pick_template", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTemplatePetGrooming: String { NSLocalizedString("bipe_agenda_template_pet_grooming", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTemplateBarbershop: String { NSLocalizedString("bipe_agenda_template_barbershop", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTemplateSalon: String { NSLocalizedString("bipe_agenda_template_salon", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTemplateClinic: String { NSLocalizedString("bipe_agenda_template_clinic", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTemplateClasses: String { NSLocalizedString("bipe_agenda_template_classes", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTemplateOther: String { NSLocalizedString("bipe_agenda_template_other", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceBath: String { NSLocalizedString("bipe_agenda_service_bath", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceGrooming: String { NSLocalizedString("bipe_agenda_service_grooming", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceHaircut: String { NSLocalizedString("bipe_agenda_service_haircut", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceBeard: String { NSLocalizedString("bipe_agenda_service_beard", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceConsultation: String { NSLocalizedString("bipe_agenda_service_consultation", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceClass: String { NSLocalizedString("bipe_agenda_service_class", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceGeneric: String { NSLocalizedString("bipe_agenda_service_generic", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaSetupHours: String { NSLocalizedString("bipe_agenda_setup_hours", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaSetupPeople: String { NSLocalizedString("bipe_agenda_setup_people", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaAddPerson: String { NSLocalizedString("bipe_agenda_add_person", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaPersonName: String { NSLocalizedString("bipe_agenda_person_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaAddRange: String { NSLocalizedString("bipe_agenda_add_range", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaSetupReview: String { NSLocalizedString("bipe_agenda_setup_review", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTemplateHint: String { NSLocalizedString("bipe_agenda_template_hint", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaPublish: String { NSLocalizedString("bipe_agenda_publish", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaUnpublish: String { NSLocalizedString("bipe_agenda_unpublish", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaSetupDone: String { NSLocalizedString("bipe_agenda_setup_done", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaEmptyDay: String { NSLocalizedString("bipe_agenda_empty_day", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaAllPeople: String { NSLocalizedString("bipe_agenda_all_people", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaWalkIn: String { NSLocalizedString("bipe_agenda_walk_in", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaCustomerName: String { NSLocalizedString("bipe_agenda_customer_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaWalkInHint: String { NSLocalizedString("bipe_agenda_walk_in_hint", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaBlock: String { NSLocalizedString("bipe_agenda_block", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaCloseToday: String { NSLocalizedString("bipe_agenda_close_today", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaCloseTodayBody: String { NSLocalizedString("bipe_agenda_close_today_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaCloseTodayMessage: String { NSLocalizedString("bipe_agenda_close_today_message", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaMyBookings: String { NSLocalizedString("bipe_agenda_my_bookings", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaNoBookings: String { NSLocalizedString("bipe_agenda_no_bookings", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaDownload: String { NSLocalizedString("bipe_agenda_download", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaNoSlots: String { NSLocalizedString("bipe_agenda_no_slots", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaStatusHeld: String { NSLocalizedString("bipe_agenda_status_held", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaStatusRequested: String { NSLocalizedString("bipe_agenda_status_requested", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaStatusDone: String { NSLocalizedString("bipe_agenda_status_done", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaStatusCancelled: String { NSLocalizedString("bipe_agenda_status_cancelled", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaStatusNoShow: String { NSLocalizedString("bipe_agenda_status_no_show", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaAccept: String { NSLocalizedString("bipe_agenda_accept", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaDecline: String { NSLocalizedString("bipe_agenda_decline", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaMarkNoShow: String { NSLocalizedString("bipe_agenda_mark_no_show", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaCancelConfirm: String { NSLocalizedString("bipe_agenda_cancel_confirm", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaPolicyDefault: String { NSLocalizedString("bipe_agenda_policy_default", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaServiceDuration: String { NSLocalizedString("bipe_agenda_service_duration", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaBufferBefore: String { NSLocalizedString("bipe_agenda_buffer_before", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaBufferAfter: String { NSLocalizedString("bipe_agenda_buffer_after", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaTimeZone: String { NSLocalizedString("bipe_agenda_time_zone", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorSlotTaken: String { NSLocalizedString("bipe_agenda_error_slot_taken", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorHoldExpired: String { NSLocalizedString("bipe_agenda_error_hold_expired", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorTooManyOpen: String { NSLocalizedString("bipe_agenda_error_too_many_open", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorOutsideNotice: String { NSLocalizedString("bipe_agenda_error_outside_notice", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorOutsideHorizon: String { NSLocalizedString("bipe_agenda_error_outside_horizon", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorNotPublished: String { NSLocalizedString("bipe_agenda_error_not_published", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorCancelWindow: String { NSLocalizedString("bipe_agenda_error_cancel_window", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaErrorSave: String { NSLocalizedString("bipe_agenda_error_save", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var agendaFeedEvent: String { NSLocalizedString("bipe_agenda_feed_event", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func agendaPushNew(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_agenda_push_new", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
+
+    public static func agendaPushCancelled(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_agenda_push_cancelled", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
+
+    public static func agendaPushMorning(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_agenda_push_morning", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func agendaPushConfirm(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_agenda_push_confirm", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
+
+    public static func agendaPushTwoHours(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_agenda_push_two_hours", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
+
+    public static func agendaPushMoved(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_agenda_push_moved", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
+
+    public static func agendaPushOwnerCancelled(_ p1: String, _ p2: String, _ p3: String) -> String {
+        String(format: NSLocalizedString("bipe_agenda_push_owner_cancelled", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
+    }
 }
