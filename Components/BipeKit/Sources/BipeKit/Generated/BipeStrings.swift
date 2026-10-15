@@ -945,4 +945,62 @@ public enum BipeStrings {
     public static func queuePushCalled(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_queue_push_called", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
+
+    public static var catalogAddItem: String { NSLocalizedString("bipe_catalog_add_item", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogEditItem: String { NSLocalizedString("bipe_catalog_edit_item", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogItemName: String { NSLocalizedString("bipe_catalog_item_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogItemKind: String { NSLocalizedString("bipe_catalog_item_kind", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogKindService: String { NSLocalizedString("bipe_catalog_kind_service", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogKindProduct: String { NSLocalizedString("bipe_catalog_kind_product", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogPhoto: String { NSLocalizedString("bipe_catalog_photo", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogAddPhoto: String { NSLocalizedString("bipe_catalog_add_photo", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogRemovePhoto: String { NSLocalizedString("bipe_catalog_remove_photo", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogPrice: String { NSLocalizedString("bipe_catalog_price", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogPriceFixed: String { NSLocalizedString("bipe_catalog_price_fixed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogPriceFromOption: String { NSLocalizedString("bipe_catalog_price_from_option", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogDescription: String { NSLocalizedString("bipe_catalog_description", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogCategory: String { NSLocalizedString("bipe_catalog_category", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogActive: String { NSLocalizedString("bipe_catalog_active", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogReorder: String { NSLocalizedString("bipe_catalog_reorder", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogAvailableToday: String { NSLocalizedString("bipe_catalog_available_today", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogMarkSoldOut: String { NSLocalizedString("bipe_catalog_mark_sold_out", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogMarkAvailable: String { NSLocalizedString("bipe_catalog_mark_available", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogEmpty: String { NSLocalizedString("bipe_catalog_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogOwnerEmpty: String { NSLocalizedString("bipe_catalog_owner_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogSave: String { NSLocalizedString("bipe_catalog_save", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogRemove: String { NSLocalizedString("bipe_catalog_remove", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogRemoveBody: String { NSLocalizedString("bipe_catalog_remove_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogSaved: String { NSLocalizedString("bipe_catalog_saved", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogRemoved: String { NSLocalizedString("bipe_catalog_removed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogSaveFailed: String { NSLocalizedString("bipe_catalog_save_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogPhotoFailed: String { NSLocalizedString("bipe_catalog_photo_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var catalogLoadFailed: String { NSLocalizedString("bipe_catalog_load_failed", tableName: "Bipe", bundle: .module, comment: "") }
 }
