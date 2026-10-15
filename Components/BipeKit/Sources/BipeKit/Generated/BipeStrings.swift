@@ -1153,4 +1153,66 @@ public enum BipeStrings {
     public static func agendaPushOwnerCancelled(_ p1: String, _ p2: String, _ p3: String) -> String {
         String(format: NSLocalizedString("bipe_agenda_push_owner_cancelled", tableName: "Bipe", bundle: .module, comment: ""), p1, p2, p3)
     }
+
+    public static var linkedAccountsTitle: String { NSLocalizedString("bipe_linked_accounts_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkApple: String { NSLocalizedString("bipe_link_apple", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkGoogle: String { NSLocalizedString("bipe_link_google", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedApple: String { NSLocalizedString("bipe_linked_apple", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedGoogle: String { NSLocalizedString("bipe_linked_google", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func linkedAccountBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_linked_account_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var linkedAccountNoPinReset: String { NSLocalizedString("bipe_linked_account_no_pin_reset", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountBiometric: String { NSLocalizedString("bipe_linked_account_biometric", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountUnlink: String { NSLocalizedString("bipe_linked_account_unlink", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountUnlinkTitle: String { NSLocalizedString("bipe_linked_account_unlink_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountUnlinkBody: String { NSLocalizedString("bipe_linked_account_unlink_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountUnlinkBiometric: String { NSLocalizedString("bipe_linked_account_unlink_biometric", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountUnlinked: String { NSLocalizedString("bipe_linked_account_unlinked", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountError: String { NSLocalizedString("bipe_linked_account_error", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAccountUnlinkError: String { NSLocalizedString("bipe_linked_account_unlink_error", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryApple: String { NSLocalizedString("bipe_recovery_apple", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryGoogle: String { NSLocalizedString("bipe_recovery_google", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func recoveryLinkedBody(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_linked_body", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func recoveryLinkedWait(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_recovery_linked_wait", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var recoveryLinkedPinBlocked: String { NSLocalizedString("bipe_recovery_linked_pin_blocked", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryLinkedInvalid: String { NSLocalizedString("bipe_recovery_linked_invalid", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryLinkedHistory: String { NSLocalizedString("bipe_recovery_linked_history", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedAppleAlert: String { NSLocalizedString("bipe_linked_apple_alert", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedGoogleAlert: String { NSLocalizedString("bipe_linked_google_alert", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var unlinkedAppleAlert: String { NSLocalizedString("bipe_unlinked_apple_alert", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var unlinkedGoogleAlert: String { NSLocalizedString("bipe_unlinked_google_alert", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryLinkedAppleAlert: String { NSLocalizedString("bipe_recovery_linked_apple_alert", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryLinkedGoogleAlert: String { NSLocalizedString("bipe_recovery_linked_google_alert", tableName: "Bipe", bundle: .module, comment: "") }
 }

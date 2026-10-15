@@ -665,6 +665,15 @@ public enum BipeRegistries {
     public static let recoveryDelayHoursEmail = 24
     public static let recoveryDelayHoursGuardian = 24
     public static let recoveryDelayHoursCpf = 72
+    /// Linked providers are recovery factors only (ADR 0096).
+    public static let linkedRecoveryProviders: [String] = [
+        "apple",
+        "google",
+    ]
+    public static let linkedRecoveryDelayHours = 24
+    public static let linkedRecoveryRequiresPin = true
+    public static let linkedRecoveryAllowsPinReset = false
+    public static let linkedRecoveryMaxAccountsPerProvider = 1
     public static let guardianApprovalsMax = 2
     public static let recoveryLinkMinutes = 60
     public static let emailVerifyLinkHours = 24
