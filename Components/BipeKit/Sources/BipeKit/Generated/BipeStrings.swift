@@ -290,6 +290,12 @@ public enum BipeStrings {
 
     public static var invitesOtherDevice: String { NSLocalizedString("bipe_invites_other_device", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var invitesNameAction: String { NSLocalizedString("bipe_invites_name_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesNamePlaceholder: String { NSLocalizedString("bipe_invites_name_placeholder", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesNameFooter: String { NSLocalizedString("bipe_invites_name_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static func invitesShareMessage(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_invites_share_message", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }

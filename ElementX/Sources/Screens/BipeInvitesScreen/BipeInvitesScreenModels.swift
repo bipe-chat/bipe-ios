@@ -19,6 +19,8 @@ struct BipeInvitesScreenViewState: BindableState {
     var invites: [BipeInvite] = []
     /// Links for pending invites created on this device (kept in the keychain). The server keeps only a hash of each code.
     var shareURLs: [String: URL] = [:]
+    /// Names the person gave their invites on this device, by invite ID.
+    var names: [String: String] = [:]
     
     var bindings = BipeInvitesScreenViewStateBindings()
     
@@ -53,6 +55,8 @@ struct BipeInvitesScreenViewStateBindings {
     var alertInfo: AlertInfo<BipeInvitesScreenAlertType>?
     var shareSheetLink: BipeInviteShareLink?
     var qrCodeLink: BipeInviteShareLink?
+    var namingInviteID: String?
+    var nameDraft = ""
 }
 
 struct BipeInviteShareLink: Identifiable {
@@ -70,6 +74,8 @@ enum BipeInvitesScreenViewAction {
     case share(inviteID: String)
     case showQRCode(inviteID: String)
     case revoke(inviteID: String)
+    case startNaming(inviteID: String)
+    case saveName
     case openUserProfile(userID: String)
 }
 

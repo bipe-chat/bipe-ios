@@ -44,6 +44,28 @@ public nonisolated struct BipeInviteStore {
         if kept.count != current.count { writeLinks(kept) }
     }
 
+    // MARK: - Names
+
+    /// Names the person gave their invites, by invite ID. They stay on this device and never reach the server.
+    public func names() -> [String: String] {
+        defaults.dictionary(forKey: namesKey) as? [String: String] ?? [:]
+    }
+
+    /// An empty name removes the entry.
+    public func saveName(_ name: String, forInviteID id: String) {
+        var current = names()
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        current[id] = trimmed.isEmpty ? nil : trimmed
+        defaults.set(current, forKey: namesKey)
+    }
+
+    /// Drops names of invites the server no longer lists.
+    public func keepNames(forInviteIDs ids: Set<String>) {
+        let current = names()
+        let kept = current.filter { ids.contains($0.key) }
+        if kept.count != current.count { defaults.set(kept, forKey: namesKey) }
+    }
+
     // MARK: - Seen joins
 
     /// `nil` until the first check on this device, so the first check can mark old joins as seen without announcing them.
@@ -69,6 +91,7 @@ public nonisolated struct BipeInviteStore {
     // MARK: - Private
 
     private var seenKey: String { "bipe.invites.seenJoined.\(userID)" }
+    private var namesKey: String { "bipe.invites.names.\(userID)" }
     private var pairsKey: String { "bipe.invites.pairs.\(userID)" }
 
     private func writeLinks(_ links: [String: URL]) {

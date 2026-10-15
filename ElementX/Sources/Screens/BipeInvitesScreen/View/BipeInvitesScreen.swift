@@ -11,7 +11,6 @@ import SwiftUI
 struct BipeInvitesScreen: View {
     @Bindable var context: BipeInvitesScreenViewModel.Context
     @Environment(\.bipeHandleResolver) private var handleResolver
-    @State private var selectedPendingInvite: BipeInvite?
     
     var body: some View {
         Form {
@@ -23,11 +22,13 @@ struct BipeInvitesScreen: View {
         .navigationTitle(BipeStrings.invitesTitle)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
-        .confirmationDialog(BipeStrings.invitesLink,
-                            isPresented: isPendingInviteDialogPresented,
-                            titleVisibility: .hidden,
-                            presenting: selectedPendingInvite) { invite in
-            pendingInviteActions(for: invite)
+        .alert(BipeStrings.invitesNameAction, isPresented: isNamingPresented) {
+            TextField(BipeStrings.invitesNamePlaceholder, text: $context.nameDraft)
+                .textInputAutocapitalization(.words)
+            Button(L10n.actionSave) { context.send(viewAction: .saveName) }
+            Button(L10n.actionCancel, role: .cancel) { }
+        } message: {
+            Text(BipeStrings.invitesNameFooter)
         }
         .sheet(item: $context.shareSheetLink) { link in
             AppActivityView(activityItems: [BipeStrings.invitesShareMessage(link.url.absoluteString)])
@@ -72,7 +73,7 @@ struct BipeInvitesScreen: View {
                 ForEach(joinedInvites) { invite in
                     if let userID = invite.joinedUserId {
                         ListRow(label: .default(title: handleResolver?.displayText(for: userID) ?? userID,
-                                                description: invite.status.title,
+                                                description: joinedDescription(for: invite),
                                                 icon: \.checkCircle),
                                 kind: .navigationLink { context.send(viewAction: .openUserProfile(userID: userID)) })
                     }
@@ -90,10 +91,19 @@ struct BipeInvitesScreen: View {
         if !pendingInvites.isEmpty {
             Section {
                 ForEach(pendingInvites) { invite in
-                    ListRow(label: .default(title: BipeStrings.invitesLink,
+                    ListRow(label: .default(title: title(for: invite),
                                             description: description(for: invite),
                                             icon: \.time),
-                            kind: .button { selectedPendingInvite = invite })
+                            kind: .label)
+                        .overlay {
+                            // A tap opens the menu at the row, so no action needs its own button.
+                            Menu {
+                                pendingInviteActions(for: invite)
+                            } label: {
+                                Color.clear.contentShape(Rectangle())
+                            }
+                            .accessibilityLabel(BipeStrings.invitesLink)
+                        }
                 }
             } header: {
                 Text(BipeStrings.invitesPendingHeader)
@@ -104,17 +114,38 @@ struct BipeInvitesScreen: View {
     
     @ViewBuilder
     private func pendingInviteActions(for invite: BipeInvite) -> some View {
+        Button { context.send(viewAction: .startNaming(inviteID: invite.id)) } label: {
+            Label(BipeStrings.invitesNameAction, icon: \.edit)
+        }
         // Links live only on the device that made them; the server keeps a hash of the code.
         if context.viewState.shareURLs[invite.id] != nil {
-            Button(L10n.actionShare) { context.send(viewAction: .share(inviteID: invite.id)) }
-            Button(BipeStrings.invitesQrAction) { context.send(viewAction: .showQRCode(inviteID: invite.id)) }
+            Button { context.send(viewAction: .share(inviteID: invite.id)) } label: {
+                Label(L10n.actionShare, icon: \.shareIos)
+            }
+            Button { context.send(viewAction: .showQRCode(inviteID: invite.id)) } label: {
+                Label(BipeStrings.invitesQrAction, icon: \.qrCode)
+            }
         }
-        Button(BipeStrings.invitesRevoke, role: .destructive) { context.send(viewAction: .revoke(inviteID: invite.id)) }
+        Button(role: .destructive) { context.send(viewAction: .revoke(inviteID: invite.id)) } label: {
+            Label(BipeStrings.invitesRevoke, icon: \.delete)
+        }
     }
     
-    private var isPendingInviteDialogPresented: Binding<Bool> {
-        Binding(get: { selectedPendingInvite != nil },
-                set: { if !$0 { selectedPendingInvite = nil } })
+    private var isNamingPresented: Binding<Bool> {
+        Binding(get: { context.namingInviteID != nil },
+                set: { if !$0 { context.namingInviteID = nil } })
+    }
+    
+    /// The name the person gave the invite, else its code, so each row can be told apart.
+    private func title(for invite: BipeInvite) -> String {
+        if let name = context.viewState.names[invite.id] { return name }
+        if let url = context.viewState.shareURLs[invite.id], let code = BipeInviteLink.code(from: url) { return code }
+        return BipeStrings.invitesLink
+    }
+    
+    private func joinedDescription(for invite: BipeInvite) -> String {
+        guard let name = context.viewState.names[invite.id] else { return invite.status.title }
+        return "\(name) · \(invite.status.title)"
     }
     
     private func description(for invite: BipeInvite) -> String {

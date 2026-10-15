@@ -31,6 +31,7 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
         
         var initialState = BipeInvitesScreenViewState()
         initialState.shareURLs = store.links()
+        initialState.names = store.names()
         super.init(initialViewState: initialState)
         
         Task { await load() }
@@ -52,6 +53,14 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
             state.bindings.shareSheetLink = link(for: inviteID)
         case .showQRCode(let inviteID):
             state.bindings.qrCodeLink = link(for: inviteID)
+        case .startNaming(let inviteID):
+            state.bindings.nameDraft = state.names[inviteID] ?? ""
+            state.bindings.namingInviteID = inviteID
+        case .saveName:
+            guard let inviteID = state.bindings.namingInviteID else { return }
+            store.saveName(state.bindings.nameDraft, forInviteID: inviteID)
+            state.names = store.names()
+            state.bindings.namingInviteID = nil
         case .revoke(let inviteID):
             Task { await revoke(inviteID) }
         case .openUserProfile(let userID):
@@ -76,6 +85,8 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
             let pendingIDs = Set(myInvites.invites.filter { $0.status == .pending }.map(\.id))
             store.keepLinks(forPendingInviteIDs: pendingIDs)
             state.shareURLs = state.shareURLs.filter { pendingIDs.contains($0.key) }
+            store.keepNames(forInviteIDs: Set(myInvites.invites.map(\.id)))
+            state.names = store.names()
             let joinedIDs = Set(myInvites.invites.filter { $0.status == .used }.map(\.id))
             store.setSeenJoinedInviteIDs((store.seenJoinedInviteIDs() ?? []).union(joinedIDs))
         } catch {
