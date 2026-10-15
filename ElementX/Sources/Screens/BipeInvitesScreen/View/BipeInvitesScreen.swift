@@ -11,91 +11,117 @@ import SwiftUI
 struct BipeInvitesScreen: View {
     @Bindable var context: BipeInvitesScreenViewModel.Context
     @Environment(\.bipeHandleResolver) private var handleResolver
-    @State private var qrCodeInvite: QRCodeInvite?
+    @State private var selectedPendingInvite: BipeInvite?
     
     var body: some View {
         Form {
-            Section {
-                ListRow(label: .plain(title: BipeStrings.invitesAvailable(String(context.viewState.available))),
-                        kind: .label)
-                ListRow(label: .action(title: BipeStrings.invitesCreate, icon: \.plus),
-                        kind: .button { context.send(viewAction: .create) })
-                    .disabled(!context.viewState.canCreate)
-            } footer: {
-                Text(context.viewState.footer)
-                    .compoundListSectionFooter()
-            }
-            
-            Section {
-                if context.viewState.invites.isEmpty, !context.viewState.isLoading {
-                    ListRow(label: .plain(title: BipeStrings.invitesEmpty), kind: .label)
-                }
-                ForEach(context.viewState.invites) { invite in
-                    row(for: invite)
-                }
-            }
+            inviteSection
+            joinedSection
+            pendingSection
         }
         .compoundList()
         .navigationTitle(BipeStrings.invitesTitle)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
-        .sheet(item: $qrCodeInvite) { invite in
-            BipeInviteQRCodeSheet(url: invite.url, shareTitle: L10n.actionShare)
+        .confirmationDialog(BipeStrings.invitesLink,
+                            isPresented: isPendingInviteDialogPresented,
+                            titleVisibility: .hidden,
+                            presenting: selectedPendingInvite) { invite in
+            pendingInviteActions(for: invite)
+        }
+        .sheet(item: $context.shareSheetLink) { link in
+            AppActivityView(activityItems: [BipeStrings.invitesShareMessage(link.url.absoluteString)])
+                .ignoresSafeArea(edges: .bottom)
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $context.qrCodeLink) { link in
+            BipeInviteQRCodeSheet(url: link.url, shareTitle: L10n.actionShare)
                 .presentationDetents([.large])
         }
     }
     
-    @ViewBuilder
-    private func row(for invite: BipeInvite) -> some View {
-        switch invite.status {
-        case .pending:
-            VStack(alignment: .leading, spacing: 8) {
-                ListRow(label: .default(title: invite.status.title,
-                                        description: BipeStrings.invitesExpires(invite.expiresAt.formatted(date: .abbreviated, time: .omitted)),
-                                        icon: \.time),
-                        kind: .label)
-                HStack(spacing: 12) {
-                    if let url = context.viewState.shareURLs[invite.id] {
-                        ShareLink(item: BipeStrings.invitesShareMessage(url.absoluteString)) {
-                            Label(L10n.actionShare, icon: \.shareIos)
-                        }
-                        .buttonStyle(.compound(.secondary, size: .medium))
-                        Button {
-                            qrCodeInvite = QRCodeInvite(id: invite.id, url: url)
-                        } label: {
-                            Label(BipeStrings.invitesQrAction, icon: \.qrCode)
-                        }
-                        .buttonStyle(.compound(.secondary, size: .medium))
-                    }
-                    Button(role: .destructive) {
-                        context.send(viewAction: .revoke(inviteID: invite.id))
-                    } label: {
-                        Text(BipeStrings.invitesRevoke)
-                    }
-                    .buttonStyle(.compound(.tertiary, size: .medium))
+    private var inviteSection: some View {
+        Section {
+            VStack(spacing: 12) {
+                Button { context.send(viewAction: .inviteByLink) } label: {
+                    Label(BipeStrings.invitesInviteSomeone, icon: \.shareIos)
+                        .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
+                .buttonStyle(.compound(.primary))
+                
+                Button { context.send(viewAction: .inviteInPerson) } label: {
+                    Label(BipeStrings.invitesShowQr, icon: \.qrCode)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.compound(.secondary))
             }
-        case .used:
-            if let userID = invite.joinedUserId {
-                ListRow(label: .default(title: handleResolver?.displayText(for: userID) ?? userID,
-                                        description: invite.status.title,
-                                        icon: \.checkCircle),
-                        kind: .navigationLink { context.send(viewAction: .openUserProfile(userID: userID)) })
-            }
-        case .expired, .revoked:
-            ListRow(label: .default(title: invite.status.title,
-                                    description: invite.createdAt.formatted(date: .abbreviated, time: .omitted),
-                                    icon: \.close),
-                    kind: .label)
+            .disabled(!context.viewState.canCreate)
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+        } footer: {
+            Text(context.viewState.footer)
+                .compoundListSectionFooter()
         }
     }
-}
-
-private struct QRCodeInvite: Identifiable {
-    let id: String
-    let url: URL
+    
+    @ViewBuilder
+    private var joinedSection: some View {
+        let joinedInvites = context.viewState.joinedInvites
+        if !joinedInvites.isEmpty {
+            Section {
+                ForEach(joinedInvites) { invite in
+                    if let userID = invite.joinedUserId {
+                        ListRow(label: .default(title: handleResolver?.displayText(for: userID) ?? userID,
+                                                description: invite.status.title,
+                                                icon: \.checkCircle),
+                                kind: .navigationLink { context.send(viewAction: .openUserProfile(userID: userID)) })
+                    }
+                }
+            } header: {
+                Text("\(BipeStrings.invitesJoinedHeader) (\(joinedInvites.count))")
+                    .compoundListSectionHeader()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var pendingSection: some View {
+        let pendingInvites = context.viewState.pendingInvites
+        if !pendingInvites.isEmpty {
+            Section {
+                ForEach(pendingInvites) { invite in
+                    ListRow(label: .default(title: BipeStrings.invitesLink,
+                                            description: description(for: invite),
+                                            icon: \.time),
+                            kind: .button { selectedPendingInvite = invite })
+                }
+            } header: {
+                Text(BipeStrings.invitesPendingHeader)
+                    .compoundListSectionHeader()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func pendingInviteActions(for invite: BipeInvite) -> some View {
+        // Links live only on the device that made them; the server keeps a hash of the code.
+        if context.viewState.shareURLs[invite.id] != nil {
+            Button(L10n.actionShare) { context.send(viewAction: .share(inviteID: invite.id)) }
+            Button(BipeStrings.invitesQrAction) { context.send(viewAction: .showQRCode(inviteID: invite.id)) }
+        }
+        Button(BipeStrings.invitesRevoke, role: .destructive) { context.send(viewAction: .revoke(inviteID: invite.id)) }
+    }
+    
+    private var isPendingInviteDialogPresented: Binding<Bool> {
+        Binding(get: { selectedPendingInvite != nil },
+                set: { if !$0 { selectedPendingInvite = nil } })
+    }
+    
+    private func description(for invite: BipeInvite) -> String {
+        let expiry = BipeStrings.invitesExpires(invite.expiresAt.formatted(date: .abbreviated, time: .omitted))
+        guard context.viewState.shareURLs[invite.id] == nil else { return expiry }
+        return "\(expiry). \(BipeStrings.invitesOtherDevice)"
+    }
 }
 
 // MARK: - Previews

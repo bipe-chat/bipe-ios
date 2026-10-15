@@ -278,6 +278,18 @@ public enum BipeStrings {
 
     public static var invitesCreate: String { NSLocalizedString("bipe_invites_create", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var invitesInviteSomeone: String { NSLocalizedString("bipe_invites_invite_someone", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesShowQr: String { NSLocalizedString("bipe_invites_show_qr", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesJoinedHeader: String { NSLocalizedString("bipe_invites_joined_header", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesPendingHeader: String { NSLocalizedString("bipe_invites_pending_header", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesLink: String { NSLocalizedString("bipe_invites_link", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var invitesOtherDevice: String { NSLocalizedString("bipe_invites_other_device", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static func invitesShareMessage(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_invites_share_message", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }

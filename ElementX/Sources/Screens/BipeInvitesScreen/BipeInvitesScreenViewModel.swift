@@ -38,8 +38,20 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
     
     override func process(viewAction: BipeInvitesScreenViewAction) {
         switch viewAction {
-        case .create:
-            Task { await create() }
+        case .inviteByLink:
+            Task {
+                guard let link = await create() else { return }
+                state.bindings.shareSheetLink = link
+            }
+        case .inviteInPerson:
+            Task {
+                guard let link = await create() else { return }
+                state.bindings.qrCodeLink = link
+            }
+        case .share(let inviteID):
+            state.bindings.shareSheetLink = link(for: inviteID)
+        case .showQRCode(let inviteID):
+            state.bindings.qrCodeLink = link(for: inviteID)
         case .revoke(let inviteID):
             Task { await revoke(inviteID) }
         case .openUserProfile(let userID):
@@ -72,8 +84,9 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
         }
     }
     
-    private func create() async {
-        guard state.canCreate else { return }
+    /// Creates an invite and returns its link, so the caller can open the share sheet or the QR code at once.
+    private func create() async -> BipeInviteShareLink? {
+        guard state.canCreate else { return nil }
         
         startLoading()
         defer { stopLoading() }
@@ -86,10 +99,16 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
             state.shareURLs[created.id] = created.url
             store.saveLink(created.url, forInviteID: created.id)
             await load()
+            return BipeInviteShareLink(id: created.id, url: created.url)
         } catch {
             MXLog.error("Bipe invite creation failed: \(error)")
             show(error)
+            return nil
         }
+    }
+    
+    private func link(for inviteID: String) -> BipeInviteShareLink? {
+        state.shareURLs[inviteID].map { BipeInviteShareLink(id: inviteID, url: $0) }
     }
     
     private func revoke(_ inviteID: String) async {
