@@ -231,5 +231,6 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Conferir no Bipe: close | Back to the app that shared | Back to Bipe | The iOS check runs in the share extension; Android shows it in the app (ADR 0091) |
 | Message actions | Native context menu on long press: reaction row, actions, the message as preview | Element's bottom sheet | Platform idiom |
 | Terms screen and a recovery alert due together | Terms screen first, the alert right after Continue | Recovery alert first, then the terms screen | On iOS a root alert cannot show over the full-screen terms cover; on Android the terms screen is an overlay that waits for the alert |
+| Settings: Idioma | Row that opens the iPhone Ajustes | No row | iOS sets the app language in system settings; Android follows the system language |
 
 <!-- /parity:differences -->
