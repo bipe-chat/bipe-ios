@@ -156,11 +156,50 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     actionsSubject.send(.openSelfChat)
                 case .bipeAccount:
                     presentBipeAccountScreen()
+                case .bipeGroup(let group):
+                    presentBipeSettingsGroup(group)
                 }
             }
             .store(in: &cancellables)
         
         navigationStackCoordinator.setRootCoordinator(settingsScreenCoordinator, animated: animated)
+    }
+    
+    // MARK: - Bipe settings groups (ADR 0112)
+    
+    private func presentBipeSettingsGroup(_ group: BipeSettingsGroup) {
+        guard !group.usesElementScreen else {
+            presentNotificationSettings()
+            return
+        }
+        
+        let coordinator = BipeSettingsGroupScreenCoordinator(parameters: .init(group: group,
+                                                                               userSession: flowParameters.userSession,
+                                                                               appLockService: appLockService,
+                                                                               userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .open(let row):
+                    self?.openBipeSettingsRow(row)
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    /// The rows that open another screen or flow. Old Element routes map here.
+    private func openBipeSettingsRow(_ row: BipeSettingsRow) {
+        switch row {
+        case .profileNamePhoto:
+            presentUserDetailsEditScreen()
+        case .profileHandle:
+            presentBipeHandleScreen()
+        case .profilePublicProfile:
+            presentBipePublicProfileScreen()
+        default:
+            MXLog.error("Bipe settings row without a screen: \(row.rawValue)")
+        }
     }
     
     /// `onDone` runs after the screen pops, e.g. to reload the screen below.

@@ -42,6 +42,8 @@ enum SettingsScreenViewModelAction {
     case bipeContacts
     case bipeSelfChat
     case bipeAccount
+    /// Bipe: a settings group row under "Configurações" (ADR 0112).
+    case bipeGroup(BipeSettingsGroup)
 }
 
 enum SettingsScreenSecuritySectionMode {
@@ -61,10 +63,12 @@ struct SettingsScreenViewState: BindableState {
     /// Bipe: the username row (Bipe accounts only) and the current handle.
     var showBipeHandle = false
     var bipeHandle: String?
-    /// Bipe: whether the public profile is on (ADR 0041). `nil` until loaded.
-    var bipePublicProfileEnabled: Bool?
     /// Bipe: "Quem pode me mandar mensagem". Same visibility as the username row.
     var bipeWhoCanMessage: BipeWhoCanMessage?
+    /// Bipe: the ways back to the account, the subtitle of "Sua conta". `nil` until loaded.
+    var bipeWaysBack: BipeWaysBack?
+    /// Bipe: notifications on this phone, the subtitle of "Notificações". `nil` until loaded.
+    var bipeNotificationsOn: Bool?
     
     /// Bipe: the "Perfil de confiança" card. Same visibility as the username row.
     var bipeTrustProfile: BipeTrustProfile? {
@@ -158,6 +162,9 @@ enum SettingsScreenViewAction {
     case bipeContacts
     case bipeSelfChat
     case bipeAccount
+    case bipeGroup(BipeSettingsGroup)
+    /// Bipe: a long press on the version copies the device ID (ADR 0112).
+    case bipeCopyDeviceID
     
     enum UserStatusAction {
         /// Show status picker sheet to select a preset status.

@@ -161,13 +161,20 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         case .bipeLoadHandle:
             Task { await loadBipeHandle() }
             Task { await loadBipeWhoCanMessage() }
-            Task { await loadBipePublicProfile() }
+            Task { await loadBipeWaysBack() }
+            Task { await loadBipeNotificationsState() }
         case .bipeContacts:
             actionsSubject.send(.bipeContacts)
         case .bipeSelfChat:
             actionsSubject.send(.bipeSelfChat)
         case .bipeAccount:
             actionsSubject.send(.bipeAccount)
+        case .bipeGroup(let group):
+            actionsSubject.send(.bipeGroup(group))
+        case .bipeCopyDeviceID:
+            guard let deviceID = state.deviceID else { return }
+            UIPasteboard.general.string = deviceID
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.helpDeviceIdCopied, icon: \.check))
         }
     }
     
@@ -195,16 +202,19 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         }
     }
     
-    private func loadBipePublicProfile() async {
-        guard state.showBipeHandle else { return }
-        let apiClient = BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL)
-        do {
-            state.bipePublicProfileEnabled = try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(BipeAPIError) -> Bool in
-                try await apiClient.myProfile(accessToken: token).enabled
-            }
-        } catch {
-            MXLog.error("Bipe public profile load failed: \(error)")
+    private func loadBipeWaysBack() async {
+        guard state.showBipeHandle else {
+            state.bipeWaysBack = BipeWaysBackReader.waysBack(status: nil, clientProxy: clientProxy)
+            return
         }
+        let apiClient = BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL)
+        state.bipeWaysBack = await BipeWaysBackReader.load(apiClient: apiClient, clientProxy: clientProxy).waysBack
+    }
+    
+    /// On when the app setting is on and iOS allows notifications.
+    private func loadBipeNotificationsState() async {
+        let authorizationStatus = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        state.bipeNotificationsOn = userSettings.app.enableNotifications && authorizationStatus != .denied
     }
     
     // MARK: - Private
