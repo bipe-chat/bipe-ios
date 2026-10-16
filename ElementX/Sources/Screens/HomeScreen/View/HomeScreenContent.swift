@@ -119,6 +119,12 @@ struct HomeScreenContent: View {
                     RoomListFiltersView(state: $context.filtersState)
                 }
                 
+                if context.viewState.shouldShowBipeInviterRow, let inviterHandle = context.viewState.bipeInviterHandle {
+                    BipeInviterRow(inviterHandle: inviterHandle) {
+                        context.send(viewAction: .openBipeInviterChat)
+                    }
+                }
+                
                 if context.viewState.shouldShowBipeRequestsRow {
                     BipeRequestsRow(count: context.viewState.bipeRequestCount) {
                         context.filtersState.activateFilter(.invites)

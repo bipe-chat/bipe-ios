@@ -124,6 +124,7 @@
 		0F81DEE3E02A6549B20DF09A /* DeactivateAccountScreenViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633924B26ACCD29C18BEF4E8 /* DeactivateAccountScreenViewModelProtocol.swift */; };
 		0FA03F5A33C0857231B32B44 /* ReportRoomScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FDB0B87D925AE830E32621 /* ReportRoomScreenViewModel.swift */; };
 		101C8BFCAE35F43F37A6D8ED /* NotificationToneManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18678D0A4177D8F0A255BC36 /* NotificationToneManagerMock.swift */; };
+		102F8D7420F3928D1B35D2DF /* BipeInviterHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06CB5F8A126EC9EB65C27A4 /* BipeInviterHint.swift */; };
 		106E3126B0C49231381B5B80 /* AccountUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96792E7EE6742172DA3A35E /* AccountUserDefaultsTests.swift */; };
 		108D3C0707A90B0F848CDBB9 /* ResolveVerifiedUserSendFailureScreenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011EF0086E49DBD78E16E5 /* ResolveVerifiedUserSendFailureScreenModels.swift */; };
 		109AEB7D33C4497727AFB87F /* TimelineInteractionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA894BC09972DC45E497D37 /* TimelineInteractionHandler.swift */; };
@@ -379,6 +380,7 @@
 		37906355E207DB5703754675 /* AppLockSetupBiometricsScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F893F4A111CB7BA5C96949 /* AppLockSetupBiometricsScreenViewModel.swift */; };
 		37D789F24199B32E3FD1AA7B /* FileRoomTimelineItemContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216F0DDC98F2A2C162D09C28 /* FileRoomTimelineItemContent.swift */; };
 		37E47F5101C0C036289D3807 /* DSWaveformImageViews in Frameworks */ = {isa = PBXBuildFile; productRef = 2A4106A0A96DC4C273128AA5 /* DSWaveformImageViews */; };
+		37F09F2FEDEA5DBAFC633868 /* BipeInviterRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09E3E09DFD3A311C957901E /* BipeInviterRow.swift */; };
 		383063A7924F06D54BA9B24C /* SpaceSettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9475FD81B13D50103E5290EB /* SpaceSettingsScreen.swift */; };
 		384D6B9A7DFD7260139D6852 /* UITestsNotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBEB8D9F4940E161B18FE4BC /* UITestsNotificationCenter.swift */; };
 		38546A6010A2CF240EC9AF73 /* BindableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA1D2CBAEA5D0BD00B90D1B /* BindableState.swift */; };
@@ -445,6 +447,7 @@
 		42F1C8731166633E35A6D7E6 /* RoomEventStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A307A44F952CD73E63AE31 /* RoomEventStringBuilder.swift */; };
 		432EA37BDC97CEDBAB7B23A6 /* RoomInfoProxyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14517E5597594956FCE1950D /* RoomInfoProxyProtocol.swift */; };
 		43670DD4D30C97AC64ADBE0D /* BipePublicProfileScreenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA6626E9CD7664A738EC7C5 /* BipePublicProfileScreenModels.swift */; };
+		43B2BED753230FDCC46701A1 /* BipeInviterGreeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8AA94CD093583F7A5F455A3 /* BipeInviterGreeting.swift */; };
 		43F35A7E5703D64DB0519C59 /* ServerSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD469F7513574341181F7EAA /* ServerSelectionScreen.swift */; };
 		440123E29E2F9B001A775BBE /* TimelineItemProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D505843AB66822EB91F0DF0 /* TimelineItemProxy.swift */; };
 		441857143FC100E0A7DE42A8 /* RoomPowerLevelProxyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D635709C1D6D37C225AD40E /* RoomPowerLevelProxyProtocol.swift */; };
@@ -2904,6 +2907,7 @@
 		B858A61F2A570DFB8DE570A7 /* AggregratedReaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AggregratedReaction.swift; sourceTree = "<group>"; };
 		B88CE0A058727BC68EEEC6B6 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		B8A3B7637DDBD6AA97AC2545 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
+		B8AA94CD093583F7A5F455A3 /* BipeInviterGreeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeInviterGreeting.swift; sourceTree = "<group>"; };
 		B8F28602AC7AC881AED37EBA /* NavigationCoordinators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationCoordinators.swift; sourceTree = "<group>"; };
 		B8FACBAABD1345DD488E08A9 /* BipeMessagingScreenCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeMessagingScreenCoordinator.swift; sourceTree = "<group>"; };
 		B902EA6CD3296B0E10EE432B /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
@@ -3126,6 +3130,8 @@
 		DF17EA323AD0205A6AB621AA /* Snapshotting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snapshotting.swift; sourceTree = "<group>"; };
 		DF3D25B3EDB283B5807EADCF /* ReadMarkerRoomTimelineItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadMarkerRoomTimelineItem.swift; sourceTree = "<group>"; };
 		E06AAD6D9D3F5833E7A5A2F9 /* RoomListFilterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomListFilterModels.swift; sourceTree = "<group>"; };
+		E06CB5F8A126EC9EB65C27A4 /* BipeInviterHint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeInviterHint.swift; sourceTree = "<group>"; };
+		E09E3E09DFD3A311C957901E /* BipeInviterRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeInviterRow.swift; sourceTree = "<group>"; };
 		E0FF9CB3EFA753277291F609 /* EncryptionResetScreenCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionResetScreenCoordinator.swift; sourceTree = "<group>"; };
 		E10DA51DBC8C7E1460DBCCBD /* UserProfileListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileListRow.swift; sourceTree = "<group>"; };
 		E124365DC2141340F6F81A72 /* NotificationCountBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCountBadge.swift; sourceTree = "<group>"; };
@@ -4866,6 +4872,7 @@
 		4F43EBE458FBE634996AD7C6 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				E09E3E09DFD3A311C957901E /* BipeInviterRow.swift */,
 				41C39D72D72BC0FACEE5CC7A /* BipeRequestsRow.swift */,
 				8D152423EE6CF0ECCC84091A /* BloomModifier.swift */,
 				B902EA6CD3296B0E10EE432B /* HomeScreen.swift */,
@@ -5620,6 +5627,7 @@
 		79023E5904B155E8E2B8B502 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				E06CB5F8A126EC9EB65C27A4 /* BipeInviterHint.swift */,
 				47F441A78A5CAA9E2937E463 /* KnockRequestsBannerView.swift */,
 				5C60559596897AC65D2CB799 /* LiveLocationSharingBannerView.swift */,
 				F48A2FA6814F824ABB4C07F3 /* RoomCallControlsToolbar.swift */,
@@ -6492,6 +6500,7 @@
 				93D8388DC0F6DFBF2E2A03F1 /* BipeAccountSignIn.swift */,
 				9520AA297F6101DAEE47CC78 /* BipeInviteJoinNotifier.swift */,
 				6A39ABDC71FD08DD9D975EDC /* BipeInvitePairs.swift */,
+				B8AA94CD093583F7A5F455A3 /* BipeInviterGreeting.swift */,
 				58C64F1A51E09FD1DF536412 /* BipeQuietGroups.swift */,
 				5FAD6C53A9D613A645275528 /* BipeRecoveryAlerts.swift */,
 				446946D980C054325C969E80 /* BipeRoomListScope.swift */,
@@ -8964,6 +8973,9 @@
 				555F73B068AFF63CDDFBEDAC /* BipeHandleScreenViewModelProtocol.swift in Sources */,
 				B80E69FB5AF4635994437CE0 /* BipeInviteJoinNotifier.swift in Sources */,
 				D93B7D5AD1969C5997FC7C5F /* BipeInvitePairs.swift in Sources */,
+				43B2BED753230FDCC46701A1 /* BipeInviterGreeting.swift in Sources */,
+				102F8D7420F3928D1B35D2DF /* BipeInviterHint.swift in Sources */,
+				37F09F2FEDEA5DBAFC633868 /* BipeInviterRow.swift in Sources */,
 				A556EC94F1FBDD42CA219FE6 /* BipeInvitesScreen.swift in Sources */,
 				0EBA7779C020DE655FD8A277 /* BipeInvitesScreenCoordinator.swift in Sources */,
 				3148F2835572D9D73C88C3AB /* BipeInvitesScreenModels.swift in Sources */,

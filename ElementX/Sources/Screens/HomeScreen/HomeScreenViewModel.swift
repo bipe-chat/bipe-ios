@@ -7,6 +7,7 @@
 //
 
 import AnalyticsEvents
+import BipeKit
 import Combine
 import MatrixRustSDK
 import SwiftUI
@@ -79,6 +80,13 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             guard let self, await bipeInvitePairs.refresh() else { return }
             updateRooms()
         }
+        
+        updateBipeInviterGreeting()
+        NotificationCenter.default.publisher(for: .bipeInviterGreetingDidChange)
+            .filter { [userID = userSession.clientProxy.userID] in $0.object as? String == userID }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateBipeInviterGreeting() }
+            .store(in: &cancellables)
         
         userSession.clientProxy.userProfilePublisher
             .receive(on: DispatchQueue.main)
@@ -256,6 +264,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             actionsSubject.send(.presentStartChatScreen)
         case .createGroup:
             actionsSubject.send(.presentCreateGroupScreen)
+        case .openBipeInviterChat:
+            Task { await openBipeInviterChat() }
         case .spaceFilters:
             if spaceFilterSubject.value != nil {
                 spaceFilterSubject.send(nil)
@@ -472,6 +482,35 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         state.rooms = rooms
         state.bipeRequestCount = requestCount
+    }
+    
+    // MARK: Bipe inviter greeting (ADR 0034)
+    
+    private func updateBipeInviterGreeting() {
+        guard let greeting = userSession.clientProxy.bipeInviterGreeting else {
+            state.bipeInviterHandle = nil
+            return
+        }
+        state.bipeInviterHandle = greeting.handle ?? String(greeting.userID.trimmingPrefix("@"))
+        Task { [weak self] in
+            guard let self, let handle = await greeting.displayHandle(resolver: userSession.bipeHandleResolver),
+                  userSession.clientProxy.bipeInviterGreeting != nil else { return }
+            state.bipeInviterHandle = handle
+        }
+    }
+    
+    private static let bipeInviterChatLoadingID = "BipeInviterChatLoading"
+    
+    private func openBipeInviterChat() async {
+        guard let greeting = userSession.clientProxy.bipeInviterGreeting else { return }
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.bipeInviterChatLoadingID, type: .modal, title: L10n.commonLoading, persistent: true))
+        let roomID = await userSession.clientProxy.bipeDirectRoom(with: greeting.userID)
+        userIndicatorController.retractIndicatorWithId(Self.bipeInviterChatLoadingID)
+        guard let roomID else {
+            state.bindings.alertInfo = AlertInfo(id: UUID(), title: L10n.errorUnknown)
+            return
+        }
+        actionsSubject.send(.presentRoom(roomIdentifier: roomID))
     }
     
     private func markRoomAsFavourite(_ roomID: String, isFavourite: Bool) async {

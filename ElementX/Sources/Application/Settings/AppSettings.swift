@@ -115,6 +115,10 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference
     var bipePendingInviterUserID: String?
     
+    /// Bipe: the inviter's handle from the invite preview, kept with `bipePendingInviterUserID`.
+    @UserPreference
+    var bipePendingInviterHandle: String?
+    
     /// Defaults to `true` for new users, and we use a migration to set it to `false` for existing users.
     @UserPreference(defaultValue: true)
     var hasSeenNewSoundBanner: Bool

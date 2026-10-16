@@ -11,8 +11,8 @@ import SwiftUI
 enum BipeSignupScreenViewModelAction: CustomStringConvertible {
     /// The account exists and this device signed in with its hidden password.
     case signedIn(UserSessionProtocol)
-    /// The account came from a personal invite. The app opens the inviter's profile after the first sign-in.
-    case createdWithInvite(inviterUserID: String)
+    /// The account came from a personal invite. The app opens a chat with the inviter after the first sign-in (ADR 0034).
+    case createdWithInvite(inviterUserID: String, inviterHandle: String?)
 
     var description: String {
         switch self {

@@ -266,6 +266,20 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_signup_invited_by", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static func inviterHint(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_inviter_hint", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var inviterHintAction: String { NSLocalizedString("bipe_inviter_hint_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviterGreeting: String { NSLocalizedString("bipe_inviter_greeting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func inviterCardTitle(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_inviter_card_title", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var inviterCardBody: String { NSLocalizedString("bipe_inviter_card_body", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var inviteAlreadySignedIn: String { NSLocalizedString("bipe_invite_already_signed_in", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var invitesTitle: String { NSLocalizedString("bipe_invites_title", tableName: "Bipe", bundle: .module, comment: "") }

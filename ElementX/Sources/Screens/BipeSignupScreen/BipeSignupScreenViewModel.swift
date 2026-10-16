@@ -178,7 +178,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             }
             state.isAccountCreated = true
             if let inviterUserID = response.inviterUserId {
-                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
+                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID, inviterHandle: state.inviterHandle))
             }
             userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.signupDeviceSuccess, icon: \.checkCircle))
             return (credentials, pin)

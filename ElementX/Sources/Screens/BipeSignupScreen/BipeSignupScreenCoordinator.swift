@@ -20,7 +20,7 @@ struct BipeSignupScreenCoordinatorParameters {
 
 enum BipeSignupScreenCoordinatorAction: CustomStringConvertible {
     case signedIn(UserSessionProtocol)
-    case createdWithInvite(inviterUserID: String)
+    case createdWithInvite(inviterUserID: String, inviterHandle: String?)
     
     var description: String {
         switch self {
@@ -59,8 +59,8 @@ final class BipeSignupScreenCoordinator: CoordinatorProtocol {
             switch action {
             case .signedIn(let userSession):
                 actionsSubject.send(.signedIn(userSession))
-            case .createdWithInvite(let inviterUserID):
-                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
+            case .createdWithInvite(let inviterUserID, let inviterHandle):
+                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID, inviterHandle: inviterHandle))
             }
         }
         .store(in: &cancellables)
