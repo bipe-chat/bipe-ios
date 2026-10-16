@@ -80,6 +80,16 @@ struct HomeScreenRoomList: View {
                         }
                         
                         Button {
+                            context.send(viewAction: .setRoomMuted(roomIdentifier: room.id, isMuted: !room.badges.isMuteShown))
+                        } label: {
+                            if room.badges.isMuteShown {
+                                Label(L10n.commonUnmute, icon: \.notifications)
+                            } else {
+                                Label(L10n.commonMute, icon: \.notificationsOff)
+                            }
+                        }
+                        
+                        Button {
                             context.send(viewAction: .showRoomDetails(roomIdentifier: room.id))
                         } label: {
                             Label(L10n.commonSettings, icon: \.settings)

@@ -323,6 +323,10 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             Task {
                 await markRoomAsFavourite(roomIdentifier, isFavourite: isFavourite)
             }
+        case .setRoomMuted(let roomIdentifier, let isMuted):
+            Task {
+                await setRoomMuted(roomIdentifier, isMuted: isMuted)
+            }
         case .acceptInvite(let roomIdentifier):
             Task {
                 await acceptInvite(roomID: roomIdentifier)
@@ -524,6 +528,30 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             analyticsService.trackInteraction(name: .MobileRoomListRoomContextMenuFavouriteToggle)
         case .failure(let error):
             MXLog.error("Failed marking room \(roomID) as favourite: \(isFavourite) with error: \(error)")
+        }
+    }
+    
+    // Bipe: one-tap mute from the room list. No duration, the room stays muted until unmuted.
+    private func setRoomMuted(_ roomID: String, isMuted: Bool) async {
+        guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID) else {
+            MXLog.error("Failed retrieving room for identifier: \(roomID)")
+            return
+        }
+        
+        let notificationSettings = userSession.clientProxy.notificationSettings
+        do {
+            if isMuted {
+                try await notificationSettings.setNotificationMode(roomId: roomID, mode: .mute)
+            } else {
+                try await notificationSettings.unmuteRoom(roomId: roomID,
+                                                          isEncrypted: roomProxy.infoPublisher.value.isEncrypted,
+                                                          isOneToOne: roomProxy.infoPublisher.value.activeMembersCount == 2)
+            }
+        } catch {
+            MXLog.error("Failed setting room \(roomID) muted: \(isMuted) with error: \(error)")
+            state.bindings.alertInfo = .init(id: UUID(),
+                                             title: L10n.commonError,
+                                             message: isMuted ? L10n.screenRoomDetailsErrorMuting : L10n.screenRoomDetailsErrorUnmuting)
         }
     }
     

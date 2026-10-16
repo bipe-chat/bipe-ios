@@ -56,6 +56,7 @@ enum HomeScreenViewAction {
     case markRoomAsUnread(roomIdentifier: String)
     case markRoomAsRead(roomIdentifier: String)
     case markRoomAsFavourite(roomIdentifier: String, isFavourite: Bool)
+    case setRoomMuted(roomIdentifier: String, isMuted: Bool)
     
     case acceptInvite(roomIdentifier: String)
     case declineInvite(roomIdentifier: String)
