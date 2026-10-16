@@ -16,7 +16,7 @@ public nonisolated enum ScamDetector {
         for pattern in compiledPatterns where pattern.expression.firstMatch(in: message, range: range) != nil {
             ids.append(pattern.matchID)
         }
-
+        
         // The reference matches phrases on the normalised message without homoglyph folding.
         let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
         for phrase in BipeRegistries.urgencyPhrases where containsCodeUnits(normalized, phrase) {
@@ -27,14 +27,14 @@ public nonisolated enum ScamDetector {
         }
         return ids
     }
-
+    
     // MARK: - Private
-
+    
     private struct CompiledPattern: Sendable {
         let matchID: String
         let expression: NSRegularExpression
     }
-
+    
     private static let compiledPatterns: [CompiledPattern] = {
         let groups: [(name: String, patterns: [ScamPattern])] = [
             ("pixKeyPatterns", BipeRegistries.pixKeyPatterns),
@@ -51,7 +51,7 @@ public nonisolated enum ScamDetector {
             }
         }
     }()
-
+    
     /// JS `String.prototype.includes`: UTF-16 code units, no grapheme or canonical-equivalence matching.
     static func containsCodeUnits(_ text: String, _ substring: String) -> Bool {
         (text as NSString).range(of: substring, options: .literal).location != NSNotFound

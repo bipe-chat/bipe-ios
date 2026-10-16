@@ -71,8 +71,8 @@ struct SettingsScreenViewState: BindableState {
     var bipeTrustProfile: BipeTrustProfile? {
         guard showBipeHandle else { return nil }
         return BipeTrustProfile(displayName: userProfile.displayName,
-                                   hasAvatar: userProfile.avatarURL != nil,
-                                   handle: bipeHandle)
+                                hasAvatar: userProfile.avatarURL != nil,
+                                handle: bipeHandle)
     }
     
     var securitySectionMode = SettingsScreenSecuritySectionMode.none

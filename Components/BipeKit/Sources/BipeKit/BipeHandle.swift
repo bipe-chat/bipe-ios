@@ -14,7 +14,7 @@ public enum BipeHandleProblem: String, Sendable, Equatable {
     case reserved
     /// Also covers held and lookalike handles (server only).
     case taken
-
+    
     public var localizedMessage: String {
         switch self {
         case .tooShort: BipeStrings.handleTooShort(String(BipeRegistries.handleMinLength))
@@ -37,16 +37,24 @@ public nonisolated enum BipeHandle {
         }
         return handle
     }
-
+    
     /// Length and character checks only, the same as a lookup. `nil` means the server must decide.
     /// An owned handle may be shorter than `handleMinLength` (ADR 0065); the server decides who may claim it.
     public static func localProblem(for handle: String) -> BipeHandleProblem? {
         // JS `length` counts UTF-16 code units; the pattern is ASCII-only, so any non-ASCII input fails it anyway.
         let length = handle.utf16.count
-        if length < BipeRegistries.handleOwnerMinLength { return .tooShort }
-        if length > BipeRegistries.handleMaxLength { return .tooLong }
-        if length < BipeRegistries.handleMinLength, !BipeRegistries.ownedHandles.contains(handle) { return .tooShort }
-        if handle.range(of: BipeRegistries.handlePattern, options: .regularExpression) == nil { return .invalidCharacters }
+        if length < BipeRegistries.handleOwnerMinLength {
+            return .tooShort
+        }
+        if length > BipeRegistries.handleMaxLength {
+            return .tooLong
+        }
+        if length < BipeRegistries.handleMinLength, !BipeRegistries.ownedHandles.contains(handle) {
+            return .tooShort
+        }
+        if handle.range(of: BipeRegistries.handlePattern, options: .regularExpression) == nil {
+            return .invalidCharacters
+        }
         return nil
     }
 }
@@ -56,7 +64,7 @@ public nonisolated enum BipeSignupRules {
     public static let inviteCodeMaxLength = 64
     public static let emailMaxLength = 254
     public static let displayNameMaxLength = 100
-
+    
     /// A loose shape check. MAS and the API validate the address for real.
     public static func isPlausibleEmail(_ email: String) -> Bool {
         guard email.count <= emailMaxLength else { return false }
@@ -72,11 +80,15 @@ public enum BipeHandleStatus: Sendable, Equatable {
     case problem(BipeHandleProblem)
     /// The check failed (offline or server error). The server decides on submit.
     case unknown
-
+    
     public var isBlocking: Bool {
-        if case .problem = self { true } else { false }
+        if case .problem = self {
+            true
+        } else {
+            false
+        }
     }
-
+    
     /// Footer text for the handle field. `defaultText` shows when there is nothing to report.
     public func footer(defaultText: String) -> String {
         switch self {
@@ -94,16 +106,16 @@ public final class BipeHandleAvailabilityChecker {
     private let apiClient: BipeAPIClient
     private let debounce: Duration
     private var task: Task<Void, Never>?
-
+    
     public init(apiClient: BipeAPIClient, debounce: Duration = .milliseconds(500)) {
         self.apiClient = apiClient
         self.debounce = debounce
     }
-
+    
     /// Cancels any check in flight. `update` gets every status change for `input`, on the main actor.
     public func check(_ input: String, update: @escaping @MainActor (BipeHandleStatus) -> Void) {
         task?.cancel()
-
+        
         let handle = BipeHandle.sanitize(input)
         guard !handle.isEmpty else {
             update(.empty)
@@ -113,12 +125,12 @@ public final class BipeHandleAvailabilityChecker {
             update(.problem(problem))
             return
         }
-
+        
         update(.checking)
         task = Task { [apiClient, debounce] in
             try? await Task.sleep(for: debounce)
             guard !Task.isCancelled else { return }
-
+            
             let status: BipeHandleStatus
             do {
                 let availability = try await apiClient.handleAvailability(handle)
@@ -126,12 +138,12 @@ public final class BipeHandleAvailabilityChecker {
             } catch {
                 status = .unknown
             }
-
+            
             guard !Task.isCancelled else { return }
             update(status)
         }
     }
-
+    
     public func cancel() {
         task?.cancel()
     }

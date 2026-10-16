@@ -7,8 +7,8 @@
 //
 
 import AnalyticsEvents
-import BipeKit
 import BackgroundTasks
+import BipeKit
 import Combine
 import Intents
 import MatrixRustSDK
@@ -763,9 +763,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         if userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName {
             Task {
                 await BipeInviteJoinNotifier(apiBaseURL: appSettings.bipeAPIBaseURL,
-                                                clientProxy: userSession.clientProxy,
-                                                handleResolver: userSession.bipeHandleResolver,
-                                                userIndicatorController: userIndicatorController).run()
+                                             clientProxy: userSession.clientProxy,
+                                             handleResolver: userSession.bipeHandleResolver,
+                                             userIndicatorController: userIndicatorController).run()
             }
         }
         
@@ -858,7 +858,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             
             // Bipe: the notice shows the cached handle instead of the Matrix ID when one is known.
             navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: coordinator,
-                                                                                       handleResolver: userSession.bipeHandleResolver))
+                                                                                    handleResolver: userSession.bipeHandleResolver))
         }
     }
     

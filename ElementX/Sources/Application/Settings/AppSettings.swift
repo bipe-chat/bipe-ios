@@ -134,9 +134,13 @@ final nonisolated class AppSettings: @unchecked Sendable {
     private(set) var hideBrandChrome = false
     
     /// The task identifier used for background app refresh. Also used in main target's the Info.plist
-    var backgroundAppRefreshTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.refresh" } // Bipe: derived from the bundle ID
+    var backgroundAppRefreshTaskIdentifier: String {
+        InfoPlistReader.main.baseBundleIdentifier + ".background.refresh"
+    } // Bipe: derived from the bundle ID
     /// The task identifier used for the search index backfill. Also used in main target's the Info.plist
-    var searchBackfillTaskIdentifier: String { InfoPlistReader.main.baseBundleIdentifier + ".background.search-backfill" } // Bipe: derived from the bundle ID
+    var searchBackfillTaskIdentifier: String {
+        InfoPlistReader.main.baseBundleIdentifier + ".background.search-backfill"
+    } // Bipe: derived from the bundle ID
     
     /// A URL where users can go read more about the app.
     private(set) var websiteURL: URL = "https://bipe.chat"
@@ -305,7 +309,7 @@ final nonisolated class AppSettings: @unchecked Sendable {
     /// The configuration to use for analytics. Bipe: always `nil`, the app has no analytics (bipe#55).
     let analyticsConfiguration: AnalyticsConfiguration? = nil
     /// The URL to open with more information about analytics terms. When this is `nil` the "Learn more" link will be hidden.
-    private(set) var analyticsTermsURL: URL? = nil // Bipe: no analytics
+    private(set) var analyticsTermsURL: URL? // Bipe: no analytics
     /// Whether or not there the app is able ask for user consent to enable analytics.
     var canPromptForAnalytics: Bool {
         analyticsConfiguration != nil

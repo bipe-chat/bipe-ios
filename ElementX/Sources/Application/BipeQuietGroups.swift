@@ -16,20 +16,22 @@ import SwiftUI
 @MainActor
 struct BipeQuietGroups {
     let clientProxy: ClientProxyProtocol
-
+    
     private static let pollRuleID = "chat.bipe.poll_start"
-
-    private var appliedKey: String { "bipe.quietGroupsApplied.\(clientProxy.userID)" }
-
+    
+    private var appliedKey: String {
+        "bipe.quietGroupsApplied.\(clientProxy.userID)"
+    }
+    
     func run() async {
         guard !UserDefaults.standard.bool(forKey: appliedKey) else { return }
-
+        
         let settings = clientProxy.notificationSettings
         guard await settings.canPushEncryptedEventsToDevice() else {
             MXLog.info("Bipe quiet groups: waiting for encrypted event push support on the server")
             return
         }
-
+        
         do {
             // A user who already picked a group default keeps it.
             for isEncrypted in [true, false] {

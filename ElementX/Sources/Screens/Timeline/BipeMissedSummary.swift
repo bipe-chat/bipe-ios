@@ -15,19 +15,21 @@ struct BipeMissedSummary: Equatable {
             case reply
             case poll
         }
-
+        
         let kind: Kind
         let eventID: String
         let senderName: String
         let text: String
-
-        var id: String { eventID }
+        
+        var id: String {
+            eventID
+        }
     }
-
+    
     /// Below this many unread messages the block stays hidden: a short gap reads fine without it.
     static let minimumUnreadCount = 20
     static let maximumLines = 4
-
+    
     let lines: [Line]
     let otherCount: Int
 }
@@ -36,20 +38,20 @@ extension BipeMissedSummary {
     init?(itemsAfterReadMarker: some Sequence<RoomTimelineItemViewState>, ownUserID: String) {
         let items = itemsAfterReadMarker.compactMap(\.bipeEventItem)
         guard items.count >= Self.minimumUnreadCount else { return nil }
-
+        
         let matches = items.compactMap { Self.line(for: $0, ownUserID: ownUserID) }
         guard !matches.isEmpty else { return nil }
-
+        
         let lines = Array(matches.prefix(Self.maximumLines))
         self.init(lines: lines, otherCount: items.count - lines.count)
     }
-
+    
     // MARK: - Private
-
+    
     private static func line(for item: EventBasedTimelineItemProtocol, ownUserID: String) -> Line? {
         guard !item.isOutgoing, let eventID = item.id.eventID else { return nil }
         let senderName = item.sender.displayName ?? item.sender.id
-
+        
         if let poll = item as? PollRoomTimelineItem {
             guard !poll.poll.hasEnded, !poll.poll.options.contains(where: \.isSelected) else { return nil }
             return Line(kind: .poll, eventID: eventID, senderName: senderName, text: poll.poll.question)
@@ -62,7 +64,7 @@ extension BipeMissedSummary {
         }
         return nil
     }
-
+    
     private static func mentions(_ userID: String, in item: EventBasedTimelineItemProtocol) -> Bool {
         let formattedBody: AttributedString? = switch item {
         case let item as TextRoomTimelineItem: item.content.formattedBody

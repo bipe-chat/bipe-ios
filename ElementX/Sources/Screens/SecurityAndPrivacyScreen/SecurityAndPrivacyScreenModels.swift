@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Foundation
 import BipeKit
+import Foundation
 
 enum SecurityAndPrivacyScreenViewModelAction {
     case displayEditAddressScreen

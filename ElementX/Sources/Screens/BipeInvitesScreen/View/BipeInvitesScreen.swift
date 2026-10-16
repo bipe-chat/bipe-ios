@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct BipeInvitesScreen: View {
@@ -133,13 +133,21 @@ struct BipeInvitesScreen: View {
     
     private var isNamingPresented: Binding<Bool> {
         Binding(get: { context.namingInviteID != nil },
-                set: { if !$0 { context.namingInviteID = nil } })
+                set: {
+                    if !$0 {
+                        context.namingInviteID = nil
+                    }
+                })
     }
     
     /// The name the person gave the invite, else its code, so each row can be told apart.
     private func title(for invite: BipeInvite) -> String {
-        if let name = context.viewState.names[invite.id] { return name }
-        if let url = context.viewState.shareURLs[invite.id], let code = BipeInviteLink.code(from: url) { return code }
+        if let name = context.viewState.names[invite.id] {
+            return name
+        }
+        if let url = context.viewState.shareURLs[invite.id], let code = BipeInviteLink.code(from: url) {
+            return code
+        }
         return BipeStrings.invitesLink
     }
     
@@ -161,8 +169,8 @@ struct BipeInvitesScreen: View {
 
 struct BipeInvitesScreen_Previews: PreviewProvider {
     static let viewModel = BipeInvitesScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                         clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
-                                                         userIndicatorController: UserIndicatorControllerMock())
+                                                      clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
+                                                      userIndicatorController: UserIndicatorControllerMock())
     
     static var previews: some View {
         ElementNavigationStack {

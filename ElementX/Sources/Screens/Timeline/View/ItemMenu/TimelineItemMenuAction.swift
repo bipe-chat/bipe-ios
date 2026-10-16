@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import OrderedCollections
 import BipeKit
+import OrderedCollections
 import SFSafeSymbols
 import SwiftUI
 

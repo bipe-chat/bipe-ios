@@ -6,9 +6,9 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import Flow
-import BipeKit
 import SwiftUI
 
 struct AvatarHeaderView<Footer: View>: View {

@@ -4,18 +4,18 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import BipeKit
 import Compound
 import PhotosUI
-import BipeKit
 import SwiftUI
 
 struct BipePublicProfileScreen: View {
     @Bindable var context: BipePublicProfileScreenViewModel.Context
     @State private var selectedPhoto: PhotosPickerItem?
-
+    
     private enum Focus { case name, bio }
     @FocusState private var focus: Focus?
-
+    
     var body: some View {
         Form {
             if context.viewState.needsHandle {
@@ -51,7 +51,7 @@ struct BipePublicProfileScreen: View {
             }
         }
     }
-
+    
     private var needsHandleSection: some View {
         Section {
             ListRow(label: .default(title: BipeStrings.settingsHandle, icon: \.userProfile),
@@ -63,7 +63,7 @@ struct BipePublicProfileScreen: View {
                 .compoundListSectionFooter()
         }
     }
-
+    
     private var toggleSection: some View {
         Section {
             ListRow(label: .default(title: BipeStrings.publicProfileToggle, icon: \.webBrowser),
@@ -74,7 +74,7 @@ struct BipePublicProfileScreen: View {
                 .compoundListSectionFooter()
         }
     }
-
+    
     private var photoSection: some View {
         Section {
             ListRow(kind: .custom {
@@ -99,7 +99,7 @@ struct BipePublicProfileScreen: View {
         }
         .disabled(context.viewState.isLoading)
     }
-
+    
     private var photo: some View {
         Group {
             if let data = context.viewState.pendingPhoto, let image = UIImage(data: data) {
@@ -123,14 +123,14 @@ struct BipePublicProfileScreen: View {
         .clipShape(Circle())
         .accessibilityHidden(true)
     }
-
+    
     private var photoPlaceholder: some View {
         CompoundIcon(\.userProfile, size: .custom(48), relativeTo: .compound.headingLG)
             .foregroundStyle(.compound.iconSecondary)
             .frame(width: 96, height: 96)
             .background(Color.compound.bgSubtleSecondary)
     }
-
+    
     private var nameSection: some View {
         Section {
             ListRow(label: .plain(title: BipeStrings.publicProfileName),
@@ -148,7 +148,7 @@ struct BipePublicProfileScreen: View {
             }
         }
     }
-
+    
     private var bioSection: some View {
         Section {
             ListRow(label: .plain(title: BipeStrings.publicProfileBioPlaceholder),
@@ -167,7 +167,7 @@ struct BipePublicProfileScreen: View {
             }
         }
     }
-
+    
     private func shareSection(url: URL) -> some View {
         Section {
             ListRow(kind: .custom {
@@ -179,7 +179,7 @@ struct BipePublicProfileScreen: View {
             })
         }
     }
-
+    
     private func save() {
         guard context.viewState.canSave else { return }
         focus = nil
@@ -191,9 +191,9 @@ struct BipePublicProfileScreen: View {
 
 struct BipePublicProfileScreen_Previews: PreviewProvider {
     static let viewModel = BipePublicProfileScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                               userSession: UserSessionMock(.init()),
-                                                               userIndicatorController: UserIndicatorControllerMock())
-
+                                                            userSession: UserSessionMock(.init()),
+                                                            userIndicatorController: UserIndicatorControllerMock())
+    
     static var previews: some View {
         ElementNavigationStack {
             BipePublicProfileScreen(context: viewModel.context)

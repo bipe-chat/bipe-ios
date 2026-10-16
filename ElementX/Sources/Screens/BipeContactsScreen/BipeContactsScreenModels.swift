@@ -21,7 +21,9 @@ struct BipeContactsScreenMatch: Identifiable, Equatable {
     /// The name in the user's own address book.
     let contactName: String
     
-    var id: String { userID }
+    var id: String {
+        userID
+    }
 }
 
 struct BipeContactsScreenViewState: BindableState {

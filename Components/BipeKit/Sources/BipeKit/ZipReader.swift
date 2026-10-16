@@ -19,26 +19,26 @@ public struct ZipReader: Sendable {
         fileprivate let localHeaderOffset: Int
         fileprivate let isEncrypted: Bool
     }
-
+    
     public enum ZipError: Error, Sendable {
         case notAZip
         case unsupportedEntry
         case corrupt
     }
-
+    
     public let entries: [Entry]
     private let data: Data
-
+    
     /// Maps the file instead of reading it, so a large export does not fill memory.
     public init(url: URL) throws {
         try self.init(data: Data(contentsOf: url, options: .alwaysMapped))
     }
-
+    
     public init(data: Data) throws {
         self.data = data
         entries = try Self.readCentralDirectory(data)
     }
-
+    
     /// The bytes of `entry`. Fails for entries larger than `maxSize`.
     public func contents(of entry: Entry, maxSize: Int) throws -> Data {
         guard !entry.isEncrypted, entry.uncompressedSize <= maxSize,
@@ -54,7 +54,7 @@ public struct ZipReader: Sendable {
         let start = header + 30 + Int(nameLength) + Int(extraLength)
         guard start >= 0, start + entry.compressedSize <= data.count else { throw ZipError.corrupt }
         let compressed = data.subdata(in: (data.startIndex + start)..<(data.startIndex + start + entry.compressedSize))
-
+        
         if entry.method == 0 {
             return compressed
         }
@@ -70,9 +70,9 @@ public struct ZipReader: Sendable {
         guard written == entry.uncompressedSize else { throw ZipError.corrupt }
         return output
     }
-
+    
     // MARK: - Private
-
+    
     private static func readCentralDirectory(_ data: Data) throws -> [Entry] {
         // The end-of-central-directory record sits in the last 22 + 65535 bytes (the comment is at most 64 KiB).
         let minimumOffset = max(0, data.count - 22 - 0xFFFF)
@@ -90,7 +90,7 @@ public struct ZipReader: Sendable {
               let directoryOffset = data.uint32(at: eocd + 16) else {
             throw ZipError.notAZip
         }
-
+        
         var entries: [Entry] = []
         var cursor = Int(directoryOffset)
         for _ in 0..<count {
@@ -129,7 +129,7 @@ private extension Data {
         let i = startIndex + offset
         return UInt16(self[i]) | UInt16(self[i + 1]) << 8
     }
-
+    
     func uint32(at offset: Int) -> UInt32? {
         guard offset >= 0, offset + 4 <= count else { return nil }
         let i = startIndex + offset

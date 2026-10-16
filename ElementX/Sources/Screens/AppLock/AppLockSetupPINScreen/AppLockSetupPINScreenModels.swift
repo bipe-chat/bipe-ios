@@ -40,6 +40,7 @@ struct AppLockSetupPINScreenViewState: BindableState {
     var pinCodeLength: Int {
         mode == .unlock ? storedPINCodeLength : newPINCodeLength
     }
+    
     /// The number of attempts the user has made in the `confirm` mode.
     var numberOfConfirmAttempts = 0
     /// The number of attempts the user has made in the `unlock` mode.

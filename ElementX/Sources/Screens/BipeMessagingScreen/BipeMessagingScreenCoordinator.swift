@@ -17,7 +17,7 @@ final class BipeMessagingScreenCoordinator: CoordinatorProtocol {
     
     init(parameters: BipeMessagingScreenCoordinatorParameters) {
         viewModel = BipeMessagingScreenViewModel(apiClient: parameters.apiClient,
-                                                    clientProxy: parameters.clientProxy)
+                                                 clientProxy: parameters.clientProxy)
     }
     
     func toPresentable() -> AnyView {

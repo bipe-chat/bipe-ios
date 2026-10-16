@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Compound
 import BipeKit
+import Compound
 import SFSafeSymbols
 import SwiftUI
 
@@ -44,7 +44,11 @@ struct SettingsScreen: View {
         .navigationTitle(context.viewState.bipeIsInTab ? BipeStrings.tabYou : L10n.commonSettings)
         .navigationBarTitleDisplayMode(context.viewState.bipeIsInTab ? .large : .inline)
         .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)
-        .toolbar { if !context.viewState.bipeIsInTab { toolbar } }
+        .toolbar {
+            if !context.viewState.bipeIsInTab {
+                toolbar
+            }
+        }
         .sheet(isPresented: $context.isPresentingStatusPicker) {
             SettingsScreenUserStatusPickerView { action in
                 context.send(viewAction: .userStatus(action))
@@ -239,7 +243,9 @@ struct SettingsScreen: View {
                                     description: BipeStrings.settingsLanguageFooter,
                                     icon: \.translate),
                     kind: .button {
-                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
                     })
             
             ListRow(label: .default(title: L10n.commonMediaUploadQuality,

@@ -6,9 +6,9 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Compound
-import BipeKit
 import SwiftUI
 
 struct SecureBackupScreen: View {

@@ -14,7 +14,9 @@ struct BipeMessagingScreenViewState: BindableState {
     
     var bindings = BipeMessagingScreenViewStateBindings()
     
-    var isDisabled: Bool { isLoading || isSaving }
+    var isDisabled: Bool {
+        isLoading || isSaving
+    }
 }
 
 struct BipeMessagingScreenViewStateBindings {

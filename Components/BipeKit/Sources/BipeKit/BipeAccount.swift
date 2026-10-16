@@ -13,15 +13,17 @@ public struct BipeCredentials: Decodable, Sendable, Equatable, CustomStringConve
     public let userId: String
     public let password: String
     public let recoveryToken: String
-
+    
     public init(userId: String, password: String, recoveryToken: String) {
         self.userId = userId
         self.password = password
         self.recoveryToken = recoveryToken
     }
-
+    
     /// Never prints the password or the token.
-    public var description: String { "BipeCredentials(\(userId))" }
+    public var description: String {
+        "BipeCredentials(\(userId))"
+    }
 }
 
 /// Contract: `AccountStatus`. Read when the app comes to the foreground.
@@ -51,7 +53,7 @@ public struct BipeRecovery: Decodable, Sendable, Equatable, Identifiable {
     /// When the delay ends.
     public let readyAt: Date?
     public let endedAt: Date?
-
+    
     public init(id: String, method: BipeRecoveryMethod, purpose: BipeRecoveryPurpose, state: BipeRecoveryState,
                 createdAt: Date, readyAt: Date?, endedAt: Date?) {
         self.id = id
@@ -71,16 +73,18 @@ public struct BipeRecoveryStarted: Codable, Sendable, Equatable, CustomStringCon
     public let claimSecret: String
     public let purpose: BipeRecoveryPurpose
     public let readyAt: Date
-
+    
     public init(recoveryId: String, claimSecret: String, purpose: BipeRecoveryPurpose, readyAt: Date) {
         self.recoveryId = recoveryId
         self.claimSecret = claimSecret
         self.purpose = purpose
         self.readyAt = readyAt
     }
-
+    
     /// Never prints the claim secret.
-    public var description: String { "BipeRecoveryStarted(\(recoveryId), \(purpose.rawValue))" }
+    public var description: String {
+        "BipeRecoveryStarted(\(recoveryId), \(purpose.rawValue))"
+    }
 }
 
 /// Contract: `RecoveryClaim`.
@@ -94,20 +98,22 @@ public struct BipeRecoveryClaim: Decodable, Sendable, CustomStringConvertible {
     public let password: String?
     /// Access, completed by this call only. Shown once.
     public let recoveryToken: String?
-
+    
     public var credentials: BipeCredentials? {
         guard let userId, let password, let recoveryToken else { return nil }
         return BipeCredentials(userId: userId, password: password, recoveryToken: recoveryToken)
     }
-
+    
     /// Never prints the password or the token.
-    public var description: String { "BipeRecoveryClaim(\(state.rawValue), \(purpose.rawValue))" }
+    public var description: String {
+        "BipeRecoveryClaim(\(state.rawValue), \(purpose.rawValue))"
+    }
 }
 
 /// Contract: `Recovery.method`.
 public enum BipeRecoveryMethod: String, Codable, Sendable {
     case token, email, guardian, cpf
-
+    
     public init(from decoder: Decoder) throws {
         // An unknown value from a newer server must not fail the account state.
         self = try Self(rawValue: decoder.singleValueContainer().decode(String.self)) ?? .email
@@ -118,7 +124,7 @@ public enum BipeRecoveryMethod: String, Codable, Sendable {
 public enum BipeRecoveryPurpose: String, Codable, Sendable {
     case access
     case pinReset = "pin_reset"
-
+    
     public init(from decoder: Decoder) throws {
         self = try Self(rawValue: decoder.singleValueContainer().decode(String.self)) ?? .access
     }
@@ -127,7 +133,7 @@ public enum BipeRecoveryPurpose: String, Codable, Sendable {
 /// Contract: `Recovery.state`.
 public enum BipeRecoveryState: String, Codable, Sendable {
     case waiting, completed, cancelled, expired
-
+    
     public init(from decoder: Decoder) throws {
         self = try Self(rawValue: decoder.singleValueContainer().decode(String.self)) ?? .expired
     }
@@ -147,8 +153,10 @@ public extension BipeRecovery {
         default: return nil
         }
     }
-
-    var canBeCancelled: Bool { state == .waiting }
+    
+    var canBeCancelled: Bool {
+        state == .waiting
+    }
 }
 
 /// Recovery links in the email: `https://bipe.chat/recuperar/#<token>`. The token sits in the fragment, so it stays out of server logs.
@@ -167,12 +175,17 @@ public nonisolated enum BipeRecoveryLink {
 /// A recovery link token. Prints redacted, because routes and actions get logged.
 public nonisolated struct BipeRecoveryLinkToken: Hashable, Sendable, CustomStringConvertible, CustomDebugStringConvertible {
     public let value: String
-
+    
     public init?(url: URL) {
         guard let value = BipeRecoveryLink.token(from: url) else { return nil }
         self.value = value
     }
-
-    public var description: String { "BipeRecoveryLinkToken(redacted)" }
-    public var debugDescription: String { description }
+    
+    public var description: String {
+        "BipeRecoveryLinkToken(redacted)"
+    }
+    
+    public var debugDescription: String {
+        description
+    }
 }

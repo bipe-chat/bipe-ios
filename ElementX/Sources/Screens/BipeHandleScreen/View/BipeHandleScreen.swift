@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct BipeHandleScreen: View {
@@ -46,17 +46,17 @@ struct BipeHandleScreen: View {
     
     private var handleField: some View {
         TextField(text: $context.handle) {
-                Text(BipeStrings.handlePlaceholder).foregroundColor(.compound.textSecondary)
-            }
-            .focused($isFocused)
-            .textFieldStyle(.compound(labelText: BipeStrings.settingsHandle,
-                                      footerText: context.viewState.footer,
-                                      state: context.viewState.fieldState))
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .submitLabel(.done)
-            .onSubmit(save)
-            .disabled(context.viewState.isLoading || context.viewState.isInCooldown)
+            Text(BipeStrings.handlePlaceholder).foregroundColor(.compound.textSecondary)
+        }
+        .focused($isFocused)
+        .textFieldStyle(.compound(labelText: BipeStrings.settingsHandle,
+                                  footerText: context.viewState.footer,
+                                  state: context.viewState.fieldState))
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .submitLabel(.done)
+        .onSubmit(save)
+        .disabled(context.viewState.isLoading || context.viewState.isInCooldown)
     }
     
     /// The user's own profile link: QR code and share button.
@@ -89,8 +89,8 @@ struct BipeHandleScreen: View {
 
 struct BipeHandleScreen_Previews: PreviewProvider {
     static let viewModel = BipeHandleScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                        clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
-                                                        userIndicatorController: UserIndicatorControllerMock())
+                                                     clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
+                                                     userIndicatorController: UserIndicatorControllerMock())
     
     static var previews: some View {
         ElementNavigationStack {

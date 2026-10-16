@@ -86,7 +86,7 @@ struct AppLockScreen: View {
                 .foregroundColor(subtitleColor)
                 .multilineTextAlignment(.center)
                 .accessibilityFocused($accessibilitySubtitleFocus)
-
+            
             // Bipe: nobody from Bipe asks for the PIN (bipe#182).
             Text(BipeStrings.pinNeverAsked)
                 .font(.compound.bodySM)

@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftUI
 
 enum SettingsFlowCoordinatorAction {
@@ -168,9 +168,9 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     /// `onDone` runs after the screen pops, e.g. to reload the screen below.
     private func presentBipeHandleScreen(onDone: (() -> Void)? = nil) {
         let coordinator = BipeHandleScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                           clientProxy: flowParameters.userSession.clientProxy,
-                                                                           handleResolver: flowParameters.userSession.bipeHandleResolver,
-                                                                           userIndicatorController: flowParameters.userIndicatorController))
+                                                                        clientProxy: flowParameters.userSession.clientProxy,
+                                                                        handleResolver: flowParameters.userSession.bipeHandleResolver,
+                                                                        userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {
@@ -185,8 +185,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     private func presentBipePublicProfileScreen() {
         let coordinator = BipePublicProfileScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                                  userSession: flowParameters.userSession,
-                                                                                  userIndicatorController: flowParameters.userIndicatorController))
+                                                                               userSession: flowParameters.userSession,
+                                                                               userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self, weak coordinator] action in
                 switch action {
@@ -208,14 +208,14 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     private func presentBipeMessagingScreen() {
         let coordinator = BipeMessagingScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                              clientProxy: flowParameters.userSession.clientProxy))
+                                                                           clientProxy: flowParameters.userSession.clientProxy))
         navigationStackCoordinator.push(coordinator)
     }
     
     private func presentBipeInvitesScreen() {
         let coordinator = BipeInvitesScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                            clientProxy: flowParameters.userSession.clientProxy,
-                                                                            userIndicatorController: flowParameters.userIndicatorController))
+                                                                         clientProxy: flowParameters.userSession.clientProxy,
+                                                                         userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {
@@ -229,7 +229,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     private func presentBipeContactsScreen() {
         let coordinator = BipeContactsScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                             clientProxy: flowParameters.userSession.clientProxy))
+                                                                          clientProxy: flowParameters.userSession.clientProxy))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {

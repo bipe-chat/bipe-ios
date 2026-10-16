@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct BipeContactsScreen: View {
@@ -23,7 +23,9 @@ struct BipeContactsScreen: View {
                 case .denied:
                     ListRow(label: .action(title: BipeStrings.contactsOpenSettings, icon: \.settings),
                             kind: .button {
-                                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    openURL(url)
+                                }
                             })
                 case .granted:
                     if context.viewState.isLoading {
@@ -73,7 +75,7 @@ struct BipeContactsScreen: View {
 
 struct BipeContactsScreen_Previews: PreviewProvider {
     static let viewModel = BipeContactsScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                          clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")))
+                                                       clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")))
     
     static var previews: some View {
         ElementNavigationStack {
