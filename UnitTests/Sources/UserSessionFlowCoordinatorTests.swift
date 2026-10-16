@@ -21,7 +21,8 @@ struct UserSessionFlowCoordinatorTests {
     private let networkReachabilitySubject: CurrentValueSubject<NetworkMonitorReachability, Never> = .init(.reachable)
     private let homeserverReachabilitySubject: CurrentValueSubject<HomeserverReachability, Never> = .init(.reachable)
     private var tabCoordinator: NavigationTabCoordinator<UserSessionFlowCoordinator.HomeTab>? {
-        rootCoordinator?.rootCoordinator as? NavigationTabCoordinator
+        // Bipe: the tabs are wrapped to put the handle resolver in the environment.
+        (rootCoordinator?.rootCoordinator as? BipeEnvironmentCoordinator)?.wrappedCoordinator as? NavigationTabCoordinator
     }
     
     private var chatsSplitCoordinator: NavigationSplitCoordinator? {

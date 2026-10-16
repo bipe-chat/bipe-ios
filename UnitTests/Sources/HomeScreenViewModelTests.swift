@@ -264,7 +264,8 @@ final class HomeScreenViewModelTests {
     func inviteUnreadBadge() async throws {
         setupViewModel(invites: .rooms)
         var invites = context.viewState.rooms.invites
-        #expect(invites.count == 2)
+        // Bipe: the DM invite is a request and shows under Pedidos only, so the list has the group invite.
+        #expect(invites.count == 1)
         
         for invite in invites {
             #expect(invite.badges.isDotShown)
@@ -288,9 +289,10 @@ final class HomeScreenViewModelTests {
     func acceptInvite() async throws {
         setupViewModel(invites: .rooms)
         
-        let invitedRoomIDs = context.viewState.rooms.invites.compactMap(\.roomID)
+        // Bipe: the DM invite is a request and shows under Pedidos only. The list has the group invite (the first one).
+        let invitedRoomIDs = [RoomSummary].mockInvites.map(\.id)
         userSettings.app.seenInvites = Set(invitedRoomIDs)
-        #expect(invitedRoomIDs.count == 2)
+        #expect(context.viewState.rooms.invites.compactMap(\.roomID) == [invitedRoomIDs[0]])
         
         let deferred = deferFulfillment(viewModel.actions) { $0 == .presentRoom(roomIdentifier: invitedRoomIDs[0]) }
         context.send(viewAction: .acceptInvite(roomIdentifier: invitedRoomIDs[0]))
@@ -321,9 +323,10 @@ final class HomeScreenViewModelTests {
     @Test
     func declineInvite() async throws {
         setupViewModel(invites: .rooms)
-        let invitedRoomIDs = context.viewState.rooms.invites.compactMap(\.roomID)
+        // Bipe: the DM invite is a request and shows under Pedidos only. The list has the group invite (the first one).
+        let invitedRoomIDs = [RoomSummary].mockInvites.map(\.id)
         userSettings.app.seenInvites = Set(invitedRoomIDs)
-        #expect(invitedRoomIDs.count == 2)
+        #expect(context.viewState.rooms.invites.compactMap(\.roomID) == [invitedRoomIDs[0]])
         
         let deferred = deferFulfillment(context.$viewState) { $0.bindings.alertInfo != nil }
         context.send(viewAction: .declineInvite(roomIdentifier: invitedRoomIDs[0]))
@@ -353,9 +356,10 @@ final class HomeScreenViewModelTests {
     @Test
     func declineAndBlockInvite() async throws {
         setupViewModel(invites: .rooms)
-        let invitedRoomIDs = context.viewState.rooms.invites.compactMap(\.roomID)
+        // Bipe: the DM invite is a request and shows under Pedidos only. The list has the group invite (the first one).
+        let invitedRoomIDs = [RoomSummary].mockInvites.map(\.id)
         userSettings.app.seenInvites = Set(invitedRoomIDs)
-        #expect(invitedRoomIDs.count == 2)
+        #expect(context.viewState.rooms.invites.compactMap(\.roomID) == [invitedRoomIDs[0]])
         
         let deferred = deferFulfillment(context.$viewState) { $0.bindings.alertInfo != nil }
         context.send(viewAction: .declineInvite(roomIdentifier: invitedRoomIDs[0]))
@@ -545,6 +549,8 @@ final class HomeScreenViewModelTests {
         try await deferred.fulfill()
         
         // A filter or a search without matches empties the list, the mode must not regress.
+        // Bipe: without a filter an empty tab shows the empty state (ADR 0053), so a filter is active here.
+        context.filtersState.activateFilter(.unreads)
         let failure = deferFailure(context.$viewState, timeout: .seconds(1)) { $0.roomListMode != .rooms }
         roomListSubject.send([])
         stateSubject.send(.loaded(totalNumberOfRooms: 9))
