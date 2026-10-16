@@ -270,11 +270,7 @@ struct SettingsScreen: View {
                         .accessibilityIdentifier(A11yIdentifiers.settingsScreen.analytics)
             }
             
-            ListRow(label: .default(title: L10n.screenAdvancedSettingsLabs,
-                                    icon: \.labs),
-                    kind: .navigationLink {
-                        context.send(viewAction: .labs)
-                    })
+            // Bipe: no Labs entry. Threads and galleries are on by default; "Ask to join" stays off.
             
             ListRow(label: .default(title: L10n.commonAbout,
                                     icon: \.info),

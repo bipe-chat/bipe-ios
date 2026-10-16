@@ -155,8 +155,9 @@ Not done (needs the domain, Apple team or brand):
 - **Self-chat:** `BipeSelfChat`. Account data `chat.bipe.self_chat` = `{"room_id": "..."}` (same on Android). Created on first tap as a private encrypted room named "Anotações". The room lists hide it by a cached ID in `UserDefaults`; it opens in Conversas.
 - **Search:** the search tab needs iOS 26 (`globalSearchEnabled`, on by default). On iOS 18 to 25 search stays inline in the room list.
 
-## Threads and galleries on by default (15 Oct 2026)
+## Threads and galleries on by default, no Labs (15 Oct 2026)
 
+- **No Labs entry in settings.** The row is gone from `SettingsScreen`; `LabsScreen` stays in the tree for rebases. "Ask to join" (knocking) stays off.
 - Not in Labs any more. `threadsEnabled` and `galleryEnabled` use new keys (`threadsEnabledV2`, `galleryEnabledV2`, default on), so an old Labs opt-out does not stick.
 - The event cache is built differently with threads on. `AppCoordinator.rebuildEventCacheForThreadsIfNeeded` clears it once after the first session restore, through the same `.clearCache` path the Labs toggle used. The marker is the old Labs key `threadsEnabled` (`isEventCacheBuiltWithThreads`). Fresh installs and new logins set it without a clear.
 - Android does the same (`AppMigration` in bipe-android).
