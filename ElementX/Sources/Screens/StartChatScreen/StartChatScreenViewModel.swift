@@ -38,6 +38,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
         super.init(initialViewState: StartChatScreenViewState(userID: userSession.clientProxy.userID), mediaProvider: userSession.mediaProvider)
         
         setupBindings()
+        loadBipeInviter()
         
         Task {
             suggestedUsers = await userSession.clientProxy.recentConversationCounterparts()
@@ -163,7 +164,10 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
     private var fetchUsersTask: Task<Void, Never>?
     
     private func fetchUsers() {
-        guard context.searchQuery.count >= 3 else {
+        // Bipe: owned handles can be 2 characters (ADR 0065), below the directory minimum. The handle lookup has no minimum.
+        let searchesDirectory = context.searchQuery.count >= 3
+        let isHandle = BipeHandle.localProblem(for: BipeHandle.sanitize(context.searchQuery).lowercased()) == nil
+        guard searchesDirectory || isHandle else {
             state.usersSection = .init(type: .suggestions, users: suggestedUsers)
             state.bipeHandleNotFound = nil
             return
@@ -172,7 +176,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
         fetchUsersTask = Task {
             let query = context.searchQuery
             async let bipeResult = bipeLookUp(query: query)
-            let result = await userDiscoveryService.searchProfiles(with: query)
+            let result: Result<[UserProfile], UserDiscoveryErrorType> = searchesDirectory ? await userDiscoveryService.searchProfiles(with: query) : .success([])
             let bipeLookUp = await bipeResult
             
             guard !Task.isCancelled else { return }
@@ -188,6 +192,16 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
                     state.usersSection = .init(type: .searchResult, users: bipeUsers)
                 }
             }
+        }
+    }
+    
+    /// Bipe ADR 0111: empty search results offer the chat with the inviter until the user messages them.
+    private func loadBipeInviter() {
+        guard let greeting = userSession.clientProxy.bipeInviterGreeting else { return }
+        state.bipeInviter = (greeting.userID, greeting.handle ?? String(greeting.userID.trimmingPrefix("@")))
+        Task {
+            guard let handle = await greeting.displayHandle(resolver: userSession.bipeHandleResolver) else { return }
+            state.bipeInviter = (greeting.userID, handle)
         }
     }
     

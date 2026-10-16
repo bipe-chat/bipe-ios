@@ -132,13 +132,32 @@ struct StartChatScreen: View {
         }
     }
     
+    @ViewBuilder
     private var noResultsContent: some View {
-        Text(context.viewState.bipeHandleNotFound.map(BipeStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
-            .font(.compound.bodyLG)
-            .foregroundColor(.compound.textSecondary)
-            .frame(maxWidth: .infinity)
-            .listRowBackground(Color.clear)
-            .accessibilityIdentifier(A11yIdentifiers.startChatScreen.searchNoResults)
+        // Bipe: the search finds exact handles only, so a name finds nobody. Say so (ADR 0111).
+        VStack(spacing: 8) {
+            Text(context.viewState.bipeHandleNotFound.map(BipeStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
+                .font(.compound.bodyLG)
+                .foregroundColor(.compound.textSecondary)
+            Text(BipeStrings.startChatSearchByHandle)
+                .font(.compound.bodyMD)
+                .foregroundColor(.compound.textSecondary)
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .listRowBackground(Color.clear)
+        .accessibilityIdentifier(A11yIdentifiers.startChatScreen.searchNoResults)
+        
+        if let inviter = context.viewState.bipeInviter {
+            Section {
+                ListRow(label: .default(title: BipeStrings.inviterCardTitle(inviter.handle),
+                                        description: BipeStrings.inviterCardBody,
+                                        icon: \.chat),
+                        kind: .navigationLink {
+                            context.send(viewAction: .selectUser(UserProfile(userID: inviter.userID)))
+                        })
+            }
+        }
     }
     
     private var toolbar: some ToolbarContent {

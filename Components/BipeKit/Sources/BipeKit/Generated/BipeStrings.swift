@@ -208,6 +208,8 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_start_chat_handle_not_found", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static var startChatSearchByHandle: String { NSLocalizedString("bipe_start_chat_search_by_handle", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var profileShare: String { NSLocalizedString("bipe_profile_share", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var profileQrAction: String { NSLocalizedString("bipe_profile_qr_action", tableName: "Bipe", bundle: .module, comment: "") }
