@@ -614,23 +614,43 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 
                 let badgeCount = Int(userSession.clientProxy.totalUnreadNotifications)
                 
-                // Bipe ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
-                var chatsCount = 0
-                var groupsCount = 0
-                for summary in roomSummaries {
-                    switch BipeRoomListScope(summary: summary) {
-                    case .chats: chatsCount += Int(summary.unreadNotificationsCount)
-                    case .groups: groupsCount += Int(summary.unreadNotificationsCount)
-                    }
-                }
-                chatsTabDetails.badgeCount = chatsCount
-                groupsTabDetails.badgeCount = groupsCount
+                updateBipeTabBadges(roomSummaries: roomSummaries)
                 
                 await flowParameters.notificationManager.removeDeliveredNotificationsForFullyReadRooms(roomSummaries)
                 await flowParameters.notificationManager.updateAppBadgeCount(badgeCount)
             }
         }
         .store(in: &cancellables)
+        
+        userSession.userSettings.app.seenInvitesPublisher
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                updateBipeTabBadges(roomSummaries: roomListPublisher.value)
+            }
+            .store(in: &cancellables)
+    }
+    
+    /// Bipe ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
+    /// A group invite the user has not opened counts 1 on Grupos. DM invites stay behind the Pedidos row.
+    private func updateBipeTabBadges(roomSummaries: [RoomSummary]) {
+        let seenInvites = userSession.userSettings.app.seenInvites
+        var chatsCount = 0
+        var groupsCount = 0
+        for summary in roomSummaries {
+            switch BipeRoomListScope(summary: summary) {
+            case .chats:
+                chatsCount += Int(summary.unreadNotificationsCount)
+            case .groups:
+                if summary.joinRequestType?.isInvite == true {
+                    groupsCount += seenInvites.contains(summary.id) ? 0 : 1
+                } else {
+                    groupsCount += Int(summary.unreadNotificationsCount)
+                }
+            }
+        }
+        chatsTabDetails.badgeCount = chatsCount
+        groupsTabDetails.badgeCount = groupsCount
     }
     
     // MARK: - Native calls
