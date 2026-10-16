@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -111,11 +112,14 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
         case .processTapPeople:
             actionsSubject.send(.requestMemberDetailsPresentation)
         case .processTapInvite:
-            if let dmRecipient = state.dmRecipientInfo {
-                actionsSubject.send(.requestInviteToNewRoomPresentation(selectedInvitee: .init(member: dmRecipient.member)))
+            // Bipe: a DM never grows into a group. Invite the recipient to one of your groups instead.
+            if state.dmRecipientInfo != nil {
+                presentInviteToGroupPicker()
             } else {
                 actionsSubject.send(.requestInvitePeoplePresentation)
             }
+        case .inviteToGroup(let roomID):
+            Task { await inviteRecipient(toGroup: roomID) }
         case .processTapLeave:
             processTapToLeave()
         case .confirmLeave:
@@ -423,10 +427,50 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
         }
     }
     
+    // MARK: Bipe: invite to a group
+    
+    private func presentInviteToGroupPicker() {
+        let selfChatID = BipeSelfChat(clientProxy: userSession.clientProxy).cachedRoomID
+        let groups = userSession.clientProxy.staticRoomSummaryProvider.roomListPublisher.value
+            .filter { $0.isJoined && !$0.isDirect && !$0.isSpace && !$0.isTombstoned && $0.id != selfChatID }
+            .map { BipeInviteToGroupOption(id: $0.id, name: $0.name, avatar: $0.avatar) }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        state.bindings.inviteToGroupPicker = .init(groups: groups)
+    }
+    
+    private func inviteRecipient(toGroup roomID: String) async {
+        state.bindings.inviteToGroupPicker = nil
+        guard let recipient = state.dmRecipientInfo?.member else { return }
+        
+        let loadingID = "BipeInviteToGroupLoading"
+        userIndicatorController.submitIndicator(UserIndicator(id: loadingID, type: .modal, title: L10n.commonLoading, persistent: true))
+        defer { userIndicatorController.retractIndicatorWithId(loadingID) }
+        
+        guard case let .joined(groupProxy) = await userSession.clientProxy.roomForIdentifier(roomID),
+              groupProxy.infoPublisher.value.powerLevels?.canOwnUserInvite() == true else {
+            userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
+            return
+        }
+        
+        if case let .success(member) = await groupProxy.getMember(userID: recipient.id), member.isActive {
+            userIndicatorController.submitIndicator(.init(title: BipeStrings.dmInviteToGroupAlreadyMember))
+            return
+        }
+        
+        switch await groupProxy.invite(userID: recipient.id) {
+        case .success:
+            userIndicatorController.submitIndicator(.init(title: BipeStrings.dmInviteToGroupSent, icon: \.check))
+        case .failure(let error):
+            MXLog.error("Failed inviting the DM recipient to a group: \(error)")
+            userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
+        }
+    }
+    
     private static let leaveRoomLoadingID = "LeaveRoomLoading"
     
     private func leaveRoom() async {
-        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: L10n.commonLeavingRoom, persistent: true))
+        let leavingTitle = state.dmRecipientInfo != nil ? L10n.commonLoading : L10n.commonLeavingRoom
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: leavingTitle, persistent: true))
         let result = await roomProxy.leaveRoom()
         userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)
         switch result {

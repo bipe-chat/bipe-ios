@@ -1399,4 +1399,14 @@ public enum BipeStrings {
     public static func orderPushCancelled(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_order_push_cancelled", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
+
+    public static var dmInviteToGroup: String { NSLocalizedString("bipe_dm_invite_to_group", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInviteToGroupEmpty: String { NSLocalizedString("bipe_dm_invite_to_group_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInviteToGroupSent: String { NSLocalizedString("bipe_dm_invite_to_group_sent", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInviteToGroupAlreadyMember: String { NSLocalizedString("bipe_dm_invite_to_group_already_member", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmLeaveBody: String { NSLocalizedString("bipe_dm_leave_body", tableName: "Bipe", bundle: .module, comment: "") }
 }

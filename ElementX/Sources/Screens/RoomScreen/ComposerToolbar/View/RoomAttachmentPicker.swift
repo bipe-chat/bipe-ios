@@ -38,12 +38,14 @@ struct RoomAttachmentPicker: View {
             }
             .accessibilityIdentifier(A11yIdentifiers.roomScreen.attachmentPickerTextFormatting)
             
-            Button {
-                context.send(viewAction: .attach(.poll))
-            } label: {
-                Label(L10n.screenRoomAttachmentSourcePoll, icon: \.polls)
+            if !context.viewState.isDM {
+                Button {
+                    context.send(viewAction: .attach(.poll))
+                } label: {
+                    Label(L10n.screenRoomAttachmentSourcePoll, icon: \.polls)
+                }
+                .accessibilityIdentifier(A11yIdentifiers.roomScreen.attachmentPickerPoll)
             }
-            .accessibilityIdentifier(A11yIdentifiers.roomScreen.attachmentPickerPoll)
             
             // Bipe: sticker picker (ADR 0029).
             Button {

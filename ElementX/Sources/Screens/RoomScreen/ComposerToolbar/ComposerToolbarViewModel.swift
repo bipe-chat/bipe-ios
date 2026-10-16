@@ -91,6 +91,13 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
         ]
         
         roomProxy.infoPublisher
+            .map(\.isDM)
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .weakAssign(to: \.state.isDM, on: self)
+            .store(in: &cancellables)
+        
+        roomProxy.infoPublisher
             .map(\.isEncrypted)
             .receive(on: DispatchQueue.main)
             .removeDuplicates()
