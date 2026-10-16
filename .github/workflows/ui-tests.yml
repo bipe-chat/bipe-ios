@@ -17,6 +17,8 @@ jobs:
     name: Tests
     runs-on: xcode-27
     timeout-minutes: 90
+    # Bipe: Element-only (LFS snapshots, private submodule). Runs only in element-hq.
+    if: ${{ github.repository == 'element-hq/element-x-ios' }}
     strategy:
       fail-fast: false
       matrix:
