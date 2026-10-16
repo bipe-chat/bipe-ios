@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 import UniformTypeIdentifiers
@@ -28,7 +29,7 @@ struct NotificationSettingsScreen: View {
                     roomsNotificationSection
                 }
                 
-                roomListActivitySection
+                // Bipe (ADR 0112): "Show all activity in the room list" is not on this screen; its default stays.
                 
                 if context.enableNotifications {
                     if context.viewState.showCallsSettings, context.viewState.settings?.callsEnabled != nil {
@@ -87,6 +88,7 @@ struct NotificationSettingsScreen: View {
     
     private var enableNotificationSection: some View {
         Section {
+            // Bipe: needs string bipe_notifications_enable ("Ligar neste celular"); Element's says "dispositivo".
             ListRow(label: .plain(title: L10n.screenNotificationSettingsEnableNotifications),
                     kind: .toggle($context.enableNotifications))
                 .onChange(of: context.enableNotifications) {
@@ -120,7 +122,7 @@ struct NotificationSettingsScreen: View {
                     .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.notifications)
             
             // Invitations
-            ListRow(label: .plain(title: L10n.screenNotificationSettingsInviteForMeLabel),
+            ListRow(label: .plain(title: BipeStrings.notificationsInvites), // Bipe: Pedidos and group invites
                     kind: .toggle($context.invitationsEnabled))
                 .disabled(context.viewState.settings?.invitationsEnabled == nil)
                 .allowsHitTesting(!context.viewState.applyingChange)
@@ -129,7 +131,7 @@ struct NotificationSettingsScreen: View {
                 }
             
             // @room mentions
-            ListRow(label: .plain(title: L10n.screenNotificationSettingsRoomMentionLabel),
+            ListRow(label: .plain(title: BipeStrings.notificationsWholeGroup), // Bipe: no "@room" (ADR 0112)
                     kind: .toggle($context.roomMentionsEnabled))
                 .disabled(context.viewState.settings?.roomMentionsEnabled == nil)
                 .allowsHitTesting(!context.viewState.applyingChange)
@@ -172,14 +174,17 @@ struct NotificationSettingsScreen: View {
     @ViewBuilder
     private var soundSelectionSection: some View {
         Section {
-            DisclosureGroup(context.viewState.selectedAlertTone.label, isExpanded: $context.shouldShowAlertSounds) {
+            // Bipe: "Som de mensagem" with the chosen tone as its value (ADR 0112).
+            DisclosureGroup(isExpanded: $context.shouldShowAlertSounds) {
                 customSoundSelectionSection
+            } label: {
+                LabeledContent(BipeStrings.notificationsMessageSound, value: context.viewState.selectedAlertTone.bipeLabel)
             }
             .foregroundStyle(.compound.textPrimary)
             .listRowBackground(Color.compound.bgCanvasDefaultLevel1)
             .listRowSeparatorTint(ListRowColor.separatorTint)
         } header: {
-            Text(L10n.screenNotificationSettingsSoundSectionTitle)
+            Text(BipeStrings.notificationsSound)
                 .compoundListSectionHeader()
         }
         
@@ -190,7 +195,7 @@ struct NotificationSettingsScreen: View {
     
     private var presetSoundSelectionSection: some View {
         ForEach(NotificationToneManager.allDefaultAlerts, id: \.filename) { alertTone in
-            ListRow(label: .plain(title: alertTone.label),
+            ListRow(label: .plain(title: alertTone.bipeLabel),
                     kind: .selection(isSelected: context.viewState.selectedAlertTone == alertTone) {
                         context.send(viewAction: .selectAlertTone(alertTone))
                     })
@@ -200,7 +205,7 @@ struct NotificationSettingsScreen: View {
     @ViewBuilder
     private var customSoundSelectionSection: some View {
         ForEach(context.viewState.availableCustomTones, id: \.filename) { alertTone in
-            ListRow(label: .plain(title: alertTone.label),
+            ListRow(label: .plain(title: alertTone.bipeLabel),
                     kind: .selection(isSelected: context.viewState.selectedAlertTone == alertTone) {
                         context.send(viewAction: .selectAlertTone(alertTone))
                     })
@@ -213,7 +218,7 @@ struct NotificationSettingsScreen: View {
             context.send(viewAction: .deleteCustomAlertTones(tones))
         }
         
-        ListRow(label: .plain(title: L10n.screenNotificationSettingsSoundCustomSoundButtonTitle),
+        ListRow(label: .plain(title: BipeStrings.notificationsToneCustom),
                 kind: .button {
                     context.shouldShowCustomAlertTonePicker = true
                 })
@@ -253,6 +258,20 @@ struct NotificationSettingsScreen: View {
                 .padding(.horizontal, ListRowPadding.horizontal)
                 .padding(.vertical, 24)
             })
+        }
+    }
+}
+
+// MARK: - Bipe
+
+private extension NotificationTone {
+    /// Bipe: the bundled tones get Bipe names, no "Element" (ADR 0112). The manager is shared with the NSE,
+    /// which does not link BipeKit, so the names change here.
+    var bipeLabel: String {
+        switch filename {
+        case NotificationToneManager.defaultElementXMessageTone.filename: BipeStrings.notificationsToneDefault
+        case "sound_01.caf": BipeStrings.notificationsToneSoft
+        default: label
         }
     }
 }
