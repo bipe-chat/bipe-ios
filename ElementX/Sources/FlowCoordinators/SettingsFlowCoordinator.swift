@@ -215,6 +215,10 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             startLinkNewDeviceFlow()
         case .accountSignOut:
             actionsSubject.send(.runLogoutFlow)
+        case .chatsMediaQuality:
+            presentMediaUploadQualitySettings()
+        case .chatsLiveLocation:
+            presentLocationSharingSettings()
         default:
             MXLog.error("Bipe settings row without a screen: \(row.rawValue)")
         }

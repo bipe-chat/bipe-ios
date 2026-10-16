@@ -42,6 +42,11 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     /// "Desbloquear com Face ID / Touch ID": shown when the phone has biometrics and the app lock is on.
     var biometryName: String?
     
+    // MARK: Conversas e mídia
+    
+    var timelineMediaVisibility: TimelineMediaVisibility = .always
+    var isWaitingTimelineMediaVisibility = false
+    
     var bindings: BipeSettingsGroupScreenViewStateBindings
 
     /// The registry sections, cut into Form sections so that a row footer sits right under its row.
@@ -72,6 +77,11 @@ struct BipeSettingsGroupScreenViewStateBindings {
         set { appSettings.sharePresence = newValue }
     }
     
+    var appAppearance: AppAppearance {
+        get { appSettings.appAppearance }
+        set { appSettings.appAppearance = newValue }
+    }
+    
     init(appSettings: AppSettings) {
         self.appSettings = appSettings
     }
@@ -90,6 +100,7 @@ enum BipeSettingsGroupScreenViewAction {
     case export
     case exportClosed
     case biometricUnlockChanged
+    case updateTimelineMediaVisibility(TimelineMediaVisibility)
 }
 
 /// One Form section: the registry section's title on the first block, a row footer or the section footer on the last.

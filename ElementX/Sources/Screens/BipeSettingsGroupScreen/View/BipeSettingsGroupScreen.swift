@@ -26,9 +26,16 @@ struct BipeSettingsGroupScreen: View {
                             .compoundListSectionHeader()
                     }
                 } footer: {
-                    if let footer = block.footer {
-                        Text(footer)
-                            .compoundListSectionFooter()
+                    VStack(spacing: 16) {
+                        if let footer = block.footer {
+                            Text(footer)
+                                .compoundListSectionFooter()
+                        }
+                        if context.viewState.group == .help, block.id == context.viewState.blocks.last?.id {
+                            Text(BipeStrings.helpVersion(Self.version))
+                                .compoundListSectionFooter()
+                                .frame(maxWidth: .infinity)
+                        }
                     }
                 }
             }
@@ -46,6 +53,10 @@ struct BipeSettingsGroupScreen: View {
         }
     }
 
+    private static var version: String {
+        ProcessInfo.isRunningTests ? "0.0.0 (1)" : "\(InfoPlistReader.main.bundleShortVersionString) (\(InfoPlistReader.main.bundleVersion))"
+    }
+    
     private var isShowingExport: Binding<Bool> {
         Binding(get: { context.viewState.bindings.exportFileURL != nil },
                 set: { if !$0 { context.exportFileURL = nil } })
@@ -105,6 +116,27 @@ struct BipeSettingsGroupScreen: View {
             linkRow(row, value: context.viewState.recoveryKeySet ? BipeStrings.accountRecoveryKeySaved : BipeStrings.accountRecoveryKeyMissing)
         case .accountThisDevice:
             infoRow(row, value: UIDevice.current.name)
+        
+        case .chatsAppearance:
+            ListRow(label: .plain(title: row.title),
+                    kind: .picker(selection: $context.appAppearance,
+                                  items: AppAppearance.allCases.map { (title: $0.name, tag: $0) }))
+        case .chatsLanguage, .helpLicenses:
+            // The language and the open source licenses (Settings.bundle) live in the iPhone's Ajustes.
+            ListRow(label: .plain(title: row.title),
+                    details: .systemIcon(.arrowUpRight),
+                    kind: .button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
+                    })
+        case .chatsShowMedia:
+            ListRow(label: .plain(title: row.title),
+                    details: context.viewState.isWaitingTimelineMediaVisibility ? .isWaiting(true) : nil,
+                    kind: .picker(selection: Binding(get: { context.viewState.timelineMediaVisibility },
+                                                     set: { context.send(viewAction: .updateTimelineMediaVisibility($0)) }),
+                                  items: TimelineMediaVisibility.bipeItems))
+                .disabled(context.viewState.isWaitingTimelineMediaVisibility)
         default:
             switch row.kind {
             case .url:
@@ -175,6 +207,14 @@ struct BipeSettingsGroupScreen: View {
                         openURL(url)
                     }
                 })
+    }
+}
+
+private extension TimelineMediaVisibility {
+    static var bipeItems: [(title: String, tag: TimelineMediaVisibility)] {
+        [(title: BipeStrings.chatsShowMediaAlways, tag: .always),
+         (title: BipeStrings.chatsShowMediaPrivate, tag: .privateOnly),
+         (title: BipeStrings.chatsShowMediaNever, tag: .never)]
     }
 }
 
