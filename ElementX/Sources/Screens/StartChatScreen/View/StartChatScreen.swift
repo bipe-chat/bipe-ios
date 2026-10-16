@@ -33,6 +33,7 @@ struct StartChatScreen: View {
                           disablesInteractiveDismiss: true)
         .compoundSearchField()
         .alert(item: $context.alertInfo)
+        .bipeInviteSheets(shareSheetLink: $context.bipeInviteShareLink, qrCodeLink: .constant(nil))
         .sheet(item: $context.selectedUserToInvite) { userToInvite in
             SendInviteConfirmationView(userToInvite: userToInvite,
                                        mediaProvider: context.mediaProvider) {
@@ -99,12 +100,10 @@ struct StartChatScreen: View {
     
     private var inviteFriendsSection: some View {
         Section {
-            ListRow(kind: .custom {
-                MatrixUserShareLink(userID: context.viewState.userID) {
-                    ListRowLabel.default(title: L10n.actionInvitePeopleToApp(InfoPlistReader.main.bundleDisplayName),
-                                         icon: \.shareIos)
-                }
-            })
+            // Bipe: shares a personal invite, not a profile link (sign-up needs an invite).
+            ListRow(label: .default(title: L10n.actionInvitePeopleToApp(InfoPlistReader.main.bundleDisplayName),
+                                    icon: \.shareIos),
+                    kind: .button { context.send(viewAction: .bipeInviteToApp) })
             .accessibilityIdentifier(A11yIdentifiers.startChatScreen.inviteFriends)
         }
     }

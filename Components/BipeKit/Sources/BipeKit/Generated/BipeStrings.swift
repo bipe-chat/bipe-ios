@@ -526,6 +526,10 @@ public enum BipeStrings {
 
     public static var contactsInvite: String { NSLocalizedString("bipe_contacts_invite", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var contactsJoinedWithInvite: String { NSLocalizedString("bipe_contacts_joined_with_invite", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var contactsPendingInvites: String { NSLocalizedString("bipe_contacts_pending_invites", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var discoveryToggle: String { NSLocalizedString("bipe_discovery_toggle", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var discoveryFooter: String { NSLocalizedString("bipe_discovery_footer", tableName: "Bipe", bundle: .module, comment: "") }

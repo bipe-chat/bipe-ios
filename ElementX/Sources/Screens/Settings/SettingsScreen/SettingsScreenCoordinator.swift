@@ -47,7 +47,6 @@ enum SettingsScreenCoordinatorAction {
     case bipeHandle
     case bipePublicProfile
     case bipeMessaging
-    case bipeInvites
     case bipeContacts
     case bipeSelfChat
     case bipeAccount
@@ -128,8 +127,6 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.bipePublicProfile)
                 case .bipeMessaging:
                     actionsSubject.send(.bipeMessaging)
-                case .bipeInvites:
-                    actionsSubject.send(.bipeInvites)
                 case .bipeContacts:
                     actionsSubject.send(.bipeContacts)
                 case .bipeSelfChat:

@@ -150,8 +150,6 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     presentBipePublicProfileScreen()
                 case .bipeMessaging:
                     presentBipeMessagingScreen()
-                case .bipeInvites:
-                    presentBipeInvitesScreen()
                 case .bipeContacts:
                     presentBipeContactsScreen()
                 case .bipeSelfChat:
@@ -229,7 +227,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     private func presentBipeContactsScreen() {
         let coordinator = BipeContactsScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                             clientProxy: flowParameters.userSession.clientProxy))
+                                                                             clientProxy: flowParameters.userSession.clientProxy,
+                                                                             userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {

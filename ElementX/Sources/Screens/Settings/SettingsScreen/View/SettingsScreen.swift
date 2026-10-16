@@ -213,14 +213,9 @@ struct SettingsScreen: View {
                             context.send(viewAction: .bipeMessaging)
                         })
                 
-                ListRow(label: .default(title: BipeStrings.invitesTitle,
-                                        icon: \.userAdd),
-                        kind: .navigationLink {
-                            context.send(viewAction: .bipeInvites)
-                        })
-                
+                // Bipe: invites live in the contacts screen, one row for both.
                 ListRow(label: .default(title: BipeStrings.contactsTitle,
-                                        icon: \.userProfile),
+                                        icon: \.userAdd),
                         kind: .navigationLink {
                             context.send(viewAction: .bipeContacts)
                         })

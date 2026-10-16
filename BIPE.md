@@ -125,6 +125,13 @@ Not done (needs the domain, Apple team or brand):
 - **Password saving:** `webcredentials:bipe.chat` in the associated domains; the AASA lists both app IDs (bipe-infra).
 - Not built: guardian and CPF recovery (no API yet), QR sign-in checks from bipe#152, the fallback prompt after sign-up (the optional email on the form is the only fallback).
 
+## Contacts and invites (growth loop step 2)
+
+- **One settings row**, "Contatos e convites", opens `BipeContactsScreen`. Invites have no settings row of their own.
+- **Contacts screen:** the invite buttons on top (`BipeInviteButtonsSection`, shared with `BipeInvitesScreen`), then people who joined with the user's invite (`GET /v1/me/invites`, status `used`), then address-book matches, then a "Convites ainda não usados" row with the count that opens `BipeInvitesScreen`. The counts reload on each appear, so they are current after a return from the invites screen.
+- **Start chat "Convidar pessoas":** creates a personal invite and opens the share sheet (`BipeInviteCreator.createIfAvailable`). Element shared a matrix.to profile link, which is a dead end for an invite-only sign-up.
+- `BipeInviteCreator` (BipeKit) is the one place that creates an invite and stores its link. `BipeInviteQuota` writes the quota text.
+
 ## Handle change lines (ADR 0066, bipe#166)
 
 - **Remove the handle:** "Remover nome de usuário" on `BipeHandleScreen`, also during the cooldown. A confirmation alert (`bipe_handle_remove_body`), then `DELETE /v1/me/handle`. Same flow on Android.
@@ -196,6 +203,7 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Check before a PIN change | Biometrics or the phone's passcode | Biometrics or the phone's screen lock; else the app lock PIN | `LAContext` on iOS, `BiometricPrompt` with `DEVICE_CREDENTIAL` on Android |
 | Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
 | Voice messages | Sender-side transcription, pause and resume | Shows the transcript and checks it for scams; no sender-side transcription | On-device recognition on low-end Android unmeasured (#80, #81) **Gap** |
+| Where invites live | Contatos e convites: invite buttons, people who joined with your invite, and unused invites in the contacts screen | Convidar pessoas in settings | Android has no contacts screen yet (#162) **Gap** |
 | Help links | Hidden | Still point to element.io | Not done on Android (#205) **Gap** |
 | Sticker from a photo | Subject cut-out (Vision) | Centred square crop | Cut-out needs ML Kit, not decided (#101) **Undecided** |
 | Sticker import | Chat export ZIP or files | Chat export ZIP or files; picker opens in WhatsApp's stickers folder | iOS apps cannot read WhatsApp's files |

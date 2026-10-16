@@ -11,6 +11,7 @@ import SwiftUI
 struct BipeContactsScreenCoordinatorParameters {
     let apiClient: BipeAPIClient
     let clientProxy: ClientProxyProtocol
+    let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum BipeContactsScreenCoordinatorAction {
@@ -29,7 +30,9 @@ final class BipeContactsScreenCoordinator: CoordinatorProtocol {
     }
     
     init(parameters: BipeContactsScreenCoordinatorParameters) {
-        viewModel = BipeContactsScreenViewModel(apiClient: parameters.apiClient, clientProxy: parameters.clientProxy)
+        viewModel = BipeContactsScreenViewModel(apiClient: parameters.apiClient,
+                                                clientProxy: parameters.clientProxy,
+                                                userIndicatorController: parameters.userIndicatorController)
     }
     
     func start() {

@@ -162,8 +162,6 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             Task { await loadBipeHandle() }
             Task { await loadBipeWhoCanMessage() }
             Task { await loadBipePublicProfile() }
-        case .bipeInvites:
-            actionsSubject.send(.bipeInvites)
         case .bipeContacts:
             actionsSubject.send(.bipeContacts)
         case .bipeSelfChat:

@@ -39,7 +39,6 @@ enum SettingsScreenViewModelAction {
     case bipeHandle
     case bipePublicProfile
     case bipeMessaging
-    case bipeInvites
     case bipeContacts
     case bipeSelfChat
     case bipeAccount
@@ -156,7 +155,6 @@ enum SettingsScreenViewAction {
     case bipePublicProfile
     case bipeMessaging
     case bipeLoadHandle
-    case bipeInvites
     case bipeContacts
     case bipeSelfChat
     case bipeAccount

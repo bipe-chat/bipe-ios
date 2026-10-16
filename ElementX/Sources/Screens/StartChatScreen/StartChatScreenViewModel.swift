@@ -86,6 +86,30 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             joinRoomByAddress()
         case .openRoomDirectorySearch:
             actionsSubject.send(.openRoomDirectorySearch)
+        case .bipeInviteToApp:
+            Task { await bipeInviteToApp() }
+        }
+    }
+    
+    /// Bipe: sign-up needs a personal invite, so "invite people" shares one instead of a profile link.
+    private func bipeInviteToApp() async {
+        let clientProxy = userSession.clientProxy
+        let creator = BipeInviteCreator(apiClient: BipeAPIClient(baseURL: userSession.userSettings.app.bipeAPIBaseURL),
+                                        userID: clientProxy.userID) { clientProxy.accessToken }
+        showLoadingIndicator()
+        defer { hideLoadingIndicator() }
+        
+        do {
+            switch try await creator.createIfAvailable() {
+            case .created(let created):
+                MXLog.info("Bipe invite created \(created)")
+                state.bindings.bipeInviteShareLink = BipeInviteShareLink(id: created.id, url: created.url)
+            case .noneLeft(let nextAvailableAt):
+                state.bindings.alertInfo = AlertInfo(id: .bipeInvite, title: BipeStrings.invitesTitle, message: BipeInviteQuota.noneLeft(nextAvailableAt: nextAvailableAt))
+            }
+        } catch {
+            MXLog.error("Bipe invite creation failed: \(error)")
+            state.bindings.alertInfo = AlertInfo(id: .bipeInvite, title: L10n.commonError, message: error.localizedMessage)
         }
     }
     
