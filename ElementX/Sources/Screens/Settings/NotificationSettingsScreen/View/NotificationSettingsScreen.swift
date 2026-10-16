@@ -88,8 +88,7 @@ struct NotificationSettingsScreen: View {
     
     private var enableNotificationSection: some View {
         Section {
-            // Bipe: needs string bipe_notifications_enable ("Ligar neste celular"); Element's says "dispositivo".
-            ListRow(label: .plain(title: L10n.screenNotificationSettingsEnableNotifications),
+            ListRow(label: .plain(title: BipeStrings.notificationsEnable), // Bipe: "celular", not "dispositivo"
                     kind: .toggle($context.enableNotifications))
                 .onChange(of: context.enableNotifications) {
                     context.send(viewAction: .changedEnableNotifications)
@@ -100,7 +99,7 @@ struct NotificationSettingsScreen: View {
     private var roomsNotificationSection: some View {
         Section {
             // Group chats
-            ListRow(label: .plain(title: L10n.screenNotificationSettingsGroupChats),
+            ListRow(label: .plain(title: BipeStrings.notificationsGroups), // Bipe
                     details: context.viewState.settings.map {
                         .title(context.viewState.strings.string(for: $0.groupChatsMode))
                     } ?? .isWaiting(true),
@@ -111,7 +110,7 @@ struct NotificationSettingsScreen: View {
                     .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.notifications)
             
             // Direct chats
-            ListRow(label: .plain(title: L10n.screenNotificationSettingsDirectChats),
+            ListRow(label: .plain(title: BipeStrings.notificationsChats), // Bipe
                     details: context.viewState.settings.map {
                         .title(context.viewState.strings.string(for: $0.directChatsMode))
                     } ?? .isWaiting(true),
@@ -140,7 +139,7 @@ struct NotificationSettingsScreen: View {
                 }
             
         } header: {
-            Text(L10n.screenNotificationSettingsNotificationSectionTitle)
+            Text(BipeStrings.notificationsNotifyAbout) // Bipe: "Avisar sobre"
                 .compoundListSectionHeader()
         }
     }

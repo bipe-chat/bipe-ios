@@ -39,8 +39,9 @@ struct LocationSharingSettingsScreen: View {
         Section {
             ListRow(kind: .custom {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Bipe: needs string bipe_chats_live_location_distance ("A cada %1$@"); Element's plural is English only.
-                    Text(Self.measurementFormatter.string(from: .init(value: Double(context.liveLocationMinimumDistanceUpdate), unit: UnitLength.meters)))
+                    // Bipe: "A cada 25 m"; Element's plural is English only.
+                    Text(BipeStrings.chatsLiveLocationDistance(Self.measurementFormatter.string(from: .init(value: Double(context.liveLocationMinimumDistanceUpdate),
+                                                                                                             unit: UnitLength.meters))))
                         .font(.compound.bodyLG)
                         .foregroundStyle(.compound.textPrimary)
                         // The internal hidden label of the slider will read voice over
@@ -74,8 +75,8 @@ struct LocationSharingSettingsScreen: View {
                     .foregroundStyle(.compound.textSecondary)
             }
         } footer: {
-            // Bipe: needs string bipe_chats_live_location_precise ("Precise Location" hint); Element's is English only.
-            Text(context.viewState.liveLocationUpdateFooterAttributedString)
+            // Bipe: Element's "Precise Location" hint is English only.
+            Text(BipeStrings.chatsLiveLocationPrecise)
                 .compoundListSectionFooter()
         }
     }
