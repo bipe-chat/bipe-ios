@@ -155,12 +155,18 @@ struct BipeSignupScreen: View {
         }
     }
 
-    /// Clickwrap (ADR 0113). The links open the pages; a tap anywhere else on the row toggles the box.
+    /// Clickwrap (ADR 0113). Only the box toggles: a tap gesture on the row would swallow the link taps in the text.
     private var termsCheckbox: some View {
         let isAccepted = context.isTermsAccepted
         return HStack(alignment: .top, spacing: 12) {
-            CompoundIcon(isAccepted ? \.checkCircleSolid : \.circle)
-                .foregroundColor(isAccepted ? .compound.iconSuccessPrimary : .compound.borderInteractivePrimary)
+            Button { context.isTermsAccepted.toggle() } label: {
+                CompoundIcon(isAccepted ? \.checkCircleSolid : \.circle)
+                    .foregroundColor(isAccepted ? .compound.iconSuccessPrimary : .compound.borderInteractivePrimary)
+                    .padding(10)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .padding(-10)
 
             Text(context.viewState.termsSentence)
                 .font(.compound.bodyMD)
@@ -168,8 +174,6 @@ struct BipeSignupScreen: View {
                 .tint(.compound.textLinkExternal)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .contentShape(Rectangle())
-        .onTapGesture { context.isTermsAccepted.toggle() }
         // VoiceOver reads a real toggle with its state; the links become actions.
         .accessibilityRepresentation {
             Toggle(String(context.viewState.termsSentence.characters), isOn: $context.isTermsAccepted)
