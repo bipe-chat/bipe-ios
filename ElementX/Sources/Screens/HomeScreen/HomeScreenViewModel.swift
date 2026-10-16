@@ -551,7 +551,9 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             MXLog.error("Failed setting room \(roomID) muted: \(isMuted) with error: \(error)")
             state.bindings.alertInfo = .init(id: UUID(),
                                              title: L10n.commonError,
-                                             message: isMuted ? L10n.screenRoomDetailsErrorMuting : L10n.screenRoomDetailsErrorUnmuting)
+                                             message: roomProxy.infoPublisher.value.isDM // Bipe: a DM is a conversation
+                                                 ? (isMuted ? BipeStrings.dmErrorMuting : BipeStrings.dmErrorUnmuting)
+                                                 : (isMuted ? L10n.screenRoomDetailsErrorMuting : L10n.screenRoomDetailsErrorUnmuting))
         }
     }
     
@@ -609,7 +611,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         defer {
             userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)
         }
-        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: L10n.commonLeavingRoom, persistent: true))
+        let isDirect = state.rooms.first { $0.roomID == roomID }?.isDirect == true // Bipe: a DM is a conversation
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDirect ? BipeStrings.dmLeaving : L10n.commonLeavingRoom, persistent: true))
         
         guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID),
               case .success = await roomProxy.leaveRoom() else {
@@ -619,7 +622,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         userIndicatorController.submitIndicator(UserIndicator(id: UUID().uuidString,
                                                               type: .toast,
-                                                              title: L10n.commonCurrentUserLeftRoom,
+                                                              title: isDirect ? BipeStrings.dmLeftByYou : L10n.commonCurrentUserLeftRoom,
                                                               icon: \.check))
         actionsSubject.send(.roomLeft(roomIdentifier: roomID))
     }

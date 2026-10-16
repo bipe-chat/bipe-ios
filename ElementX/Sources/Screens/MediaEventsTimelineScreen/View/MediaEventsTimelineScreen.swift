@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -194,7 +195,7 @@ struct MediaEventsTimelineScreen: View {
             .font(.compound.headingMDBold)
             .multilineTextAlignment(.center)
         
-        Text(L10n.screenMediaBrowserMediaEmptyStateSubtitle)
+        Text(context.viewState.activeTimelineContext.viewState.isDM ? BipeStrings.dmMediaEmpty : L10n.screenMediaBrowserMediaEmptyStateSubtitle) // Bipe: a DM is a conversation
             .foregroundColor(.compound.textSecondary)
             .font(.compound.bodyMD)
             .multilineTextAlignment(.center)
@@ -209,7 +210,7 @@ struct MediaEventsTimelineScreen: View {
             .font(.compound.headingMDBold)
             .multilineTextAlignment(.center)
         
-        Text(L10n.screenMediaBrowserFilesEmptyStateSubtitle)
+        Text(context.viewState.activeTimelineContext.viewState.isDM ? BipeStrings.dmFilesEmpty : L10n.screenMediaBrowserFilesEmptyStateSubtitle) // Bipe: a DM is a conversation
             .foregroundColor(.compound.textSecondary)
             .font(.compound.bodyMD)
             .multilineTextAlignment(.center)

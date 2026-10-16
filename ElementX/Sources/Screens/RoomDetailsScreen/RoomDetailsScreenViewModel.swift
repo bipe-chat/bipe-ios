@@ -404,7 +404,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             } catch {
                 state.bindings.alertInfo = AlertInfo(id: .alert,
                                                      title: L10n.commonError,
-                                                     message: L10n.screenRoomDetailsErrorUnmuting)
+                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorUnmuting : L10n.screenRoomDetailsErrorUnmuting) // Bipe
             }
         default:
             do {
@@ -412,7 +412,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             } catch {
                 state.bindings.alertInfo = AlertInfo(id: .alert,
                                                      title: L10n.commonError,
-                                                     message: L10n.screenRoomDetailsErrorMuting)
+                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorMuting : L10n.screenRoomDetailsErrorMuting) // Bipe
             }
         }
         state.isProcessingMuteToggleAction = false
@@ -469,7 +469,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
     private static let leaveRoomLoadingID = "LeaveRoomLoading"
     
     private func leaveRoom() async {
-        let leavingTitle = state.dmRecipientInfo != nil ? L10n.commonLoading : L10n.commonLeavingRoom
+        let leavingTitle = state.dmRecipientInfo != nil ? BipeStrings.dmLeaving : L10n.commonLeavingRoom // Bipe
         userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: leavingTitle, persistent: true))
         let result = await roomProxy.leaveRoom()
         userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)

@@ -69,7 +69,7 @@ struct RoomDetailsScreen: View {
                 }
             }
         }
-        .navigationTitle(L10n.screenRoomDetailsTitle)
+        .navigationTitle(context.viewState.dmRecipientInfo != nil ? BipeStrings.dmDetailsTitle : L10n.screenRoomDetailsTitle) // Bipe: a DM is a conversation
         .navigationBarTitleDisplayMode(.inline)
         .track(screen: .RoomDetails)
         .interactiveQuickLook(item: $context.mediaPreviewItem, allowEditing: false)

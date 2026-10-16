@@ -106,7 +106,7 @@ struct HomeScreenRoomList: View {
                         Button(role: .destructive) {
                             context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
                         } label: {
-                            Label(L10n.actionLeaveRoom, icon: \.leave)
+                            Label(room.isDirect ? L10n.actionLeaveConversation : L10n.actionLeaveRoom, icon: \.leave) // Bipe: a DM is a conversation
                         }
                     }
             }

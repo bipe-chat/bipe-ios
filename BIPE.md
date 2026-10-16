@@ -191,6 +191,8 @@ Not done (needs the domain, Apple team or brand):
 - A DM never turns into a group. DM details: no topic (`hasTopicSection`), no polls history, no "Convidar" to the DM. "Convidar para um grupo" opens `BipeInviteToGroupSheet` with your joined groups from `staticRoomSummaryProvider` (not DMs, spaces, replaced rooms or the self-chat) and invites the other person to the one you pick. The group's invite permission is checked at pick time.
 - The composer "+" menu has no poll in a DM (`ComposerToolbarViewState.isDM`).
 - Leave in a DM says "Sair da conversa" with `bipe_dm_leave_body`.
+- No room setup lines in a DM timeline: `RoomTimelineItemFactory` drops invites, joins and "encryption enabled" (upstream already dropped the create event and your own join). A leave says "saiu da conversa" (`bipe_dm_left`). DM details are titled "Informações da conversa". The room list menu, leave toast and spinner, mute errors and the media empty states say "conversa" in a DM.
+- Leaving a DM is final for that room. The SDK finds a DM only among joined rooms (`get_dm_rooms`), so if you start a chat again, Bipe creates a new room. The other person keeps the old room: they see "Você está sozinho nesta conversa" and can invite you back to it.
 - Android does the same (`BipeInviteToGroup` in libraries/bipe).
 
 ## Differences from Android (ADR 0031)

@@ -1439,4 +1439,22 @@ public enum BipeStrings {
     public static var dmInviteToGroupAlreadyMember: String { NSLocalizedString("bipe_dm_invite_to_group_already_member", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var dmLeaveBody: String { NSLocalizedString("bipe_dm_leave_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDetailsTitle: String { NSLocalizedString("bipe_dm_details_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func dmLeft(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_left", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmLeftByYou: String { NSLocalizedString("bipe_dm_left_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmLeaving: String { NSLocalizedString("bipe_dm_leaving", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmErrorMuting: String { NSLocalizedString("bipe_dm_error_muting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmErrorUnmuting: String { NSLocalizedString("bipe_dm_error_unmuting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmMediaEmpty: String { NSLocalizedString("bipe_dm_media_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmFilesEmpty: String { NSLocalizedString("bipe_dm_files_empty", tableName: "Bipe", bundle: .module, comment: "") }
 }
