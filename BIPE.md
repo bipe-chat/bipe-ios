@@ -186,6 +186,13 @@ Not done (needs the domain, Apple team or brand):
 
 - **Login stuck on "loading" after choosing a server:** check the app log for `TimedOut` on `/.well-known/matrix/client`. On 11 October 2026 the cause was the phone's Tailscale routing, not the app. Logs: `xcrun devicectl device copy from --device <UDID> --domain-type appGroupDataContainer --domain-identifier group.chat.bipe.dev --source Library/Logs/chat.bipe.app.dev/<file> --destination <local file>`.
 
+## DMs are DMs (16 Oct 2026)
+
+- A DM never turns into a group. DM details: no topic (`hasTopicSection`), no polls history, no "Convidar" to the DM. "Convidar para um grupo" opens `BipeInviteToGroupSheet` with your joined groups from `staticRoomSummaryProvider` (not DMs, spaces, replaced rooms or the self-chat) and invites the other person to the one you pick. The group's invite permission is checked at pick time.
+- The composer "+" menu has no poll in a DM (`ComposerToolbarViewState.isDM`).
+- Leave in a DM says "Sair da conversa" with `bipe_dm_leave_body`.
+- Android does the same (`BipeInviteToGroup` in libraries/bipe).
+
 ## Differences from Android (ADR 0031)
 
 Each line is a difference with its reason. A difference not listed here is a bug. The table is generated from `bipe-shared/product/parity.json` (ADR 0092): change it there, then run `node tools/parity.mjs --write` in bipe-shared. Android's list: `../bipe-android/BIPE.md`.

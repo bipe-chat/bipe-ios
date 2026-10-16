@@ -83,6 +83,8 @@ struct ComposerToolbarViewState: BindableState {
     
     var isRoomEncrypted: Bool
     var isLocationSharingEnabled: Bool
+    /// Bipe: DMs have no polls.
+    var isDM = false
     
     var keyCommands: [WysiwygKeyCommand] = []
     

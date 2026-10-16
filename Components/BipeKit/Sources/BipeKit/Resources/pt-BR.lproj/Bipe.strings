@@ -615,3 +615,8 @@
 "bipe_order_push_refused" = "%1$@ recusou seu pedido. Confira o motivo no Bipe.";
 "bipe_order_push_done" = "Pedido em %1$@ entregue.";
 "bipe_order_push_cancelled" = "Pedido em %1$@ cancelado.";
+"bipe_dm_invite_to_group" = "Convidar para um grupo";
+"bipe_dm_invite_to_group_empty" = "Você não está em nenhum grupo em que possa convidar pessoas.";
+"bipe_dm_invite_to_group_sent" = "Convite enviado";
+"bipe_dm_invite_to_group_already_member" = "Essa pessoa já está nesse grupo";
+"bipe_dm_leave_body" = "A conversa some da sua lista.";

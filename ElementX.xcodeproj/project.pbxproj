@@ -358,6 +358,7 @@
 		34357B287357BC0B9715DD51 /* UserAgentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F2529D434C750ED78ADF1ED /* UserAgentBuilder.swift */; };
 		34390DAE0C574DAD30CCA7D9 /* DeclineAndBlockScreenViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADF12A50186B75C68017B61 /* DeclineAndBlockScreenViewModelTests.swift */; };
 		34C752A73717C691582DC6C7 /* UnsupportedRoomTimelineItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B8500C152BC59445647DA8 /* UnsupportedRoomTimelineItem.swift */; };
+		34EFF140C7EE0322D0FED3A8 /* BipeInviteToGroupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD41A47DF13B76951FED98B2 /* BipeInviteToGroupSheet.swift */; };
 		34F1261CEF6D6A00D559B520 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CFD5EB0B0EEA4549FB49784 /* SettingsScreen.swift */; };
 		352C439BE0F75E101EF11FB1 /* RoomScreenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2886615BEBAE33A0AA4D5F8 /* RoomScreenModels.swift */; };
 		355B11D08CE0CEF97A813236 /* AppRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A9E3FBE8A66B5A17AD7F74 /* AppRoutes.swift */; };
@@ -2830,6 +2831,7 @@
 		AC9104846487244648D32C6D /* AudioPlayerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerProtocol.swift; sourceTree = "<group>"; };
 		AD0FF64B0E6470F66F42E182 /* EstimatedWaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EstimatedWaveformView.swift; sourceTree = "<group>"; };
 		AD3521DF92391551E02004D8 /* VoiceMessageMediaEventsTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMessageMediaEventsTimelineView.swift; sourceTree = "<group>"; };
+		AD41A47DF13B76951FED98B2 /* BipeInviteToGroupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeInviteToGroupSheet.swift; sourceTree = "<group>"; };
 		AD529C89924EE32CE307F36F /* VisualListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualListItem.swift; sourceTree = "<group>"; };
 		AD558A898847C179E4B7A237 /* SecureBackupKeyBackupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureBackupKeyBackupScreen.swift; sourceTree = "<group>"; };
 		AD6B522BD637845AB9570B10 /* RoomNotificationSettingsProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomNotificationSettingsProxy.swift; sourceTree = "<group>"; };
@@ -5066,6 +5068,7 @@
 		5DC032EC5F19009AA7CADB41 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				AD41A47DF13B76951FED98B2 /* BipeInviteToGroupSheet.swift */,
 				E1A5FEF17ED7E6176D922D4F /* RoomDetailsScreen.swift */,
 			);
 			path = View;
@@ -8973,6 +8976,7 @@
 				555F73B068AFF63CDDFBEDAC /* BipeHandleScreenViewModelProtocol.swift in Sources */,
 				B80E69FB5AF4635994437CE0 /* BipeInviteJoinNotifier.swift in Sources */,
 				D93B7D5AD1969C5997FC7C5F /* BipeInvitePairs.swift in Sources */,
+				34EFF140C7EE0322D0FED3A8 /* BipeInviteToGroupSheet.swift in Sources */,
 				43B2BED753230FDCC46701A1 /* BipeInviterGreeting.swift in Sources */,
 				102F8D7420F3928D1B35D2DF /* BipeInviterHint.swift in Sources */,
 				37F09F2FEDEA5DBAFC633868 /* BipeInviterRow.swift in Sources */,
