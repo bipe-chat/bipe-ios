@@ -39,6 +39,8 @@ public struct BipeAccountStatus: Decodable, Sendable, Equatable {
     public let emailPending: String?
     /// Waiting ones, and ones that ended in the last 7 days. Newest first.
     public let recoveries: [BipeRecovery]
+    /// The last legal version this account accepted (ADR 0113). Absent for accounts made before ADR 0113.
+    public let termsVersion: String?
 }
 
 /// Contract: `Recovery`.

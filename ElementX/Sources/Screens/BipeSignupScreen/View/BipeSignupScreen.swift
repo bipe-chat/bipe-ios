@@ -16,6 +16,7 @@ struct BipeSignupScreen: View {
     }
 
     @FocusState private var focusedField: Field?
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ScrollView {
@@ -143,10 +144,38 @@ struct BipeSignupScreen: View {
             }
             .disabled(context.viewState.isAccountCreated)
 
-            Button(L10n.actionContinue, action: continueStep)
-                .buttonStyle(.compound(.primary))
-                .disabled(!context.viewState.canContinueForm)
+            VStack(spacing: 20) {
+                termsCheckbox
+                    .disabled(context.viewState.isAccountCreated)
+
+                Button(L10n.actionContinue, action: continueStep)
+                    .buttonStyle(.compound(.primary))
+                    .disabled(!context.viewState.canContinueForm)
+            }
         }
+    }
+
+    /// Clickwrap (ADR 0113). The links open the pages; a tap anywhere else on the row toggles the box.
+    private var termsCheckbox: some View {
+        let isAccepted = context.isTermsAccepted
+        return HStack(alignment: .top, spacing: 12) {
+            CompoundIcon(isAccepted ? \.checkCircleSolid : \.circle)
+                .foregroundColor(isAccepted ? .compound.iconSuccessPrimary : .compound.borderInteractivePrimary)
+
+            Text(context.viewState.termsSentence)
+                .font(.compound.bodyMD)
+                .foregroundColor(.compound.textSecondary)
+                .tint(.compound.textLinkExternal)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { context.isTermsAccepted.toggle() }
+        // VoiceOver reads a real toggle with its state; the links become actions.
+        .accessibilityRepresentation {
+            Toggle(String(context.viewState.termsSentence.characters), isOn: $context.isTermsAccepted)
+        }
+        .accessibilityAction(named: BipeStrings.signupTermsLink) { openURL(context.viewState.termsURL) }
+        .accessibilityAction(named: BipeStrings.signupPrivacyLink) { openURL(context.viewState.privacyURL) }
     }
 
     private var inviteCodeField: some View {
@@ -268,14 +297,27 @@ struct BipeSignupScreen: View {
 // MARK: - Previews
 
 struct BipeSignupScreen_Previews: PreviewProvider {
-    static let viewModel = BipeSignupScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                     signIn: BipeAccountSignIn(authenticationService: AuthenticationService.mock, appSettings: .volatile()),
-                                                     appLockService: nil,
-                                                     userIndicatorController: UserIndicatorControllerMock())
+    static let viewModel = makeViewModel(isTermsAccepted: false)
+    static let termsAcceptedViewModel = makeViewModel(isTermsAccepted: true)
 
     static var previews: some View {
         ElementNavigationStack {
             BipeSignupScreen(context: viewModel.context)
         }
+        .previewDisplayName("Terms unticked")
+
+        ElementNavigationStack {
+            BipeSignupScreen(context: termsAcceptedViewModel.context)
+        }
+        .previewDisplayName("Terms ticked")
+    }
+
+    static func makeViewModel(isTermsAccepted: Bool) -> BipeSignupScreenViewModel {
+        let viewModel = BipeSignupScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
+                                                  signIn: BipeAccountSignIn(authenticationService: AuthenticationService.mock, appSettings: .volatile()),
+                                                  appLockService: nil,
+                                                  userIndicatorController: UserIndicatorControllerMock())
+        viewModel.context.isTermsAccepted = isTermsAccepted
+        return viewModel
     }
 }

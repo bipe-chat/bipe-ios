@@ -33,6 +33,9 @@ enum BipeSignupStep {
 }
 
 struct BipeSignupScreenViewState: BindableState {
+    /// The Termos de uso on the public site (ADR 0113).
+    let termsURL: URL
+    let privacyURL: URL
     var step = BipeSignupStep.form
     /// The fallback step shows the email field.
     var isFallbackEmailOpen = false
@@ -117,6 +120,15 @@ struct BipeSignupScreenViewState: BindableState {
             && !handleStatus.isBlocking
             && isInviteCodeAcceptable
             && inviteCodeError == nil
+            && bindings.isTermsAccepted
+    }
+
+    /// "Li e aceito os Termos de uso e a Política de privacidade." with both names as links.
+    var termsSentence: AttributedString {
+        var sentence = AttributedString(BipeStrings.signupTermsAccept("{terms}", "{privacy}"))
+        sentence.bipeReplaceLink("{terms}", title: BipeStrings.signupTermsLink, url: termsURL)
+        sentence.bipeReplaceLink("{privacy}", title: BipeStrings.signupPrivacyLink, url: privacyURL)
+        return sentence
     }
 
     var isPINValid: Bool {
@@ -140,6 +152,8 @@ struct BipeSignupScreenViewStateBindings {
     var pin = ""
     var pinConfirmation = ""
     var inviteCode = ""
+    /// The clickwrap checkbox (ADR 0113). Starts unticked; sign-up needs it ticked.
+    var isTermsAccepted = false
 
     var alertInfo: AlertInfo<BipeSignupScreenAlertType>?
 }

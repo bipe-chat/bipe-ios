@@ -39,6 +39,13 @@ public struct BipeAPIClient: Sendable {
         return response.challenge
     }
 
+    // MARK: - Terms (ADR 0113)
+
+    /// `POST /v1/me/terms`. Records that the person ticked the box for this version. `version` must be ``BipeRegistries/legalVersion``.
+    public func acceptTerms(version: String, accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "POST", path: ["v1", "me", "terms"], body: TermsAcceptance(termsVersion: version), accessToken: accessToken)
+    }
+
     // MARK: - Device-first accounts (ADR 0057, ADR 0059)
 
     /// `GET /v1/me/account`. PIN state, recovery email and the recoveries of the last 7 days.
@@ -298,6 +305,10 @@ public struct BipeAPIClient: Sendable {
         let handle: String
     }
 
+    private struct TermsAcceptance: Encodable {
+        let termsVersion: String
+    }
+
     private struct PINRequest: Encodable {
         let pin: String
     }
@@ -460,6 +471,8 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
     public let attestation: BipeAttestation?
     /// Same key on a retry: the same account (ADR 0094). From ``BipeCredentialStore/pendingSignup()``.
     public let signupKey: String?
+    /// The ``BipeRegistries/legalVersion`` the person accepted with the checkbox (ADR 0113). Without it the server answers `terms_required`.
+    public let termsVersion: String?
 
     public init(inviteCode: String? = nil,
                 email: String?,
@@ -468,8 +481,10 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
                 handle: String?,
                 displayName: String?,
                 attestation: BipeAttestation? = nil,
-                signupKey: String? = nil) {
+                signupKey: String? = nil,
+                termsVersion: String?) {
         self.signupKey = signupKey
+        self.termsVersion = termsVersion
         self.inviteCode = inviteCode
         self.email = email
         password = nil
@@ -510,6 +525,8 @@ public struct BipeAttestation: Encodable, Sendable, CustomStringConvertible {
 public struct BipeSignupConfig: Decodable, Sendable, Equatable {
     /// `true`: sign-up fails without a valid invite code. An app that cannot read the mode assumes `true`.
     public let inviteRequired: Bool
+    /// The current legal version (ADR 0113). Absent from a server older than ADR 0113.
+    public let termsVersion: String?
 }
 
 public struct BipeSignupResponse: Decodable, Sendable, CustomStringConvertible {
@@ -723,6 +740,8 @@ public enum BipeAPIErrorCode: String, Sendable {
     case pinNotSet = "pin_not_set"
     case recoveryInvalid = "recovery_invalid"
     case emailUnavailable = "email_unavailable"
+    /// 403. Reason `missing` or `outdated` (ADR 0113).
+    case termsRequired = "terms_required"
 }
 
 public enum BipeAPIError: Error, Sendable, Equatable {
@@ -775,6 +794,7 @@ public enum BipeAPIError: Error, Sendable, Equatable {
             case .pinNotSet: BipeStrings.pinCreateBody(String(BipeRegistries.pinLength))
             case .recoveryInvalid: BipeStrings.errorRecoveryInvalid
             case .emailUnavailable: BipeStrings.errorEmailUnavailable
+            case .termsRequired: BipeStrings.signupTermsRequired
             case .badRequest, .notFound, .internal: BipeStrings.errorGeneric
             }
         case .network:

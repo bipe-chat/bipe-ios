@@ -42,7 +42,9 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         self.userIndicatorController = userIndicatorController
         handleChecker = BipeHandleAvailabilityChecker(apiClient: apiClient)
 
-        var initialState = BipeSignupScreenViewState()
+        let site = signIn.appSettings.websiteURL
+        var initialState = BipeSignupScreenViewState(termsURL: BipeLegalLinks.termsURL(site: site),
+                                                     privacyURL: BipeLegalLinks.privacyURL(site: site))
         initialState.bindings.inviteCode = inviteCode?.value ?? ""
         super.init(initialViewState: initialState)
 
@@ -168,7 +170,8 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                                          handle: handle.isEmpty ? nil : handle,
                                          displayName: displayName.isEmpty ? nil : displayName,
                                          attestation: attestation,
-                                         signupKey: pending.key)
+                                         signupKey: pending.key,
+                                         termsVersion: state.bindings.isTermsAccepted ? BipeRegistries.legalVersion : nil)
             }
             MXLog.info("Bipe sign-up created \(response.userId)")
             guard let credentials = response.credentials else {
@@ -276,6 +279,9 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                 state.inviteCodeError = message
                 state.step = .form
                 return
+            case .termsRequired:
+                // The alert below says why; the form holds the checkbox.
+                state.step = .form
             default:
                 break
             }
