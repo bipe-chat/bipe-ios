@@ -44,6 +44,7 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
         super.init(initialViewState: BipeSettingsGroupScreenViewState(group: group,
                                                                       isBipeAccount: userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName,
                                                                       hideInviteAvatars: userSession.clientProxy.hideInviteAvatarsPublisher.value,
+                                                                      timelineMediaVisibility: userSession.clientProxy.timelineMediaVisibilityPublisher.value,
                                                                       bindings: .init(appSettings: appSettings)),
                    mediaProvider: userSession.mediaProvider)
 
@@ -73,6 +74,14 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
                     state.recoveryKeySet = recoveryState == .enabled
                     state.waysBack = BipeWaysBackReader.waysBack(status: state.accountStatus, clientProxy: clientProxy)
                 }
+                .store(in: &cancellables)
+        }
+        
+        if group == .chats {
+            userSession.clientProxy.timelineMediaVisibilityPublisher
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .weakAssign(to: \.state.timelineMediaVisibility, on: self)
                 .store(in: &cancellables)
         }
         
@@ -107,6 +116,8 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             removeExportFile()
         case .biometricUnlockChanged:
             Task { await updateBiometricUnlock(state.bindings.biometricUnlock) }
+        case .updateTimelineMediaVisibility(let value):
+            Task { await updateTimelineMediaVisibility(value) }
         }
     }
 
@@ -170,6 +181,19 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             }
         } else {
             appLockService.disableBiometricUnlock()
+        }
+    }
+    
+    // MARK: - Conversas e mídia
+    
+    private func updateTimelineMediaVisibility(_ value: TimelineMediaVisibility) async {
+        let previous = state.timelineMediaVisibility
+        state.timelineMediaVisibility = value
+        state.isWaitingTimelineMediaVisibility = true
+        defer { state.isWaitingTimelineMediaVisibility = false }
+        if case .failure = await clientProxy.setTimelineMediaVisibility(value) {
+            state.timelineMediaVisibility = previous
+            userIndicatorController.submitIndicator(UserIndicator(title: L10n.errorUnknown))
         }
     }
     
