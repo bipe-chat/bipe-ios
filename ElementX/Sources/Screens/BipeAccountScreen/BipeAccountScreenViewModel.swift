@@ -5,6 +5,7 @@
 //
 
 import BipeKit
+import Combine
 import LocalAuthentication
 import SwiftUI
 
@@ -19,7 +20,13 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let credentialStore = BipeCredentialStore.bipeApp
 
-    init(apiClient: BipeAPIClient,
+    private let actionsSubject: PassthroughSubject<BipeAccountScreenViewModelAction, Never> = .init()
+    var actionsPublisher: AnyPublisher<BipeAccountScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
+    }
+
+    init(mode: BipeAccountScreenMode,
+         apiClient: BipeAPIClient,
          clientProxy: ClientProxyProtocol,
          appLockService: AppLockServiceProtocol,
          userIndicatorController: UserIndicatorControllerProtocol) {
@@ -28,9 +35,13 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
         self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
 
-        super.init(initialViewState: BipeAccountScreenViewState())
+        super.init(initialViewState: BipeAccountScreenViewState(mode: mode))
 
-        Task { await load() }
+        Task {
+            await load()
+            // Bipe (ADR 0112): "Trocar senha" in Sua conta goes straight to the check and the form.
+            if mode == .pin { await verifyDeviceOwnerThenEditPIN() }
+        }
     }
 
     override func process(viewAction: BipeAccountScreenViewAction) {
@@ -121,7 +132,7 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             appLockService.bipeUseAccountPIN(pin)
             closePINForm()
             userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.pinChanged, icon: \.checkCircle))
-            await load()
+            actionsSubject.send(.done)
         } catch {
             MXLog.error("Bipe PIN save failed: \(error)")
             show(error)

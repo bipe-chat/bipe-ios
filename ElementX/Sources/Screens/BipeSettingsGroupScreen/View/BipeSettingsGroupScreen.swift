@@ -90,6 +90,21 @@ struct BipeSettingsGroupScreen: View {
         case .privacyExport:
             ListRow(label: .plain(title: row.title),
                     kind: .button { context.send(viewAction: .export) })
+        
+        case .accountWaysBackStatus:
+            waysBackCard
+        case .accountBiometricUnlock:
+            if let biometryName = context.viewState.biometryName {
+                ListRow(label: .plain(title: BipeStrings.accountBiometricUnlock(biometryName)),
+                        kind: .toggle($context.biometricUnlock))
+                    .onChange(of: context.biometricUnlock) { context.send(viewAction: .biometricUnlockChanged) }
+            }
+        case .accountEmail:
+            linkRow(row, value: context.viewState.accountStatus.map { $0.email ?? $0.emailPending ?? BipeStrings.accountEmailNone })
+        case .accountRecoveryKey:
+            linkRow(row, value: context.viewState.recoveryKeySet ? BipeStrings.accountRecoveryKeySaved : BipeStrings.accountRecoveryKeyMissing)
+        case .accountThisDevice:
+            infoRow(row, value: UIDevice.current.name)
         default:
             switch row.kind {
             case .url:
@@ -105,6 +120,41 @@ struct BipeSettingsGroupScreen: View {
         }
     }
 
+    @ViewBuilder
+    private var waysBackCard: some View {
+        if let waysBack = context.viewState.waysBack {
+            ListRow(kind: .custom {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 8) {
+                        if waysBack.needsWarning {
+                            CompoundIcon(\.warning)
+                                .foregroundStyle(.compound.iconCriticalPrimary)
+                                .accessibilityHidden(true)
+                        } else {
+                            CompoundIcon(\.checkCircleSolid)
+                                .foregroundStyle(.compound.iconSuccessPrimary)
+                                .accessibilityHidden(true)
+                        }
+                        Text(waysBack.cardTitle)
+                            .font(.compound.bodyLGSemibold)
+                            .foregroundStyle(.compound.textPrimary)
+                    }
+                    if let warning = waysBack.cardWarning {
+                        Text(warning)
+                            .font(.compound.bodyMD)
+                            .foregroundStyle(.compound.textCriticalPrimary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, ListRowPadding.horizontal)
+                .padding(.vertical, 12)
+                .accessibilityElement(children: .combine)
+            })
+        } else {
+            ListRow(label: .plain(title: L10n.commonLoading), kind: .label)
+        }
+    }
+    
     private func infoRow(_ row: BipeSettingsRow, value: String?) -> some View {
         ListRow(label: .plain(title: row.title),
                 details: value.map { .title($0) },

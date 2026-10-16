@@ -34,6 +34,14 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     var phoneLinked: Bool?
     var isWaitingDiscoverable = false
     
+    // MARK: Sua conta
+    
+    var accountStatus: BipeAccountStatus?
+    var waysBack: BipeWaysBack?
+    var recoveryKeySet = false
+    /// "Desbloquear com Face ID / Touch ID": shown when the phone has biometrics and the app lock is on.
+    var biometryName: String?
+    
     var bindings: BipeSettingsGroupScreenViewStateBindings
 
     /// The registry sections, cut into Form sections so that a row footer sits right under its row.
@@ -56,6 +64,7 @@ struct BipeSettingsGroupScreenViewStateBindings {
     var discoverableByPhone = false
     /// "Baixar meus dados": the file to share.
     var exportFileURL: URL?
+    var biometricUnlock = false
     
     /// "Online e digitando": Element's share-presence setting.
     var sharePresence: Bool {
@@ -80,6 +89,7 @@ enum BipeSettingsGroupScreenViewAction {
     case discoverableChanged
     case export
     case exportClosed
+    case biometricUnlockChanged
 }
 
 /// One Form section: the registry section's title on the first block, a row footer or the section footer on the last.

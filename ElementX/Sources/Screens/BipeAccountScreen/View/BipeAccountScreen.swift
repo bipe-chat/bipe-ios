@@ -13,15 +13,19 @@ struct BipeAccountScreen: View {
 
     var body: some View {
         Form {
-            if context.viewState.isEditingPIN {
-                pinFormSections
-            } else {
-                pinSection
+            switch context.viewState.mode {
+            case .pin:
+                if context.viewState.isEditingPIN {
+                    pinFormSections
+                } else {
+                    pinSection
+                }
+            case .email:
                 emailSection
             }
         }
         .compoundList()
-        .navigationTitle(BipeStrings.pinChangeTitle)
+        .navigationTitle(context.viewState.title)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
         .onChange(of: context.pin) { context.send(viewAction: .pinChanged) }
@@ -137,7 +141,8 @@ struct BipeAccountScreen: View {
 // MARK: - Previews
 
 struct BipeAccountScreen_Previews: PreviewProvider {
-    static let viewModel = BipeAccountScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
+    static let viewModel = BipeAccountScreenViewModel(mode: .email,
+                                                      apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
                                                       clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
                                                       appLockService: AppLockServiceMock.mock(),
                                                       userIndicatorController: UserIndicatorControllerMock())

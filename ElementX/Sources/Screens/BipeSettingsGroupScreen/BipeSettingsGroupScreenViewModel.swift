@@ -6,6 +6,7 @@
 
 import BipeKit
 import Combine
+import LocalAuthentication
 import SwiftUI
 
 typealias BipeSettingsGroupScreenViewModelType = StateStoreViewModelV2<BipeSettingsGroupScreenViewState, BipeSettingsGroupScreenViewAction>
@@ -61,6 +62,20 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             .sink { [weak self] profile in self?.state.displayName = profile.displayName }
             .store(in: &cancellables)
         
+        if group == .account {
+            state.biometryName = appLockService.isEnabled && appLockService.biometryType != .none ? appLockService.biometryType.localizedString : nil
+            state.bindings.biometricUnlock = appLockService.biometricUnlockEnabled
+            
+            userSession.clientProxy.secureBackupController.recoveryState
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] recoveryState in
+                    guard let self else { return }
+                    state.recoveryKeySet = recoveryState == .enabled
+                    state.waysBack = BipeWaysBackReader.waysBack(status: state.accountStatus, clientProxy: clientProxy)
+                }
+                .store(in: &cancellables)
+        }
+        
         if group == .privacy {
             userSession.clientProxy.hideInviteAvatarsPublisher
                 .removeDuplicates()
@@ -90,17 +105,20 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             Task { await exportData() }
         case .exportClosed:
             removeExportFile()
+        case .biometricUnlockChanged:
+            Task { await updateBiometricUnlock(state.bindings.biometricUnlock) }
         }
     }
 
     private func reload() {
-        guard state.isBipeAccount else { return }
         switch state.group {
-        case .profile:
+        case .profile where state.isBipeAccount:
             Task { await loadProfile() }
-        case .privacy:
+        case .privacy where state.isBipeAccount:
             Task { await loadPrivacy() }
-        case .account, .notifications, .chats, .help:
+        case .account:
+            Task { await loadAccount() }
+        default:
             break
         }
     }
@@ -124,6 +142,37 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
         }
     }
 
+    // MARK: - Sua conta
+    
+    private func loadAccount() async {
+        guard state.isBipeAccount else {
+            state.waysBack = BipeWaysBackReader.waysBack(status: nil, clientProxy: clientProxy)
+            return
+        }
+        let result = await BipeWaysBackReader.load(apiClient: apiClient, clientProxy: clientProxy)
+        state.accountStatus = result.status
+        state.waysBack = result.waysBack
+    }
+    
+    /// Same steps as Element's app lock settings: Face ID needs one unlock to confirm.
+    private func updateBiometricUnlock(_ enabled: Bool) async {
+        guard enabled != appLockService.biometricUnlockEnabled else { return }
+        if enabled {
+            guard case .success = appLockService.enableBiometricUnlock() else {
+                MXLog.error("Enabling biometric unlock failed.")
+                state.bindings.biometricUnlock = false
+                return
+            }
+            if appLockService.biometryType == .faceID, await appLockService.unlockWithBiometrics() != .unlocked {
+                MXLog.info("Biometric unlock not confirmed. Disabling it.")
+                appLockService.disableBiometricUnlock()
+                state.bindings.biometricUnlock = false
+            }
+        } else {
+            appLockService.disableBiometricUnlock()
+        }
+    }
+    
     // MARK: - Privacidade
     
     private func loadPrivacy() async {
