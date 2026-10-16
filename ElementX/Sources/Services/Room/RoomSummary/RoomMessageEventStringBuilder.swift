@@ -25,7 +25,7 @@ nonisolated struct RoomMessageEventStringBuilder {
     let attributedStringBuilder: AttributedStringBuilderProtocol
     let style: Style
     
-    func buildAttributedString(for messageType: MessageType, senderDisplayName: String, isOutgoing: Bool) -> AttributedString {
+    func buildAttributedString(for messageType: MessageType, senderDisplayName: String, isOutgoing: Bool, shouldPrefixSender: Bool = true) -> AttributedString {
         let message: AttributedString
         switch messageType {
         case .emote(content: let content):
@@ -71,20 +71,20 @@ nonisolated struct RoomMessageEventStringBuilder {
             message = AttributedString(body)
         }
         
-        if style == .senderPrefixed {
+        if style == .senderPrefixed, shouldPrefixSender {
             return prefix(message, with: isOutgoing ? L10n.commonYou : senderDisplayName)
         } else {
             return message
         }
     }
     
-    func buildAttributedStringForLiveLocation(senderDisplayName: String, isOutgoing: Bool) -> AttributedString {
+    func buildAttributedStringForLiveLocation(senderDisplayName: String, isOutgoing: Bool, shouldPrefixSender: Bool = true) -> AttributedString {
         var message = AttributedString(L10n.commonSharedLiveLocation)
         if style == .typeBolded {
             message.bold()
         }
         
-        if style == .senderPrefixed {
+        if style == .senderPrefixed, shouldPrefixSender {
             return prefix(message, with: isOutgoing ? L10n.commonYou : senderDisplayName)
         } else {
             return message
