@@ -586,6 +586,12 @@ public enum BipeStrings {
 
     public static var signupTermsRequired: String { NSLocalizedString("bipe_signup_terms_required", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var termsReacceptTitle: String { NSLocalizedString("bipe_terms_reaccept_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var termsReacceptBody: String { NSLocalizedString("bipe_terms_reaccept_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var termsReacceptFailed: String { NSLocalizedString("bipe_terms_reaccept_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var pinCreateTitle: String { NSLocalizedString("bipe_pin_create_title", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static func pinCreateBody(_ p1: String) -> String {

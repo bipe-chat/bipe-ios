@@ -16,7 +16,6 @@ struct BipeSignupScreen: View {
     }
 
     @FocusState private var focusedField: Field?
-    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ScrollView {
@@ -145,7 +144,9 @@ struct BipeSignupScreen: View {
             .disabled(context.viewState.isAccountCreated)
 
             VStack(spacing: 20) {
-                termsCheckbox
+                BipeTermsCheckbox(isAccepted: $context.isTermsAccepted,
+                                  termsURL: context.viewState.termsURL,
+                                  privacyURL: context.viewState.privacyURL)
                     .disabled(context.viewState.isAccountCreated)
 
                 Button(L10n.actionContinue, action: continueStep)
@@ -153,33 +154,6 @@ struct BipeSignupScreen: View {
                     .disabled(!context.viewState.canContinueForm)
             }
         }
-    }
-
-    /// Clickwrap (ADR 0113). Only the box toggles: a tap gesture on the row would swallow the link taps in the text.
-    private var termsCheckbox: some View {
-        let isAccepted = context.isTermsAccepted
-        return HStack(alignment: .top, spacing: 12) {
-            Button { context.isTermsAccepted.toggle() } label: {
-                CompoundIcon(isAccepted ? \.checkCircleSolid : \.circle)
-                    .foregroundColor(isAccepted ? .compound.iconSuccessPrimary : .compound.borderInteractivePrimary)
-                    .padding(10)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .padding(-10)
-
-            Text(context.viewState.termsSentence)
-                .font(.compound.bodyMD)
-                .foregroundColor(.compound.textSecondary)
-                .tint(.compound.textLinkExternal)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        // VoiceOver reads a real toggle with its state; the links become actions.
-        .accessibilityRepresentation {
-            Toggle(String(context.viewState.termsSentence.characters), isOn: $context.isTermsAccepted)
-        }
-        .accessibilityAction(named: BipeStrings.signupTermsLink) { openURL(context.viewState.termsURL) }
-        .accessibilityAction(named: BipeStrings.signupPrivacyLink) { openURL(context.viewState.privacyURL) }
     }
 
     private var inviteCodeField: some View {

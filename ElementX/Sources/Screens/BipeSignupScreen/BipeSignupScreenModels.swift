@@ -123,14 +123,6 @@ struct BipeSignupScreenViewState: BindableState {
             && bindings.isTermsAccepted
     }
 
-    /// "Li e aceito os Termos de uso e a Política de privacidade." with both names as links.
-    var termsSentence: AttributedString {
-        var sentence = AttributedString(BipeStrings.signupTermsAccept("{terms}", "{privacy}"))
-        sentence.bipeReplaceLink("{terms}", title: BipeStrings.signupTermsLink, url: termsURL)
-        sentence.bipeReplaceLink("{privacy}", title: BipeStrings.signupPrivacyLink, url: privacyURL)
-        return sentence
-    }
-
     var isPINValid: Bool {
         BipePIN.problem(for: bindings.pin) == nil && bindings.pin == bindings.pinConfirmation
     }

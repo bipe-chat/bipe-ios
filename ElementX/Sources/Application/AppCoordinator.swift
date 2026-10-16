@@ -772,7 +772,11 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             bipeRecoveryAlerts = BipeRecoveryAlerts(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
                                                     clientProxy: userSession.clientProxy,
                                                     navigationRootCoordinator: navigationRootCoordinator,
-                                                    userIndicatorController: userIndicatorController)
+                                                    userIndicatorController: userIndicatorController) { [weak self] in
+                self?.userSessionFlowCoordinator?.presentBipeTermsReacceptScreen { [weak self] in
+                    Task { await self?.bipeRecoveryAlerts?.check() }
+                }
+            }
             Task { await bipeRecoveryAlerts?.check() }
             Task { await refreshBipeHandleChangesAfterSync(clientProxy: userSession.clientProxy) }
         }

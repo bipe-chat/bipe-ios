@@ -10,6 +10,7 @@ import SwiftUI
 /// The old-device side of recovery (ADR 0057, ADR 0059, security.md rule 6). Reads `GET /v1/me/account` when the
 /// app comes to the foreground and shows each waiting recovery with a cancel button, and each completed token
 /// recovery once as a notice. A recovery the user answered "It was me" to does not show again on this device.
+/// The same read asks for the terms again when the account's version is not the current one (ADR 0113).
 @MainActor
 final class BipeRecoveryAlerts {
     private let apiClient: BipeAPIClient
@@ -17,6 +18,8 @@ final class BipeRecoveryAlerts {
     private let navigationRootCoordinator: NavigationRootCoordinator
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let defaults: UserDefaults
+    /// Shows the terms re-accept screen. Only after a successful read: the server is the authority, so errors fail open.
+    private let onTermsOutdated: () -> Void
 
     private var isChecking = false
     /// IDs shown in this run, so a foreground event during an open alert does not stack a second one.
@@ -28,12 +31,14 @@ final class BipeRecoveryAlerts {
          clientProxy: ClientProxyProtocol,
          navigationRootCoordinator: NavigationRootCoordinator,
          userIndicatorController: UserIndicatorControllerProtocol,
-         defaults: UserDefaults = .standard) {
+         defaults: UserDefaults = .standard,
+         onTermsOutdated: @escaping () -> Void) {
         self.apiClient = apiClient
         self.clientProxy = clientProxy
         self.navigationRootCoordinator = navigationRootCoordinator
         self.userIndicatorController = userIndicatorController
         self.defaults = defaults
+        self.onTermsOutdated = onTermsOutdated
     }
 
     /// This device redeemed a token. Its own completed token recovery must not alert it.
@@ -63,6 +68,13 @@ final class BipeRecoveryAlerts {
             acknowledged = (acknowledged ?? []).union(completedTokens)
             setAcknowledgedIDs(acknowledged ?? [])
             defaults.removeObject(forKey: Self.acknowledgeTokenRecoveriesKey)
+        }
+
+        // No version (an account from before ADR 0113) counts as outdated. The screen covers the app and an alert
+        // cannot show over it, so recovery alerts wait: acceptance runs this check again.
+        if status.termsVersion != BipeRegistries.legalVersion {
+            onTermsOutdated()
+            return
         }
 
         let next = status.recoveries.first { recovery in
