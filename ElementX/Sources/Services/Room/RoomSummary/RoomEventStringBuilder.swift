@@ -20,21 +20,24 @@ nonisolated struct RoomEventStringBuilder {
                               isOutgoing: eventItemProxy.isOwn)
     }
     
-    func buildAttributedString(for content: TimelineItemContent, sender: TimelineItemSender, isOutgoing: Bool) -> AttributedString? {
+    /// In a DM the room name is already the other person's name, so `isDM` drops the prefix
+    /// for their events and keeps "You" for your own.
+    func buildAttributedString(for content: TimelineItemContent, sender: TimelineItemSender, isOutgoing: Bool, isDM: Bool = false) -> AttributedString? {
         let displayName = sender.disambiguatedDisplayName ?? sender.id
+        let shouldPrefixSender = isOutgoing || !isDM
         
         switch content {
         case .msgLike(let messageLikeContent):
             switch messageLikeContent.kind {
             case .message(let messageContent):
-                return messageEventStringBuilder.buildAttributedString(for: messageContent.msgType, senderDisplayName: displayName, isOutgoing: isOutgoing)
+                return messageEventStringBuilder.buildAttributedString(for: messageContent.msgType, senderDisplayName: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .sticker:
                 if messageEventStringBuilder.style == .typeBolded {
                     var string = AttributedString(L10n.commonSticker)
                     string.bold()
                     return string
                 }
-                return prefix(L10n.commonSticker, with: displayName, isOutgoing: isOutgoing)
+                return prefix(L10n.commonSticker, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .poll(let question, _, _, _, _, _, _):
                 if messageEventStringBuilder.style == .typeBolded {
                     let questionPlaceholder = "{question}"
@@ -44,9 +47,9 @@ nonisolated struct RoomEventStringBuilder {
                     finalString.replace(questionPlaceholder, with: normalString)
                     return finalString
                 }
-                return prefix(L10n.commonPollSummary(question), with: displayName, isOutgoing: isOutgoing)
+                return prefix(L10n.commonPollSummary(question), with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .redacted:
-                return prefix(L10n.commonMessageRemoved, with: displayName, isOutgoing: isOutgoing)
+                return prefix(L10n.commonMessageRemoved, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .unableToDecrypt(let encryptedMessage):
                 let errorMessage = switch encryptedMessage {
                 case .megolmV1AesSha2(_, .sentBeforeWeJoined): L10n.commonUnableToDecryptNoAccess
@@ -54,14 +57,14 @@ nonisolated struct RoomEventStringBuilder {
                 case .megolmV1AesSha2(_, .unknownDevice), .megolmV1AesSha2(_, .unsignedDevice): L10n.commonUnableToDecryptInsecureDevice
                 default: L10n.commonWaitingForDecryptionKey
                 }
-                return prefix(errorMessage, with: displayName, isOutgoing: isOutgoing)
+                return prefix(errorMessage, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .liveLocation:
-                return messageEventStringBuilder.buildAttributedStringForLiveLocation(senderDisplayName: displayName, isOutgoing: isOutgoing)
+                return messageEventStringBuilder.buildAttributedStringForLiveLocation(senderDisplayName: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .other:
                 return nil // We shouldn't receive these without asking for custom event types.
             }
         case .failedToParseMessageLike, .failedToParseState:
-            return prefix(L10n.commonUnsupportedEvent, with: displayName, isOutgoing: isOutgoing)
+            return prefix(L10n.commonUnsupportedEvent, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
         case .state(_, let state):
             return stateEventStringBuilder
                 .buildString(for: state, sender: sender, isOutgoing: isOutgoing)
@@ -81,14 +84,14 @@ nonisolated struct RoomEventStringBuilder {
                                           memberIsYou: isOutgoing)
                 .map(AttributedString.init)
         case .callInvite:
-            return prefix(L10n.commonUnsupportedCall, with: displayName, isOutgoing: isOutgoing)
+            return prefix(L10n.commonUnsupportedCall, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
         case .rtcNotification:
-            return prefix(L10n.commonCallStarted, with: displayName, isOutgoing: isOutgoing)
+            return prefix(L10n.commonCallStarted, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
         }
     }
     
-    private func prefix(_ eventSummary: String, with senderDisplayName: String, isOutgoing: Bool) -> AttributedString {
-        guard shouldPrefixSenderName else {
+    private func prefix(_ eventSummary: String, with senderDisplayName: String, isOutgoing: Bool, shouldPrefixSender: Bool) -> AttributedString {
+        guard shouldPrefixSenderName, shouldPrefixSender else {
             return AttributedString(eventSummary)
         }
         let attributedEventSummary = AttributedString(eventSummary.trimmingCharacters(in: .whitespacesAndNewlines))
