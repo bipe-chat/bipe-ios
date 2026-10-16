@@ -38,8 +38,19 @@ struct BipeSettingsGroupScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
         .onAppear { context.send(viewAction: .reload) }
+        .sheet(isPresented: isShowingExport, onDismiss: { context.send(viewAction: .exportClosed) }) {
+            if let url = context.viewState.bindings.exportFileURL {
+                AppActivityView(activityItems: [url])
+                    .presentationDetents([.medium, .large])
+            }
+        }
     }
 
+    private var isShowingExport: Binding<Bool> {
+        Binding(get: { context.viewState.bindings.exportFileURL != nil },
+                set: { if !$0 { context.exportFileURL = nil } })
+    }
+    
     // MARK: - Rows
 
     @ViewBuilder
@@ -51,6 +62,34 @@ struct BipeSettingsGroupScreen: View {
             linkRow(row, value: context.viewState.handle.map { "@\($0)" } ?? BipeStrings.settingsHandleNone)
         case .profilePublicProfile:
             linkRow(row, value: context.viewState.publicProfileEnabled.map { $0 ? BipeStrings.publicProfileOn : BipeStrings.publicProfileOff })
+        
+        case .privacyMessaging:
+            linkRow(row, value: context.viewState.whoCanMessage?.title)
+        case .privacyRequestPhotos:
+            ListRow(label: .plain(title: row.title),
+                    details: context.viewState.isWaitingHideInviteAvatars ? .isWaiting(true) : nil,
+                    kind: .toggle(Binding(get: { context.viewState.hideInviteAvatars },
+                                          set: { context.send(viewAction: .updateHideInviteAvatars($0)) })))
+                .disabled(context.viewState.isWaitingHideInviteAvatars)
+        case .privacyBlocked:
+            linkRow(row, value: context.viewState.blockedCount.map { $0 == 0 ? BipeStrings.privacyBlockedNone : String($0) })
+        case .privacyNumber:
+            infoRow(row, value: context.viewState.phoneLinked.map { $0 ? BipeStrings.privacyNumberLinked : BipeStrings.privacyNumberNotLinked })
+        case .privacyDiscovery:
+            ListRow(label: .plain(title: row.title),
+                    details: context.viewState.isWaitingDiscoverable ? .isWaiting(true) : nil,
+                    kind: .toggle($context.discoverableByPhone))
+                .disabled(context.viewState.isWaitingDiscoverable)
+                .onChange(of: context.discoverableByPhone) { context.send(viewAction: .discoverableChanged) }
+        case .privacyPresence:
+            ListRow(label: .plain(title: row.title),
+                    kind: .toggle($context.sharePresence))
+        case .privacyReadReceipts:
+            // ADR 0050: always on. A row with no switch, so people learn the rule where they look for it.
+            infoRow(row, value: BipeStrings.privacyReadReceiptsValue)
+        case .privacyExport:
+            ListRow(label: .plain(title: row.title),
+                    kind: .button { context.send(viewAction: .export) })
         default:
             switch row.kind {
             case .url:
@@ -66,6 +105,12 @@ struct BipeSettingsGroupScreen: View {
         }
     }
 
+    private func infoRow(_ row: BipeSettingsRow, value: String?) -> some View {
+        ListRow(label: .plain(title: row.title),
+                details: value.map { .title($0) },
+                kind: .label)
+    }
+    
     private func linkRow(_ row: BipeSettingsRow, value: String?) -> some View {
         ListRow(label: .plain(title: row.title),
                 details: value.map { .title($0) },
