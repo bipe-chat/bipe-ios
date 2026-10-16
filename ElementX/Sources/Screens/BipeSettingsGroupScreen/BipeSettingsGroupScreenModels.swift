@@ -57,7 +57,8 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     }
 
     private func isShown(_ row: BipeSettingsRow) -> Bool {
-        isBipeAccount || !row.needsBipeAccount
+        if row == .accountBiometricUnlock, biometryName == nil { return false }
+        return isBipeAccount || !row.needsBipeAccount
     }
 }
 
