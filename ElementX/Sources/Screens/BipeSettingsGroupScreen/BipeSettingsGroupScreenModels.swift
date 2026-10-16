@@ -24,8 +24,17 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     var displayName: String?
     var handle: String?
     var publicProfileEnabled: Bool?
-
-    var bindings = BipeSettingsGroupScreenViewStateBindings()
+    
+    // MARK: Privacidade
+    
+    var whoCanMessage: BipeWhoCanMessage?
+    var hideInviteAvatars = false
+    var isWaitingHideInviteAvatars = false
+    var blockedCount: Int?
+    var phoneLinked: Bool?
+    var isWaitingDiscoverable = false
+    
+    var bindings: BipeSettingsGroupScreenViewStateBindings
 
     /// The registry sections, cut into Form sections so that a row footer sits right under its row.
     var blocks: [BipeSettingsBlock] {
@@ -40,7 +49,23 @@ struct BipeSettingsGroupScreenViewState: BindableState {
 }
 
 struct BipeSettingsGroupScreenViewStateBindings {
+    private let appSettings: AppSettings
+    
     var alertInfo: AlertInfo<BipeSettingsGroupScreenAlertType>?
+    /// "Quem tem meu número pode me encontrar". Saved on change.
+    var discoverableByPhone = false
+    /// "Baixar meus dados": the file to share.
+    var exportFileURL: URL?
+    
+    /// "Online e digitando": Element's share-presence setting.
+    var sharePresence: Bool {
+        get { appSettings.sharePresence }
+        set { appSettings.sharePresence = newValue }
+    }
+    
+    init(appSettings: AppSettings) {
+        self.appSettings = appSettings
+    }
 }
 
 enum BipeSettingsGroupScreenAlertType: Hashable {
@@ -51,6 +76,10 @@ enum BipeSettingsGroupScreenViewAction {
     /// The screen appeared: first show, or back from a pushed screen that may have changed a value.
     case reload
     case open(BipeSettingsRow)
+    case updateHideInviteAvatars(Bool)
+    case discoverableChanged
+    case export
+    case exportClosed
 }
 
 /// One Form section: the registry section's title on the first block, a row footer or the section footer on the last.

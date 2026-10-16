@@ -245,6 +245,16 @@ public struct BipeAPIClient: Sendable {
         try await send(method: "DELETE", path: ["v1", "me", "profile", "photo"], body: Empty?.none, accessToken: accessToken)
     }
 
+    // MARK: - Data export (LGPD art. 18, ADR 0112, bipe#364)
+
+    /// `GET /v1/me/export`. The server data of the caller as one JSON file. Messages stay on the device and are not in it.
+    /// `rate_limited` (429) when asked too often.
+    public func exportMyData(accessToken: String) async throws(BipeAPIError) -> BipeDataExport {
+        let (data, response) = try await perform(method: "GET", path: ["v1", "me", "export"], rawBody: nil, accessToken: accessToken)
+        let filename = BipeDataExport.filename(contentDisposition: response.value(forHTTPHeaderField: "Content-Disposition"))
+        return BipeDataExport(data: data, filename: filename)
+    }
+
     // MARK: - Auth
 
     /// Runs `request` with the token from `accessToken`. On HTTP 401 it reads the token again and retries once,
@@ -376,10 +386,11 @@ public struct BipeAPIClient: Sendable {
         return try await send(method: method, path: path, rawBody: rawBody, accessToken: accessToken)
     }
 
-    private func send<Response: Decodable>(method: String,
-                                           path: [String],
-                                           rawBody: (data: Data, contentType: String)?,
-                                           accessToken: String? = nil) async throws(BipeAPIError) -> Response {
+    /// Sends the request and returns the body of a 2xx answer. Other answers throw the contract's error.
+    private func perform(method: String,
+                         path: [String],
+                         rawBody: (data: Data, contentType: String)?,
+                         accessToken: String?) async throws(BipeAPIError) -> (Data, HTTPURLResponse) {
         // appending(path:) percent-encodes each component, so a handle cannot add path segments.
         let url = path.reduce(baseURL) { $0.appending(path: $1, directoryHint: .notDirectory) }
         var request = URLRequest(url: url)
@@ -414,6 +425,15 @@ public struct BipeAPIClient: Sendable {
             }
             throw .unexpectedResponse(statusCode: httpResponse.statusCode)
         }
+
+        return (data, httpResponse)
+    }
+
+    private func send<Response: Decodable>(method: String,
+                                           path: [String],
+                                           rawBody: (data: Data, contentType: String)?,
+                                           accessToken: String? = nil) async throws(BipeAPIError) -> Response {
+        let (data, httpResponse) = try await perform(method: method, path: path, rawBody: rawBody, accessToken: accessToken)
 
         // 204, and 202 without a body.
         if httpResponse.statusCode == 204 || data.isEmpty, let noContent = NoContent() as? Response {

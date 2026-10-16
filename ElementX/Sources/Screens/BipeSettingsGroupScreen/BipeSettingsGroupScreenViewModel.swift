@@ -41,7 +41,9 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
 
         let appSettings = userSession.userSettings.app
         super.init(initialViewState: BipeSettingsGroupScreenViewState(group: group,
-                                                                      isBipeAccount: userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName),
+                                                                      isBipeAccount: userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName,
+                                                                      hideInviteAvatars: userSession.clientProxy.hideInviteAvatarsPublisher.value,
+                                                                      bindings: .init(appSettings: appSettings)),
                    mediaProvider: userSession.mediaProvider)
 
         appSettings.linkNewDeviceEnabledPublisher
@@ -58,6 +60,20 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             .receive(on: DispatchQueue.main)
             .sink { [weak self] profile in self?.state.displayName = profile.displayName }
             .store(in: &cancellables)
+        
+        if group == .privacy {
+            userSession.clientProxy.hideInviteAvatarsPublisher
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .weakAssign(to: \.state.hideInviteAvatars, on: self)
+                .store(in: &cancellables)
+            
+            userSession.clientProxy.ignoredUsersPublisher
+                .receive(on: DispatchQueue.main)
+                .map { $0?.count ?? 0 }
+                .weakAssign(to: \.state.blockedCount, on: self)
+                .store(in: &cancellables)
+        }
     }
 
     override func process(viewAction: BipeSettingsGroupScreenViewAction) {
@@ -66,6 +82,14 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             reload()
         case .open(let row):
             actionsSubject.send(.open(row))
+        case .updateHideInviteAvatars(let value):
+            Task { await updateHideInviteAvatars(value) }
+        case .discoverableChanged:
+            Task { await saveDiscoverable(state.bindings.discoverableByPhone) }
+        case .export:
+            Task { await exportData() }
+        case .exportClosed:
+            removeExportFile()
         }
     }
 
@@ -74,7 +98,9 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
         switch state.group {
         case .profile:
             Task { await loadProfile() }
-        case .privacy, .account, .notifications, .chats, .help:
+        case .privacy:
+            Task { await loadPrivacy() }
+        case .account, .notifications, .chats, .help:
             break
         }
     }
@@ -98,8 +124,108 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
         }
     }
 
+    // MARK: - Privacidade
+    
+    private func loadPrivacy() async {
+        do {
+            state.whoCanMessage = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeWhoCanMessage in
+                try await apiClient.messagingSetting(accessToken: token)
+            }
+        } catch {
+            MXLog.error("Bipe messaging setting load failed: \(error)")
+        }
+        do {
+            let phone = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeMyPhone in
+                try await apiClient.myPhone(accessToken: token)
+            }
+            state.phoneLinked = phone.linked
+            savedDiscoverable = phone.discoverableByPhone
+            state.bindings.discoverableByPhone = phone.discoverableByPhone
+        } catch {
+            MXLog.error("Bipe phone status load failed: \(error)")
+        }
+    }
+    
+    private var savedDiscoverable = false
+    
+    private func saveDiscoverable(_ value: Bool) async {
+        guard value != savedDiscoverable, !state.isWaitingDiscoverable else { return }
+        state.isWaitingDiscoverable = true
+        defer { state.isWaitingDiscoverable = false }
+        do {
+            try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) in
+                try await apiClient.setDiscoverableByPhone(value, accessToken: token)
+            }
+            savedDiscoverable = value
+        } catch {
+            MXLog.error("Bipe discovery setting failed: \(error)")
+            state.bindings.discoverableByPhone = savedDiscoverable
+            showError(error.localizedMessage)
+        }
+    }
+    
+    private func updateHideInviteAvatars(_ value: Bool) async {
+        let previous = state.hideInviteAvatars
+        state.hideInviteAvatars = value
+        state.isWaitingHideInviteAvatars = true
+        defer { state.isWaitingHideInviteAvatars = false }
+        if case .failure = await clientProxy.setHideInviteAvatars(value) {
+            state.hideInviteAvatars = previous
+            userIndicatorController.submitIndicator(UserIndicator(title: L10n.errorUnknown))
+        }
+    }
+    
+    /// LGPD art. 18 (bipe#364): device owner check, `GET /v1/me/export`, then the share sheet.
+    private func exportData() async {
+        guard await appLockService.verifyDeviceOwner(reason: BipeStrings.privacyExportBiometric) == .verified else {
+            MXLog.info("Bipe data export: device owner check not passed")
+            return
+        }
+        
+        let indicatorID = "\(Self.self)-Export"
+        userIndicatorController.submitIndicator(UserIndicator(id: indicatorID, type: .modal, title: L10n.commonLoading, persistent: true))
+        defer { userIndicatorController.retractIndicatorWithId(indicatorID) }
+        
+        do {
+            let export = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeDataExport in
+                try await apiClient.exportMyData(accessToken: token)
+            }
+            let directory = URL.temporaryDirectory.appending(path: "BipeExport", directoryHint: .isDirectory)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let fileURL = directory.appending(path: export.filename, directoryHint: .notDirectory)
+            try export.data.write(to: fileURL, options: [.atomic, .completeFileProtection])
+            exportedFile = fileURL
+            state.bindings.exportFileURL = fileURL
+        } catch let error as BipeAPIError {
+            MXLog.error("Bipe data export failed: \(error)")
+            if case .server(.rateLimited, _, _) = error {
+                showError(BipeStrings.errorRateLimited)
+            } else {
+                showError(BipeStrings.privacyExportError)
+            }
+        } catch {
+            MXLog.error("Bipe data export could not write the file: \(error)")
+            showError(BipeStrings.privacyExportError)
+        }
+    }
+    
+    private var exportedFile: URL?
+    
+    /// The file leaves the device only through the share sheet; remove the copy after it closes.
+    private func removeExportFile() {
+        if let exportedFile {
+            try? FileManager.default.removeItem(at: exportedFile)
+        }
+        exportedFile = nil
+        state.bindings.exportFileURL = nil
+    }
+    
     // MARK: - Private
-
+    
+    private func showError(_ message: String) {
+        state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: message)
+    }
+    
     private func withTokenRetry<T>(_ request: (String) async throws(BipeAPIError) -> T) async throws(BipeAPIError) -> T {
         try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }, request)
     }

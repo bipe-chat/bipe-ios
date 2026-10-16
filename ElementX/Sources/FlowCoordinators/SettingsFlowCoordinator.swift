@@ -197,6 +197,12 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             presentBipeHandleScreen()
         case .profilePublicProfile:
             presentBipePublicProfileScreen()
+        case .privacyMessaging:
+            presentBipeMessagingScreen()
+        case .privacyBlocked:
+            presentBlockedUsersScreen()
+        case .privacyContacts:
+            presentBipeContactsScreen()
         default:
             MXLog.error("Bipe settings row without a screen: \(row.rawValue)")
         }

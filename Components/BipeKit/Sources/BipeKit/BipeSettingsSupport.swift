@@ -103,6 +103,36 @@ public extension BipeWhoCanMessage {
     }
 }
 
+/// The answer of `GET /v1/me/export`.
+public struct BipeDataExport: Sendable {
+    public let data: Data
+    /// A plain file name, safe for a temporary file.
+    public let filename: String
+
+    public init(data: Data, filename: String) {
+        self.data = data
+        self.filename = filename
+    }
+
+    /// The name from `content-disposition: attachment; filename="bipe-dados-YYYY-MM-DD.json"`.
+    /// Anything else, or a name with other characters, gives `bipe-dados-<today>.json`.
+    static func filename(contentDisposition: String?, now: Date = .now) -> String {
+        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.")
+        if let contentDisposition,
+           let range = contentDisposition.range(of: "filename=") {
+            let name = contentDisposition[range.upperBound...]
+                .split(separator: ";", maxSplits: 1).first
+                .map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\" ")) } ?? ""
+            if !name.isEmpty, !name.hasPrefix("."), name.hasSuffix(".json"),
+               name.unicodeScalars.allSatisfy(allowed.contains) {
+                return name
+            }
+        }
+        let day = now.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
+        return "bipe-dados-\(day).json"
+    }
+}
+
 // MARK: - Perfil de confiança
 
 public extension BipeTrustProfile {
