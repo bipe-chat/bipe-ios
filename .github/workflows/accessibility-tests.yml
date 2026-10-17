@@ -13,6 +13,8 @@ jobs:
     name: Tests
     runs-on: xcode-27
     timeout-minutes: 150
+    # Bipe: Element-only (LFS snapshots, private submodule). Runs only in element-hq.
+    if: ${{ github.repository == 'element-hq/element-x-ios' }}
 
     concurrency:
       # Only allow a single run of this workflow on each branch, automatically cancelling older runs.

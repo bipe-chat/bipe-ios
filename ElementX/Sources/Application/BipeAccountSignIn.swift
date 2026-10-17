@@ -18,13 +18,13 @@ struct BipeAccountSignIn {
     let authenticationService: AuthenticationServiceProtocol
     let appSettings: AppSettings
     let credentialStore: BipeCredentialStore
-
+    
     init(authenticationService: AuthenticationServiceProtocol, appSettings: AppSettings) {
         self.authenticationService = authenticationService
         self.appSettings = appSettings
         credentialStore = .bipeApp
     }
-
+    
     /// Keeps the credentials (password on this device, token synced) and signs in with them.
     func signIn(with credentials: BipeCredentials) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
         // A pending sign-up stays until the caller has signed in and set the app lock: it holds the PIN, and
@@ -34,7 +34,7 @@ struct BipeAccountSignIn {
         }
         return await signIn(userID: credentials.userId, password: credentials.password)
     }
-
+    
     /// Finishes a sign-up whose answer never reached this device (ADR 0094). `nil` when there is nothing to finish.
     func resumePendingSignup(apiClient: BipeAPIClient) async -> Result<UserSessionProtocol, AuthenticationServiceError>? {
         guard let pending = credentialStore.pendingSignup() else { return nil }
@@ -51,7 +51,7 @@ struct BipeAccountSignIn {
             return nil
         }
     }
-
+    
     /// Signs in with the password stored on this device. `nil` when there is none.
     func signInWithStoredPassword() async -> Result<UserSessionProtocol, AuthenticationServiceError>? {
         guard let stored = credentialStore.password() else { return nil }
@@ -63,7 +63,7 @@ struct BipeAccountSignIn {
         }
         return result
     }
-
+    
     private func signIn(userID: String, password: String) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
         if case .failure(let error) = await authenticationService.configure(for: appSettings.defaultAccountProvider.serverNameOrBaseURL, flow: .login) {
             return .failure(error)

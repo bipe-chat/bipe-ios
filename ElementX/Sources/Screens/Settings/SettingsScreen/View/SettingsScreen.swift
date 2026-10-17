@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct SettingsScreen: View {
@@ -55,7 +55,11 @@ struct SettingsScreen: View {
         .navigationTitle(context.viewState.bipeIsInTab ? BipeStrings.tabYou : L10n.commonSettings)
         .navigationBarTitleDisplayMode(context.viewState.bipeIsInTab ? .large : .inline)
         .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)
-        .toolbar { if !context.viewState.bipeIsInTab { toolbar } }
+        .toolbar {
+            if !context.viewState.bipeIsInTab {
+                toolbar
+            }
+        }
     }
     
     /// Developer options stay behind 7 taps on the version.

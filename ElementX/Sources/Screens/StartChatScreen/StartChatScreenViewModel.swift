@@ -6,9 +6,9 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import MatrixRustSDK
-import BipeKit
 import SwiftUI
 
 typealias StartChatScreenViewModelType = StateStoreViewModel<StartChatScreenViewState, StartChatScreenViewAction>
@@ -246,7 +246,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
         guard let userID else { return (handle, nil) }
         guard userID != userSession.clientProxy.userID else { return nil }
         
-        let profile = (try? await userSession.clientProxy.profile(for: userID).get()) ?? UserProfile(userID: userID)
+        let profile = await (try? userSession.clientProxy.profile(for: userID).get()) ?? UserProfile(userID: userID)
         return (handle, profile)
     }
     

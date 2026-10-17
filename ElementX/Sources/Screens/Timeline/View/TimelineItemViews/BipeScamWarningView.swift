@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 /// Bipe: caution card under an incoming message that looks like a common scam pattern (trust-ui.md, caution level).
 struct BipeScamWarningView: View {
     let kind: ScamWarningKind
-
+    
     var body: some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {

@@ -41,7 +41,7 @@ struct LocationSharingSettingsScreen: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // Bipe: "A cada 25 m"; Element's plural is English only.
                     Text(BipeStrings.chatsLiveLocationDistance(Self.measurementFormatter.string(from: .init(value: Double(context.liveLocationMinimumDistanceUpdate),
-                                                                                                             unit: UnitLength.meters))))
+                                                                                                            unit: UnitLength.meters))))
                         .font(.compound.bodyLG)
                         .foregroundStyle(.compound.textPrimary)
                         // The internal hidden label of the slider will read voice over

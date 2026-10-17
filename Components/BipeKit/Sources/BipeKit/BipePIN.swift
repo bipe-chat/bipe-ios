@@ -13,7 +13,7 @@ public enum BipePinProblem: String, Sendable, Equatable {
     case repeatedDigit = "repeated_digit"
     case sequence
     case date
-
+    
     public var localizedMessage: String {
         switch self {
         case .notDigits: BipeStrings.pinProblemNotDigits
@@ -34,7 +34,9 @@ public nonisolated enum BipePIN {
         guard pin.unicodeScalars.allSatisfy({ ("0"..."9").contains($0) }) else { return .notDigits }
         guard pin.count == BipeRegistries.pinLength else { return .wrongLength }
         let digits = pin.unicodeScalars.map { Int($0.value) - 48 }
-        if digits.allSatisfy({ $0 == digits[0] }) { return .repeatedDigit }
+        if digits.allSatisfy({ $0 == digits[0] }) {
+            return .repeatedDigit
+        }
         // Up (step 1) or down (step 9, which is minus 1 modulo 10), with wrap: 78901234 and 21098765 count.
         for step in [1, 9] where digits.indices.dropFirst().allSatisfy({ digits[$0] == (digits[$0 - 1] + step) % 10 }) {
             return .sequence
@@ -46,12 +48,12 @@ public nonisolated enum BipePIN {
         }
         return nil
     }
-
+    
     /// Keeps digits only and cuts at the PIN length. For number-pad fields that can still receive pasted text.
     public static func sanitize(_ input: String) -> String {
         String(input.filter(\.isASCIIDigit).prefix(BipeRegistries.pinLength))
     }
-
+    
     private static func isDate(year: Int, month: Int, day: Int) -> Bool {
         guard (BipeRegistries.pinDateYearMin...BipeRegistries.pinDateYearMax).contains(year), (1...12).contains(month), day >= 1 else {
             return false
@@ -63,5 +65,7 @@ public nonisolated enum BipePIN {
 }
 
 private extension Character {
-    var isASCIIDigit: Bool { ("0"..."9").contains(self) }
+    var isASCIIDigit: Bool {
+        ("0"..."9").contains(self)
+    }
 }

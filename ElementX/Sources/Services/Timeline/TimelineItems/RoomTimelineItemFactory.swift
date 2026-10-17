@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import MatrixRustSDK
 import BipeKit
+import MatrixRustSDK
 import UIKit
 import UniformTypeIdentifiers
 
@@ -661,8 +661,8 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
     
     /// Bipe: scam pattern check for incoming text. Runs off the main thread (TimelineController builds items in a detached task).
     private func bipeAddingScamWarning(to content: TextRoomTimelineItemContent,
-                                          _ eventItemProxy: EventTimelineItemProxy,
-                                          _ isOutgoing: Bool) -> TextRoomTimelineItemContent {
+                                       _ eventItemProxy: EventTimelineItemProxy,
+                                       _ isOutgoing: Bool) -> TextRoomTimelineItemContent {
         guard !isOutgoing, let eventID = eventItemProxy.id.eventID else { return content }
         var content = content
         content.bipeScamWarning = ScamDetector.warningKind(for: content.body, eventID: eventID)
@@ -671,8 +671,8 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
     
     /// Bipe: the same check on the transcript of an incoming voice message (bipe/docs/audio.md).
     private func bipeAddingScamWarning(to content: AudioRoomTimelineItemContent,
-                                          _ eventItemProxy: EventTimelineItemProxy,
-                                          _ isOutgoing: Bool) -> AudioRoomTimelineItemContent {
+                                       _ eventItemProxy: EventTimelineItemProxy,
+                                       _ isOutgoing: Bool) -> AudioRoomTimelineItemContent {
         guard !isOutgoing, let eventID = eventItemProxy.id.eventID, let transcript = content.caption else { return content }
         var content = content
         content.bipeScamWarning = ScamDetector.warningKind(for: transcript, eventID: eventID)

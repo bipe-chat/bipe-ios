@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 enum BipeSignupScreenViewModelAction: CustomStringConvertible {
@@ -13,7 +13,7 @@ enum BipeSignupScreenViewModelAction: CustomStringConvertible {
     case signedIn(UserSessionProtocol)
     /// The account came from a personal invite. The app opens a chat with the inviter after the first sign-in (ADR 0034).
     case createdWithInvite(inviterUserID: String, inviterHandle: String?)
-
+    
     var description: String {
         switch self {
         case .signedIn: "signedIn"
@@ -44,74 +44,78 @@ struct BipeSignupScreenViewState: BindableState {
     var isAccountCreated = false
     /// From `GET /v1/signup/config` (ADR 0072). `true` until the server says otherwise, and after an error.
     var isInviteRequired = true
-
+    
     var emailError: String?
     var pinError: String?
     var handleError: String?
     var inviteCodeError: String?
     /// The inviter's handle, from the invite preview.
     var inviterHandle: String?
-
+    
     var bindings = BipeSignupScreenViewStateBindings()
-
+    
     var trimmedEmail: String {
         bindings.email.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-
+    
     /// The PIN rule's message once all digits are typed.
     var pinProblem: BipePinProblem? {
         bindings.pin.count < BipeRegistries.pinLength ? nil : BipePIN.problem(for: bindings.pin)
     }
-
+    
     var pinFooter: String {
         pinError ?? pinProblem?.localizedMessage ?? BipeStrings.pinCreateBody(String(BipeRegistries.pinLength))
     }
-
+    
     var pinMismatch: Bool {
         bindings.pinConfirmation.count == BipeRegistries.pinLength && bindings.pin != bindings.pinConfirmation
     }
-
+    
     var handleFooter: String {
         handleError ?? handleStatus.footer(defaultText: BipeStrings.signupHandleFooter)
     }
-
+    
     var handleFieldState: CompoundTextFieldStyle.State {
         handleError != nil ? .error : handleStatus.textFieldState
     }
-
+    
     /// The normalised code, or `nil` when the field is empty.
     var inviteCode: BipeInviteCode? {
         BipeInviteCode(bindings.inviteCode)
     }
-
+    
     var isInviteCodeEmpty: Bool {
         bindings.inviteCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
-
+    
     var isInviteCodeAcceptable: Bool {
         inviteCode != nil || (isInviteCodeEmpty && !isInviteRequired)
     }
-
+    
     var inviteCodeLabel: String {
         isInviteRequired ? BipeStrings.signupInviteCode : BipeStrings.signupInviteCodeOptional
     }
-
+    
     /// Never "opcional" when the server requires an invite (ADR 0072): an empty field says why a code is needed.
     var inviteCodeFooter: String? {
-        if let inviteCodeError { return inviteCodeError }
-        if isInviteCodeEmpty { return isInviteRequired ? BipeStrings.signupInviteRequired : nil }
+        if let inviteCodeError {
+            return inviteCodeError
+        }
+        if isInviteCodeEmpty {
+            return isInviteRequired ? BipeStrings.signupInviteRequired : nil
+        }
         return inviteCode == nil ? BipeStrings.errorInviteInvalid : nil
     }
-
+    
     var isInviteCodeFooterError: Bool {
         inviteCodeError != nil || (!isInviteCodeEmpty && inviteCode == nil)
     }
-
+    
     /// Blank, or a plausible address.
     var isEmailAcceptable: Bool {
         trimmedEmail.isEmpty || BipeSignupRules.isPlausibleEmail(trimmedEmail)
     }
-
+    
     var canContinueForm: Bool {
         let displayName = bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         return !displayName.isEmpty
@@ -122,16 +126,16 @@ struct BipeSignupScreenViewState: BindableState {
             && inviteCodeError == nil
             && bindings.isTermsAccepted
     }
-
+    
     var isPINValid: Bool {
         BipePIN.problem(for: bindings.pin) == nil && bindings.pin == bindings.pinConfirmation
     }
-
+    
     /// The fallback step's email: required there, unlike on the form.
     var canSubmitFallbackEmail: Bool {
         !trimmedEmail.isEmpty && BipeSignupRules.isPlausibleEmail(trimmedEmail)
     }
-
+    
     var canSubmit: Bool {
         isAccountCreated || (canContinueForm && isPINValid)
     }
@@ -146,7 +150,7 @@ struct BipeSignupScreenViewStateBindings {
     var inviteCode = ""
     /// The clickwrap checkbox (ADR 0113). Starts unticked; sign-up needs it ticked.
     var isTermsAccepted = false
-
+    
     var alertInfo: AlertInfo<BipeSignupScreenAlertType>?
 }
 

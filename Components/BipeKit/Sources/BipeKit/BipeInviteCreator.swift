@@ -13,17 +13,17 @@ public struct BipeInviteCreator {
         case created(BipeCreatedInvite)
         case noneLeft(nextAvailableAt: Date?)
     }
-
+    
     private let apiClient: BipeAPIClient
     private let accessToken: @MainActor () -> String?
     private let store: BipeInviteStore
-
+    
     public init(apiClient: BipeAPIClient, userID: String, accessToken: @escaping @MainActor () -> String?) {
         self.apiClient = apiClient
         self.accessToken = accessToken
         store = BipeInviteStore(userID: userID)
     }
-
+    
     /// Creates an invite and stores its link. The caller checks the quota first.
     public func create() async throws(BipeAPIError) -> BipeCreatedInvite {
         let created = try await BipeAPIClient.withTokenRetry(accessToken: accessToken) { [apiClient] (token: String) async throws(BipeAPIError) -> BipeCreatedInvite in
@@ -32,7 +32,7 @@ public struct BipeInviteCreator {
         store.saveLink(created.url, forInviteID: created.id)
         return created
     }
-
+    
     /// Reads the quota, then creates an invite only when one is left. For screens that do not show the quota.
     public func createIfAvailable() async throws(BipeAPIError) -> Result {
         let myInvites = try await BipeAPIClient.withTokenRetry(accessToken: accessToken) { [apiClient] (token: String) async throws(BipeAPIError) -> BipeMyInvites in
@@ -52,11 +52,11 @@ public enum BipeInviteQuota {
         guard available <= lowInviteCount else { return BipeStrings.invitesExplainer }
         return "\(BipeStrings.invitesExplainer) \(BipeStrings.invitesAvailable(String(available)))"
     }
-
+    
     public static func noneLeft(nextAvailableAt: Date?) -> String {
         guard let nextAvailableAt else { return BipeStrings.invitesNoneLeft }
         return "\(BipeStrings.invitesNoneLeft) \(BipeStrings.invitesNext(nextAvailableAt.formatted(date: .abbreviated, time: .shortened)))"
     }
-
+    
     private static let lowInviteCount = 5
 }

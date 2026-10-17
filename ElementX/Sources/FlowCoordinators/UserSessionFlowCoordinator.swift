@@ -7,10 +7,10 @@
 //
 
 import AVKit
+import BipeKit
 import Combine
 import Compound
 import ElementCall
-import BipeKit
 import SwiftState
 import SwiftUI
 
@@ -94,7 +94,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationTabCoordinator = NavigationTabCoordinator()
         navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: navigationTabCoordinator,
-                                                                                   handleResolver: flowParameters.userSession.bipeHandleResolver))
+                                                                                handleResolver: flowParameters.userSession.bipeHandleResolver))
         
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
@@ -250,7 +250,9 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         guard let roomID else { return currentTab }
         // The self-chat has one member, so the SDK files it as a group. It opens in Conversas.
-        if roomID == bipeSelfChat.cachedRoomID { return .chats }
+        if roomID == bipeSelfChat.cachedRoomID {
+            return .chats
+        }
         guard let summary = userSession.clientProxy.roomSummaryForIdentifier(roomID) else { return currentTab }
         return BipeRoomListScope(summary: summary) == .groups ? .groups : .chats
     }
@@ -443,8 +445,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         let appSettings = userSession.userSettings.app
         let coordinator = BipeTermsReacceptScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
-                                                                                clientProxy: userSession.clientProxy,
-                                                                                site: appSettings.websiteURL))
+                                                                               clientProxy: userSession.clientProxy,
+                                                                               site: appSettings.websiteURL))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 guard let self else { return }

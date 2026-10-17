@@ -23,8 +23,23 @@ jobs:
 
     steps:
       - uses: nschloe/action-cached-lfs-checkout@385a8ecc719e50b8c71af6ab01a624b486b7c3bc # v1.2.5
+        if: ${{ github.repository == 'element-hq/element-x-ios' }}
         with:
           persist-credentials: false
+
+      # Bipe: the fork has no LFS objects of its own. The unit tests need only the development media,
+      # which are fetched from the public Element repository. The preview snapshot tests are skipped.
+      - name: Checkout
+        if: ${{ github.repository != 'element-hq/element-x-ios' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Fetch development media from Element LFS
+        if: ${{ github.repository != 'element-hq/element-x-ios' }}
+        run: |
+          git config lfs.url https://github.com/element-hq/element-x-ios.git/info/lfs
+          git lfs pull --include "Components/DevelopmentAssets/Media/**"
 
       - name: Setup environment
         run: source ci_scripts/ci_common.sh && setup_github_actions_environment
@@ -37,7 +52,10 @@ jobs:
           restore-keys: compilation-cache-unit-tests-
 
       - name: Run tests
-        run: swift run -q tools ci unit-tests
+        env:
+          # Bipe: no preview snapshot tests in the fork.
+          SKIP_PREVIEWS: ${{ github.repository != 'element-hq/element-x-ios' && '--skip-previews' || '' }}
+        run: swift run -q tools ci unit-tests $SKIP_PREVIEWS
 
       - name: Save compilation cache
         # Only develop populates the cache, all of the other runs simply read from it.
@@ -59,7 +77,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         # Skip if not successful and in forks
-        if: ${{ success() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        if: ${{ success() && github.repository == 'element-hq/element-x-ios' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           report_type: coverage
@@ -71,7 +89,7 @@ jobs:
 
       - name: Upload test results to Codecov
         # Skip if cancelled and in forks
-        if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        if: ${{ !cancelled() && github.repository == 'element-hq/element-x-ios' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         continue-on-error: true
         with:

@@ -9,6 +9,10 @@
 --disable docCommentsBeforeModifiers # throwing false positives in AuthenticationServiceProtocol on v0.58.0
 --disable docComments # converts regular comments into doc comments even when they're implementation notes
 --disable emptyExtensions
+# New in 0.64.0. Off to keep the diff with upstream Element small; CI installs the latest SwiftFormat.
+--disable extensionAttributes
+--disable nestedIf
+--disable repeatedGuard
 
 --commas inline
 --ifdef no-indent

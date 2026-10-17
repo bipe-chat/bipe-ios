@@ -14,34 +14,34 @@ typealias BipeTermsReacceptScreenViewModelType = StateStoreViewModelV2<BipeTerms
 class BipeTermsReacceptScreenViewModel: BipeTermsReacceptScreenViewModelType, BipeTermsReacceptScreenViewModelProtocol {
     private let apiClient: BipeAPIClient
     private let clientProxy: ClientProxyProtocol
-
+    
     private let actionsSubject: PassthroughSubject<BipeTermsReacceptScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeTermsReacceptScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(apiClient: BipeAPIClient, clientProxy: ClientProxyProtocol, site: URL) {
         self.apiClient = apiClient
         self.clientProxy = clientProxy
         super.init(initialViewState: BipeTermsReacceptScreenViewState(termsURL: BipeLegalLinks.termsURL(site: site),
                                                                       privacyURL: BipeLegalLinks.privacyURL(site: site)))
     }
-
+    
     override func process(viewAction: BipeTermsReacceptScreenViewAction) {
         switch viewAction {
         case .continue:
             Task { await accept() }
         }
     }
-
+    
     // MARK: - Private
-
+    
     private func accept() async {
         guard state.canContinue else { return }
         state.isSaving = true
         state.isFailed = false
         defer { state.isSaving = false }
-
+        
         do {
             try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { [apiClient] (token: String) async throws(BipeAPIError) in
                 try await apiClient.acceptTerms(version: BipeRegistries.legalVersion, accessToken: token)

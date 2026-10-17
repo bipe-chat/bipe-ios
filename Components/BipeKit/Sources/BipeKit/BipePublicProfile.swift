@@ -15,14 +15,14 @@ public enum BipeProfileProblem: String, Sendable, Equatable {
     case bioTooManyLines = "bio_too_many_lines"
     /// Server only: turning the profile on needs a handle.
     case noHandle = "no_handle"
-
+    
     public var isNameProblem: Bool {
         switch self {
         case .nameEmpty, .nameTooLong, .nameReserved: true
         case .bioTooLong, .bioTooManyLines, .noHandle: false
         }
     }
-
+    
     public var localizedMessage: String {
         switch self {
         case .nameEmpty: BipeStrings.publicProfileNameEmpty
@@ -40,16 +40,26 @@ public nonisolated enum BipePublicProfileRules {
     /// Port of `profileProblem()`. Lengths count Unicode scalars, like JS `[...s].length`.
     public static func profileProblem(name: String, bio: String) -> BipeProfileProblem? {
         let trimmedName = trim(name)
-        if trimmedName.unicodeScalars.isEmpty { return .nameEmpty }
-        if trimmedName.unicodeScalars.count > BipeRegistries.profileNameMaxLength { return .nameTooLong }
-        if NameNormalizer.reservedCategory(for: trimmedName) != nil { return .nameReserved }
+        if trimmedName.unicodeScalars.isEmpty {
+            return .nameEmpty
+        }
+        if trimmedName.unicodeScalars.count > BipeRegistries.profileNameMaxLength {
+            return .nameTooLong
+        }
+        if NameNormalizer.reservedCategory(for: trimmedName) != nil {
+            return .nameReserved
+        }
         let trimmedBio = trim(bio)
-        if trimmedBio.unicodeScalars.count > BipeRegistries.profileBioMaxLength { return .bioTooLong }
+        if trimmedBio.unicodeScalars.count > BipeRegistries.profileBioMaxLength {
+            return .bioTooLong
+        }
         // JS `split("\n")`: count scalars, because Swift treats "\r\n" as one Character.
-        if trimmedBio.unicodeScalars.count(where: { $0 == "\n" }) + 1 > BipeRegistries.profileBioMaxLines { return .bioTooManyLines }
+        if trimmedBio.unicodeScalars.count(where: { $0 == "\n" }) + 1 > BipeRegistries.profileBioMaxLines {
+            return .bioTooManyLines
+        }
         return nil
     }
-
+    
     /// JS `String.prototype.trim()`.
     public static func trim(_ input: String) -> String {
         let scalars = input.unicodeScalars
@@ -66,11 +76,11 @@ public struct BipePublicProfileBioView: View {
     private let userID: String
     @Environment(\.bipeHandleResolver) private var handleResolver
     @State private var bio: String?
-
+    
     public init(userID: String) {
         self.userID = userID
     }
-
+    
     public var body: some View {
         // A stack, not a bare `if`: `.task` must run while the bio is still nil.
         VStack(spacing: 0) {
@@ -97,22 +107,22 @@ public struct BipePublicProfileBioView: View {
 /// `profilePhotoMaxPixels` on each side and `profilePhotoMaxBytes`. Drawing again drops all metadata.
 public nonisolated enum BipeProfilePhoto {
     private static let qualities: [CGFloat] = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25]
-
+    
     /// `nil` when the data is not an image or does not fit even at the lowest quality.
     public static func jpegData(from imageData: Data) -> Data? {
         guard let image = UIImage(data: imageData) else { return nil }
         return jpegData(from: image)
     }
-
+    
     public static func jpegData(from image: UIImage) -> Data? {
         let pixelWidth = image.size.width * image.scale
         let pixelHeight = image.size.height * image.scale
         guard pixelWidth > 0, pixelHeight > 0 else { return nil }
-
+        
         let ratio = min(1, CGFloat(BipeRegistries.profilePhotoMaxPixels) / max(pixelWidth, pixelHeight))
         let size = CGSize(width: max(1, (pixelWidth * ratio).rounded(.down)),
                           height: max(1, (pixelHeight * ratio).rounded(.down)))
-
+        
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         format.opaque = true
@@ -123,7 +133,7 @@ public nonisolated enum BipeProfilePhoto {
             context.fill(CGRect(origin: .zero, size: size))
             image.draw(in: CGRect(origin: .zero, size: size))
         }
-
+        
         for quality in qualities {
             if let data = rendered.jpegData(compressionQuality: quality), data.count <= BipeRegistries.profilePhotoMaxBytes {
                 return data

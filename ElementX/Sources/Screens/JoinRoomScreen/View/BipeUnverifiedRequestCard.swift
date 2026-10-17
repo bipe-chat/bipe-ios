@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 /// Bipe: "Conta não verificada" card on a message request (trust-ui.md, neutral level).

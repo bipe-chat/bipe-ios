@@ -1206,10 +1206,10 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
     private func presentStickerPicker(threadRootEventID: String?) {
         let stackCoordinator = NavigationStackCoordinator()
         let coordinator = BipeStickerPickerScreenCoordinator(parameters: .init(clientProxy: userSession.clientProxy,
-                                                                                  roomProxy: roomProxy,
-                                                                                  threadRootEventID: threadRootEventID,
-                                                                                  mediaProvider: userSession.mediaProvider,
-                                                                                  userIndicatorController: flowParameters.userIndicatorController))
+                                                                               roomProxy: roomProxy,
+                                                                               threadRootEventID: threadRootEventID,
+                                                                               mediaProvider: userSession.mediaProvider,
+                                                                               userIndicatorController: flowParameters.userIndicatorController))
         stackCoordinator.setRootCoordinator(coordinator)
         
         coordinator.actionsPublisher

@@ -50,23 +50,23 @@ public struct BipeWaysBack: Sendable, Equatable {
     public var recoveryKey: Bool
     /// The recovery token synced to this Apple account (iCloud Keychain).
     public var syncedToken: Bool
-
+    
     public init(email: Bool, linkedAccount: Bool, recoveryKey: Bool, syncedToken: Bool) {
         self.email = email
         self.linkedAccount = linkedAccount
         self.recoveryKey = recoveryKey
         self.syncedToken = syncedToken
     }
-
+    
     public var count: Int {
         [email, linkedAccount, recoveryKey, syncedToken].filter(\.self).count
     }
-
+    
     /// One or none: the only warning in Settings.
     public var needsWarning: Bool {
         count <= 1
     }
-
+    
     /// The subtitle of the "Sua conta" row.
     public var summary: String {
         switch count {
@@ -75,12 +75,12 @@ public struct BipeWaysBack: Sendable, Equatable {
         default: BipeStrings.settingsAccountPaths(String(count))
         }
     }
-
+    
     /// The status card: the count line, then the warning when there is one.
     public var cardTitle: String {
         count == 0 ? BipeStrings.settingsAccountPathsNone : BipeStrings.settingsAccountPaths(String(count))
     }
-
+    
     public var cardWarning: String? {
         switch count {
         case 0: BipeStrings.fallbackReminder
@@ -108,12 +108,12 @@ public struct BipeDataExport: Sendable {
     public let data: Data
     /// A plain file name, safe for a temporary file.
     public let filename: String
-
+    
     public init(data: Data, filename: String) {
         self.data = data
         self.filename = filename
     }
-
+    
     /// The name from `content-disposition: attachment; filename="bipe-dados-YYYY-MM-DD.json"`.
     /// Anything else, or a name with other characters, gives `bipe-dados-<today>.json`.
     static func filename(contentDisposition: String?, now: Date = .now) -> String {

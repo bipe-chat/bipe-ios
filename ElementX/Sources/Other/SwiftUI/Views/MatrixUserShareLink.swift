@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import MatrixRustSDK
 import BipeKit
+import MatrixRustSDK
 import SwiftUI
 
 struct MatrixUserShareLink<Label: View>: View {

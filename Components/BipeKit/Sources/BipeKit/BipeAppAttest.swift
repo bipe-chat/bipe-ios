@@ -15,7 +15,7 @@ public enum BipeAppAttest {
     public static var isSupported: Bool {
         DCAppAttestService.shared.isSupported
     }
-
+    
     /// Like ``attestation(api:)``, but `nil` when Apple's attestation service is down after one more try.
     /// The server then decides (`SIGNUP_ATTEST_REQUIRED`), so an Apple outage does not stop sign-up when it is off.
     public static func attestationUnlessServiceDown(api: BipeAPIClient) async throws(BipeAPIError) -> BipeAttestation? {
@@ -23,26 +23,28 @@ public enum BipeAppAttest {
             do {
                 return try await attestation(api: api)
             } catch .attestationServiceDown {
-                if attempt == 2 { return nil }
+                if attempt == 2 {
+                    return nil
+                }
                 try? await Task.sleep(for: .seconds(2))
             }
         }
         return nil
     }
-
+    
     /// Fetches a challenge and attests a new key against it. Sign-up is rare, so every attempt uses a fresh key
     /// and nothing goes to the keychain.
     public static func attestation(api: BipeAPIClient) async throws(BipeAPIError) -> BipeAttestation {
         let challenge = try await api.attestChallenge()
         let clientDataHash = Data(SHA256.hash(data: Data(challenge.utf8)))
         let service = DCAppAttestService.shared
-
+        
         do {
             let keyID = try await service.generateKey()
             let attestationObject = try await service.attestKey(keyID, clientDataHash: clientDataHash)
             return BipeAttestation(keyId: keyID,
-                                      attestationObject: attestationObject.base64EncodedString(),
-                                      challenge: challenge)
+                                   attestationObject: attestationObject.base64EncodedString(),
+                                   challenge: challenge)
         } catch let error as DCError where error.code == .serverUnavailable {
             throw .attestationServiceDown
         } catch {

@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftUI
 
 typealias BipeSignupScreenViewModelType = StateStoreViewModelV2<BipeSignupScreenViewState, BipeSignupScreenViewAction>
@@ -19,18 +19,18 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     private let signIn: BipeAccountSignIn
     private let appLockService: AppLockServiceProtocol?
     private let userIndicatorController: UserIndicatorControllerProtocol
-
+    
     private let handleChecker: BipeHandleAvailabilityChecker
     /// The new account's PIN, kept in memory until the sign-in succeeds. Then it becomes the app lock PIN.
     private var pendingAppLockPIN: String?
     /// The new account's credentials, kept in memory until the sign-in succeeds.
     private var createdCredentials: BipeCredentials?
-
+    
     private let actionsSubject: PassthroughSubject<BipeSignupScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeSignupScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(inviteCode: BipeInviteCode? = nil,
          apiClient: BipeAPIClient,
          signIn: BipeAccountSignIn,
@@ -41,19 +41,19 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
         handleChecker = BipeHandleAvailabilityChecker(apiClient: apiClient)
-
+        
         let site = signIn.appSettings.websiteURL
         var initialState = BipeSignupScreenViewState(termsURL: BipeLegalLinks.termsURL(site: site),
                                                      privacyURL: BipeLegalLinks.privacyURL(site: site))
         initialState.bindings.inviteCode = inviteCode?.value ?? ""
         super.init(initialViewState: initialState)
-
+        
         if let inviteCode {
             Task { await loadInvitePreview(inviteCode) }
         }
         Task { await loadSignupConfig() }
     }
-
+    
     override func process(viewAction: BipeSignupScreenViewAction) {
         switch viewAction {
         case .handleChanged:
@@ -66,16 +66,22 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             state.inviterHandle = nil
             // A pasted link or message becomes the bare code; a complete code shows who invited.
             if let code = state.inviteCode {
-                if state.bindings.inviteCode != code.value { state.bindings.inviteCode = code.value }
+                if state.bindings.inviteCode != code.value {
+                    state.bindings.inviteCode = code.value
+                }
                 Task { await loadInvitePreview(code) }
             }
         case .clearFieldErrors:
             state.emailError = nil
             state.pinError = nil
             let pin = BipePIN.sanitize(state.bindings.pin)
-            if pin != state.bindings.pin { state.bindings.pin = pin }
+            if pin != state.bindings.pin {
+                state.bindings.pin = pin
+            }
             let confirmation = BipePIN.sanitize(state.bindings.pinConfirmation)
-            if confirmation != state.bindings.pinConfirmation { state.bindings.pinConfirmation = confirmation }
+            if confirmation != state.bindings.pinConfirmation {
+                state.bindings.pinConfirmation = confirmation
+            }
         case .continue:
             continueStep()
         case .back:
@@ -91,9 +97,9 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             Task { await submit() }
         }
     }
-
+    
     // MARK: - Private
-
+    
     private func continueStep() {
         switch state.step {
         case .form:
@@ -111,13 +117,13 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             Task { await submit() }
         }
     }
-
+    
     private func submit() async {
         guard state.canSubmit else { return }
-
+        
         startLoading()
         defer { stopLoading() }
-
+        
         if !state.isAccountCreated {
             guard let (credentials, pin) = await createAccount() else { return }
             createdCredentials = credentials
@@ -134,7 +140,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             state.bindings.alertInfo = AlertInfo(id: .error)
         }
     }
-
+    
     /// The new account's credentials and the PIN it really has. On a retry after a lost answer the server returns the
     /// account of the first try (ADR 0094), so the PIN is the one that try sent.
     private func createAccount() async -> (BipeCredentials, String)? {
@@ -155,7 +161,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             state.bindings.pin = pin
             state.bindings.pinConfirmation = pin
         }
-
+        
         do {
             let response = try await signupRetryingLostAnswers { () async throws(BipeAPIError) -> BipeSignupRequest in
                 // A new attestation for every try: the server spends each challenge once.
@@ -196,7 +202,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             return nil
         }
     }
-
+    
     /// Mobile data drops often. A try without an answer may still have made the account, and the same key returns it,
     /// so a few quiet retries are safe (ADR 0094).
     private func signupRetryingLostAnswers(_ makeRequest: () async throws(BipeAPIError) -> BipeSignupRequest) async throws(BipeAPIError) -> BipeSignupResponse {
@@ -218,7 +224,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             }
         }
     }
-
+    
     private func finishSignIn(_ result: Result<UserSessionProtocol, AuthenticationServiceError>) async {
         switch result {
         case .success(let userSession):
@@ -235,13 +241,13 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             state.bindings.alertInfo = AlertInfo(id: .error)
         }
     }
-
+    
     /// An error keeps the default: an invite is required (ADR 0072).
     private func loadSignupConfig() async {
         guard let config = try? await apiClient.signupConfig() else { return }
         state.isInviteRequired = config.inviteRequired
     }
-
+    
     /// Shows who invited the user, or marks a code that no longer works. Failures stay silent: sign-up checks the code again.
     private func loadInvitePreview(_ code: BipeInviteCode) async {
         guard let preview = try? await apiClient.invitePreview(code: code.value) else { return }
@@ -252,10 +258,10 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             state.inviteCodeError = BipeStrings.errorInviteInvalid
         }
     }
-
+    
     private func show(_ error: BipeAPIError) {
         let message = error.localizedMessage
-
+        
         if case .server(let code, _, _) = error {
             switch code {
             // A field error opens the step that holds the field.
@@ -286,21 +292,21 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                 break
             }
         }
-
+        
         state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: message)
     }
-
+    
     // MARK: - User Indicators
-
+    
     private let loadingIndicatorID = "\(BipeSignupScreenViewModel.self)-Loading"
-
+    
     private func startLoading() {
         userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID,
                                                               type: .modal,
                                                               title: L10n.commonLoading,
                                                               persistent: true))
     }
-
+    
     private func stopLoading() {
         userIndicatorController.retractIndicatorWithId(loadingIndicatorID)
     }

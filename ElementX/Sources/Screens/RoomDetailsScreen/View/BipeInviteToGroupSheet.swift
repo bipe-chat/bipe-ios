@@ -16,7 +16,7 @@ struct BipeInviteToGroupSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationStack {
+        ElementNavigationStack {
             Form {
                 if picker.groups.isEmpty {
                     Section {

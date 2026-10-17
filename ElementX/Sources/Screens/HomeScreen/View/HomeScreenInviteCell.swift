@@ -6,9 +6,10 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Compound
-import BipeKit
+import MatrixRustSDKMocks
 import SwiftUI
 
 struct HomeScreenInviteCell: View {
@@ -155,8 +156,6 @@ struct HomeScreenInviteCell: View {
 }
 
 // MARK: - Previews
-
-import MatrixRustSDKMocks
 
 struct HomeScreenInviteCell_Previews: PreviewProvider, TestablePreview {
     static var previews: some View {

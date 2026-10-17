@@ -23,11 +23,11 @@ extension ClientProxyProtocol {
             return nil
         }
     }
-
+    
     var bipeInviterGreeting: BipeInviterGreeting? {
         BipeInviteStore(userID: userID).inviterGreeting()
     }
-
+    
     /// Ends the prompt. Called when the user sends a message in the chat with the inviter.
     func bipeEndInviterGreeting() {
         guard bipeInviterGreeting != nil else { return }

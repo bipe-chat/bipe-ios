@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import BipeKit
 import Combine
 import Contacts
-import BipeKit
 import SwiftUI
 
 typealias BipeContactsScreenViewModelType = StateStoreViewModelV2<BipeContactsScreenViewState, BipeContactsScreenViewAction>
@@ -67,7 +67,6 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
             }
         }
     }
-
     
     // MARK: - Private
     
@@ -81,9 +80,11 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
     }
     
     private func requestAccess() async {
-        let granted = (try? await contactStore.requestAccess(for: .contacts)) ?? false
+        let granted = await (try? contactStore.requestAccess(for: .contacts)) ?? false
         state.access = granted ? .granted : Self.currentAccess()
-        if state.access == .granted { await search() }
+        if state.access == .granted {
+            await search()
+        }
     }
     
     private func search() async {

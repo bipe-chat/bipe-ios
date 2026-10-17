@@ -26,9 +26,9 @@ struct TimelineItemMenu: View {
                 send(.itemSendInfoTapped(itemID: item.id))
             }
             .padding(.horizontal, 16)
-                .padding(.top, 32.0)
-                .padding(.bottom, 4.0)
-                .frame(idealWidth: 300.0)
+            .padding(.top, 32.0)
+            .padding(.bottom, 4.0)
+            .frame(idealWidth: 300.0)
             
             Divider()
                 .background(Color.compound.bgSubtlePrimary)
@@ -201,7 +201,7 @@ struct TimelineItemMenuHeader: View {
                                             members: context.viewState.members,
                                             ownUserID: context.viewState.ownUserID,
                                             action: onSendInfoTapped)
-                .padding(.bottom, 8)
+                    .padding(.bottom, 8)
             } else if let authenticity = item.properties.encryptionAuthenticity {
                 Label(authenticity.message, icon: authenticity.icon, iconSize: .small, relativeTo: .compound.bodySMSemibold)
                     .font(.compound.bodySMSemibold)

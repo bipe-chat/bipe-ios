@@ -6,9 +6,9 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import MatrixRustSDK
-import BipeKit
 import SwiftUI
 
 struct UserProfileListRow: View {
