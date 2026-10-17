@@ -24,8 +24,19 @@ public nonisolated struct BadgeVerifier: Sendable {
         self.trustedKeys = trustedKeys
     }
     
+    /// The release trust list from bipe-shared `registries/badge-keys.json` (ADR 0123).
+    public static func bipeTrusted() throws(KeyError) -> BadgeVerifier {
+        var keys: [String: Data] = [:]
+        for (kid, key) in BipeRegistries.badgeKeys {
+            guard let raw = Data(base64URLEncoded: key) else { throw .invalidPublicKey(kid: kid) }
+            keys[kid] = raw
+        }
+        return try BadgeVerifier(trustedKeys: keys)
+    }
+    
     /// Decodes and verifies envelope JSON. Undecodable JSON is `malformed`.
-    public func verify(envelopeJSON: Data, sender: String, senderDevice: String, now: Date = .now) -> BadgeVerificationResult {
+    /// - Parameter senderMasterKey: the sender's cross-signing master key from the SDK (`UserIdentity.masterKey()`), nil when unknown.
+    public func verify(envelopeJSON: Data, sender: String, senderDevice: String, senderMasterKey: String?, now: Date = .now) -> BadgeVerificationResult {
         // Check `v` before the full shape: a future version may have other fields.
         guard let probe = try? JSONDecoder().decode(VersionProbe.self, from: envelopeJSON) else {
             return .invalid(.malformed)
@@ -36,11 +47,11 @@ public nonisolated struct BadgeVerifier: Sendable {
         guard let envelope = try? JSONDecoder().decode(BadgeEnvelope.self, from: envelopeJSON) else {
             return .invalid(.malformed)
         }
-        return verify(envelope, sender: sender, senderDevice: senderDevice, now: now)
+        return verify(envelope, sender: sender, senderDevice: senderDevice, senderMasterKey: senderMasterKey, now: now)
     }
     
     /// Runs the documented checks in order and returns the first failure.
-    public func verify(_ envelope: BadgeEnvelope, sender: String, senderDevice: String, now: Date = .now) -> BadgeVerificationResult {
+    public func verify(_ envelope: BadgeEnvelope, sender: String, senderDevice: String, senderMasterKey: String?, now: Date = .now) -> BadgeVerificationResult {
         guard envelope.v == BadgeEnvelope.supportedVersion else {
             return .invalid(.unsupportedVersion)
         }
@@ -71,8 +82,16 @@ public nonisolated struct BadgeVerifier: Sendable {
         guard payload.sub == sender else {
             return .invalid(.subjectMismatch)
         }
-        guard payload.dev == senderDevice else {
-            return .invalid(.deviceMismatch)
+        switch payload.binding {
+        case .masterKey(let msk):
+            // A company badge binds to the account, so any of its devices may send. No known master key fails closed.
+            guard let senderMasterKey, msk == senderMasterKey else {
+                return .invalid(.masterKeyMismatch)
+            }
+        case .device(let dev):
+            guard dev == senderDevice else {
+                return .invalid(.deviceMismatch)
+            }
         }
         return .valid(payload)
     }
@@ -100,25 +119,56 @@ public nonisolated enum BadgeLevel: String, Sendable, Codable {
     case pix
     case govbr
     case institution
+    /// A verified company (ADR 0042), bound to the account's cross-signing master key.
+    case cnpj
+}
+
+/// How a company proved control of its CNPJ (ADR 0042).
+public nonisolated enum BadgeCNPJMethod: String, Sendable, Codable {
+    case ecnpj
+    case partner
+    case staff
+}
+
+/// What a badge is bound to (badge-attestation.md, step 7).
+public nonisolated enum BadgeBinding: Sendable, Equatable {
+    /// Fingerprint of the device key (`dev`): `pix`, `govbr` and `institution`.
+    case device(String)
+    /// The account's cross-signing master key (`msk`): `cnpj`.
+    case masterKey(String)
+}
+
+/// The company fields of a `cnpj` badge.
+public nonisolated struct BadgeCompany: Sendable, Equatable {
+    public let legalName: String
+    public let tradeName: String?
+    public let method: BadgeCNPJMethod
+    /// The Receita Federal release that last showed the CNPJ as active, YYYY-MM.
+    public let checkedMonth: String
 }
 
 public nonisolated struct BadgePayload: Sendable, Equatable, Decodable {
     /// Matrix user ID.
     public let sub: String
     public let lvl: BadgeLevel
-    /// Verified legal name or institution name.
+    /// Verified name. For `cnpj`: the trade name when the registry has one, else the legal name.
     public let name: String
-    /// Institution CNPJ, digits only. Present only for `institution`.
+    /// Normalised CNPJ (14 characters, digits and uppercase letters). Present for `institution` and `cnpj`.
     public let cnpj: String?
-    /// Fingerprint of the device key the badge is bound to.
-    public let dev: String
+    /// Present only for `cnpj`.
+    public let company: BadgeCompany?
+    public let binding: BadgeBinding
     /// Issued at, Unix seconds.
     public let iat: Int64
     /// Expires at, Unix seconds.
     public let exp: Int64
     
     private enum CodingKeys: String, CodingKey {
-        case sub, lvl, name, cnpj, dev, iat, exp
+        case sub, lvl, name, cnpj, dev, msk, iat, exp
+        case legalName = "legal_name"
+        case tradeName = "trade_name"
+        case method
+        case checkedMonth = "checked_month"
     }
     
     public init(from decoder: Decoder) throws {
@@ -127,11 +177,28 @@ public nonisolated struct BadgePayload: Sendable, Equatable, Decodable {
         lvl = try container.decode(BadgeLevel.self, forKey: .lvl)
         name = try container.decode(String.self, forKey: .name)
         cnpj = try container.decodeIfPresent(String.self, forKey: .cnpj)
-        dev = try container.decode(String.self, forKey: .dev)
         iat = try container.decode(Int64.self, forKey: .iat)
         exp = try container.decode(Int64.self, forKey: .exp)
-        if lvl == .institution, cnpj == nil {
-            throw DecodingError.keyNotFound(CodingKeys.cnpj, .init(codingPath: [], debugDescription: "institution badge without cnpj"))
+        switch lvl {
+        case .cnpj:
+            let msk = try container.decode(String.self, forKey: .msk)
+            let legalName = try container.decode(String.self, forKey: .legalName)
+            let checkedMonth = try container.decode(String.self, forKey: .checkedMonth)
+            guard let cnpj, cnpj.wholeMatch(of: /[0-9A-Z]{12}[0-9]{2}/) != nil, !legalName.isEmpty, !msk.isEmpty,
+                  checkedMonth.wholeMatch(of: /[0-9]{4}-(0[1-9]|1[0-2])/) != nil else {
+                throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "malformed cnpj badge"))
+            }
+            company = try BadgeCompany(legalName: legalName,
+                                       tradeName: container.decodeIfPresent(String.self, forKey: .tradeName),
+                                       method: container.decode(BadgeCNPJMethod.self, forKey: .method),
+                                       checkedMonth: checkedMonth)
+            binding = .masterKey(msk)
+        case .pix, .govbr, .institution:
+            if lvl == .institution, cnpj == nil {
+                throw DecodingError.keyNotFound(CodingKeys.cnpj, .init(codingPath: [], debugDescription: "institution badge without cnpj"))
+            }
+            company = nil
+            binding = try .device(container.decode(String.self, forKey: .dev))
         }
     }
 }
@@ -151,6 +218,7 @@ public nonisolated enum BadgeVerificationFailure: String, Sendable, Equatable, E
     case notYetValid = "not_yet_valid"
     case subjectMismatch = "subject_mismatch"
     case deviceMismatch = "device_mismatch"
+    case masterKeyMismatch = "master_key_mismatch"
 }
 
 // MARK: - Private
