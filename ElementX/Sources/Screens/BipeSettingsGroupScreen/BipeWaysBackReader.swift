@@ -5,17 +5,26 @@
 //
 
 import BipeKit
+import Combine
 import SwiftUI
 
 /// Bipe: counts the ways back to the account from what the app already reads (ADR 0112). There is no API for it.
 enum BipeWaysBackReader {
+    /// Each count made from a loaded account state, with the user ID. The Você tab badge follows it.
+    static let counted = PassthroughSubject<(userID: String, waysBack: BipeWaysBack), Never>()
+    
     /// `status` is `GET /v1/me/account`, `nil` when it did not load.
     static func waysBack(status: BipeAccountStatus?, clientProxy: ClientProxyProtocol) -> BipeWaysBack {
-        BipeWaysBack(email: status?.email != nil,
-                     // ADR 0096: no linked-account screen on iOS yet (bipe#307).
-                     linkedAccount: false,
-                     recoveryKey: clientProxy.secureBackupController.recoveryState.value == .enabled,
-                     syncedToken: BipeCredentialStore.bipeApp.recoveryToken()?.userID == clientProxy.userID)
+        let waysBack = BipeWaysBack(email: status?.email != nil,
+                                    // ADR 0096: no linked-account screen on iOS yet (bipe#307).
+                                    linkedAccount: false,
+                                    recoveryKey: clientProxy.secureBackupController.recoveryState.value == .enabled,
+                                    syncedToken: BipeCredentialStore.bipeApp.recoveryToken()?.userID == clientProxy.userID)
+        // Without the account state the email is unknown: no count goes to the tab.
+        if status != nil {
+            counted.send((clientProxy.userID, waysBack))
+        }
+        return waysBack
     }
 
     /// Loads the account state, then counts. The status is `nil` when the call fails.

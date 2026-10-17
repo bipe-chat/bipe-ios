@@ -43,6 +43,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     private let groupsTabFlowCoordinator: ChatsTabFlowCoordinator
     private let groupsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     private let youTabFlowCoordinator: SettingsFlowCoordinator
+    private let youTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     private let bipeSelfChat: BipeSelfChat
     
     private let searchScreenCoordinator: SearchScreenCoordinator?
@@ -115,7 +116,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                                         isInTab: true,
                                                         navigationStackCoordinator: youStackCoordinator,
                                                         flowParameters: flowParameters)
-        let youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: BipeStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
+        youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: BipeStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
         bipeSelfChat = BipeSelfChat(clientProxy: flowParameters.userSession.clientProxy)
         
         if flowParameters.userSession.userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
@@ -392,6 +393,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         setupCallObservers()
         setupUnreadNotificationsObserver()
+        setupBipeWaysBackObserver()
         
         searchScreenCoordinator?.actionsPublisher
             .sink { [weak self] action in
@@ -696,6 +698,30 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         }
         chatsTabDetails.badgeCount = chatsCount
         groupsTabDetails.badgeCount = groupsCount
+    }
+    
+    /// Bipe ADR 0112: the Você tab shows a warning when the account has one way back or none,
+    /// the same count as the badge on the "Sua conta" row.
+    private func setupBipeWaysBackObserver() {
+        let clientProxy = userSession.clientProxy
+        let appSettings = userSession.userSettings.app
+        guard clientProxy.userIDServerName == appSettings.bipeSignupServerName else { return }
+        
+        BipeWaysBackReader.counted
+            .filter { $0.userID == clientProxy.userID }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.youTabDetails.bipeWarning = $0.waysBack.needsWarning }
+            .store(in: &cancellables)
+        
+        // A new recovery key changes the count. The first value also does the first count.
+        clientProxy.secureBackupController.recoveryState
+            .removeDuplicates()
+            .sink { _ in
+                Task {
+                    _ = await BipeWaysBackReader.load(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL), clientProxy: clientProxy)
+                }
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Native calls
