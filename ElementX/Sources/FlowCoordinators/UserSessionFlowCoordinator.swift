@@ -51,6 +51,10 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     
     private var settingsFlowCoordinator: SettingsFlowCoordinator?
     
+    private var bipeTermsReacceptCoordinator: BipeTermsReacceptScreenCoordinator?
+    /// Set while this account still has to accept the terms (ADR 0113): what to run after it accepts.
+    private var bipePendingTermsReaccept: (() -> Void)?
+    
     enum State: StateType {
         /// The state machine hasn't started.
         case initial
@@ -381,6 +385,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                     navigationTabCoordinator.setFullScreenCoverCoordinator(onboardingStackCoordinator, animated: animated)
                 case .dismiss:
                     navigationTabCoordinator.setFullScreenCoverCoordinator(nil)
+                    presentPendingBipeTermsReaccept() // Bipe: waited for onboarding (ADR 0113)
                 case .logoutConfirmed:
                     actionsSubject.send(.logout)
                 }
@@ -418,6 +423,46 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         if onboardingFlowCoordinator.shouldStart {
             clearRoute(animated: false)
             onboardingFlowCoordinator.start()
+        }
+    }
+    
+    // MARK: - Terms (Bipe ADR 0113)
+    
+    /// Shows the blocking terms re-accept screen. It never shows twice. While onboarding or a sheet is up it waits:
+    /// onboarding's dismissal shows it, else the next account check does.
+    func presentBipeTermsReacceptScreen(onAccepted: @escaping () -> Void) {
+        bipePendingTermsReaccept = onAccepted
+        presentPendingBipeTermsReaccept()
+    }
+    
+    private func presentPendingBipeTermsReaccept() {
+        guard let onAccepted = bipePendingTermsReaccept,
+              bipeTermsReacceptCoordinator == nil,
+              navigationTabCoordinator.fullScreenCoverCoordinator == nil,
+              navigationTabCoordinator.sheetCoordinator == nil else {
+            return
+        }
+        
+        let appSettings = userSession.userSettings.app
+        let coordinator = BipeTermsReacceptScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
+                                                                                clientProxy: userSession.clientProxy,
+                                                                                site: appSettings.websiteURL))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                guard let self else { return }
+                switch action {
+                case .accepted:
+                    bipePendingTermsReaccept = nil
+                    navigationTabCoordinator.setFullScreenCoverCoordinator(nil)
+                    onAccepted()
+                }
+            }
+            .store(in: &cancellables)
+        
+        bipeTermsReacceptCoordinator = coordinator
+        // Onboarding can replace the cover; the screen comes back when onboarding closes.
+        navigationTabCoordinator.setFullScreenCoverCoordinator(coordinator) { [weak self] in
+            self?.bipeTermsReacceptCoordinator = nil
         }
     }
     
@@ -616,23 +661,43 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 
                 let badgeCount = Int(userSession.clientProxy.totalUnreadNotifications)
                 
-                // Bipe ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
-                var chatsCount = 0
-                var groupsCount = 0
-                for summary in roomSummaries {
-                    switch BipeRoomListScope(summary: summary) {
-                    case .chats: chatsCount += Int(summary.unreadNotificationsCount)
-                    case .groups: groupsCount += Int(summary.unreadNotificationsCount)
-                    }
-                }
-                chatsTabDetails.badgeCount = chatsCount
-                groupsTabDetails.badgeCount = groupsCount
+                updateBipeTabBadges(roomSummaries: roomSummaries)
                 
                 await flowParameters.notificationManager.removeDeliveredNotificationsForFullyReadRooms(roomSummaries)
                 await flowParameters.notificationManager.updateAppBadgeCount(badgeCount)
             }
         }
         .store(in: &cancellables)
+        
+        userSession.userSettings.app.seenInvitesPublisher
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                updateBipeTabBadges(roomSummaries: roomListPublisher.value)
+            }
+            .store(in: &cancellables)
+    }
+    
+    /// Bipe ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
+    /// A group invite the user has not opened counts 1 on Grupos. DM invites stay behind the Pedidos row.
+    private func updateBipeTabBadges(roomSummaries: [RoomSummary]) {
+        let seenInvites = userSession.userSettings.app.seenInvites
+        var chatsCount = 0
+        var groupsCount = 0
+        for summary in roomSummaries {
+            switch BipeRoomListScope(summary: summary) {
+            case .chats:
+                chatsCount += Int(summary.unreadNotificationsCount)
+            case .groups:
+                if summary.joinRequestType?.isInvite == true {
+                    groupsCount += seenInvites.contains(summary.id) ? 0 : 1
+                } else {
+                    groupsCount += Int(summary.unreadNotificationsCount)
+                }
+            }
+        }
+        chatsTabDetails.badgeCount = chatsCount
+        groupsTabDetails.badgeCount = groupsCount
     }
     
     // MARK: - Native calls

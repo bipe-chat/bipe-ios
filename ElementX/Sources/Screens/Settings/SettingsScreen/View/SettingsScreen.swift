@@ -8,35 +8,46 @@
 
 import BipeKit
 import Compound
-import SFSafeSymbols
 import SwiftUI
 
 struct SettingsScreen: View {
     @Bindable var context: SettingsScreenViewModel.Context
-    @Environment(\.openURL) private var openURL
-    @Environment(\.bipeHandleResolver) private var bipeHandleResolver
     
+    // Bipe: the Você tab by the user's question (ADR 0112). The modal settings root shows the same structure.
+    // Element's "Account settings" and "App settings" sections, the status row and Add account are gone;
+    // their rows live in the groups (`BipeSettingsGroupScreen`).
     var body: some View {
         Form {
-            if context.viewState.bipeIsInTab {
-                BipeSelfChatSection { context.send(viewAction: .bipeSelfChat) }
+            BipeProfileHeaderSection(userProfile: context.viewState.userProfile,
+                                     handle: context.viewState.bipeHandle,
+                                     mediaProvider: context.mediaProvider) {
+                context.send(viewAction: .bipeGroup(.profile))
             }
             
-            userSection
+            BipeSelfChatSection { context.send(viewAction: .bipeSelfChat) }
             
             if let trustProfile = context.viewState.bipeTrustProfile {
                 BipeTrustProfileSection(profile: trustProfile) { context.send(viewAction: $0) }
             }
             
-            if context.viewState.showAddAccountButton {
-                addAccountSection
+            if context.viewState.showBipeHandle {
+                Section {
+                    // Bipe: invites and contacts share one screen.
+                    ListRow(label: .default(title: BipeStrings.invitesTitle,
+                                            icon: \.userAdd),
+                            kind: .navigationLink {
+                                context.send(viewAction: .bipeContacts)
+                            })
+                }
             }
             
-            accountSettingsSection
+            BipeSettingsGroupsSection(whoCanMessage: context.viewState.bipeWhoCanMessage,
+                                      waysBack: context.viewState.bipeWaysBack,
+                                      notificationsOn: context.viewState.bipeNotificationsOn) { group in
+                context.send(viewAction: .bipeGroup(group))
+            }
             
-            signOutSection
-            
-            appSettingsSection
+            developerSection
         }
         .compoundList()
         // Bipe: reloads the handle on first show and after returning from a pushed screen.
@@ -49,242 +60,11 @@ struct SettingsScreen: View {
                 toolbar
             }
         }
-        .sheet(isPresented: $context.isPresentingStatusPicker) {
-            SettingsScreenUserStatusPickerView { action in
-                context.send(viewAction: .userStatus(action))
-            }
-            .presentationDetents([.medium])
-            .presentationBackground(.compound.bgCanvasDefault)
-        }
     }
     
-    private var userSection: some View {
+    /// Developer options stay behind 7 taps on the version.
+    private var developerSection: some View {
         Section {
-            ListRow(kind: .custom {
-                Button {
-                    context.send(viewAction: .userDetails)
-                } label: {
-                    HStack(spacing: 12) {
-                        LoadableAvatarImage(url: context.viewState.userProfile.avatarURL,
-                                            name: context.viewState.userProfile.displayName,
-                                            contentID: context.viewState.userProfile.id,
-                                            avatarSize: .user(on: .settings),
-                                            mediaProvider: context.mediaProvider)
-                            .accessibilityHidden(true)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(context.viewState.userProfile.displayName ?? "")
-                                .font(.compound.headingMD)
-                                .foregroundColor(.compound.textPrimary)
-                            
-                            Text(bipeHandleResolver?.displayText(for: context.viewState.userProfile.id) ?? context.viewState.userProfile.id)
-                                .font(.compound.bodySM)
-                                .foregroundColor(.compound.textSecondary)
-                        }
-                        
-                        Spacer()
-                        
-                        ListRowAccessory.navigationLink
-                    }
-                    .padding(.horizontal, ListRowPadding.horizontal)
-                    .padding(.vertical, 8)
-                }
-            })
-            
-            if context.viewState.showUserStatusInput {
-                SettingsScreenUserStatusRow(mode: context.viewState.userStatusRowMode) { action in
-                    context.send(viewAction: .userStatus(action))
-                }
-            }
-        }
-    }
-    
-    private var addAccountSection: some View {
-        Section {
-            ListRow(label: .default(title: L10n.screenSettingsAddAccount,
-                                    icon: \.plus),
-                    kind: .navigationLink {
-                        context.send(viewAction: .addAccount)
-                    })
-                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.addAccount)
-        }
-    }
-    
-    private var accountSettingsSection: some View {
-        Section {
-            if let url = context.viewState.accountProfileURL {
-                ListRow(label: .default(title: L10n.actionManageAccountAndDevices,
-                                        icon: \.userProfile),
-                        kind: .button {
-                            context.send(viewAction: .manageAccount(url: url))
-                        })
-                        .accessibilityIdentifier(A11yIdentifiers.settingsScreen.account)
-            }
-            
-            if context.viewState.showLinkNewDeviceButton {
-                ListRow(label: .default(title: L10n.commonLinkNewDevice,
-                                        icon: \.devices),
-                        kind: .navigationLink {
-                            context.send(viewAction: .linkNewDevice)
-                        })
-            }
-            
-            ListRow(label: .default(title: L10n.screenNotificationSettingsTitle,
-                                    icon: \.notifications),
-                    kind: .navigationLink {
-                        context.send(viewAction: .notifications)
-                    })
-                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.notifications)
-            
-            switch context.viewState.securitySectionMode {
-            case .secureBackup:
-                ListRow(label: .default(title: L10n.commonEncryption,
-                                        icon: \.key),
-                        details: context.viewState.showSecuritySectionBadge ? .icon(securitySectionBadge) : nil,
-                        kind: .navigationLink { context.send(viewAction: .secureBackup) })
-                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.secureBackup)
-            default:
-                EmptyView()
-            }
-            
-            ListRow(label: .default(title: L10n.commonModerationAndSafety,
-                                    icon: \.admin),
-                    kind: .navigationLink {
-                        context.send(viewAction: .moderationAndSafety)
-                    })
-            
-            if context.viewState.isBugReportServiceEnabled {
-                ListRow(label: .default(title: L10n.commonReportAProblem,
-                                        icon: \.chatProblem),
-                        kind: .navigationLink {
-                            context.send(viewAction: .reportBug)
-                        })
-                        .accessibilityIdentifier(A11yIdentifiers.settingsScreen.reportBug)
-            }
-        } header: {
-            Text(L10n.commonAccountSettings)
-                .compoundListSectionHeader()
-        }
-    }
-    
-    private var signOutSection: some View {
-        Section {
-            ListRow(label: .action(title: L10n.screenSignoutPreferenceItem,
-                                   icon: \.close,
-                                   role: .destructive),
-                    kind: .button {
-                        context.send(viewAction: .logout)
-                    })
-                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.logout)
-            
-            if context.viewState.showAccountDeactivation {
-                ListRow(label: .action(title: L10n.actionDeleteAccount,
-                                       icon: \.delete,
-                                       role: .destructive),
-                        kind: .navigationLink {
-                            context.send(viewAction: .deactivateAccount)
-                        })
-            }
-        }
-    }
-    
-    private var appSettingsSection: some View {
-        Section {
-            ListRow(label: .default(title: L10n.commonAppearance,
-                                    icon: \.darkMode),
-                    kind: .picker(selection: $context.appAppearance,
-                                  items: AppAppearance.allCases.map { (title: $0.name, tag: $0) }))
-            
-            if context.viewState.showBipeHandle {
-                ListRow(label: .default(title: BipeStrings.settingsHandle,
-                                        icon: \.userProfile),
-                        details: .title(context.viewState.bipeHandle.map { "@\($0)" } ?? BipeStrings.settingsHandleNone),
-                        kind: .navigationLink {
-                            context.send(viewAction: .bipeHandle)
-                        })
-                
-                ListRow(label: .default(title: BipeStrings.settingsPublicProfile,
-                                        icon: \.webBrowser),
-                        details: context.viewState.bipePublicProfileEnabled.map { .title($0 ? BipeStrings.publicProfileOn : BipeStrings.publicProfileOff) },
-                        kind: .navigationLink {
-                            context.send(viewAction: .bipePublicProfile)
-                        })
-                
-                ListRow(label: .default(title: BipeStrings.messagingTitle,
-                                        icon: \.chat),
-                        details: context.viewState.bipeWhoCanMessage.map { .title($0.title) },
-                        kind: .navigationLink {
-                            context.send(viewAction: .bipeMessaging)
-                        })
-                
-                ListRow(label: .default(title: BipeStrings.invitesTitle,
-                                        icon: \.userAdd),
-                        kind: .navigationLink {
-                            context.send(viewAction: .bipeInvites)
-                        })
-                
-                ListRow(label: .default(title: BipeStrings.contactsTitle,
-                                        icon: \.userProfile),
-                        kind: .navigationLink {
-                            context.send(viewAction: .bipeContacts)
-                        })
-                
-                // Bipe ADR 0057: PIN, recovery email, and the move from a beta password to a PIN.
-                ListRow(label: .default(title: BipeStrings.pinChangeTitle,
-                                        description: BipeStrings.emailTitle,
-                                        icon: \.lock),
-                        kind: .navigationLink {
-                            context.send(viewAction: .bipeAccount)
-                        })
-            }
-            
-            // Bipe: pt-BR / en switch lives in iOS per-app language settings.
-            ListRow(label: .default(title: BipeStrings.settingsLanguage,
-                                    description: BipeStrings.settingsLanguageFooter,
-                                    icon: \.translate),
-                    kind: .button {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            openURL(url)
-                        }
-                    })
-            
-            ListRow(label: .default(title: L10n.commonMediaUploadQuality,
-                                    icon: \.image),
-                    kind: .navigationLink {
-                        context.send(viewAction: .mediaUploadQuality)
-                    })
-            
-            ListRow(label: .default(title: L10n.commonScreenLock,
-                                    icon: \.lock),
-                    kind: .navigationLink {
-                        context.send(viewAction: .appLock)
-                    })
-                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.screenLock)
-            
-            ListRow(label: .default(title: L10n.commonLocationSharing,
-                                    icon: \.locationPin),
-                    kind: .navigationLink {
-                        context.send(viewAction: .locationSharing)
-                    })
-            
-            if context.viewState.showAnalyticsSettings {
-                ListRow(label: .default(title: L10n.commonAnalytics,
-                                        icon: \.chart),
-                        kind: .navigationLink {
-                            context.send(viewAction: .analytics)
-                        })
-                        .accessibilityIdentifier(A11yIdentifiers.settingsScreen.analytics)
-            }
-            
-            // Bipe: no Labs entry. Threads and galleries are on by default; "Ask to join" stays off.
-            
-            ListRow(label: .default(title: L10n.commonAbout,
-                                    icon: \.info),
-                    kind: .navigationLink {
-                        context.send(viewAction: .about)
-                    })
-                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.about)
-            
             if context.viewState.showDeveloperOptions {
                 ListRow(label: .default(title: L10n.commonDeveloperOptions,
                                         icon: \.code),
@@ -293,36 +73,30 @@ struct SettingsScreen: View {
                         })
                         .accessibilityIdentifier(A11yIdentifiers.settingsScreen.developerOptions)
             }
-        } header: {
-            Text(L10n.commonAppSettings)
-                .compoundListSectionHeader()
         } footer: {
             versionSection
         }
     }
     
+    /// Bipe: the version only. A long press copies the device ID (ADR 0112).
     private var versionSection: some View {
-        VStack(spacing: 0) {
-            versionText
-                .frame(maxWidth: .infinity)
-            
-            if let deviceID = context.viewState.deviceID {
-                Text(deviceID)
+        versionText
+            .frame(maxWidth: .infinity)
+            .compoundListSectionFooter()
+            .padding(.top, 24)
+            .onTapGesture(count: 7) {
+                context.send(viewAction: .enableDeveloperOptions)
             }
-        }
-        .compoundListSectionFooter()
-        .textSelection(.enabled)
-        .padding(.top, 24)
-        .onTapGesture(count: 7) {
-            context.send(viewAction: .enableDeveloperOptions)
-        }
+            .onLongPressGesture {
+                context.send(viewAction: .bipeCopyDeviceID)
+            }
     }
     
     private var versionText: Text {
         // Let's not snapshot a changing version string.
         let shortVersion = ProcessInfo.isRunningTests ? "0.0.0" : InfoPlistReader.main.bundleShortVersionString
         let version = ProcessInfo.isRunningTests ? "1" : InfoPlistReader.main.bundleVersion
-        return Text(L10n.settingsVersionNumber(shortVersion, version))
+        return Text(BipeStrings.helpVersion("\(shortVersion) (\(version))"))
     }
     
     private var toolbar: some ToolbarContent {
@@ -331,16 +105,9 @@ struct SettingsScreen: View {
                 .accessibilityIdentifier(A11yIdentifiers.settingsScreen.done)
         }
     }
-    
-    @ViewBuilder
-    private var securitySectionBadge: some View {
-        if context.viewState.showSecuritySectionBadge {
-            BadgeView(size: 10)
-        }
-    }
 }
 
-private extension AppAppearance {
+extension AppAppearance {
     var name: String {
         switch self {
         case .system:
@@ -364,7 +131,6 @@ struct SettingsScreen_Previews: PreviewProvider, TestablePreview {
         ElementNavigationStack {
             SettingsScreen(context: viewModel.context)
         }
-        .snapshotPreferences(expect: viewModel.context.observe(\.viewState.accountProfileURL).map { $0 != nil })
         .frame(height: 1300)
         .previewLayout(.sizeThatFits)
         .previewDisplayName("Default")
@@ -372,7 +138,6 @@ struct SettingsScreen_Previews: PreviewProvider, TestablePreview {
         ElementNavigationStack {
             SettingsScreen(context: bugReportDisabledViewModel.context)
         }
-        .snapshotPreferences(expect: bugReportDisabledViewModel.context.observe(\.viewState.accountProfileURL).map { $0 != nil })
         .frame(height: 1250)
         .previewLayout(.sizeThatFits)
         .previewDisplayName("Bug report disabled")

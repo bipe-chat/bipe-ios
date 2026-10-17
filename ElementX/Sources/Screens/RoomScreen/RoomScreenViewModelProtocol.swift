@@ -17,4 +17,6 @@ protocol RoomScreenViewModelProtocol {
     func timelineHasScrolled(direction: ScrollDirection)
     func setSelectedPinnedEventID(_ eventID: String)
     func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel)
+    /// Bipe ADR 0034: ends the prompt to message the inviter.
+    func bipeOwnMessageSent()
 }

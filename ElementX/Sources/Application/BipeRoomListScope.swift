@@ -8,7 +8,7 @@ import BipeKit
 import MatrixRustSDK
 
 /// Which rooms a home tab lists (bipe ADR 0053).
-/// Conversas: direct chats and every invite (DM invites become Pedidos). Grupos: joined rooms that are not direct chats.
+/// Conversas: direct chats and DM invites (they become Pedidos). Grupos: rooms that are not direct chats, joined or invited.
 enum BipeRoomListScope {
     case chats
     case groups
@@ -23,8 +23,8 @@ enum BipeRoomListScope {
     /// Added to every filter of the tab's room summary provider. The SDK category puts the DM flag first, then the member count.
     var rustFilter: RoomListEntriesDynamicFilterKind {
         switch self {
-        case .chats: .any(filters: [.category(expect: .people), .invite])
-        case .groups: .all(filters: [.category(expect: .group), .joined])
+        case .chats: .category(expect: .people)
+        case .groups: .all(filters: [.category(expect: .group), .any(filters: [.joined, .invite])])
         }
     }
     
@@ -38,10 +38,11 @@ enum BipeRoomListScope {
     
     /// Swift mirror of `rustFilter` for tab badges and routing.
     init(summary: RoomSummary) {
-        if summary.joinRequestType?.isInvite == true || (summary.isDirect && summary.activeMembersCount <= 2) {
-            self = .chats
+        let isChat = if summary.joinRequestType?.isInvite == true {
+            summary.isDirect
         } else {
-            self = .groups
+            summary.isDirect && summary.activeMembersCount <= 2
         }
+        self = isChat ? .chats : .groups
     }
 }

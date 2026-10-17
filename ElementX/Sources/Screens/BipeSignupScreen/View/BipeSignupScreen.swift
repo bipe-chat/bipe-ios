@@ -143,9 +143,16 @@ struct BipeSignupScreen: View {
             }
             .disabled(context.viewState.isAccountCreated)
             
-            Button(L10n.actionContinue, action: continueStep)
-                .buttonStyle(.compound(.primary))
-                .disabled(!context.viewState.canContinueForm)
+            VStack(spacing: 20) {
+                BipeTermsCheckbox(isAccepted: $context.isTermsAccepted,
+                                  termsURL: context.viewState.termsURL,
+                                  privacyURL: context.viewState.privacyURL)
+                    .disabled(context.viewState.isAccountCreated)
+                
+                Button(L10n.actionContinue, action: continueStep)
+                    .buttonStyle(.compound(.primary))
+                    .disabled(!context.viewState.canContinueForm)
+            }
         }
     }
     
@@ -270,14 +277,27 @@ struct BipeSignupScreen: View {
 // MARK: - Previews
 
 struct BipeSignupScreen_Previews: PreviewProvider {
-    static let viewModel = BipeSignupScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                     signIn: BipeAccountSignIn(authenticationService: AuthenticationService.mock, appSettings: .volatile()),
-                                                     appLockService: nil,
-                                                     userIndicatorController: UserIndicatorControllerMock())
+    static let viewModel = makeViewModel(isTermsAccepted: false)
+    static let termsAcceptedViewModel = makeViewModel(isTermsAccepted: true)
     
     static var previews: some View {
         ElementNavigationStack {
             BipeSignupScreen(context: viewModel.context)
         }
+        .previewDisplayName("Terms unticked")
+        
+        ElementNavigationStack {
+            BipeSignupScreen(context: termsAcceptedViewModel.context)
+        }
+        .previewDisplayName("Terms ticked")
+    }
+    
+    static func makeViewModel(isTermsAccepted: Bool) -> BipeSignupScreenViewModel {
+        let viewModel = BipeSignupScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
+                                                  signIn: BipeAccountSignIn(authenticationService: AuthenticationService.mock, appSettings: .volatile()),
+                                                  appLockService: nil,
+                                                  userIndicatorController: UserIndicatorControllerMock())
+        viewModel.context.isTermsAccepted = isTermsAccepted
+        return viewModel
     }
 }

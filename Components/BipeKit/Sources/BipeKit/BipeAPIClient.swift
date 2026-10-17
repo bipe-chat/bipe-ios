@@ -39,6 +39,13 @@ public struct BipeAPIClient: Sendable {
         return response.challenge
     }
     
+    // MARK: - Terms (ADR 0113)
+    
+    /// `POST /v1/me/terms`. Records that the person ticked the box for this version. `version` must be ``BipeRegistries/legalVersion``.
+    public func acceptTerms(version: String, accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "POST", path: ["v1", "me", "terms"], body: TermsAcceptance(termsVersion: version), accessToken: accessToken)
+    }
+    
     // MARK: - Device-first accounts (ADR 0057, ADR 0059)
     
     /// `GET /v1/me/account`. PIN state, recovery email and the recoveries of the last 7 days.
@@ -238,6 +245,16 @@ public struct BipeAPIClient: Sendable {
         try await send(method: "DELETE", path: ["v1", "me", "profile", "photo"], body: Empty?.none, accessToken: accessToken)
     }
     
+    // MARK: - Data export (LGPD art. 18, ADR 0112, bipe#364)
+    
+    /// `GET /v1/me/export`. The server data of the caller as one JSON file. Messages stay on the device and are not in it.
+    /// `rate_limited` (429) when asked too often.
+    public func exportMyData(accessToken: String) async throws(BipeAPIError) -> BipeDataExport {
+        let (data, response) = try await perform(method: "GET", path: ["v1", "me", "export"], rawBody: nil, accessToken: accessToken)
+        let filename = BipeDataExport.filename(contentDisposition: response.value(forHTTPHeaderField: "Content-Disposition"))
+        return BipeDataExport(data: data, filename: filename)
+    }
+    
     // MARK: - Auth
     
     /// Runs `request` with the token from `accessToken`. On HTTP 401 it reads the token again and retries once,
@@ -296,6 +313,10 @@ public struct BipeAPIClient: Sendable {
     
     private struct SetHandleRequest: Encodable {
         let handle: String
+    }
+    
+    private struct TermsAcceptance: Encodable {
+        let termsVersion: String
     }
     
     private struct PINRequest: Encodable {
@@ -365,10 +386,11 @@ public struct BipeAPIClient: Sendable {
         return try await send(method: method, path: path, rawBody: rawBody, accessToken: accessToken)
     }
     
-    private func send<Response: Decodable>(method: String,
-                                           path: [String],
-                                           rawBody: (data: Data, contentType: String)?,
-                                           accessToken: String? = nil) async throws(BipeAPIError) -> Response {
+    /// Sends the request and returns the body of a 2xx answer. Other answers throw the contract's error.
+    private func perform(method: String,
+                         path: [String],
+                         rawBody: (data: Data, contentType: String)?,
+                         accessToken: String?) async throws(BipeAPIError) -> (Data, HTTPURLResponse) {
         // appending(path:) percent-encodes each component, so a handle cannot add path segments.
         let url = path.reduce(baseURL) { $0.appending(path: $1, directoryHint: .notDirectory) }
         var request = URLRequest(url: url)
@@ -403,6 +425,15 @@ public struct BipeAPIClient: Sendable {
             }
             throw .unexpectedResponse(statusCode: httpResponse.statusCode)
         }
+        
+        return (data, httpResponse)
+    }
+    
+    private func send<Response: Decodable>(method: String,
+                                           path: [String],
+                                           rawBody: (data: Data, contentType: String)?,
+                                           accessToken: String? = nil) async throws(BipeAPIError) -> Response {
+        let (data, httpResponse) = try await perform(method: method, path: path, rawBody: rawBody, accessToken: accessToken)
         
         // 204, and 202 without a body.
         if httpResponse.statusCode == 204 || data.isEmpty, let noContent = NoContent() as? Response {
@@ -460,6 +491,8 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
     public let attestation: BipeAttestation?
     /// Same key on a retry: the same account (ADR 0094). From ``BipeCredentialStore/pendingSignup()``.
     public let signupKey: String?
+    /// The ``BipeRegistries/legalVersion`` the person accepted with the checkbox (ADR 0113). Without it the server answers `terms_required`.
+    public let termsVersion: String?
     
     public init(inviteCode: String? = nil,
                 email: String?,
@@ -468,8 +501,10 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
                 handle: String?,
                 displayName: String?,
                 attestation: BipeAttestation? = nil,
-                signupKey: String? = nil) {
+                signupKey: String? = nil,
+                termsVersion: String?) {
         self.signupKey = signupKey
+        self.termsVersion = termsVersion
         self.inviteCode = inviteCode
         self.email = email
         password = nil
@@ -514,6 +549,8 @@ public struct BipeAttestation: Encodable, Sendable, CustomStringConvertible {
 public struct BipeSignupConfig: Decodable, Sendable, Equatable {
     /// `true`: sign-up fails without a valid invite code. An app that cannot read the mode assumes `true`.
     public let inviteRequired: Bool
+    /// The current legal version (ADR 0113). Absent from a server older than ADR 0113.
+    public let termsVersion: String?
 }
 
 public struct BipeSignupResponse: Decodable, Sendable, CustomStringConvertible {
@@ -731,6 +768,8 @@ public enum BipeAPIErrorCode: String, Sendable {
     case pinNotSet = "pin_not_set"
     case recoveryInvalid = "recovery_invalid"
     case emailUnavailable = "email_unavailable"
+    /// 403. Reason `missing` or `outdated` (ADR 0113).
+    case termsRequired = "terms_required"
 }
 
 public enum BipeAPIError: Error, Sendable, Equatable {
@@ -783,6 +822,7 @@ public enum BipeAPIError: Error, Sendable, Equatable {
             case .pinNotSet: BipeStrings.pinCreateBody(String(BipeRegistries.pinLength))
             case .recoveryInvalid: BipeStrings.errorRecoveryInvalid
             case .emailUnavailable: BipeStrings.errorEmailUnavailable
+            case .termsRequired: BipeStrings.signupTermsRequired
             case .badRequest, .notFound, .internal: BipeStrings.errorGeneric
             }
         case .network:

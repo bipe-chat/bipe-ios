@@ -37,6 +37,8 @@ enum RoomScreenViewAction {
     case displayThreadList
     case tappedOpenLiveLocation
     case tappedStopLiveLocation
+    /// Bipe ADR 0034: the "say hi" button in the prompt to message the inviter.
+    case sayHiToBipeInviter
 }
 
 struct RoomScreenViewState: BindableState {
@@ -98,6 +100,9 @@ struct RoomScreenViewState: BindableState {
     var roomHistorySharingState: RoomHistorySharingState?
     
     var footerDetails: RoomScreenFooterViewDetails?
+    
+    /// Bipe ADR 0034: the inviter's handle while this is the chat with the inviter and the user has not messaged them yet.
+    var bipeInviterHandle: String?
     
     var bindings = RoomScreenViewStateBindings()
 }

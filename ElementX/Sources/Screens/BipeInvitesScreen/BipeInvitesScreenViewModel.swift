@@ -15,6 +15,7 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
     private let clientProxy: ClientProxyProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let store: BipeInviteStore
+    private let creator: BipeInviteCreator
     
     private let actionsSubject: PassthroughSubject<BipeInvitesScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeInvitesScreenViewModelAction, Never> {
@@ -28,6 +29,7 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
         self.clientProxy = clientProxy
         self.userIndicatorController = userIndicatorController
         store = BipeInviteStore(userID: clientProxy.userID)
+        creator = BipeInviteCreator(apiClient: apiClient, userID: clientProxy.userID) { [clientProxy] in clientProxy.accessToken }
         
         var initialState = BipeInvitesScreenViewState()
         initialState.shareURLs = store.links()
@@ -103,12 +105,9 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
         defer { stopLoading() }
         
         do {
-            let created = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeCreatedInvite in
-                try await apiClient.createInvite(accessToken: token)
-            }
+            let created = try await creator.create()
             MXLog.info("Bipe invite created \(created)")
             state.shareURLs[created.id] = created.url
-            store.saveLink(created.url, forInviteID: created.id)
             await load()
             return BipeInviteShareLink(id: created.id, url: created.url)
         } catch {

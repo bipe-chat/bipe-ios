@@ -9,11 +9,26 @@ import Compound
 import SwiftUI
 
 /// Bipe: the "Perfil de confiança" card at the top of Settings (bipe/docs/trust-levels.md).
+/// It collapses to one row when every live step is done (ADR 0112); a tap opens it again.
 struct BipeTrustProfileSection: View {
     let profile: BipeTrustProfile
     let send: (SettingsScreenViewAction) -> Void
     
+    @State private var isExpanded = false
+    
     var body: some View {
+        if profile.liveStepsDone, !isExpanded {
+            Section {
+                ListRow(label: .default(title: BipeStrings.trustTitle, icon: \.verified),
+                        details: .title(BipeStrings.trustProgress(String(profile.completedCount), String(profile.totalCount))),
+                        kind: .navigationLink { isExpanded = true })
+            }
+        } else {
+            card
+        }
+    }
+    
+    private var card: some View {
         Section {
             ListRow(kind: .custom { header })
             

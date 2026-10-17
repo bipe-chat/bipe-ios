@@ -57,10 +57,22 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             if isDM, case .roomCreate = content {
                 return nil
             }
+            // Bipe: a DM has no room setup lines (BIPE.md "DMs are DMs").
+            if isDM, case .roomEncryption = content {
+                return nil
+            }
             return buildStateTimelineItem(for: eventItemProxy, state: content, isOutgoing: isOutgoing)
         case .roomMembership(userId: let userID, let displayName, change: let change, let reason):
             if isDM, change == .joined, userID == self.userID {
                 return nil
+            }
+            // Bipe: a DM has no invite or join lines, and the other person leaves the conversation, not a room.
+            if isDM, change == .joined || change == .invited || change == .invitationAccepted {
+                return nil
+            }
+            if isDM, change == .left {
+                let text = userID == self.userID ? BipeStrings.dmLeftByYou : BipeStrings.dmLeft(displayName ?? userID)
+                return buildStateTimelineItem(for: eventItemProxy, text: text, isOutgoing: isOutgoing)
             }
             return buildStateMembershipChangeTimelineItem(for: eventItemProxy, memberUserID: userID, memberDisplayName: displayName, membershipChange: change, reason: reason, isOutgoing: isOutgoing)
         case .profileChange(let displayName, let prevDisplayName, let avatarUrl, let prevAvatarUrl):

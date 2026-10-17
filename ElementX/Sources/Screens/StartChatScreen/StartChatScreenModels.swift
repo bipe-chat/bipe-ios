@@ -10,6 +10,7 @@ import Foundation
 
 enum StartChatScreenErrorType: Error {
     case failedCreatingRoom
+    case bipeInvite
 }
 
 enum StartChatScreenViewModelAction: Equatable {
@@ -25,6 +26,8 @@ struct StartChatScreenViewState: BindableState {
     var usersSection: UserDiscoverySection = .init(type: .suggestions, users: [])
     /// Bipe: the handle in the query when nobody holds it.
     var bipeHandleNotFound: String?
+    /// Bipe ADR 0111: the inviter while the user has not messaged them yet.
+    var bipeInviter: (userID: String, handle: String)?
     
     var isSearching: Bool {
         !bindings.searchQuery.isEmpty
@@ -46,6 +49,7 @@ struct StartChatScreenViewStateBindings {
     
     var selectedUserToInvite: UserToInvite?
     var isJoinRoomByAddressSheetPresented = false
+    var bipeInviteShareLink: BipeInviteShareLink?
 }
 
 enum StartChatScreenViewAction {
@@ -55,6 +59,7 @@ enum StartChatScreenViewAction {
     case selectUser(UserProfile)
     case joinRoomByAddress
     case openRoomDirectorySearch
+    case bipeInviteToApp
 }
 
 enum JoinByAddressState: Equatable {

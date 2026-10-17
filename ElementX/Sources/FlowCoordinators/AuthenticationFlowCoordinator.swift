@@ -496,8 +496,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .signedIn(let userSession):
                     self?.stateMachine.tryEvent(.signedIn, userInfo: userSession)
-                case .createdWithInvite(let inviterUserID):
+                case .createdWithInvite(let inviterUserID, let inviterHandle):
                     self?.appSettings.bipePendingInviterUserID = inviterUserID
+                    self?.appSettings.bipePendingInviterHandle = inviterHandle
                 }
             }
             .store(in: &cancellables)

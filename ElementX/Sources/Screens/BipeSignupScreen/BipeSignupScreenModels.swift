@@ -11,8 +11,8 @@ import SwiftUI
 enum BipeSignupScreenViewModelAction: CustomStringConvertible {
     /// The account exists and this device signed in with its hidden password.
     case signedIn(UserSessionProtocol)
-    /// The account came from a personal invite. The app opens the inviter's profile after the first sign-in.
-    case createdWithInvite(inviterUserID: String)
+    /// The account came from a personal invite. The app opens a chat with the inviter after the first sign-in (ADR 0034).
+    case createdWithInvite(inviterUserID: String, inviterHandle: String?)
     
     var description: String {
         switch self {
@@ -33,6 +33,9 @@ enum BipeSignupStep {
 }
 
 struct BipeSignupScreenViewState: BindableState {
+    /// The Termos de uso on the public site (ADR 0113).
+    let termsURL: URL
+    let privacyURL: URL
     var step = BipeSignupStep.form
     /// The fallback step shows the email field.
     var isFallbackEmailOpen = false
@@ -121,6 +124,7 @@ struct BipeSignupScreenViewState: BindableState {
             && !handleStatus.isBlocking
             && isInviteCodeAcceptable
             && inviteCodeError == nil
+            && bindings.isTermsAccepted
     }
     
     var isPINValid: Bool {
@@ -144,6 +148,8 @@ struct BipeSignupScreenViewStateBindings {
     var pin = ""
     var pinConfirmation = ""
     var inviteCode = ""
+    /// The clickwrap checkbox (ADR 0113). Starts unticked; sign-up needs it ticked.
+    var isTermsAccepted = false
     
     var alertInfo: AlertInfo<BipeSignupScreenAlertType>?
 }

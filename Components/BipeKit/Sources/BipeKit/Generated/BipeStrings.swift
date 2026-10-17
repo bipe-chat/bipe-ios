@@ -208,6 +208,8 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_start_chat_handle_not_found", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static var startChatSearchByHandle: String { NSLocalizedString("bipe_start_chat_search_by_handle", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var profileShare: String { NSLocalizedString("bipe_profile_share", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var profileQrAction: String { NSLocalizedString("bipe_profile_qr_action", tableName: "Bipe", bundle: .module, comment: "") }
@@ -265,6 +267,20 @@ public enum BipeStrings {
     public static func signupInvitedBy(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_signup_invited_by", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
+
+    public static func inviterHint(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_inviter_hint", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var inviterHintAction: String { NSLocalizedString("bipe_inviter_hint_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviterGreeting: String { NSLocalizedString("bipe_inviter_greeting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func inviterCardTitle(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_inviter_card_title", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var inviterCardBody: String { NSLocalizedString("bipe_inviter_card_body", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var inviteAlreadySignedIn: String { NSLocalizedString("bipe_invite_already_signed_in", tableName: "Bipe", bundle: .module, comment: "") }
 
@@ -510,6 +526,10 @@ public enum BipeStrings {
 
     public static var contactsInvite: String { NSLocalizedString("bipe_contacts_invite", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var contactsJoinedWithInvite: String { NSLocalizedString("bipe_contacts_joined_with_invite", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var contactsPendingInvites: String { NSLocalizedString("bipe_contacts_pending_invites", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var discoveryToggle: String { NSLocalizedString("bipe_discovery_toggle", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var discoveryFooter: String { NSLocalizedString("bipe_discovery_footer", tableName: "Bipe", bundle: .module, comment: "") }
@@ -555,6 +575,22 @@ public enum BipeStrings {
     public static var signupEmailOptionalFooter: String { NSLocalizedString("bipe_signup_email_optional_footer", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var signupDeviceSuccess: String { NSLocalizedString("bipe_signup_device_success", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func signupTermsAccept(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_signup_terms_accept", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static var signupTermsLink: String { NSLocalizedString("bipe_signup_terms_link", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupPrivacyLink: String { NSLocalizedString("bipe_signup_privacy_link", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupTermsRequired: String { NSLocalizedString("bipe_signup_terms_required", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var termsReacceptTitle: String { NSLocalizedString("bipe_terms_reaccept_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var termsReacceptBody: String { NSLocalizedString("bipe_terms_reaccept_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var termsReacceptFailed: String { NSLocalizedString("bipe_terms_reaccept_failed", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var pinCreateTitle: String { NSLocalizedString("bipe_pin_create_title", tableName: "Bipe", bundle: .module, comment: "") }
 
@@ -1399,4 +1435,224 @@ public enum BipeStrings {
     public static func orderPushCancelled(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_order_push_cancelled", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
+
+    public static var dmInviteToGroup: String { NSLocalizedString("bipe_dm_invite_to_group", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInviteToGroupEmpty: String { NSLocalizedString("bipe_dm_invite_to_group_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInviteToGroupSent: String { NSLocalizedString("bipe_dm_invite_to_group_sent", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInviteToGroupAlreadyMember: String { NSLocalizedString("bipe_dm_invite_to_group_already_member", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmLeaveBody: String { NSLocalizedString("bipe_dm_leave_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDetailsTitle: String { NSLocalizedString("bipe_dm_details_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func dmLeft(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_left", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmLeftByYou: String { NSLocalizedString("bipe_dm_left_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmLeaving: String { NSLocalizedString("bipe_dm_leaving", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmErrorMuting: String { NSLocalizedString("bipe_dm_error_muting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmErrorUnmuting: String { NSLocalizedString("bipe_dm_error_unmuting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmMediaEmpty: String { NSLocalizedString("bipe_dm_media_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmFilesEmpty: String { NSLocalizedString("bipe_dm_files_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsSection: String { NSLocalizedString("bipe_settings_section", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsProfile: String { NSLocalizedString("bipe_settings_profile", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsProfileNamePhoto: String { NSLocalizedString("bipe_settings_profile_name_photo", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsPrivacy: String { NSLocalizedString("bipe_settings_privacy", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsAccount: String { NSLocalizedString("bipe_settings_account", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsNotifications: String { NSLocalizedString("bipe_settings_notifications", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsChats: String { NSLocalizedString("bipe_settings_chats", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsHelp: String { NSLocalizedString("bipe_settings_help", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsNotificationsOn: String { NSLocalizedString("bipe_settings_notifications_on", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsNotificationsOff: String { NSLocalizedString("bipe_settings_notifications_off", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsPrivacySummaryEveryone: String { NSLocalizedString("bipe_settings_privacy_summary_everyone", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsPrivacySummaryVerified: String { NSLocalizedString("bipe_settings_privacy_summary_verified", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsPrivacySummaryContacts: String { NSLocalizedString("bipe_settings_privacy_summary_contacts", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsAccountPathsNone: String { NSLocalizedString("bipe_settings_account_paths_none", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func settingsAccountPaths(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_settings_account_paths", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var accountPathsWarning: String { NSLocalizedString("bipe_account_paths_warning", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountPinSection: String { NSLocalizedString("bipe_account_pin_section", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func accountBiometricUnlock(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_account_biometric_unlock", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func accountPinFooter(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_account_pin_footer", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var accountWaysBack: String { NSLocalizedString("bipe_account_ways_back", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountEmailNone: String { NSLocalizedString("bipe_account_email_none", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountRecoveryKey: String { NSLocalizedString("bipe_account_recovery_key", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountRecoveryKeySaved: String { NSLocalizedString("bipe_account_recovery_key_saved", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountRecoveryKeyMissing: String { NSLocalizedString("bipe_account_recovery_key_missing", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountRecoveryKeyFooter: String { NSLocalizedString("bipe_account_recovery_key_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountDevices: String { NSLocalizedString("bipe_account_devices", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountThisDevice: String { NSLocalizedString("bipe_account_this_device", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountLinkDevice: String { NSLocalizedString("bipe_account_link_device", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountSignOut: String { NSLocalizedString("bipe_account_sign_out", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyWhoCanTalk: String { NSLocalizedString("bipe_privacy_who_can_talk", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyRequestsHidePhotos: String { NSLocalizedString("bipe_privacy_requests_hide_photos", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyRequestsHidePhotosFooter: String { NSLocalizedString("bipe_privacy_requests_hide_photos_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyBlocked: String { NSLocalizedString("bipe_privacy_blocked", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyBlockedNone: String { NSLocalizedString("bipe_privacy_blocked_none", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyWhoCanFind: String { NSLocalizedString("bipe_privacy_who_can_find", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyNumber: String { NSLocalizedString("bipe_privacy_number", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyNumberLinked: String { NSLocalizedString("bipe_privacy_number_linked", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyNumberNotLinked: String { NSLocalizedString("bipe_privacy_number_not_linked", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyWhatOthersSee: String { NSLocalizedString("bipe_privacy_what_others_see", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyPresence: String { NSLocalizedString("bipe_privacy_presence", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyPresenceFooter: String { NSLocalizedString("bipe_privacy_presence_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyReadReceipts: String { NSLocalizedString("bipe_privacy_read_receipts", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyReadReceiptsValue: String { NSLocalizedString("bipe_privacy_read_receipts_value", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyReadReceiptsFooter: String { NSLocalizedString("bipe_privacy_read_receipts_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyWhoCanRead: String { NSLocalizedString("bipe_privacy_who_can_read", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyYourData: String { NSLocalizedString("bipe_privacy_your_data", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyExport: String { NSLocalizedString("bipe_privacy_export", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyExportFooter: String { NSLocalizedString("bipe_privacy_export_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyExportBiometric: String { NSLocalizedString("bipe_privacy_export_biometric", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyExportError: String { NSLocalizedString("bipe_privacy_export_error", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var privacyWhatBipeKeeps: String { NSLocalizedString("bipe_privacy_what_bipe_keeps", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsWholeGroup: String { NSLocalizedString("bipe_notifications_whole_group", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsInvites: String { NSLocalizedString("bipe_notifications_invites", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsSound: String { NSLocalizedString("bipe_notifications_sound", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsMessageSound: String { NSLocalizedString("bipe_notifications_message_sound", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsCallSound: String { NSLocalizedString("bipe_notifications_call_sound", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsToneDefault: String { NSLocalizedString("bipe_notifications_tone_default", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsToneSoft: String { NSLocalizedString("bipe_notifications_tone_soft", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsToneCustom: String { NSLocalizedString("bipe_notifications_tone_custom", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsMediaQuality: String { NSLocalizedString("bipe_chats_media_quality", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsShowMedia: String { NSLocalizedString("bipe_chats_show_media", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsShowMediaAlways: String { NSLocalizedString("bipe_chats_show_media_always", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsShowMediaPrivate: String { NSLocalizedString("bipe_chats_show_media_private", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsShowMediaNever: String { NSLocalizedString("bipe_chats_show_media_never", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsLiveLocation: String { NSLocalizedString("bipe_chats_live_location", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsLiveLocationFooter: String { NSLocalizedString("bipe_chats_live_location_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpDocs: String { NSLocalizedString("bipe_help_docs", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpTerms: String { NSLocalizedString("bipe_help_terms", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpPrivacy: String { NSLocalizedString("bipe_help_privacy", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpLicenses: String { NSLocalizedString("bipe_help_licenses", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func helpVersion(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_help_version", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var helpDeviceIdCopied: String { NSLocalizedString("bipe_help_device_id_copied", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var profileDisplayName: String { NSLocalizedString("bipe_profile_display_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var profileDisplayNameFooter: String { NSLocalizedString("bipe_profile_display_name_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var profileChooseFile: String { NSLocalizedString("bipe_profile_choose_file", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsAppearance: String { NSLocalizedString("bipe_chats_appearance", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsEnable: String { NSLocalizedString("bipe_notifications_enable", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsNotifyAbout: String { NSLocalizedString("bipe_notifications_notify_about", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsChats: String { NSLocalizedString("bipe_notifications_chats", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsGroups: String { NSLocalizedString("bipe_notifications_groups", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsToneSystem: String { NSLocalizedString("bipe_notifications_tone_system", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsToneSilent: String { NSLocalizedString("bipe_notifications_tone_silent", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func notificationsToneCurrent(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_notifications_tone_current", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var notificationsToneError: String { NSLocalizedString("bipe_notifications_tone_error", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountBiometricWordAndroid: String { NSLocalizedString("bipe_account_biometric_word_android", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func chatsLiveLocationDistance(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_chats_live_location_distance", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var chatsLiveLocationPrecise: String { NSLocalizedString("bipe_chats_live_location_precise", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func chatsLiveLocationPermission(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_chats_live_location_permission", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var chatsLiveLocationPermissionLink: String { NSLocalizedString("bipe_chats_live_location_permission_link", tableName: "Bipe", bundle: .module, comment: "") }
 }

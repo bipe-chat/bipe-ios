@@ -92,6 +92,27 @@ public nonisolated struct BipeInviteStore {
         defaults.set(userIDs.sorted(), forKey: pairsKey)
     }
     
+    // MARK: - Inviter greeting
+    
+    /// The inviter of this account (ADR 0034), until the user sends them a first message.
+    /// The chat list and the chat with the inviter show a prompt while it is set. Not secret; UserDefaults.
+    public func inviterGreeting() -> BipeInviterGreeting? {
+        guard let values = defaults.dictionary(forKey: greetingKey) as? [String: String],
+              let userID = values["userID"] else { return nil }
+        return BipeInviterGreeting(userID: userID, handle: values["handle"])
+    }
+    
+    public func setInviterGreeting(_ greeting: BipeInviterGreeting?) {
+        if let greeting {
+            var values = ["userID": greeting.userID]
+            values["handle"] = greeting.handle
+            defaults.set(values, forKey: greetingKey)
+        } else {
+            defaults.removeObject(forKey: greetingKey)
+        }
+        NotificationCenter.default.post(name: .bipeInviterGreetingDidChange, object: userID)
+    }
+    
     // MARK: - Private
     
     private var seenKey: String {
@@ -104,6 +125,10 @@ public nonisolated struct BipeInviteStore {
     
     private var pairsKey: String {
         "bipe.invites.pairs.\(userID)"
+    }
+    
+    private var greetingKey: String {
+        "bipe.invites.greeting.\(userID)"
     }
     
     private func writeLinks(_ links: [String: URL]) {
@@ -133,4 +158,20 @@ public nonisolated struct BipeInviteStore {
             SecItemAdd(keychainQuery.merging(attributes) { $1 } as CFDictionary, nil)
         }
     }
+}
+
+/// The person who invited this account, by Matrix ID. `handle` comes from the invite preview and can be out of date.
+public struct BipeInviterGreeting: Equatable, Sendable {
+    public let userID: String
+    public let handle: String?
+    
+    public init(userID: String, handle: String?) {
+        self.userID = userID
+        self.handle = handle
+    }
+}
+
+public extension Notification.Name {
+    /// Posted with the account's user ID as the object when the inviter greeting changes.
+    static let bipeInviterGreetingDidChange = Notification.Name("BipeInviterGreetingDidChange")
 }
