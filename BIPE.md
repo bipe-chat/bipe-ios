@@ -195,6 +195,12 @@ Not done (needs the domain, Apple team or brand):
 - Leaving a DM is final for that room. The SDK finds a DM only among joined rooms (`get_dm_rooms`), so if you start a chat again, Bipe creates a new room. The other person keeps the old room: they see "Você está sozinho nesta conversa" and can invite you back to it.
 - Android does the same (`BipeInviteToGroup` in libraries/bipe).
 
+## Message menu (16 Oct 2026)
+
+- Long press on a message opens the native iOS context menu, not Element's sheet. `TimelineItemContextMenu`: reaction palette (emoji drawn into images, palettes only render images), actions, secondary actions. `TimelineItemContextMenuPreview`: the sheet's header (`TimelineItemMenuHeader`) above the bubble.
+- The sheet (`TimelineItemMenu`) stays for the VoiceOver action. `longPressWithFeedback` on the bubble is gone.
+- On a rebase, keep the context menu unconditional (upstream shows it only on a Mac).
+
 ## Differences from Android (ADR 0031)
 
 Each line is a difference with its reason. A difference not listed here is a bug. The table is generated from `bipe-shared/product/parity.json` (ADR 0092): change it there, then run `node tools/parity.mjs --write` in bipe-shared. Android's list: `../bipe-android/BIPE.md`.
@@ -222,5 +228,6 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Search | Search tab (iOS 26+), inline before iOS 26 | Search button in the top bar of Conversas and Grupos | Platform idiom (ADR 0053) |
 | Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/bipe; same result for the user |
 | Conferir no Bipe: close | Back to the app that shared | Back to Bipe | The iOS check runs in the share extension; Android shows it in the app (ADR 0091) |
+| Message actions | Native context menu on long press: reaction row, actions, the message as preview | Element's bottom sheet | Platform idiom |
 
 <!-- /parity:differences -->

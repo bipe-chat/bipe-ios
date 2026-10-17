@@ -8,7 +8,6 @@
 
 import OrderedCollections
 import BipeKit
-import SFSafeSymbols
 import SwiftUI
 
 struct TimelineItemMenuActions {
@@ -28,13 +27,13 @@ struct TimelineItemMenuActions {
         self.secondaryActions = secondaryActions
         
         var frequentlyUsed: OrderedSet<TimelineItemMenuReaction> = [
-            .init(key: "👍️", symbol: .handThumbsup),
-            .init(key: "👎️", symbol: .handThumbsdown),
-            .init(key: "🎉", symbol: .partyPopper),
-            .init(key: "❤️", symbol: .heart)
+            .init(key: "👍️"),
+            .init(key: "👎️"),
+            .init(key: "🎉"),
+            .init(key: "❤️")
         ]
         
-        frequentlyUsed.append(contentsOf: emojiProvider.frequentlyUsedSystemEmojis().map { TimelineItemMenuReaction(key: $0, symbol: .heart) })
+        frequentlyUsed.append(contentsOf: emojiProvider.frequentlyUsedSystemEmojis().map(TimelineItemMenuReaction.init))
         
         reactions = if isReactable {
             Array(frequentlyUsed.elements.prefix(10))
@@ -46,13 +45,6 @@ struct TimelineItemMenuActions {
 
 struct TimelineItemMenuReaction: Hashable {
     let key: String
-    let symbol: SFSymbol
-    
-    /// Frequently used emojis on the all use the same .heart SFSymbol.
-    /// Override equatable so we can remove duplicates.
-    static func == (lhs: TimelineItemMenuReaction, rhs: TimelineItemMenuReaction) -> Bool {
-        lhs.key == rhs.key
-    }
 }
 
 enum TimelineItemMenuAction: Identifiable, Hashable {
@@ -183,7 +175,7 @@ enum TimelineItemMenuAction: Identifiable, Hashable {
         case .react:
             Label(L10n.actionReact, icon: \.reactionAdd)
         case .toggleReaction:
-            // Unused label - manually created in TimelineItemMacContextMenu.
+            // Unused label - manually created in TimelineItemContextMenu.
             Label(L10n.actionReact, icon: \.reactionAdd)
         case .endPoll:
             Label(L10n.actionEndPoll, icon: \.pollsEnd)
