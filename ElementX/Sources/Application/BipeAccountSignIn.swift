@@ -79,9 +79,19 @@ extension BipeCredentialStore {
     }
 }
 
+/// Bipe: the device PIN locks the app and belongs to the phone, not to an account (ADR 0086).
+enum BipeDevicePIN {
+    /// The device PIN follows the account PIN while the phone holds one account, so a one-account user keeps one PIN.
+    static var followsAccountPIN: Bool {
+        KeychainController(service: .sessions, accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier).restorationTokens().count <= 1
+    }
+}
+
 extension AppLockServiceProtocol {
-    /// Bipe: the account PIN also locks the app (ADR 0057). Biometric unlock stays on when the device supports it.
+    /// Bipe: an account PIN the user just typed or set becomes the device PIN (ADR 0057) while it follows the account PIN,
+    /// or when no app lock is set yet (ADR 0086). Biometric unlock stays on when the device supports it.
     func bipeUseAccountPIN(_ pin: String) {
+        guard BipeDevicePIN.followsAccountPIN || !isEnabled else { return }
         guard case .success = setupPINCode(pin) else {
             MXLog.error("Bipe: could not use the account PIN for the app lock")
             return
