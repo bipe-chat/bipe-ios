@@ -13,6 +13,8 @@ import SwiftUI
 
 protocol AuthenticationFlowCoordinatorDelegate: AnyObject {
     func authenticationFlowCoordinator(didLoginWithSession userSession: UserSessionProtocol)
+    /// Bipe: the add-account sheet was closed without a sign-in (ADR 0086, bipe#267).
+    func authenticationFlowCoordinatorDidCancelAddingAccount()
 }
 
 class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
@@ -27,6 +29,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private let userIndicatorController: UserIndicatorControllerProtocol
     /// Bipe: the account PIN also locks the app (ADR 0057).
     private let appLockService: AppLockServiceProtocol?
+    /// Bipe: adding an account from a signed-in session shows the flow as a sheet over it, with no silent sign-in (ADR 0086).
+    private let isAddingAccount: Bool
     
     enum State: StateType {
         /// The state machine hasn't started.
@@ -122,9 +126,11 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
          appSettings: AppSettings,
          appHooks: AppHooks,
          userIndicatorController: UserIndicatorControllerProtocol,
-         appLockService: AppLockServiceProtocol? = nil) {
+         appLockService: AppLockServiceProtocol? = nil,
+         isAddingAccount: Bool = false) {
         self.authenticationService = authenticationService
         self.appLockService = appLockService
+        self.isAddingAccount = isAddingAccount
         self.bugReportService = bugReportService
         self.navigationRootCoordinator = navigationRootCoordinator
         self.appMediator = appMediator
@@ -353,7 +359,12 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationStackCoordinator.setRootCoordinator(coordinator)
         
-        if fromState == .initial {
+        if fromState == .initial, isAddingAccount {
+            navigationRootCoordinator.setSheetCoordinator(navigationStackCoordinator) { [weak self] in
+                guard let self, stateMachine.state != .complete else { return }
+                delegate?.authenticationFlowCoordinatorDidCancelAddingAccount()
+            }
+        } else if fromState == .initial {
             navigationRootCoordinator.setRootCoordinator(navigationStackCoordinator)
             if appSettings.usesBipeSignup {
                 Task { await resumeBipeAccount() }

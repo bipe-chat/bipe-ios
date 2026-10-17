@@ -36,6 +36,9 @@ enum HomeScreenCoordinatorAction {
     case presentEncryptionResetScreen
     case presentStartChatScreen
     case presentCreateGroupScreen
+    /// Bipe: the account menu on the avatar (ADR 0086, bipe#267).
+    case bipeSwitchAccount(userID: String)
+    case bipeAddAccount
     case logout
 }
 
@@ -92,6 +95,10 @@ final class HomeScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.presentStartChatScreen)
                 case .presentCreateGroupScreen:
                     actionsSubject.send(.presentCreateGroupScreen)
+                case .bipeSwitchAccount(let userID):
+                    actionsSubject.send(.bipeSwitchAccount(userID: userID))
+                case .bipeAddAccount:
+                    actionsSubject.send(.bipeAddAccount)
                 case .logout:
                     actionsSubject.send(.logout)
                 case .transferOwnership(let roomIdentifier):

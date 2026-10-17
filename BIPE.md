@@ -126,6 +126,16 @@ Not done (needs the domain, Apple team or brand):
 - **Password saving:** `webcredentials:bipe.chat` in the associated domains; the AASA lists both app IDs (bipe-infra).
 - Not built: guardian and CPF recovery (no API yet), QR sign-in checks from bipe#152, the fallback prompt after sign-up (the optional email on the form is the only fallback).
 
+## Several accounts (ADR 0086, bipe#267)
+
+- **Chat list avatar** (`HomeScreen.settingsButton`): a tap with two or more accounts switches to the next one (one account: Você, as before). A long press opens a context menu: every account (`BipeAccountMenuItem`, current one checked), then "Adicionar conta" (`bipe_account_add`) up to the cap, else `bipe_account_cap_reached`. Account names come from `BipeAccountLabels` (BipeKit), because another account's session may not be live; the list comes from the session keychain (`BipeSignedInAccounts`), because `sessionsPublisher` lists live sessions only.
+- **Switch** (`AppCoordinator.bipeSwitchAccount`): pause the current session, `UserSessionManager.activate(userID:)` (restores the session when it is not live, moves it first), then rebuild the session UI. The state stays `signedIn`.
+- **Add account** (`bipeStartAddingAccount`): `AuthenticationFlowCoordinator(isAddingAccount: true)` shows the start screen as a sheet over the session, without the silent sign-in. A swipe down cancels. A sign-in adds the session and opens it (`isNewLogin: true`). The recovery screen offers only tokens of accounts not on the phone (`BipeCredentialStore.recoveryToken(excluding:)`).
+- **Cap:** `BipeAccountCap` (BipeKit): the last `max_accounts` from `GET /v1/me/account` (read in `BipeRecoveryAlerts`), else `BipeRegistries.maxPersonalAccounts` (2). Company accounts do not count (#269).
+- **Sign-out:** another account on the phone opens (`signedOut => restoringSession`). A sign-out after a forgotten device PIN removes every account from the phone (`userSessionManager.reset()`), so the PIN cannot be skipped to reach the other account.
+- Upstream's `multiAccountEnabled` flag and its announcement stay off.
+- Not done: the account avatar in the composer, the account name in notifications, a check that the NSE reads the right session per push (unverified), the ADR 0120 rounded square for a verified company (needs #252). Upstream develop has 28 newer commits with multi-account work ("Keep every signed-in account live", "Notify every signed-in account"); a rebase onto it can replace parts of this.
+
 ## Contacts and invites (growth loop step 2)
 
 - **One settings row**, "Contatos e convites", opens `BipeContactsScreen`. Invites have no settings row of their own.

@@ -48,7 +48,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
         
-        super.init(initialViewState: BipeRecoveryScreenViewState(mode: mode, hasRecoveryToken: signIn.credentialStore.recoveryToken() != nil))
+        super.init(initialViewState: BipeRecoveryScreenViewState(mode: mode, hasRecoveryToken: signIn.credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) != nil))
         startPollingIfWaiting()
     }
     
@@ -78,7 +78,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         case .signInWithEmail:
             Task { await signInWithEmail() }
         case .useRecoveryToken:
-            guard let token = credentialStore.recoveryToken() else { return }
+            guard let token = credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) else { return }
             switchMode(to: .token(userID: token.userID))
         case .refreshClaim:
             Task { await claim() }
@@ -120,7 +120,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             MXLog.error("Bipe token recovery failed: \(error)")
             if case .server(.recoveryInvalid, _, _) = error {
                 credentialStore.deleteRecoveryToken(for: token.userID)
-                state.hasRecoveryToken = credentialStore.recoveryToken() != nil
+                state.hasRecoveryToken = credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) != nil
                 switchMode(to: .choose)
                 state.notice = error.localizedMessage
                 return
@@ -249,7 +249,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
     
     private func endRecovery(notice: String) {
         credentialStore.deletePendingRecovery()
-        if let token = credentialStore.recoveryToken() {
+        if let token = credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) {
             switchMode(to: .token(userID: token.userID))
         } else {
             switchMode(to: .choose)

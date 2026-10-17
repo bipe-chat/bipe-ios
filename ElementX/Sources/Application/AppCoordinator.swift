@@ -379,10 +379,25 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     // MARK: - AuthenticationFlowCoordinatorDelegate
     
     func authenticationFlowCoordinator(didLoginWithSession userSession: UserSessionProtocol) {
+        // Bipe: an account added from a signed-in session (ADR 0086, bipe#267). The state stays `signedIn`.
+        if stateMachine.state == .signedIn {
+            navigationRootCoordinator.setSheetCoordinator(nil)
+            authenticationFlowCoordinator = nil
+            Task {
+                await pauseClientServices(isBackgroundTask: false)
+                bipeShowAccount(userSession, isNewLogin: true)
+            }
+            return
+        }
+        
         userSessionManager.add(userSession)
         configureActiveSession()
         authenticationFlowCoordinator = nil
         stateMachine.processEvent(.createdUserSession)
+    }
+    
+    func authenticationFlowCoordinatorDidCancelAddingAccount() {
+        authenticationFlowCoordinator = nil
     }
     
     // MARK: - WindowManagerDelegate
@@ -664,7 +679,19 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             case (_, .signOut(let isSoft, _), .signingOut):
                 logout(isSoft: isSoft)
             case (.signingOut(_, let disableAppLock), .completedSigningOut, .signedOut):
-                presentSplashScreen(isSoftLogout: false, disableAppLock: disableAppLock)
+                if !disableAppLock, !userSessionManager.userIDs.isEmpty {
+                    // Bipe: another account stays on the phone, so it opens (ADR 0086, bipe#267). After this transition ends.
+                    Task { stateMachine.processEvent(.startWithExistingSession) }
+                } else {
+                    // Bipe: a forgotten device PIN unlocks no other account: every account leaves the phone.
+                    if disableAppLock, !userSessionManager.userIDs.isEmpty {
+                        userSessionManager.reset()
+                        BipeCredentialStore.bipeApp.deleteAllPasswords()
+                    }
+                    presentSplashScreen(isSoftLogout: false, disableAppLock: disableAppLock)
+                }
+            case (.signedOut, .startWithExistingSession, .restoringSession):
+                restoreUserSession()
             case (.signingOut(_, let disableAppLock), .showSoftLogout, .softLogout):
                 presentSplashScreen(isSoftLogout: true, disableAppLock: disableAppLock)
             case (.signedIn, .clearCache, .initial):
@@ -700,6 +727,17 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     }
     
     private func startAuthentication() {
+        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: false)
+        authenticationFlowCoordinator = coordinator
+        coordinator.start()
+        
+        if storedAppRoute?.isAuthenticationRoute == true,
+           let storedAppRoute = storedAppRoute.take() {
+            coordinator.handleAppRoute(storedAppRoute, animated: false)
+        }
+    }
+    
+    private func makeAuthenticationFlowCoordinator(isAddingAccount: Bool) -> AuthenticationFlowCoordinator {
         let encryptionKeyProvider = EncryptionKeyProvider()
         let classicAppManager = ClassicAppManager()
         let authenticationService = AuthenticationService(userSessionManager: userSessionManager,
@@ -716,16 +754,10 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                         appSettings: appSettings,
                                                         appHooks: appHooks,
                                                         userIndicatorController: userIndicatorController,
-                                                        appLockService: appLockFlowCoordinator.appLockService)
+                                                        appLockService: appLockFlowCoordinator.appLockService,
+                                                        isAddingAccount: isAddingAccount)
         coordinator.delegate = self
-        
-        authenticationFlowCoordinator = coordinator
-        coordinator.start()
-        
-        if storedAppRoute?.isAuthenticationRoute == true,
-           let storedAppRoute = storedAppRoute.take() {
-            coordinator.handleAppRoute(storedAppRoute, animated: false)
-        }
+        return coordinator
     }
     
     /// Bipe ADR 0034: keeps the inviter for the chat list card and the in-chat prompt, then opens the chat.
@@ -909,6 +941,10 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 case .forceLogout:
                     bipeDeleteStoredPassword()
                     stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: true))
+                case .bipeSwitchAccount(let userID):
+                    bipeSwitchAccount(to: userID)
+                case .bipeAddAccount:
+                    bipeStartAddingAccount()
                 }
             }
             .store(in: &cancellables)
@@ -956,6 +992,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             
             // Regardless of the result, clear user data
             userSessionManager.remove(userID: userSession.clientProxy.userID)
+            BipeAccountLabels.forget(userSession.clientProxy.userID) // Bipe: the account menu name (ADR 0086)
             tearDownUserSession()
             
             userSession.userSettings.account.reset()
@@ -1048,6 +1085,50 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                     stateMachine.processEvent(.signOut(isSoft: isSoftLogout, disableAppLock: false))
                 }
             }
+    }
+    
+    // MARK: - Bipe accounts (ADR 0086, bipe#267)
+    
+    /// Shows another signed-in account. Its session is restored when it isn't live; the current one pauses.
+    private func bipeSwitchAccount(to userID: String) {
+        guard userID != userSession?.clientProxy.userID else { return }
+        showLoadingIndicator()
+        Task {
+            defer { hideLoadingIndicator() }
+            // Pause the current account before the manager makes the other one active.
+            await pauseClientServices(isBackgroundTask: false)
+            guard let target = await userSessionManager.activate(userID: userID) else {
+                await resumeClientServices()
+                showLoginErrorToast()
+                return
+            }
+            bipeShowAccount(target, isNewLogin: false)
+        }
+    }
+    
+    /// The authentication flow as a sheet over the current session, up to the cap of personal accounts.
+    private func bipeStartAddingAccount() {
+        guard authenticationFlowCoordinator == nil,
+              BipeAccountCap.canAdd(personalAccounts: userSessionManager.userIDs.count) else { return }
+        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true)
+        authenticationFlowCoordinator = coordinator
+        coordinator.start()
+    }
+    
+    /// Replaces the session UI with `userSession`'s. A new login is added to the manager first. The caller has paused the
+    /// services of the account on screen.
+    private func bipeShowAccount(_ userSession: UserSessionProtocol, isNewLogin: Bool) {
+        windowManager.closeAllSecondaryWindows()
+        userSessionFlowCoordinator?.stop()
+        elementCallService.setUserSession(nil)
+        tearDownUserSession()
+        
+        if isNewLogin {
+            userSessionManager.add(userSession)
+            appSettings.isEventCacheBuiltWithThreads = true
+        }
+        configureActiveSession()
+        setupUserSession(isNewLogin: isNewLogin)
     }
     
     /// Bipe: deletes the signed-in account's password only (ADR 0086). Without a session, every password goes.

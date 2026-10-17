@@ -82,6 +82,11 @@ public nonisolated struct BipeCredentialStore: Sendable {
         read(.recoveryToken).flatMap(Self.item)
     }
     
+    /// The newest recovery token of an account not in `signedIn`: adding an account never recovers one already on the phone.
+    public func recoveryToken(excluding signedIn: Set<String>) -> Item? {
+        readAll(.recoveryToken).filter { !signedIn.contains($0.account) }.first.flatMap(Self.item)
+    }
+    
     public func recoveryToken(for userID: String) -> Item? {
         read(.recoveryToken, account: userID).flatMap(Self.item)
     }
@@ -200,6 +205,24 @@ public nonisolated struct BipeCredentialStore: Sendable {
         if status != errSecSuccess {
             NSLog("Bipe keychain write failed for \(service.rawValue): \(status)")
         }
+    }
+    
+    /// Every item of the service, newest first.
+    private func readAll(_ service: Service) -> [(account: String, data: Data)] {
+        var query = baseQuery(service)
+        query[kSecReturnData as String] = true
+        query[kSecReturnAttributes as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitAll
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let items = result as? [[String: Any]] else { return [] }
+        return items
+            .sorted { ($0[kSecAttrModificationDate as String] as? Date ?? .distantPast) > ($1[kSecAttrModificationDate as String] as? Date ?? .distantPast) }
+            .compactMap { item in
+                guard let account = item[kSecAttrAccount as String] as? String,
+                      let data = item[kSecValueData as String] as? Data else { return nil }
+                return (account, data)
+            }
     }
     
     /// The item of `account`, or the newest item of the service when `account` is `nil`.
