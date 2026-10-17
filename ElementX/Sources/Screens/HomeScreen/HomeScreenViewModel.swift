@@ -100,7 +100,11 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                 
                 switch securityState.recoveryState {
                 case .disabled:
-                    if !state.securityBannerMode.isDismissed {
+                    // Bipe: no "set up recovery" banner for Bipe accounts. They recover with the PIN and the
+                    // recovery token (ADR 0057, ADR 0073); the Bipe fallback prompt is bipe#202.
+                    if userSession.bipeHandleResolver != nil {
+                        state.securityBannerMode = .none
+                    } else if !state.securityBannerMode.isDismissed {
                         state.securityBannerMode = .show(.setUpRecovery)
                     }
                 case .incomplete:
