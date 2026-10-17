@@ -48,6 +48,11 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
                                                                       bindings: .init(appSettings: appSettings)),
                    mediaProvider: userSession.mediaProvider)
         
+        // ADR 0087: a company account needs an attested device (ADR 0043). A company account makes no other company.
+        if BipeAppAttest.isSupported, !BipeAccountLabels.isCompany(userSession.clientProxy.userID) {
+            state.flags.insert("companyAccount")
+        }
+        
         appSettings.linkNewDeviceEnabledPublisher
             .sink { [weak self] enabled in
                 if enabled {

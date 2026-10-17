@@ -74,6 +74,9 @@ final class BipeRecoveryAlerts {
         }
         failedReads = 0
         BipeAccountCap.onServerValue(status.maxAccounts)
+        if let accountType = status.accountType {
+            BipeAccountLabels.rememberCompany(accountType == .company, for: clientProxy.userID)
+        }
         
         var acknowledged = acknowledgedIDs()
         let completedTokens = status.recoveries.filter { $0.state == .completed && $0.method == .token }.map(\.id)

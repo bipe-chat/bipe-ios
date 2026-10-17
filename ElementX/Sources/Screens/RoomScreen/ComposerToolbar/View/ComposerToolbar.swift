@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Compound
 import MatrixRustSDK
@@ -252,7 +253,8 @@ struct ComposerToolbar: View {
     }
     
     private var composerPlaceholder: String {
-        L10n.richTextEditorComposerPlaceholder
+        // Bipe ADR 0087: "Respondendo como <empresa>" in a company account.
+        context.viewState.bipeReplyingAs.map(BipeStrings.companyReplyingAs) ?? L10n.richTextEditorComposerPlaceholder
     }
     
     private var composerView: WysiwygComposerView {

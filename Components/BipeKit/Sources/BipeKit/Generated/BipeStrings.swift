@@ -1516,6 +1516,16 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_account_cap_reached", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static var companyCreate: String { NSLocalizedString("bipe_company_create", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var companyCreateFooter: String { NSLocalizedString("bipe_company_create_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var companyName: String { NSLocalizedString("bipe_company_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func companyReplyingAs(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_company_replying_as", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
     public static var accountWaysBack: String { NSLocalizedString("bipe_account_ways_back", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var accountEmailNone: String { NSLocalizedString("bipe_account_email_none", tableName: "Bipe", bundle: .module, comment: "") }

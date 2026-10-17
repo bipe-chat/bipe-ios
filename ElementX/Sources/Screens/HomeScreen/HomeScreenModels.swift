@@ -116,6 +116,8 @@ struct BipeAccountMenuItem: Identifiable, Equatable {
     let userID: String
     let label: String
     let isCurrent: Bool
+    /// ADR 0087: does not count in the cap.
+    let isCompany: Bool
     
     var id: String {
         userID
@@ -129,7 +131,12 @@ struct HomeScreenViewState: BindableState {
     var bipeAccounts: [BipeAccountMenuItem] = []
     var bipeMaxAccounts = BipeRegistries.maxPersonalAccounts
     var bipeCanAddAccount: Bool {
-        bipeAccounts.count < bipeMaxAccounts
+        bipeAccounts.filter { !$0.isCompany }.count < bipeMaxAccounts
+    }
+    
+    /// ADR 0087: the company's name in the top bar when the account on screen is a company account.
+    var bipeCompanyName: String? {
+        bipeAccounts.first { $0.isCurrent && $0.isCompany }?.label
     }
     
     var securityBannerMode = HomeScreenSecurityBannerMode.none

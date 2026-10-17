@@ -136,6 +136,13 @@ Not done (needs the domain, Apple team or brand):
 - Upstream's `multiAccountEnabled` flag and its announcement stay off.
 - Not done: the account avatar in the composer, the account name in notifications, a check that the NSE reads the right session per push (unverified), the ADR 0120 rounded square for a verified company (needs #252). Upstream develop has 28 newer commits with multi-account work ("Keep every signed-in account live", "Notify every signed-in account"); a rebase onto it can replace parts of this.
 
+## Company account, owner case (ADR 0087, bipe#269)
+
+- **Criar conta da empresa:** row `account.createCompany` in Sua conta, gated by `flag:companyAccount`. `BipeSettingsGroupScreenViewModel` turns the flag on only when `BipeAppAttest.isSupported` and the account on screen is not a company (ADR 0043). The row opens the add-account sheet straight on the sign-up screen in company mode (`AuthenticationFlowCoordinator(bipeAccountType: .company)`): the name field is "Nome da empresa", and `POST /v1/signup` sends `account_type: company` with the App Attest attestation.
+- **Account type** on the phone: `BipeAccountLabels.rememberCompany` at sign-up and from `account_type` in `GET /v1/me/account` (`BipeRecoveryAlerts`). A company account does not count in the cap (`HomeScreenViewState.bipeCanAddAccount`, `AppCoordinator.bipeStartAddingAccount`).
+- **Identity on screen:** the chat list title is the company's name (`HomeScreen.title`); the composer placeholder is "Respondendo como <empresa>" (`ComposerToolbarViewState.bipeReplyingAs`).
+- Not done: the CNPJ steps in the app (the claim UI is bipe#249 and #115; the API has them), the seal and the distinct colour in the top bar (#252, ADR 0120), the company's own recovery key and fallback prompts, a second seat verified from the owner's phone (Element's device verification may cover it; unverified).
+
 ## Contacts and invites (growth loop step 2)
 
 - **One settings row**, "Contatos e convites", opens `BipeContactsScreen`. Invites have no settings row of their own.
@@ -224,6 +231,7 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | OAuth redirect | `<bundle id>:/oauth/callback` | `<application id>:/` | Element's default per platform; both are reverse-domain private-use schemes |
 | Push | APNs through Sygnal | FCM through Sygnal; UnifiedPush optional | OS push channel (#89, #90, #91) |
 | Sign-up attestation | App Attest | None yet | Play Integrity not built on Android (#92) **Gap** |
+| Criar conta da empresa | In Sua conta on a phone with App Attest | Not shown | A company account needs an attested device (ADR 0043, ADR 0087); Play Integrity not built on Android (#92) **Gap** |
 | Synced recovery token | iCloud Keychain | Block Store (gplay); none in the F-Droid build | Platform credential store (ADR 0059). F-Droid has no Google Play services |
 | App lock | Element's lock screen, the account PIN, biometrics on | Element's lock screen, 8-digit account PIN, biometric option | Element X lock screen per platform |
 | Check before a PIN change | Biometrics or the phone's passcode | Biometrics or the phone's screen lock; else the app lock PIN | `LAContext` on iOS, `BiometricPrompt` with `DEVICE_CREDENTIAL` on Android |

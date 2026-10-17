@@ -51,7 +51,9 @@ struct HomeScreen: View {
     // MARK: - Private
     
     private var title: String {
-        if let selectedSpace = context.viewState.selectedSpaceFilter {
+        if let companyName = context.viewState.bipeCompanyName {
+            companyName // Bipe ADR 0087: the identity on screen is never ambiguous.
+        } else if let selectedSpace = context.viewState.selectedSpaceFilter {
             selectedSpace.room.name
         } else {
             context.viewState.bipeScope.title

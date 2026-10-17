@@ -727,7 +727,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     }
     
     private func startAuthentication() {
-        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: false)
+        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: false, accountType: .personal)
         authenticationFlowCoordinator = coordinator
         coordinator.start()
         
@@ -737,7 +737,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
     }
     
-    private func makeAuthenticationFlowCoordinator(isAddingAccount: Bool) -> AuthenticationFlowCoordinator {
+    private func makeAuthenticationFlowCoordinator(isAddingAccount: Bool, accountType: BipeAccountType) -> AuthenticationFlowCoordinator {
         let encryptionKeyProvider = EncryptionKeyProvider()
         let classicAppManager = ClassicAppManager()
         let authenticationService = AuthenticationService(userSessionManager: userSessionManager,
@@ -755,7 +755,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                         appHooks: appHooks,
                                                         userIndicatorController: userIndicatorController,
                                                         appLockService: appLockFlowCoordinator.appLockService,
-                                                        isAddingAccount: isAddingAccount)
+                                                        isAddingAccount: isAddingAccount,
+                                                        bipeAccountType: accountType)
         coordinator.delegate = self
         return coordinator
     }
@@ -908,7 +909,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 case .bipeSwitchAccount(let userID):
                     bipeSwitchAccount(to: userID)
                 case .bipeAddAccount:
-                    bipeStartAddingAccount()
+                    bipeStartAddingAccount(accountType: .personal)
+                case .bipeCreateCompanyAccount:
+                    bipeStartAddingAccount(accountType: .company)
                 }
             }
             .store(in: &cancellables)
@@ -1050,8 +1053,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 }
             }
     }
-    
-    // MARK: - Bipe accounts (ADR 0086, bipe#267)
     
     private func observeAppLockChanges() {
         appLockFlowCoordinator.actions.sink { [weak self] action in
@@ -1331,11 +1332,15 @@ extension AppCoordinator {
         }
     }
     
-    /// The authentication flow as a sheet over the current session, up to the cap of personal accounts.
-    private func bipeStartAddingAccount() {
-        guard authenticationFlowCoordinator == nil,
-              BipeAccountCap.canAdd(personalAccounts: userSessionManager.userIDs.count) else { return }
-        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true)
+    /// The authentication flow as a sheet over the current session. Personal accounts stop at the cap; company accounts
+    /// do not count (ADR 0087).
+    private func bipeStartAddingAccount(accountType: BipeAccountType) {
+        guard authenticationFlowCoordinator == nil else { return }
+        if accountType == .personal {
+            let personal = userSessionManager.userIDs.filter { !BipeAccountLabels.isCompany($0) }.count
+            guard BipeAccountCap.canAdd(personalAccounts: personal) else { return }
+        }
+        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true, accountType: accountType)
         authenticationFlowCoordinator = coordinator
         coordinator.start()
     }

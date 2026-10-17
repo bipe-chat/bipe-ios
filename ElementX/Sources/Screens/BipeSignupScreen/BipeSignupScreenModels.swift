@@ -36,6 +36,8 @@ struct BipeSignupScreenViewState: BindableState {
     /// The Termos de uso on the public site (ADR 0113).
     let termsURL: URL
     let privacyURL: URL
+    /// ADR 0087: the name is the company's, and the account is a company account.
+    var isCompany = false
     var step = BipeSignupStep.form
     /// The fallback step shows the email field.
     var isFallbackEmailOpen = false
