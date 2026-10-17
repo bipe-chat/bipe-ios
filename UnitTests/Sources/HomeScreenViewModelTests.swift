@@ -498,7 +498,8 @@ final class HomeScreenViewModelTests {
         #expect(context.viewState.roomListMode == .skeletons)
         
         // The provider reports loaded before the first summaries have been published.
-        let failure = deferFailure(context.$viewState, timeout: .seconds(1)) { $0.roomListMode != .skeletons }
+        // Bipe: shorter than the 1 s empty-tab fallback, which shows the empty state when nothing publishes.
+        let failure = deferFailure(context.$viewState, timeout: .milliseconds(500)) { $0.roomListMode != .skeletons }
         stateSubject.send(.loaded(totalNumberOfRooms: 8))
         try await failure.fulfill()
         
