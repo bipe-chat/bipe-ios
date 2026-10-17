@@ -134,9 +134,11 @@ struct BipeSettingsBlock: Identifiable {
 }
 
 extension BipeSettingsSection {
-    /// The section footer. The senha footer carries the number of digits.
+    /// The section footer. The senha footer carries the number of digits, or with two or more accounts says that the
+    /// device PIN stays (ADR 0086).
     var bipeFooter: String? {
-        footerKey == "bipe_account_pin_footer" ? BipeStrings.accountPinFooter(String(BipeRegistries.pinLength)) : footer
+        guard footerKey == "bipe_account_pin_footer" else { return footer }
+        return BipeDevicePIN.followsAccountPIN ? BipeStrings.accountPinFooter(String(BipeRegistries.pinLength)) : BipeStrings.accountPinFooterDevice
     }
 }
 

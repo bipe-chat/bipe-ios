@@ -1508,6 +1508,8 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_account_pin_footer", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static var accountPinFooterDevice: String { NSLocalizedString("bipe_account_pin_footer_device", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var accountWaysBack: String { NSLocalizedString("bipe_account_ways_back", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var accountEmailNone: String { NSLocalizedString("bipe_account_email_none", tableName: "Bipe", bundle: .module, comment: "") }
