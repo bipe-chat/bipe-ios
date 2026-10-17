@@ -32,7 +32,9 @@ import SwiftUI
         
         /// Bipe: the count, else the warning mark, else no badge.
         var badgeText: Text? {
-            if badgeCount > 0 { return Text(badgeCount, format: .number) }
+            if badgeCount > 0 {
+                return Text(badgeCount, format: .number)
+            }
             return bipeWarning ? Text(verbatim: "!") : nil
         }
         

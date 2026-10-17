@@ -16,7 +16,8 @@ jobs:
 
     concurrency:
       # Only allow a single run of this workflow on each branch, automatically cancelling older runs.
-      group: ${{ format('pr-checks-{0}', github.ref) }}
+      # Bipe: under pull_request_target github.ref is the base branch, so key on the PR number.
+      group: ${{ format('pr-checks-{0}', github.event.pull_request.number) }}
       cancel-in-progress: true
 
     permissions:
