@@ -22,6 +22,9 @@ final class BipeRecoveryAlerts {
     private let onTermsOutdated: () -> Void
 
     private var isChecking = false
+    /// Failed reads in a row. At app start the first read often gets a 401 just before the SDK refreshes the token.
+    private var failedReads = 0
+    private static let retryDelays: [Duration] = [.seconds(3), .seconds(10), .seconds(30)]
     /// IDs shown in this run, so a foreground event during an open alert does not stack a second one.
     private var shownThisRun: Set<String> = []
 
@@ -58,8 +61,10 @@ final class BipeRecoveryAlerts {
             }
         } catch {
             MXLog.error("Bipe account state check failed: \(error)")
+            scheduleRetry()
             return
         }
+        failedReads = 0
 
         var acknowledged = acknowledgedIDs()
         let completedTokens = status.recoveries.filter { $0.state == .completed && $0.method == .token }.map(\.id)
@@ -86,6 +91,17 @@ final class BipeRecoveryAlerts {
     }
 
     // MARK: - Private
+
+    /// Without a retry, a failed first read waits for the next foreground, and the terms screen does not show.
+    private func scheduleRetry() {
+        guard failedReads < Self.retryDelays.count else { return }
+        let delay = Self.retryDelays[failedReads]
+        failedReads += 1
+        Task { [weak self] in
+            try? await Task.sleep(for: delay)
+            await self?.check()
+        }
+    }
 
     private func show(_ recovery: BipeRecovery, message: String) {
         let keep = AlertInfoButton(title: BipeStrings.recoveryAlertKeep, role: .cancel) { [weak self] in
