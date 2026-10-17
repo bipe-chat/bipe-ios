@@ -13,6 +13,11 @@ final class BipeEnvironmentCoordinator: CoordinatorProtocol, CustomStringConvert
     private let coordinator: CoordinatorProtocol
     private let handleResolver: BipeHandleResolver?
     
+    /// The coordinator this one wraps, for example the home tabs.
+    var wrappedCoordinator: CoordinatorProtocol {
+        coordinator
+    }
+    
     var description: String {
         "BipeEnvironmentCoordinator(\(coordinator))"
     }

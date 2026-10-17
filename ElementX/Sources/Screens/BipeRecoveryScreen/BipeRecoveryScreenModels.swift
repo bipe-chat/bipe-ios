@@ -17,7 +17,7 @@ enum BipeRecoveryScreenMode: Equatable, CustomStringConvertible {
     case emailLink(BipeRecoveryLinkToken)
     /// The safety wait after an email recovery. The app polls the claim.
     case waiting(BipeRecoveryStarted)
-
+    
     var description: String {
         switch self {
         case .choose: "choose"
@@ -34,7 +34,7 @@ enum BipeRecoveryScreenViewModelAction: CustomStringConvertible {
     case loginWithQR
     /// A beta account (email and own password) signs in through MAS.
     case continueWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
-
+    
     var description: String {
         switch self {
         case .signedIn: "signedIn"
@@ -56,9 +56,9 @@ struct BipeRecoveryScreenViewState: BindableState {
     var pinError: String?
     /// A one-line note at the top: cancelled, invalid link, PIN reset done.
     var notice: String?
-
+    
     var bindings = BipeRecoveryScreenViewStateBindings()
-
+    
     var title: String {
         switch mode {
         case .choose, .token: BipeStrings.recoveryTitle
@@ -66,27 +66,27 @@ struct BipeRecoveryScreenViewState: BindableState {
         case .waiting: BipeStrings.recoveryWaitingTitle
         }
     }
-
+    
     var waitingBody: String? {
         guard case .waiting(let recovery) = mode else { return nil }
         let date = recovery.readyAt.formatted(date: .abbreviated, time: .shortened)
         return recovery.purpose == .pinReset ? BipeStrings.recoveryWaitingPinBody(date) : BipeStrings.recoveryWaitingBody(date)
     }
-
+    
     var pinProblem: BipePinProblem? {
         guard isNewPIN, bindings.pin.count == BipeRegistries.pinLength else { return nil }
         return BipePIN.problem(for: bindings.pin)
     }
-
+    
     var pinMismatch: Bool {
         isNewPIN && bindings.pinConfirmation.count == BipeRegistries.pinLength && bindings.pin != bindings.pinConfirmation
     }
-
+    
     var canSubmitPIN: Bool {
         guard bindings.pin.count == BipeRegistries.pinLength, !isPINBlocked else { return false }
         return !isNewPIN || (pinProblem == nil && bindings.pin == bindings.pinConfirmation)
     }
-
+    
     var canRequestEmail: Bool {
         BipeSignupRules.isPlausibleEmail(bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
     }

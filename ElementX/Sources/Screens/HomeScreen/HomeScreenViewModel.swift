@@ -28,7 +28,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     
     private let roomSummaryProvider: RoomSummaryProviderProtocol?
     private var bipeEmptyTabFallbackTask: Task<Void, Never>?
-
+    
     private var actionsSubject: PassthroughSubject<HomeScreenViewModelAction, Never> = .init()
     var actions: AnyPublisher<HomeScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
@@ -224,6 +224,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     
     // MARK: - Public
     
+    // swiftlint:disable:next function_body_length
     override func process(viewAction: HomeScreenViewAction) {
         switch viewAction {
         case .selectRoom(let roomIdentifier):
@@ -403,7 +404,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         } else {
             .empty // Bipe ADR 0053: the total counts every room, the tab's filter can leave none.
         }
-
+        
         if roomListMode == .skeletons || roomListMode == .awaitingCachedRooms, roomSummaryProviderState.isLoaded, !hasRooms {
             scheduleBipeEmptyTabFallback()
         }
@@ -426,20 +427,20 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             }
         }
     }
-
+    
     /// A loaded tab whose filter matches no room never publishes a room, so it would show skeletons forever.
     private func scheduleBipeEmptyTabFallback() {
         guard bipeEmptyTabFallbackTask == nil else { return }
-
+        
         bipeEmptyTabFallbackTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1))
             guard let self, let roomSummaryProvider else { return }
             bipeEmptyTabFallbackTask = nil
-
+            
             guard state.roomListMode == .skeletons || state.roomListMode == .awaitingCachedRooms,
                   roomSummaryProvider.statePublisher.value.isLoaded,
                   roomSummaryProvider.roomListPublisher.value.isEmpty else { return }
-
+            
             MXLog.info("Loaded with no rooms in this tab, setting view room list mode to \"empty\"")
             state.roomListMode = .empty
         }

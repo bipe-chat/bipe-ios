@@ -52,7 +52,9 @@ final class BipeInvitePairs {
     func recheck(roomID: String, onChange: @escaping @MainActor () -> Void) {
         guard recheckedRoomIDs.insert(roomID).inserted else { return }
         Task {
-            if await refresh() { onChange() }
+            if await refresh() {
+                onChange()
+            }
         }
     }
     

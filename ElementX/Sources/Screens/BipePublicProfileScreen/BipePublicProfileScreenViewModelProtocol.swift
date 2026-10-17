@@ -10,7 +10,7 @@ import Combine
 protocol BipePublicProfileScreenViewModelProtocol {
     var actionsPublisher: AnyPublisher<BipePublicProfileScreenViewModelAction, Never> { get }
     var context: BipePublicProfileScreenViewModelType.Context { get }
-
+    
     /// Loads the profile again, e.g. after the user picked a handle.
     func reload()
 }

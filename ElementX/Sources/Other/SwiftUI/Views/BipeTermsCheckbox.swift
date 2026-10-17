@@ -14,9 +14,9 @@ struct BipeTermsCheckbox: View {
     @Binding var isAccepted: Bool
     let termsURL: URL
     let privacyURL: URL
-
+    
     @Environment(\.openURL) private var openURL
-
+    
     var body: some View {
         let sentence = Self.sentence(termsURL: termsURL, privacyURL: privacyURL)
         HStack(alignment: .top, spacing: 12) {
@@ -28,7 +28,7 @@ struct BipeTermsCheckbox: View {
             }
             .buttonStyle(.plain)
             .padding(-10)
-
+            
             Text(sentence)
                 .font(.compound.bodyMD)
                 .foregroundColor(.compound.textSecondary)
@@ -42,7 +42,7 @@ struct BipeTermsCheckbox: View {
         .accessibilityAction(named: BipeStrings.signupTermsLink) { openURL(termsURL) }
         .accessibilityAction(named: BipeStrings.signupPrivacyLink) { openURL(privacyURL) }
     }
-
+    
     static func sentence(termsURL: URL, privacyURL: URL) -> AttributedString {
         var sentence = AttributedString(BipeStrings.signupTermsAccept("{terms}", "{privacy}"))
         sentence.bipeReplaceLink("{terms}", title: BipeStrings.signupTermsLink, url: termsURL)

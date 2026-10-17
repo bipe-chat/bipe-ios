@@ -11,17 +11,17 @@ import SwiftUI
 /// Blocking: no close button, no swipe down, no sign-out. The only way on is to accept (ADR 0113).
 struct BipeTermsReacceptScreen: View {
     @Bindable var context: BipeTermsReacceptScreenViewModel.Context
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
                 header
-
+                
                 BipeTermsCheckbox(isAccepted: $context.isTermsAccepted,
                                   termsURL: context.viewState.termsURL,
                                   privacyURL: context.viewState.privacyURL)
                     .disabled(context.viewState.isSaving)
-
+                
                 VStack(spacing: 12) {
                     if context.viewState.isFailed {
                         Text(BipeStrings.termsReacceptFailed)
@@ -29,7 +29,7 @@ struct BipeTermsReacceptScreen: View {
                             .foregroundColor(.compound.textCriticalPrimary)
                             .multilineTextAlignment(.center)
                     }
-
+                    
                     Button { context.send(viewAction: .continue) } label: {
                         HStack(spacing: 8) {
                             if context.viewState.isSaving {
@@ -50,17 +50,17 @@ struct BipeTermsReacceptScreen: View {
         .background(Color.compound.bgCanvasDefault.ignoresSafeArea())
         .interactiveDismissDisabled()
     }
-
+    
     private var header: some View {
         VStack(spacing: 8) {
             BigIcon(icon: \.document)
                 .padding(.bottom, 8)
-
+            
             Text(BipeStrings.termsReacceptTitle)
                 .font(.compound.headingMDBold)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textPrimary)
-
+            
             Text(BipeStrings.termsReacceptBody)
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.center)
@@ -76,7 +76,7 @@ struct BipeTermsReacceptScreen_Previews: PreviewProvider {
     static let tickedViewModel = makeViewModel(isTermsAccepted: true)
     static let savingViewModel = makeViewModel(isTermsAccepted: true, isSaving: true)
     static let failedViewModel = makeViewModel(isTermsAccepted: true, isFailed: true)
-
+    
     static var previews: some View {
         BipeTermsReacceptScreen(context: untickedViewModel.context)
             .previewDisplayName("Unticked")
@@ -87,7 +87,7 @@ struct BipeTermsReacceptScreen_Previews: PreviewProvider {
         BipeTermsReacceptScreen(context: failedViewModel.context)
             .previewDisplayName("Failed")
     }
-
+    
     static func makeViewModel(isTermsAccepted: Bool = false, isSaving: Bool = false, isFailed: Bool = false) -> BipeTermsReacceptScreenViewModel {
         let viewModel = BipeTermsReacceptScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
                                                          clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),

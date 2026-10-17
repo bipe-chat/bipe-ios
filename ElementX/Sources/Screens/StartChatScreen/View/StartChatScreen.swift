@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct StartChatScreen: View {
@@ -104,7 +104,7 @@ struct StartChatScreen: View {
             ListRow(label: .default(title: L10n.actionInvitePeopleToApp(InfoPlistReader.main.bundleDisplayName),
                                     icon: \.shareIos),
                     kind: .button { context.send(viewAction: .bipeInviteToApp) })
-            .accessibilityIdentifier(A11yIdentifiers.startChatScreen.inviteFriends)
+                .accessibilityIdentifier(A11yIdentifiers.startChatScreen.inviteFriends)
         }
     }
     

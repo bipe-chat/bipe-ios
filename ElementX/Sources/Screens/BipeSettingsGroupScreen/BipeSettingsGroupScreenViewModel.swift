@@ -17,20 +17,20 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
     private let appLockService: AppLockServiceProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let apiClient: BipeAPIClient
-
+    
     private var clientProxy: ClientProxyProtocol {
         userSession.clientProxy
     }
-
+    
     private var appSettings: AppSettings {
         userSession.userSettings.app
     }
-
+    
     private let actionsSubject: PassthroughSubject<BipeSettingsGroupScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeSettingsGroupScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(group: BipeSettingsGroup,
          userSession: UserSessionProtocol,
          appLockService: AppLockServiceProtocol,
@@ -39,7 +39,7 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
         self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
         apiClient = BipeAPIClient(baseURL: userSession.userSettings.app.bipeAPIBaseURL)
-
+        
         let appSettings = userSession.userSettings.app
         super.init(initialViewState: BipeSettingsGroupScreenViewState(group: group,
                                                                       isBipeAccount: userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName,
@@ -47,7 +47,7 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
                                                                       timelineMediaVisibility: userSession.clientProxy.timelineMediaVisibilityPublisher.value,
                                                                       bindings: .init(appSettings: appSettings)),
                    mediaProvider: userSession.mediaProvider)
-
+        
         appSettings.linkNewDeviceEnabledPublisher
             .sink { [weak self] enabled in
                 if enabled {
@@ -57,7 +57,7 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
                 }
             }
             .store(in: &cancellables)
-
+        
         userSession.clientProxy.userProfilePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] profile in self?.state.displayName = profile.displayName }
@@ -99,7 +99,7 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
                 .store(in: &cancellables)
         }
     }
-
+    
     override func process(viewAction: BipeSettingsGroupScreenViewAction) {
         switch viewAction {
         case .reload:
@@ -120,7 +120,7 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             Task { await updateTimelineMediaVisibility(value) }
         }
     }
-
+    
     private func reload() {
         switch state.group {
         case .profile where state.isBipeAccount:
@@ -133,9 +133,9 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             break
         }
     }
-
+    
     // MARK: - Seu perfil
-
+    
     private func loadProfile() async {
         do {
             state.handle = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeMyHandle in
@@ -152,7 +152,7 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             MXLog.error("Bipe public profile load failed: \(error)")
         }
     }
-
+    
     // MARK: - Sua conta
     
     private func loadAccount() async {

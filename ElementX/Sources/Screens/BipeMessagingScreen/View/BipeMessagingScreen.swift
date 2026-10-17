@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct BipeMessagingScreen: View {
@@ -34,7 +34,7 @@ struct BipeMessagingScreen: View {
 
 struct BipeMessagingScreen_Previews: PreviewProvider {
     static let viewModel = BipeMessagingScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                           clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")))
+                                                        clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")))
     
     static var previews: some View {
         ElementNavigationStack {

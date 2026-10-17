@@ -21,7 +21,8 @@ struct UserSessionFlowCoordinatorTests {
     private let networkReachabilitySubject: CurrentValueSubject<NetworkMonitorReachability, Never> = .init(.reachable)
     private let homeserverReachabilitySubject: CurrentValueSubject<HomeserverReachability, Never> = .init(.reachable)
     private var tabCoordinator: NavigationTabCoordinator<UserSessionFlowCoordinator.HomeTab>? {
-        rootCoordinator?.rootCoordinator as? NavigationTabCoordinator
+        // Bipe: the tabs are wrapped to put the handle resolver in the environment.
+        (rootCoordinator?.rootCoordinator as? BipeEnvironmentCoordinator)?.wrappedCoordinator as? NavigationTabCoordinator
     }
     
     private var chatsSplitCoordinator: NavigationSplitCoordinator? {
@@ -82,8 +83,8 @@ struct UserSessionFlowCoordinatorTests {
     
     @Test
     mutating func settingsPresentation() async throws {
-        try await process(route: .settings, expectedUserSessionState: .settingsScreen)
-        #expect((tabCoordinator?.sheetCoordinator as? NavigationStackCoordinator)?.rootCoordinator is SettingsScreenCoordinator)
+        // Bipe ADR 0053: settings live in the Você tab, not in a sheet.
+        try await showSettings()
     }
     
     @Test
@@ -95,12 +96,11 @@ struct UserSessionFlowCoordinatorTests {
     
     @Test
     mutating func roomPresentationClearsSettings() async throws {
-        try await process(route: .settings, expectedUserSessionState: .settingsScreen)
-        #expect((tabCoordinator?.sheetCoordinator as? NavigationStackCoordinator)?.rootCoordinator is SettingsScreenCoordinator)
+        // Bipe ADR 0053: settings live in the Você tab, not in a sheet.
+        try await showSettings()
         #expect(detailCoordinator == nil)
         
         try await process(route: .room(roomID: "1", via: []),
-                          expectedUserSessionState: .tabBar,
                           expectedChatsState: .roomList(detailState: .room(roomID: "1")))
         #expect(tabCoordinator?.sheetCoordinator == nil)
         #expect(detailNavigationStack?.rootCoordinator is RoomScreenCoordinator)
@@ -125,13 +125,12 @@ struct UserSessionFlowCoordinatorTests {
     
     @Test
     mutating func shareMediaRouteWithoutRoom() async throws {
-        try await process(route: .settings, expectedUserSessionState: .settingsScreen)
-        #expect((tabCoordinator?.sheetCoordinator as? NavigationStackCoordinator)?.rootCoordinator is SettingsScreenCoordinator)
+        // Bipe ADR 0053: settings live in the Você tab, not in a sheet.
+        try await showSettings()
         #expect(chatsSplitCoordinator?.sheetCoordinator == nil)
         
         let sharePayload: ShareExtensionPayload = .mediaFiles(roomID: nil, mediaFiles: [.init(url: .picturesDirectory, suggestedName: nil)])
         try await process(route: .share(sharePayload),
-                          expectedUserSessionState: .tabBar,
                           expectedChatsState: .shareExtensionRoomList(sharePayload: sharePayload))
         #expect(tabCoordinator?.sheetCoordinator == nil)
         #expect((chatsSplitCoordinator?.sheetCoordinator as? NavigationStackCoordinator)?.rootCoordinator is RoomSelectionScreenCoordinator)
@@ -159,13 +158,12 @@ struct UserSessionFlowCoordinatorTests {
     
     @Test
     mutating func shareTextRouteWithoutRoom() async throws {
-        try await process(route: .settings, expectedUserSessionState: .settingsScreen)
-        #expect((tabCoordinator?.sheetCoordinator as? NavigationStackCoordinator)?.rootCoordinator is SettingsScreenCoordinator)
+        // Bipe ADR 0053: settings live in the Você tab, not in a sheet.
+        try await showSettings()
         #expect(chatsSplitCoordinator?.sheetCoordinator == nil)
         
         let sharePayload: ShareExtensionPayload = .text(roomID: nil, text: "Important Text")
         try await process(route: .share(sharePayload),
-                          expectedUserSessionState: .tabBar,
                           expectedChatsState: .shareExtensionRoomList(sharePayload: sharePayload))
         #expect(tabCoordinator?.sheetCoordinator == nil)
         #expect((chatsSplitCoordinator?.sheetCoordinator as? NavigationStackCoordinator)?.rootCoordinator is RoomSelectionScreenCoordinator)
@@ -243,6 +241,14 @@ struct UserSessionFlowCoordinatorTests {
     }
     
     // MARK: - Helpers
+    
+    /// Bipe ADR 0053: the settings route selects the Você tab and presents no sheet.
+    private func showSettings() async throws {
+        userSessionFlowCoordinator.handleAppRoute(.settings, animated: true)
+        let tabCoordinator = try #require(tabCoordinator)
+        #expect(tabCoordinator.selectedTab == .you)
+        #expect(tabCoordinator.sheetCoordinator == nil)
+    }
     
     private func process(route: AppRoute,
                          expectedUserSessionState: UserSessionFlowCoordinator.State? = nil,

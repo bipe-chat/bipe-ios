@@ -14,12 +14,12 @@ public nonisolated enum BipeProfileLink {
     public static let host = "bipe.chat"
     /// Hosts whose links the app accepts. The old host stays for links already shared.
     static let acceptedHosts: Set<String> = [host, "www.\(host)", "proseio.com.br", "www.proseio.com.br"]
-
+    
     static func isBipeLinkHost(_ url: URL) -> Bool {
         guard let host = url.host()?.lowercased() else { return false }
         return acceptedHosts.contains(host)
     }
-
+    
     public static func url(handle: String) -> URL? {
         var components = URLComponents()
         components.scheme = "https"
@@ -27,7 +27,7 @@ public nonisolated enum BipeProfileLink {
         components.path = "/@\(handle)"
         return components.url
     }
-
+    
     /// The handle in a profile link, lowercased, or `nil` when the URL is not one.
     public static func handle(from url: URL) -> String? {
         guard url.scheme == "https", isBipeLinkHost(url) else {
@@ -38,7 +38,7 @@ public nonisolated enum BipeProfileLink {
         let handle = BipeHandle.sanitize(first).lowercased()
         return BipeHandle.localProblem(for: handle) == nil ? handle : nil
     }
-
+    
     /// The Matrix user ID in a `https://matrix.to/#/@user:server` permalink.
     public static func matrixUserID(fromPermalink url: URL) -> String? {
         guard url.host() == "matrix.to", let fragment = url.fragment(percentEncoded: false) else { return nil }
@@ -53,7 +53,7 @@ public extension BipeHandleResolver {
     func profileLink(for userID: String) -> URL? {
         handle(for: userID).flatMap(BipeProfileLink.url(handle:))
     }
-
+    
     /// Swaps a matrix.to user permalink for the Bipe profile link when the handle is known.
     func shareURL(for permalink: URL) -> URL {
         BipeProfileLink.matrixUserID(fromPermalink: permalink).flatMap(profileLink(for:)) ?? permalink
@@ -67,11 +67,11 @@ public extension BipeHandleResolver {
 /// A QR code for a profile link, drawn with Core Image.
 public struct BipeQRCodeView: View {
     private let image: UIImage?
-
+    
     public init(url: URL) {
         image = Self.makeImage(for: url.absoluteString)
     }
-
+    
     public var body: some View {
         if let image {
             Image(uiImage: image)
@@ -83,7 +83,7 @@ public struct BipeQRCodeView: View {
                 .accessibilityHidden(true)
         }
     }
-
+    
     private static func makeImage(for string: String) -> UIImage? {
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(string.utf8)
@@ -105,7 +105,7 @@ public struct BipeQRCodeSheet: View {
     private let footer: String
     private let shareMessage: String?
     private let shareTitle: String
-
+    
     public init(url: URL, title: String, caption: String? = nil, footer: String, shareMessage: String? = nil, shareTitle: String) {
         self.url = url
         self.title = title
@@ -114,7 +114,7 @@ public struct BipeQRCodeSheet: View {
         self.shareMessage = shareMessage
         self.shareTitle = shareTitle
     }
-
+    
     public var body: some View {
         VStack(spacing: 20) {
             Text(title)
@@ -140,7 +140,7 @@ public struct BipeQRCodeSheet: View {
         }
         .padding(24)
     }
-
+    
     private var shareLabel: some View {
         Label(shareTitle, systemImage: "square.and.arrow.up")
     }
@@ -150,13 +150,13 @@ public struct BipeQRCodeSheet: View {
 public struct BipeProfileQRCodeSheet: View {
     private let handle: String
     private let url: URL
-
+    
     public init?(handle: String) {
         guard let url = BipeProfileLink.url(handle: handle) else { return nil }
         self.handle = handle
         self.url = url
     }
-
+    
     public var body: some View {
         BipeQRCodeSheet(url: url,
                         title: BipeStrings.profileQrTitle,
@@ -171,12 +171,12 @@ public struct BipeProfileQRCodeSheet: View {
 public struct BipeInviteQRCodeSheet: View {
     private let url: URL
     private let shareTitle: String
-
+    
     public init(url: URL, shareTitle: String) {
         self.url = url
         self.shareTitle = shareTitle
     }
-
+    
     public var body: some View {
         BipeQRCodeSheet(url: url,
                         title: BipeStrings.invitesQrTitle,

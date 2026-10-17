@@ -7,10 +7,10 @@
 //
 
 import Algorithms
+import BipeKit
 import Combine
 import MatrixRustSDK
 import OrderedCollections
-import BipeKit
 import SwiftUI
 
 typealias TimelineViewModelType = StateStoreViewModel<TimelineViewState, TimelineViewAction>

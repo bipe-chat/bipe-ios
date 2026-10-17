@@ -12,14 +12,14 @@ import SwiftUI
 struct BipeInviterHint: View {
     let inviterHandle: String
     let sayHi: () -> Void
-
+    
     var body: some View {
         HStack(spacing: 12) {
             Text(BipeStrings.inviterHint(inviterHandle))
                 .font(.compound.bodyMD)
                 .foregroundStyle(.compound.textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             Button(BipeStrings.inviterHintAction, action: sayHi)
                 .buttonStyle(.compound(.primary, size: .small))
                 .fixedSize()

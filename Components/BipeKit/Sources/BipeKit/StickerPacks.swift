@@ -18,7 +18,10 @@ public enum StickerPackEventType {
 }
 
 public struct Sticker: Identifiable, Hashable, Sendable {
-    public var id: String { "\(packID)/\(shortcode)" }
+    public var id: String {
+        "\(packID)/\(shortcode)"
+    }
+    
     public let packID: String
     public let shortcode: String
     /// The `mxc://` URI of the image.
@@ -35,18 +38,18 @@ public struct StickerPack: Identifiable, Hashable, Sendable {
         case user
         case room(roomID: String, stateKey: String)
     }
-
+    
     public var id: String {
         switch source {
         case .user: "user"
         case .room(let roomID, let stateKey): "\(roomID)/\(stateKey)"
         }
     }
-
+    
     public let source: Source
     public let displayName: String?
     public let stickers: [Sticker]
-
+    
     /// Parses an MSC2545 pack. Keeps images whose usage includes `sticker`, or that state no usage.
     /// Returns nil when the content is not a pack or holds no stickers.
     public init?(contentJSON: Data, source: Source) {
@@ -57,7 +60,7 @@ public struct StickerPack: Identifiable, Hashable, Sendable {
         let pack = content["pack"] as? [String: Any]
         let packUsage = pack?["usage"] as? [String]
         let packID = Self.packID(for: source)
-
+        
         let stickers = images.keys.sorted().compactMap { shortcode -> Sticker? in
             guard let image = images[shortcode] as? [String: Any],
                   let url = image["url"] as? String, url.hasPrefix("mxc://") else {
@@ -78,12 +81,12 @@ public struct StickerPack: Identifiable, Hashable, Sendable {
                            size: info?["size"] as? Int)
         }
         guard !stickers.isEmpty else { return nil }
-
+        
         self.source = source
         displayName = pack?["display_name"] as? String
         self.stickers = stickers
     }
-
+    
     private static func packID(for source: Source) -> String {
         switch source {
         case .user: "user"
@@ -96,11 +99,19 @@ public extension Sticker {
     /// The JSON content of an `m.sticker` event. `threadRootID` puts the sticker in a thread.
     func eventContentJSON(threadRootID: String? = nil) -> String {
         var info: [String: Any] = [:]
-        if let width { info["w"] = width }
-        if let height { info["h"] = height }
-        if let mimeType { info["mimetype"] = mimeType }
-        if let size { info["size"] = size }
-
+        if let width {
+            info["w"] = width
+        }
+        if let height {
+            info["h"] = height
+        }
+        if let mimeType {
+            info["mimetype"] = mimeType
+        }
+        if let size {
+            info["size"] = size
+        }
+        
         var content: [String: Any] = ["body": body, "url": url, "info": info]
         if let threadRootID {
             content["m.relates_to"] = ["rel_type": "m.thread", "event_id": threadRootID, "is_falling_back": true]
@@ -116,23 +127,23 @@ public extension Sticker {
 public struct StickerPackClient: Sendable {
     private let homeserverURL: URL
     private let session: URLSession
-
+    
     public init(homeserverURL: URL, session: URLSession = .shared) {
         self.homeserverURL = homeserverURL
         self.session = session
     }
-
+    
     /// The user's own pack, the packs of `roomID`, and the room packs the user enabled.
     public func packs(userID: String, roomID: String, accessToken: String) async throws(BipeAPIError) -> [StickerPack] {
         var packs: [StickerPack] = []
-
+        
         if let data = try await get(["user", userID, "account_data", StickerPackEventType.userPack], accessToken: accessToken),
            let pack = StickerPack(contentJSON: data, source: .user) {
             packs.append(pack)
         }
-
+        
         packs += try await roomPacks(roomID: roomID, accessToken: accessToken)
-
+        
         if let data = try await get(["user", userID, "account_data", StickerPackEventType.enabledRooms], accessToken: accessToken) {
             for (enabledRoomID, stateKey) in Self.enabledRoomPacks(contentJSON: data) where enabledRoomID != roomID {
                 // A pack in a room the user left is unreadable. Skip it, keep the others.
@@ -145,9 +156,9 @@ public struct StickerPackClient: Sendable {
         }
         return packs
     }
-
+    
     // MARK: - Private
-
+    
     private func roomPacks(roomID: String, accessToken: String) async throws(BipeAPIError) -> [StickerPack] {
         guard let data = try await get(["rooms", roomID, "state"], accessToken: accessToken),
               let events = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
@@ -164,7 +175,7 @@ public struct StickerPackClient: Sendable {
         }
         .sorted { $0.id < $1.id }
     }
-
+    
     static func enabledRoomPacks(contentJSON: Data) -> [(roomID: String, stateKey: String)] {
         guard let content = try? JSONSerialization.jsonObject(with: contentJSON) as? [String: Any],
               let rooms = content["rooms"] as? [String: Any] else {
@@ -175,14 +186,14 @@ public struct StickerPackClient: Sendable {
             return keys.map { (roomID: roomID, stateKey: $0) }
         }
     }
-
+    
     /// GET under `/_matrix/client/v3`. Returns nil on 404 (no such account data or state).
     func get(_ path: [String], accessToken: String) async throws(BipeAPIError) -> Data? {
         var request = URLRequest(url: clientURL(path))
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         return try await perform(request)
     }
-
+    
     /// PUT a JSON body under `/_matrix/client/v3`.
     func put(_ path: [String], json: Data, accessToken: String) async throws(BipeAPIError) {
         var request = URLRequest(url: clientURL(path))
@@ -192,7 +203,7 @@ public struct StickerPackClient: Sendable {
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         _ = try await perform(request)
     }
-
+    
     /// `POST /_matrix/media/v3/upload`. Returns the `mxc://` URI.
     func upload(_ data: Data, mimeType: String, fileName: String, accessToken: String) async throws(BipeAPIError) -> String {
         var url = homeserverURL.appending(path: "_matrix/media/v3/upload")
@@ -209,7 +220,7 @@ public struct StickerPackClient: Sendable {
         }
         return contentURI
     }
-
+    
     private func clientURL(_ path: [String]) -> URL {
         var url = homeserverURL.appending(path: "_matrix/client/v3")
         for component in path {
@@ -217,7 +228,7 @@ public struct StickerPackClient: Sendable {
         }
         return url
     }
-
+    
     private func perform(_ request: URLRequest) async throws(BipeAPIError) -> Data? {
         let data: Data
         let response: URLResponse

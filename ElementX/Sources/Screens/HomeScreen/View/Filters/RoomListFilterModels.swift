@@ -6,11 +6,11 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
 import MatrixRustSDK
 import OrderedCollections
-import BipeKit
 
 enum RoomListFilter: Int, CaseIterable, Identifiable {
     var id: Int {

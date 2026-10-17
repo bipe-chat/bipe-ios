@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import MatrixRustSDK
 import BipeKit
+import MatrixRustSDK
 
 /// Which rooms a home tab lists (bipe ADR 0053).
 /// Conversas: direct chats and DM invites (they become Pedidos). Grupos: rooms that are not direct chats, joined or invited.

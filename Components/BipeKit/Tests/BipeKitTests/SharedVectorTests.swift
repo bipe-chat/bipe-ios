@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Foundation
 @testable import BipeKit
+import Foundation
 import Testing
 
 /// Every case in bipe-shared/test-vectors must pass (ADR 0031, rule 4). Android runs the same files.
@@ -22,7 +22,7 @@ struct SharedVectorTests {
             #expect(BipeTrustFacts.evaluate(input) == expected, "trust facts \(vector["name"] ?? "")")
         }
     }
-
+    
     @Test
     func normalization() throws {
         for vector in try SharedVectors.array("normalization.json", key: "vectors") {
@@ -31,7 +31,7 @@ struct SharedVectorTests {
             #expect(NameNormalizer.reservedCategory(for: input)?.rawValue == vector["reserved"] as? String, "reserved(\(input))")
         }
     }
-
+    
     @Test
     func scamDetection() throws {
         for vector in try SharedVectors.array("scam-detection.json", key: "vectors") {
@@ -39,7 +39,7 @@ struct SharedVectorTests {
             #expect(ScamDetector.matchIDs(in: message) == vector["matches"] as? [String], "matches(\(message))")
         }
     }
-
+    
     @Test
     func scamWarnings() throws {
         for vector in try SharedVectors.array("scam-warnings.json", key: "vectors") {
@@ -48,7 +48,7 @@ struct SharedVectorTests {
             #expect(kind?.rawValue == vector["kind"] as? String, "kind(\(message))")
         }
     }
-
+    
     @Test
     func pixCheck() throws {
         let vectors = try SharedVectors.array("pix-check.json", key: "vectors")
@@ -57,7 +57,7 @@ struct SharedVectorTests {
             let text = try #require(vector["text"] as? String)
             let result = PixCheck.check(text)
             let label = "pixCheck(\(text.prefix(40)))"
-
+            
             if let expected = vector["code"] as? [String: Any] {
                 let code = try #require(result.code, "\(label) code")
                 #expect(code.status.rawValue == expected["status"] as? String, "\(label) status")
@@ -76,14 +76,14 @@ struct SharedVectorTests {
             } else {
                 #expect(result.code == nil, "\(label) code")
             }
-
+            
             let keys = try #require(vector["keys"] as? [[String: Any]])
             #expect(result.keys.map(\.value) == keys.map { $0["value"] as? String ?? "" }, "\(label) keys")
             #expect(result.keys.map { $0.types.map(\.rawValue) } == keys.map { $0["types"] as? [String] ?? [] }, "\(label) key types")
             #expect(result.warning?.rawValue == vector["warning"] as? String, "\(label) warning")
         }
     }
-
+    
     /// The client checks length and characters only. Reserved names and lookalikes are the server's call.
     @Test
     func handles() throws {
@@ -94,7 +94,7 @@ struct SharedVectorTests {
             #expect(BipeHandle.localProblem(for: input)?.rawValue == expected, "localProblem(\(input))")
         }
     }
-
+    
     @Test
     func inviteCodes() throws {
         for vector in try SharedVectors.array("invite-codes.json", key: "vectors") {
@@ -102,7 +102,7 @@ struct SharedVectorTests {
             #expect(BipeInviteLink.normalizedCode(input) == vector["code"] as? String, "normalizedCode(\(input))")
         }
     }
-
+    
     @Test
     func pins() throws {
         let cases = try SharedVectors.array("pins.json", key: "cases")
@@ -112,20 +112,20 @@ struct SharedVectorTests {
             #expect(BipePIN.problem(for: input)?.rawValue == vector["problem"] as? String, "pinProblem(\(input))")
         }
     }
-
+    
     @Test
     func badges() throws {
         let file = try SharedVectors.object("badges.json")
-        let now = Date(timeIntervalSince1970: try #require(file["now"] as? Double))
+        let now = try Date(timeIntervalSince1970: #require(file["now"] as? Double))
         let keys = try #require(file["publicKeys"] as? [String: String])
         let verifier = try BadgeVerifier(trustedKeys: keys.mapValues { try #require(Data(base64URL: $0)) })
         for vector in try #require(file["vectors"] as? [[String: Any]]) {
             let name = try #require(vector["name"] as? String)
-            let envelope = try JSONSerialization.data(withJSONObject: try #require(vector["envelope"]))
-            let result = verifier.verify(envelopeJSON: envelope,
-                                         sender: try #require(vector["sender"] as? String),
-                                         senderDevice: try #require(vector["senderDevice"] as? String),
-                                         now: now)
+            let envelope = try JSONSerialization.data(withJSONObject: #require(vector["envelope"]))
+            let result = try verifier.verify(envelopeJSON: envelope,
+                                             sender: #require(vector["sender"] as? String),
+                                             senderDevice: #require(vector["senderDevice"] as? String),
+                                             now: now)
             let outcome = switch result {
             case .valid: "valid"
             case .invalid(let failure): failure.rawValue
@@ -147,12 +147,12 @@ enum SharedVectors {
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
             .appending(path: "bipe-shared/test-vectors")
     }
-
+    
     static func object(_ name: String) throws -> [String: Any] {
         let data = try Data(contentsOf: directory.appending(path: name))
         return try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
     }
-
+    
     static func array(_ name: String, key: String) throws -> [[String: Any]] {
         try #require(try object(name)[key] as? [[String: Any]])
     }

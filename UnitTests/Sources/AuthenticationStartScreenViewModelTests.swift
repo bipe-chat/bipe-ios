@@ -142,6 +142,8 @@ final class AuthenticationStartScreenViewModelTests {
     
     @Test
     func classicAppAccount() async throws {
+        // Bipe: other account providers are off by default. The Classic app flow needs Element's default.
+        setAllowedAccountProviders(appSettings.accountProviders, allowOtherAccountProviders: true)
         // Given a view model with a Classic app account whose server name resolves successfully.
         let classicAppAccount = makeClassicAppAccount()
         await setupViewModel(classicAppAccount: classicAppAccount)
@@ -165,6 +167,8 @@ final class AuthenticationStartScreenViewModelTests {
     
     @Test
     func classicAppAccountWithoutWellKnown() async throws {
+        // Bipe: other account providers are off by default. The Classic app flow needs Element's default.
+        setAllowedAccountProviders(appSettings.accountProviders, allowOtherAccountProviders: true)
         // Given a view model where the Classic app account's server name has no well-known file.
         let classicAppAccount = makeClassicAppAccount(serverName: "unknown-server.org",
                                                       homeserverURL: "https://matrix.company.com")
@@ -189,6 +193,8 @@ final class AuthenticationStartScreenViewModelTests {
     
     @Test
     func classicAppAccountOnUnsupportedServer() async {
+        // Bipe: other account providers are off by default. The Classic app flow needs Element's default.
+        setAllowedAccountProviders(appSettings.accountProviders, allowOtherAccountProviders: true)
         // Given a view model with a Classic app account whose server supports neither OAuth nor password login.
         let classicAppAccount = makeClassicAppAccount()
         await setupViewModel(classicAppAccount: classicAppAccount, supportsOAuth: false, supportsPasswordLogin: false)
@@ -243,6 +249,8 @@ final class AuthenticationStartScreenViewModelTests {
     
     @Test
     func classicAppAccountRequiresBackup() async throws {
+        // Bipe: other account providers are off by default. The Classic app flow needs Element's default.
+        setAllowedAccountProviders(appSettings.accountProviders, allowOtherAccountProviders: true)
         // Given a view model with a Classic app account that requires backup before signing in.
         let classicAppAccount = makeClassicAppAccount()
         await setupViewModel(classicAppAccount: classicAppAccount, availableSecrets: .requiresBackup)
@@ -338,9 +346,9 @@ final class AuthenticationStartScreenViewModelTests {
                           accessToken: "accessToken")
     }
     
-    private func setAllowedAccountProviders(_ providers: [AccountProvider]) {
+    private func setAllowedAccountProviders(_ providers: [AccountProvider], allowOtherAccountProviders: Bool = false) {
         appSettings.override(accountProviders: providers,
-                             allowOtherAccountProviders: false,
+                             allowOtherAccountProviders: allowOtherAccountProviders,
                              hideBrandChrome: false,
                              pushGatewayBaseURL: appSettings.pushGatewayBaseURL,
                              oAuthRedirectURL: appSettings.oAuthRedirectURL,

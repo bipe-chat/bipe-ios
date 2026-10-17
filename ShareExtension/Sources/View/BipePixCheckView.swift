@@ -14,7 +14,7 @@ struct BipePixCheckView: View {
     let check: PixCheck
     let close: () -> Void
     let sendToChat: () -> Void
-
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -50,8 +50,7 @@ struct BipePixCheckView: View {
             }
         }
     }
-
-    @ViewBuilder
+    
     private func codeSection(_ code: PixCheck.Code) -> some View {
         Section {
             switch code.status {
@@ -86,7 +85,7 @@ struct BipePixCheckView: View {
                 .compoundListSectionHeader()
         }
     }
-
+    
     private var keysSection: some View {
         Section {
             ForEach(check.keys, id: \.value) { key in
@@ -97,7 +96,7 @@ struct BipePixCheckView: View {
                 .compoundListSectionHeader()
         }
     }
-
+    
     private func field(_ label: String, _ value: String, footnote: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
@@ -115,7 +114,7 @@ struct BipePixCheckView: View {
         }
         .padding(.vertical, 4)
     }
-
+    
     private static func keyLabel(_ types: [PixCheck.KeyType]) -> String {
         let names = types.map { type in
             switch type {
@@ -129,7 +128,7 @@ struct BipePixCheckView: View {
         }
         return names.dropFirst().reduce(names.first ?? BipeStrings.pixCheckKeyTypeUnknown) { BipeStrings.pixCheckKeyTypesOr($0, $1) }
     }
-
+    
     /// "50.00" → "R$ 50,00". The code holds a plain decimal with a dot.
     private static func formattedAmount(_ amount: String) -> String {
         guard let value = Decimal(string: amount, locale: Locale(identifier: "en_US_POSIX")) else { return amount }

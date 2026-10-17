@@ -6,9 +6,9 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
-import BipeKit
 
 enum UserSessionCallback {
     case didReceiveAuthError(isSoftLogout: Bool)

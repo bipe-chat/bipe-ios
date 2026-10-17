@@ -1612,12 +1612,12 @@ private struct ClientProxyServices {
         try await roomSummaryProvider.setRoomList(roomListService.allRooms())
         
         bipeGroupsRoomSummaryProvider = RoomSummaryProvider(roomListService: roomListService,
-                                                               eventStringBuilder: eventStringBuilder,
-                                                               name: "BipeGroups",
-                                                               shouldUpdateVisibleRange: true,
-                                                               bipeScope: .groups,
-                                                               notificationSettings: notificationSettings,
-                                                               userSettings: userSettings)
+                                                            eventStringBuilder: eventStringBuilder,
+                                                            name: "BipeGroups",
+                                                            shouldUpdateVisibleRange: true,
+                                                            bipeScope: .groups,
+                                                            notificationSettings: notificationSettings,
+                                                            userSettings: userSettings)
         try await bipeGroupsRoomSummaryProvider.setRoomList(roomListService.allRooms())
         
         alternateRoomSummaryProvider = RoomSummaryProvider(roomListService: roomListService,

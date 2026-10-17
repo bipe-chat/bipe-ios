@@ -4,20 +4,20 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 /// Bipe: the sender checks and corrects the transcript of a recorded voice message before sending it.
 struct BipeVoiceTranscriptEditor: View {
     @Bindable var draft: VoiceTranscriptDraft
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(BipeStrings.voiceTranscriptTitle)
                 .font(.compound.bodyXSSemibold)
                 .foregroundStyle(.compound.textSecondary)
-
+            
             switch draft.state {
             case .transcribing:
                 HStack(spacing: 6) {

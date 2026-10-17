@@ -19,7 +19,7 @@ public nonisolated enum NameNormalizer {
         }
         // Locale-free and context-sensitive like JS toLowerCase(). Swift's lowercased() misses final sigma (Σ -> ς).
         let lowered = String(stripped).lowercased(with: nil)
-
+        
         var result = String.UnicodeScalarView()
         var pendingSpace = false
         // JS iterates code points, so fold per scalar, not per grapheme cluster.
@@ -40,14 +40,14 @@ public nonisolated enum NameNormalizer {
         }
         return String(result)
     }
-
+    
     /// Category of a reserved display name, or `nil` when the name is free to use.
     public static func reservedCategory(for displayName: String) -> ReservedNameCategory? {
         BipeRegistries.reservedNames[normalize(displayName)]
     }
-
+    
     // MARK: - Private
-
+    
     private static func isMark(_ scalar: Unicode.Scalar) -> Bool {
         switch scalar.properties.generalCategory {
         case .nonspacingMark, .spacingMark, .enclosingMark:
@@ -56,7 +56,7 @@ public nonisolated enum NameNormalizer {
             false
         }
     }
-
+    
     /// JS `\s` and `String.prototype.trim()`: WhiteSpace plus LineTerminator (ECMA-262).
     /// Not the same set as ICU `\s` or `Character.isWhitespace` (U+000B, U+FEFF, U+0085 differ).
     static func isJavaScriptWhitespace(_ scalar: Unicode.Scalar) -> Bool {

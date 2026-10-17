@@ -17,9 +17,9 @@ struct BipeTermsReacceptScreenViewState: BindableState {
     var isSaving = false
     /// The last `POST /v1/me/terms` failed.
     var isFailed = false
-
+    
     var bindings = BipeTermsReacceptScreenViewStateBindings()
-
+    
     var canContinue: Bool {
         bindings.isTermsAccepted && !isSaving
     }

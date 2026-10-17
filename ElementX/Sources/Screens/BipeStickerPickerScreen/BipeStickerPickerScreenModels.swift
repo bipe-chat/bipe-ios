@@ -17,7 +17,7 @@ struct BipeStickerPickerScreenViewState: BindableState {
         case loaded([StickerPack])
         case failed
     }
-
+    
     /// The room the picker sends to. Its own packs show as "From this chat".
     let roomID: String
     var content = Content.loading

@@ -8,7 +8,6 @@
 
 /// Performance instrumentation points. Bipe: no Sentry (bipe#55), so the calls record nothing.
 class Signposter {
-    
     enum TransactionName: Hashable {
         case cachedRoomList
         case upToDateRoomList

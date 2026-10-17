@@ -12,17 +12,17 @@ import SwiftUI
 /// and WhatsApp stickers are animated WebP (bipe/docs/adr/0029-stickers-in-core.md).
 public struct BipeAnimatedImage: UIViewRepresentable {
     private let data: Data
-
+    
     public init(data: Data) {
         self.data = data
     }
-
+    
     /// The number of frames in `data`. 1 for a still image, 0 when ImageIO cannot read it.
     public static func frameCount(of data: Data) -> Int {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return 0 }
         return CGImageSourceGetCount(source)
     }
-
+    
     public func makeUIView(context: Context) -> UIImageView {
         let view = UIImageView()
         view.contentMode = .scaleAspectFit
@@ -31,24 +31,24 @@ public struct BipeAnimatedImage: UIViewRepresentable {
         context.coordinator.start(data: data, in: view)
         return view
     }
-
+    
     public func updateUIView(_ uiView: UIImageView, context: Context) {
         context.coordinator.start(data: data, in: uiView)
     }
-
+    
     public static func dismantleUIView(_ uiView: UIImageView, coordinator: Coordinator) {
         coordinator.stop()
     }
-
+    
     public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
-
+    
     @MainActor
     public final class Coordinator {
         private var playingData: Data?
         private var generation = 0
-
+        
         func start(data: Data, in view: UIImageView) {
             guard data != playingData else { return }
             stop()
@@ -65,7 +65,7 @@ public struct BipeAnimatedImage: UIViewRepresentable {
                 }
             }
         }
-
+        
         func stop() {
             generation += 1
             playingData = nil

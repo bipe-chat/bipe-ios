@@ -113,6 +113,7 @@ final class RoomScreenCoordinator: CoordinatorProtocol {
     
     // MARK: - Public
     
+    // swiftlint:disable:next function_body_length
     func start() {
         timelineViewModel.actions
             .sink { [weak self] action in

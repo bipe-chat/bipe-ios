@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 /// Bipe: the sender-side transcript under a voice message (bipe/docs/audio.md).
 struct BipeVoiceTranscriptView: View {
     let text: String
-
+    
     @State private var isExpanded = false
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(BipeStrings.voiceTranscriptTitle)
@@ -35,7 +35,7 @@ struct BipeVoiceTranscriptView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
-
+    
     private static let collapsedLineLimit = 3
     private static let collapseThreshold = 140
 }
