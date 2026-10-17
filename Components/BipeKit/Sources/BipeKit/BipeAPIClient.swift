@@ -473,6 +473,12 @@ public struct BipeAPIClient: Sendable {
 
 // MARK: - Models
 
+/// Contract: `account_type` (ADR 0087). A company account needs an attestation and does not count in the cap (ADR 0086).
+public enum BipeAccountType: String, Codable, Sendable {
+    case personal
+    case company
+}
+
 /// Device-first sign-up (ADR 0057): no `password`. The server makes the password and returns it once.
 public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
     /// Optional while the server runs open sign-up (beta).
@@ -493,6 +499,8 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
     public let signupKey: String?
     /// The ``BipeRegistries/legalVersion`` the person accepted with the checkbox (ADR 0113). Without it the server answers `terms_required`.
     public let termsVersion: String?
+    /// `nil` makes a personal account. `.company` needs `attestation` (ADR 0043, ADR 0087).
+    public let accountType: BipeAccountType?
     
     public init(inviteCode: String? = nil,
                 email: String?,
@@ -502,7 +510,9 @@ public struct BipeSignupRequest: Encodable, Sendable, CustomStringConvertible {
                 displayName: String?,
                 attestation: BipeAttestation? = nil,
                 signupKey: String? = nil,
-                termsVersion: String?) {
+                termsVersion: String?,
+                accountType: BipeAccountType? = nil) {
+        self.accountType = accountType
         self.signupKey = signupKey
         self.termsVersion = termsVersion
         self.inviteCode = inviteCode

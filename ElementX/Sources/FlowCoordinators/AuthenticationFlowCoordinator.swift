@@ -31,6 +31,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private let appLockService: AppLockServiceProtocol?
     /// Bipe: adding an account from a signed-in session shows the flow as a sheet over it, with no silent sign-in (ADR 0086).
     private let isAddingAccount: Bool
+    /// Bipe: "Criar conta da empresa" goes straight to the sign-up as a company (ADR 0087).
+    private let bipeAccountType: BipeAccountType
     
     enum State: StateType {
         /// The state machine hasn't started.
@@ -127,10 +129,12 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
          appHooks: AppHooks,
          userIndicatorController: UserIndicatorControllerProtocol,
          appLockService: AppLockServiceProtocol? = nil,
-         isAddingAccount: Bool = false) {
+         isAddingAccount: Bool = false,
+         bipeAccountType: BipeAccountType = .personal) {
         self.authenticationService = authenticationService
         self.appLockService = appLockService
         self.isAddingAccount = isAddingAccount
+        self.bipeAccountType = bipeAccountType
         self.bugReportService = bugReportService
         self.navigationRootCoordinator = navigationRootCoordinator
         self.appMediator = appMediator
@@ -364,6 +368,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 guard let self, stateMachine.state != .complete else { return }
                 delegate?.authenticationFlowCoordinatorDidCancelAddingAccount()
             }
+            if bipeAccountType == .company {
+                // After the start transition ends.
+                Task { self.stateMachine.tryEvent(.bipeSignup) }
+            }
         } else if fromState == .initial {
             navigationRootCoordinator.setRootCoordinator(navigationStackCoordinator)
             if appSettings.usesBipeSignup {
@@ -499,7 +507,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                                                                apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
                                                                signIn: BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings),
                                                                appLockService: appLockService,
-                                                               userIndicatorController: userIndicatorController)
+                                                               userIndicatorController: userIndicatorController,
+                                                               accountType: bipeAccountType)
         let coordinator = BipeSignupScreenCoordinator(parameters: parameters)
         
         coordinator.actionsPublisher

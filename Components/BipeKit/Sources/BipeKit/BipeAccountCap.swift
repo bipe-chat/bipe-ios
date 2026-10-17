@@ -44,7 +44,21 @@ public nonisolated enum BipeAccountLabels {
         defaults.string(forKey: key(userID)) ?? userID
     }
     
+    /// ADR 0087: a company account does not count in the cap, and the app shows it as the company.
+    public static func rememberCompany(_ isCompany: Bool, for userID: String, defaults: UserDefaults = .standard) {
+        defaults.set(isCompany, forKey: companyKey(userID))
+    }
+    
+    public static func isCompany(_ userID: String, defaults: UserDefaults = .standard) -> Bool {
+        defaults.bool(forKey: companyKey(userID))
+    }
+    
     public static func forget(_ userID: String, defaults: UserDefaults = .standard) {
         defaults.removeObject(forKey: key(userID))
+        defaults.removeObject(forKey: companyKey(userID))
+    }
+    
+    private static func companyKey(_ userID: String) -> String {
+        "bipe.accounts.company.\(userID)"
     }
 }

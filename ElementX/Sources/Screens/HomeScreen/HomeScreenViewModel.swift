@@ -656,9 +656,10 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     private func updateBipeAccounts(profile: UserProfile) {
         let currentUserID = userSession.clientProxy.userID
         BipeAccountLabels.remember(displayName: profile.displayName, for: currentUserID)
-        let current = BipeAccountMenuItem(userID: currentUserID, label: profile.displayName ?? currentUserID, isCurrent: true)
+        let current = BipeAccountMenuItem(userID: currentUserID, label: profile.displayName ?? currentUserID, isCurrent: true,
+                                          isCompany: BipeAccountLabels.isCompany(currentUserID))
         let others = BipeSignedInAccounts.userIDs.filter { $0 != currentUserID }.sorted().map {
-            BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false)
+            BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false, isCompany: BipeAccountLabels.isCompany($0))
         }
         state.bipeAccounts = [current] + others
         state.bipeMaxAccounts = BipeAccountCap.maxPersonalAccounts()

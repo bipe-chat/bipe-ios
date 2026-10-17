@@ -85,6 +85,8 @@ struct ComposerToolbarViewState: BindableState {
     var isLocationSharingEnabled: Bool
     /// Bipe: DMs have no polls.
     var isDM = false
+    /// Bipe ADR 0087: the company the account on screen answers as. `nil` for a personal account.
+    var bipeReplyingAs: String?
     
     var keyCommands: [WysiwygKeyCommand] = []
     

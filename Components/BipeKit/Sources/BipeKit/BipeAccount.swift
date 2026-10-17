@@ -45,6 +45,8 @@ public struct BipeAccountStatus: Decodable, Sendable, Equatable {
     public let termsVersion: String?
     /// Personal accounts one phone may hold (ADR 0086). Absent from an older server.
     public let maxAccounts: Int?
+    /// ADR 0087. Absent from an older server: personal.
+    public let accountType: BipeAccountType?
 }
 
 /// Contract: `Recovery`.

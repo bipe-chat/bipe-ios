@@ -16,6 +16,8 @@ struct BipeSignupScreenCoordinatorParameters {
     /// The new account's PIN also locks the app.
     let appLockService: AppLockServiceProtocol?
     let userIndicatorController: UserIndicatorControllerProtocol
+    /// ADR 0087: "Criar conta da empresa" makes a company account.
+    var accountType = BipeAccountType.personal
 }
 
 enum BipeSignupScreenCoordinatorAction: CustomStringConvertible {
@@ -48,7 +50,8 @@ final class BipeSignupScreenCoordinator: CoordinatorProtocol {
                                               apiClient: parameters.apiClient,
                                               signIn: parameters.signIn,
                                               appLockService: parameters.appLockService,
-                                              userIndicatorController: parameters.userIndicatorController)
+                                              userIndicatorController: parameters.userIndicatorController,
+                                              accountType: parameters.accountType)
     }
     
     func start() {
