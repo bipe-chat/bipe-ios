@@ -684,4 +684,9 @@ public enum BipeRegistries {
     public static let privacyPath = "/privacidade/"
     public static let enTermsPath = "/en/terms/"
     public static let enPrivacyPath = "/en/privacy/"
+
+    /// Badge signing keys a release build trusts (ADR 0123; registries/badge-keys.json): kid to raw Ed25519 public key, base64url.
+    public static let badgeKeys: [String: String] = [
+        "prod-2026-10": "9j3_slBroZbxa3B6Tdgcm_U-O_LIdrNFXzDgY8oLwxE",
+    ]
 }
