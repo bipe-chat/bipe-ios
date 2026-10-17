@@ -59,7 +59,7 @@ struct BipeAccountSignIn {
         let result = await signIn(userID: stored.userID, password: stored.secret)
         if case .failure(.invalidCredentials) = result {
             // A token recovery on another device set a new password. The token path is next.
-            credentialStore.deletePassword()
+            credentialStore.deletePassword(for: stored.userID)
         }
         return result
     }
