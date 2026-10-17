@@ -98,6 +98,12 @@ struct RoomScreen: View {
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
+                    if let inviterHandle = context.viewState.bipeInviterHandle {
+                        BipeInviterHint(inviterHandle: inviterHandle) {
+                            context.send(viewAction: .sayHiToBipeInviter)
+                        }
+                    }
+                    
                     RoomScreenFooterView(details: context.viewState.footerDetails,
                                          mediaProvider: context.mediaProvider) { action in
                         context.send(viewAction: .footerViewAction(action))

@@ -14,11 +14,12 @@ struct AppSettingsTests {
         let appSettings = AppSettings.volatile()
         #expect(appSettings.defaultAccountProvider == appSettings.accountProviders[0])
         
+        // Bipe: other account providers are not allowed by default, so a previous server is ignored.
         appSettings.previousServers = ["example.com"]
-        #expect(appSettings.defaultAccountProvider == .generic("example.com"))
-        
-        appSettings.override(allowOtherAccountProviders: false)
         #expect(appSettings.defaultAccountProvider == appSettings.accountProviders[0])
+        
+        appSettings.override(allowOtherAccountProviders: true)
+        #expect(appSettings.defaultAccountProvider == .generic("example.com"))
     }
 }
 

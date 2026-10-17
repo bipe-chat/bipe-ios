@@ -7,8 +7,8 @@
 //
 
 import AnalyticsEvents
-import BipeKit
 import BackgroundTasks
+import BipeKit
 import Combine
 import Intents
 import MatrixRustSDK
@@ -728,17 +728,12 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
     }
     
-    /// Bipe: the existing direct chat with a user, or a new one; falls back to the profile.
-    private func openChat(with userID: String, userSession: UserSessionProtocol, flowCoordinator: UserSessionFlowCoordinator) async {
-        var roomID = try? userSession.clientProxy.directRoomForUserID(userID).get()
-        if roomID == nil {
-            roomID = try? await userSession.clientProxy.createDirectRoom(with: userID, expectedRoomName: nil).get()
-        }
-        if let roomID {
+    /// Bipe ADR 0034: keeps the inviter for the chat list card and the in-chat prompt, then opens the chat.
+    /// When the chat cannot open, the chat list stays and its card retries.
+    private func openChatWithInviter(_ inviterUserID: String, handle: String?, userSession: UserSessionProtocol, flowCoordinator: UserSessionFlowCoordinator) async {
+        BipeInviteStore(userID: userSession.clientProxy.userID).setInviterGreeting(BipeInviterGreeting(userID: inviterUserID, handle: handle))
+        if let roomID = await userSession.clientProxy.bipeDirectRoom(with: inviterUserID) {
             flowCoordinator.handleAppRoute(.room(roomID: roomID, via: []), animated: false)
-        } else {
-            MXLog.error("Bipe: could not open a chat with the inviter \(userID)")
-            flowCoordinator.handleAppRoute(.userProfile(userID: userID), animated: false)
         }
     }
     
@@ -756,16 +751,18 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             userSessionFlowCoordinator.handleAppRoute(storedAppRoute, animated: false)
         } else if let inviterUserID = appSettings.bipePendingInviterUserID {
             // Bipe ADR 0034: after a personal-invite sign-up, open a chat with the inviter. Their app accepts it without a tap.
+            let inviterHandle = appSettings.bipePendingInviterHandle
             appSettings.bipePendingInviterUserID = nil
-            await openChat(with: inviterUserID, userSession: userSession, flowCoordinator: userSessionFlowCoordinator)
+            appSettings.bipePendingInviterHandle = nil
+            await openChatWithInviter(inviterUserID, handle: inviterHandle, userSession: userSession, flowCoordinator: userSessionFlowCoordinator)
         }
         
         if userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName {
             Task {
                 await BipeInviteJoinNotifier(apiBaseURL: appSettings.bipeAPIBaseURL,
-                                                clientProxy: userSession.clientProxy,
-                                                handleResolver: userSession.bipeHandleResolver,
-                                                userIndicatorController: userIndicatorController).run()
+                                             clientProxy: userSession.clientProxy,
+                                             handleResolver: userSession.bipeHandleResolver,
+                                             userIndicatorController: userIndicatorController).run()
             }
         }
         
@@ -775,7 +772,11 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             bipeRecoveryAlerts = BipeRecoveryAlerts(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
                                                     clientProxy: userSession.clientProxy,
                                                     navigationRootCoordinator: navigationRootCoordinator,
-                                                    userIndicatorController: userIndicatorController)
+                                                    userIndicatorController: userIndicatorController) { [weak self] in
+                self?.userSessionFlowCoordinator?.presentBipeTermsReacceptScreen { [weak self] in
+                    Task { await self?.bipeRecoveryAlerts?.check() }
+                }
+            }
             Task { await bipeRecoveryAlerts?.check() }
             Task { await refreshBipeHandleChangesAfterSync(clientProxy: userSession.clientProxy) }
         }
@@ -858,7 +859,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             
             // Bipe: the notice shows the cached handle instead of the Matrix ID when one is known.
             navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: coordinator,
-                                                                                       handleResolver: userSession.bipeHandleResolver))
+                                                                                    handleResolver: userSession.bipeHandleResolver))
         }
     }
     

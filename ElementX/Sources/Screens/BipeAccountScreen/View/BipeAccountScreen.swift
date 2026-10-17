@@ -10,26 +10,30 @@ import SwiftUI
 
 struct BipeAccountScreen: View {
     @Bindable var context: BipeAccountScreenViewModel.Context
-
+    
     var body: some View {
         Form {
-            if context.viewState.isEditingPIN {
-                pinFormSections
-            } else {
-                pinSection
+            switch context.viewState.mode {
+            case .pin:
+                if context.viewState.isEditingPIN {
+                    pinFormSections
+                } else {
+                    pinSection
+                }
+            case .email:
                 emailSection
             }
         }
         .compoundList()
-        .navigationTitle(BipeStrings.pinChangeTitle)
+        .navigationTitle(context.viewState.title)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
         .onChange(of: context.pin) { context.send(viewAction: .pinChanged) }
         .onChange(of: context.pinConfirmation) { context.send(viewAction: .pinChanged) }
     }
-
+    
     // MARK: - PIN
-
+    
     @ViewBuilder
     private var pinSection: some View {
         if let status = context.viewState.status {
@@ -56,47 +60,46 @@ struct BipeAccountScreen: View {
             }
         }
     }
-
+    
+    @ViewBuilder
     private var pinFormSections: some View {
-        Group {
-            Section {
-                ListRow(kind: .custom {
-                    VStack(spacing: 16) {
-                        PINTextField(pinCode: $context.pin, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
-                        Text(BipeStrings.pinConfirmTitle)
-                            .font(.compound.bodyMD)
-                            .foregroundStyle(.compound.textSecondary)
-                        PINTextField(pinCode: $context.pinConfirmation, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                })
-            } header: {
-                Text(BipeStrings.pinCreateBody(String(BipeRegistries.pinLength)))
-                    .compoundListSectionHeader()
-            } footer: {
-                if let footer = context.viewState.pinProblem?.localizedMessage ?? (context.viewState.pinMismatch ? BipeStrings.pinMismatch : nil) {
-                    Text(footer)
-                        .compoundListSectionFooter()
-                        .foregroundStyle(.compound.textCriticalPrimary)
-                } else {
-                    Text(BipeStrings.pinNeverAsked)
-                        .compoundListSectionFooter()
+        Section {
+            ListRow(kind: .custom {
+                VStack(spacing: 16) {
+                    PINTextField(pinCode: $context.pin, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
+                    Text(BipeStrings.pinConfirmTitle)
+                        .font(.compound.bodyMD)
+                        .foregroundStyle(.compound.textSecondary)
+                    PINTextField(pinCode: $context.pinConfirmation, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
                 }
-            }
-
-            Section {
-                ListRow(label: .centeredAction(title: L10n.actionSave, icon: \.check),
-                        kind: .button { context.send(viewAction: .savePIN) })
-                    .disabled(!context.viewState.canSavePIN)
-                ListRow(label: .centeredAction(title: L10n.actionCancel, icon: \.close),
-                        kind: .button { context.send(viewAction: .cancelPIN) })
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+            })
+        } header: {
+            Text(BipeStrings.pinCreateBody(String(BipeRegistries.pinLength)))
+                .compoundListSectionHeader()
+        } footer: {
+            if let footer = context.viewState.pinProblem?.localizedMessage ?? (context.viewState.pinMismatch ? BipeStrings.pinMismatch : nil) {
+                Text(footer)
+                    .compoundListSectionFooter()
+                    .foregroundStyle(.compound.textCriticalPrimary)
+            } else {
+                Text(BipeStrings.pinNeverAsked)
+                    .compoundListSectionFooter()
             }
         }
+        
+        Section {
+            ListRow(label: .centeredAction(title: L10n.actionSave, icon: \.check),
+                    kind: .button { context.send(viewAction: .savePIN) })
+                .disabled(!context.viewState.canSavePIN)
+            ListRow(label: .centeredAction(title: L10n.actionCancel, icon: \.close),
+                    kind: .button { context.send(viewAction: .cancelPIN) })
+        }
     }
-
+    
     // MARK: - Email
-
+    
     @ViewBuilder
     private var emailSection: some View {
         if let status = context.viewState.status {
@@ -137,11 +140,12 @@ struct BipeAccountScreen: View {
 // MARK: - Previews
 
 struct BipeAccountScreen_Previews: PreviewProvider {
-    static let viewModel = BipeAccountScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
+    static let viewModel = BipeAccountScreenViewModel(mode: .email,
+                                                      apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
                                                       clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
                                                       appLockService: AppLockServiceMock.mock(),
                                                       userIndicatorController: UserIndicatorControllerMock())
-
+    
     static var previews: some View {
         ElementNavigationStack {
             BipeAccountScreen(context: viewModel.context)

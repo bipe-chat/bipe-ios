@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -29,7 +30,7 @@ struct UserDetailsEditScreen: View {
         }
         .compoundList()
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle(L10n.screenEditProfileTitle)
+        .navigationTitle(BipeStrings.settingsProfileNamePhoto) // Bipe: "Nome e foto" (ADR 0112)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(context.viewState.canSave)
         .toolbar { toolbar }
@@ -80,13 +81,16 @@ struct UserDetailsEditScreen: View {
     
     private var nameSection: some View {
         Section {
-            ListRow(label: .plain(title: L10n.screenEditProfileDisplayNamePlaceholder),
+            ListRow(label: .plain(title: BipeStrings.profileDisplayName), // Bipe: "Seu nome"
                     kind: .textField(text: $context.name, axis: .horizontal))
                 .focused($focus)
                 .disabled(!context.viewState.canEditDisplayName)
         } header: {
-            Text(L10n.screenEditProfileDisplayName)
+            Text(BipeStrings.profileDisplayName)
                 .compoundListSectionHeader()
+        } footer: {
+            Text(BipeStrings.profileDisplayNameFooter)
+                .compoundListSectionFooter()
         }
     }
     
@@ -107,7 +111,7 @@ struct UserDetailsEditScreen: View {
         Button {
             context.send(viewAction: .displayFilePicker)
         } label: {
-            Text(L10n.actionChooseFile)
+            Text(BipeStrings.profileChooseFile) // Bipe: Element has no pt-BR for "Choose file"
         }
         
         if context.viewState.showDeleteImageAction {

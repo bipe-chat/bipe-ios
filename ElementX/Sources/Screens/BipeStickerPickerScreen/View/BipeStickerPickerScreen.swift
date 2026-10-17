@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import BipeKit
 import Compound
 import PhotosUI
-import BipeKit
 import SwiftUI
 import UniformTypeIdentifiers
 

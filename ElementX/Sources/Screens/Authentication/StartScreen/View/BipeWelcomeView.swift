@@ -12,43 +12,43 @@ import SwiftUI
 /// Android: `BipeWelcomeView` in libraries/bipe.
 struct BipeWelcomeView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
-
+    
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-
+            
             if verticalSizeClass == .regular {
                 logo
                     .padding(.bottom, 32)
             }
-
+            
             Text(BipeStrings.onboardingWelcome)
                 .font(.compound.bodyLGSemibold)
                 .foregroundStyle(.compound.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 8)
-
+            
             Text(BipeStrings.onboardingTitle)
                 .font(.compound.headingXLBold)
                 .foregroundStyle(.compound.textPrimary)
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
                 .padding(.bottom, 32)
-
+            
             VStack(alignment: .leading, spacing: 16) {
                 point(icon: \.shield, text: BipeStrings.onboardingPointScam)
                 point(icon: \.locationPin, text: BipeStrings.onboardingPointBrazil)
                 point(icon: \.block, text: BipeStrings.onboardingPointNoAds)
             }
             .fixedSize(horizontal: false, vertical: true)
-
+            
             Spacer()
         }
         .padding(.horizontal, 24)
         .padding(.bottom)
         .readableFrame()
     }
-
+    
     private var logo: some View {
         Image(asset: Asset.Images.appLogo)
             .resizable()
@@ -57,7 +57,7 @@ struct BipeWelcomeView: View {
             .shadow(color: .compound.bgAccentRest.opacity(0.35), radius: 24, y: 8)
             .accessibilityHidden(true)
     }
-
+    
     private func point(icon: KeyPath<CompoundIcons, Image>, text: String) -> some View {
         HStack(spacing: 16) {
             CompoundIcon(icon, size: .small, relativeTo: .compound.bodyLG)
@@ -65,7 +65,7 @@ struct BipeWelcomeView: View {
                 .padding(10)
                 .background(.compound.bgAccentSubtle, in: Circle())
                 .accessibilityHidden(true)
-
+            
             Text(text)
                 .font(.compound.bodyLG)
                 .foregroundStyle(.compound.textPrimary)

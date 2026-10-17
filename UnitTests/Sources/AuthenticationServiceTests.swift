@@ -73,7 +73,8 @@ struct AuthenticationServiceTests {
         }
         
         #expect(service.flow == .login)
-        #expect(service.homeserver.value == .init(accountProvider: .managed(serverName: "matrix.org", baseURL: "https://matrix-client.matrix.org"),
+        // Bipe: the service falls back to the Bipe server.
+        #expect(service.homeserver.value == .init(accountProvider: .managed(serverName: "bipe.net.br", baseURL: "https://matrix.bipe.net.br"),
                                                   loginMode: .unknown))
     }
     

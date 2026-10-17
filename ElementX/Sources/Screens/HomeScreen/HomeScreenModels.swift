@@ -40,6 +40,8 @@ enum HomeScreenViewAction {
     case showSettings
     case startChat
     case createGroup
+    /// Bipe ADR 0034: the card that opens the chat with the inviter.
+    case openBipeInviterChat
     case setupRecovery
     case confirmRecoveryKey
     case resetEncryption
@@ -54,6 +56,7 @@ enum HomeScreenViewAction {
     case markRoomAsUnread(roomIdentifier: String)
     case markRoomAsRead(roomIdentifier: String)
     case markRoomAsFavourite(roomIdentifier: String, isFavourite: Bool)
+    case setRoomMuted(roomIdentifier: String, isMuted: Bool)
     
     case acceptInvite(roomIdentifier: String)
     case declineInvite(roomIdentifier: String)
@@ -121,6 +124,13 @@ struct HomeScreenViewState: BindableState {
         bipeRequestCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && roomListMode == .rooms
     }
     
+    /// Bipe ADR 0034: the inviter's handle (without "@") until the user sends them a first message.
+    var bipeInviterHandle: String?
+    
+    var shouldShowBipeInviterRow: Bool {
+        bipeInviterHandle != nil && bipeScope == .chats && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering
+    }
+    
     var selectedRoomID: String?
     
     var hideInviteAvatars = false
@@ -165,7 +175,7 @@ struct HomeScreenViewState: BindableState {
     }
     
     var shouldShowBanner: Bool {
-        securityBannerMode.isShown || shouldShowNewSoundBanner
+        securityBannerMode.isShown || shouldShowNewSoundBanner || shouldShowBipeInviterRow
     }
 }
 

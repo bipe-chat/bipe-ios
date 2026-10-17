@@ -13,9 +13,9 @@ public nonisolated struct BadgeVerifier: Sendable {
     public enum KeyError: Error, Equatable {
         case invalidPublicKey(kid: String)
     }
-
+    
     private let trustedKeys: [String: Data]
-
+    
     /// - Parameter trustedKeys: `kid` to raw 32-byte Ed25519 public key. Release builds must not include `test-only-*` keys.
     public init(trustedKeys: [String: Data]) throws(KeyError) {
         for (kid, key) in trustedKeys where (try? Curve25519.Signing.PublicKey(rawRepresentation: key)) == nil {
@@ -23,7 +23,7 @@ public nonisolated struct BadgeVerifier: Sendable {
         }
         self.trustedKeys = trustedKeys
     }
-
+    
     /// Decodes and verifies envelope JSON. Undecodable JSON is `malformed`.
     public func verify(envelopeJSON: Data, sender: String, senderDevice: String, now: Date = .now) -> BadgeVerificationResult {
         // Check `v` before the full shape: a future version may have other fields.
@@ -38,7 +38,7 @@ public nonisolated struct BadgeVerifier: Sendable {
         }
         return verify(envelope, sender: sender, senderDevice: senderDevice, now: now)
     }
-
+    
     /// Runs the documented checks in order and returns the first failure.
     public func verify(_ envelope: BadgeEnvelope, sender: String, senderDevice: String, now: Date = .now) -> BadgeVerificationResult {
         guard envelope.v == BadgeEnvelope.supportedVersion else {
@@ -60,7 +60,7 @@ public nonisolated struct BadgeVerifier: Sendable {
         guard let payload = try? JSONDecoder().decode(BadgePayload.self, from: payloadBytes) else {
             return .invalid(.malformed)
         }
-
+        
         let nowSeconds = now.timeIntervalSince1970
         if nowSeconds >= Double(payload.exp) {
             return .invalid(.expired)
@@ -80,14 +80,14 @@ public nonisolated struct BadgeVerifier: Sendable {
 
 public nonisolated struct BadgeEnvelope: Sendable, Equatable, Codable {
     public static let supportedVersion = 1
-
+    
     public let v: Int
     public let kid: String
     /// base64url without padding: the UTF-8 JSON payload bytes.
     public let payload: String
     /// base64url without padding: Ed25519 signature over the decoded payload bytes.
     public let sig: String
-
+    
     public init(v: Int, kid: String, payload: String, sig: String) {
         self.v = v
         self.kid = kid
@@ -116,11 +116,11 @@ public nonisolated struct BadgePayload: Sendable, Equatable, Decodable {
     public let iat: Int64
     /// Expires at, Unix seconds.
     public let exp: Int64
-
+    
     private enum CodingKeys: String, CodingKey {
         case sub, lvl, name, cnpj, dev, iat, exp
     }
-
+    
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         sub = try container.decode(String.self, forKey: .sub)

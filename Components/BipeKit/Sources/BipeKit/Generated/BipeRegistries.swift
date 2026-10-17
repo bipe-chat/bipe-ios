@@ -677,4 +677,11 @@ public enum BipeRegistries {
     public static let guardianApprovalsMax = 2
     public static let recoveryLinkMinutes = 60
     public static let emailVerifyLinkHours = 24
+
+    /// Terms and privacy accepted at sign-up (ADR 0113; registries/legal.json). Paths are on the public site.
+    public static let legalVersion = "2026-10-16"
+    public static let termsPath = "/termos/"
+    public static let privacyPath = "/privacidade/"
+    public static let enTermsPath = "/en/terms/"
+    public static let enPrivacyPath = "/en/privacy/"
 }

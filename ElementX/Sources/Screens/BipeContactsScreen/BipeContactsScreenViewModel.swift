@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import BipeKit
 import Combine
 import Contacts
-import BipeKit
 import SwiftUI
 
 typealias BipeContactsScreenViewModelType = StateStoreViewModelV2<BipeContactsScreenViewState, BipeContactsScreenViewAction>
@@ -14,6 +14,8 @@ typealias BipeContactsScreenViewModelType = StateStoreViewModelV2<BipeContactsSc
 class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContactsScreenViewModelProtocol {
     private let apiClient: BipeAPIClient
     private let clientProxy: ClientProxyProtocol
+    private let userIndicatorController: UserIndicatorControllerProtocol
+    private let inviteCreator: BipeInviteCreator
     private let contactStore = CNContactStore()
     /// The server value, so loading it does not send it back.
     private var savedDiscoverable = true
@@ -23,9 +25,13 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
         actionsSubject.eraseToAnyPublisher()
     }
     
-    init(apiClient: BipeAPIClient, clientProxy: ClientProxyProtocol) {
+    init(apiClient: BipeAPIClient,
+         clientProxy: ClientProxyProtocol,
+         userIndicatorController: UserIndicatorControllerProtocol) {
         self.apiClient = apiClient
         self.clientProxy = clientProxy
+        self.userIndicatorController = userIndicatorController
+        inviteCreator = BipeInviteCreator(apiClient: apiClient, userID: clientProxy.userID) { [clientProxy] in clientProxy.accessToken }
         super.init(initialViewState: BipeContactsScreenViewState())
         
         state.access = Self.currentAccess()
@@ -37,6 +43,9 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
     
     override func process(viewAction: BipeContactsScreenViewAction) {
         switch viewAction {
+        case .appeared:
+            // Also on the way back from the invites screen, which can create or cancel invites.
+            Task { await loadInvites() }
         case .requestAccess:
             Task { await requestAccess() }
         case .discoverableChanged:
@@ -46,6 +55,16 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
             actionsSubject.send(.openUserProfile(userID: userID))
         case .openInvites:
             actionsSubject.send(.openInvites)
+        case .inviteByLink:
+            Task {
+                guard let link = await createInvite() else { return }
+                state.bindings.shareSheetLink = link
+            }
+        case .inviteInPerson:
+            Task {
+                guard let link = await createInvite() else { return }
+                state.bindings.qrCodeLink = link
+            }
         }
     }
     
@@ -61,9 +80,11 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
     }
     
     private func requestAccess() async {
-        let granted = (try? await contactStore.requestAccess(for: .contacts)) ?? false
+        let granted = await (try? contactStore.requestAccess(for: .contacts)) ?? false
         state.access = granted ? .granted : Self.currentAccess()
-        if state.access == .granted { await search() }
+        if state.access == .granted {
+            await search()
+        }
     }
     
     private func search() async {
@@ -113,6 +134,45 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
             }
         }
         return result
+    }
+    
+    private func loadInvites() async {
+        do {
+            let myInvites = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeMyInvites in
+                try await apiClient.myInvites(accessToken: token)
+            }
+            state.invitesAvailable = myInvites.available
+            state.nextInviteAt = myInvites.nextAvailableAt
+            state.joinedUserIDs = myInvites.invites
+                .filter { $0.status == .used }
+                .compactMap(\.joinedUserId)
+                .filter { $0 != clientProxy.userID }
+            state.pendingInviteCount = myInvites.invites.count { $0.status == .pending }
+        } catch {
+            MXLog.error("Bipe invites load failed: \(error)")
+        }
+    }
+    
+    private func createInvite() async -> BipeInviteShareLink? {
+        guard state.canCreateInvite else { return nil }
+        
+        userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID, type: .modal, title: L10n.commonLoading, persistent: true))
+        defer { userIndicatorController.retractIndicatorWithId(loadingIndicatorID) }
+        
+        do {
+            let created = try await inviteCreator.create()
+            MXLog.info("Bipe invite created \(created)")
+            await loadInvites()
+            return BipeInviteShareLink(id: created.id, url: created.url)
+        } catch {
+            MXLog.error("Bipe invite creation failed: \(error)")
+            state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: error.localizedMessage)
+            return nil
+        }
+    }
+    
+    private var loadingIndicatorID: String {
+        "\(BipeContactsScreenViewModel.self)-Loading"
     }
     
     private func loadPhoneStatus() async {

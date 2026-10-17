@@ -6,8 +6,9 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Compound
 import BipeKit
+import Compound
+import MatrixRustSDK
 import SwiftUI
 
 struct RoomDetailsScreen: View {
@@ -57,6 +58,9 @@ struct RoomDetailsScreen: View {
         .alert(item: $context.ignoreUserRoomAlertItem,
                actions: blockUserAlertActions,
                message: blockUserAlertMessage)
+        .sheet(item: $context.inviteToGroupPicker) { picker in
+            BipeInviteToGroupSheet(picker: picker, context: context)
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if context.viewState.canEditBaseInfo {
@@ -66,7 +70,7 @@ struct RoomDetailsScreen: View {
                 }
             }
         }
-        .navigationTitle(L10n.screenRoomDetailsTitle)
+        .navigationTitle(context.viewState.dmRecipientInfo != nil ? BipeStrings.dmDetailsTitle : L10n.screenRoomDetailsTitle) // Bipe: a DM is a conversation
         .navigationBarTitleDisplayMode(.inline)
         .track(screen: .RoomDetails)
         .interactiveQuickLook(item: $context.mediaPreviewItem, allowEditing: false)
@@ -170,17 +174,20 @@ struct RoomDetailsScreen: View {
                     })
                     .disabled(context.viewState.pinnedEventsActionState.isLoading)
             
-            ListRow(label: .default(title: L10n.screenPollsHistoryTitle, icon: \.polls),
-                    kind: .navigationLink {
-                        context.send(viewAction: .processTapPolls)
-                    })
-                    .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.pollsHistory)
+            // Bipe: no polls in DMs.
+            if context.viewState.dmRecipientInfo == nil {
+                ListRow(label: .default(title: L10n.screenPollsHistoryTitle, icon: \.polls),
+                        kind: .navigationLink {
+                            context.send(viewAction: .processTapPolls)
+                        })
+                        .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.pollsHistory)
+            }
         }
     }
     
     private var inviteToNewRoomSection: some View {
         Section {
-            ListRow(label: .default(title: L10n.actionInvite, icon: \.userAdd),
+            ListRow(label: .default(title: BipeStrings.dmInviteToGroup, icon: \.userAdd),
                     kind: .navigationLink {
                         context.send(viewAction: .processTapInvite)
                     })
@@ -328,7 +335,7 @@ struct RoomDetailsScreen: View {
     
     private var leaveRoomSection: some View {
         Section {
-            ListRow(label: .action(title: L10n.screenRoomDetailsLeaveRoomTitle,
+            ListRow(label: .action(title: context.viewState.dmRecipientInfo != nil ? L10n.screenRoomDetailsLeaveConversationTitle : L10n.screenRoomDetailsLeaveRoomTitle,
                                    icon: \.leave,
                                    role: .destructive),
                     kind: .button { context.send(viewAction: .processTapLeave) })
@@ -362,8 +369,6 @@ struct RoomDetailsScreen: View {
 }
 
 // MARK: - Previews
-
-import MatrixRustSDK
 
 @available(iOS 26.0, *)
 struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {

@@ -14,7 +14,7 @@ public nonisolated enum VoiceTranscriber {
     /// The transcript, or `nil` when permission is denied, no on-device model fits, or nothing was said.
     public static func transcribe(fileURL: URL) async -> String? {
         guard await isAuthorized() else { return nil }
-
+        
         let taskBox = Mutex<SFSpeechRecognitionTask?>(nil)
         return await withTaskCancellationHandler {
             await withCheckedContinuation { continuation in
@@ -24,7 +24,9 @@ public nonisolated enum VoiceTranscriber {
                         defer { wasResumed = true }
                         return !wasResumed
                     }
-                    if shouldResume { continuation.resume(returning: transcript) }
+                    if shouldResume {
+                        continuation.resume(returning: transcript)
+                    }
                 }
                 // Speech objects are not Sendable: create them inside the lock so they stay in the box's isolation region.
                 taskBox.withLock { box in
@@ -37,7 +39,7 @@ public nonisolated enum VoiceTranscriber {
                     request.requiresOnDeviceRecognition = true
                     request.shouldReportPartialResults = false
                     request.addsPunctuation = true
-
+                    
                     box = recognizer.recognitionTask(with: request) { result, error in
                         if error != nil {
                             finish(nil)
@@ -52,9 +54,9 @@ public nonisolated enum VoiceTranscriber {
             taskBox.withLock { $0?.cancel() }
         }
     }
-
+    
     // MARK: - Private
-
+    
     private static func isAuthorized() async -> Bool {
         switch SFSpeechRecognizer.authorizationStatus() {
         case .authorized:
@@ -67,7 +69,7 @@ public nonisolated enum VoiceTranscriber {
             return false
         }
     }
-
+    
     /// The first of the user's languages that the phone transcribes offline, then pt-BR.
     /// No language detection: a pt-BR speaker with an English-only phone gets an English transcript.
     private static func onDeviceRecognizer() -> SFSpeechRecognizer? {
@@ -91,19 +93,19 @@ public final class VoiceTranscriptDraft {
         case ready
         case unavailable
     }
-
+    
     public var text = ""
     public private(set) var state = State.transcribing
-
+    
     /// The text for the event: only a finished transcript, never an empty string.
     public var caption: String? {
         guard state == .ready else { return nil }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
     }
-
+    
     @ObservationIgnored private var task: Task<Void, Never>?
-
+    
     public init(fileURL: URL) {
         task = Task { [weak self] in
             let transcript = await VoiceTranscriber.transcribe(fileURL: fileURL)
@@ -116,13 +118,13 @@ public final class VoiceTranscriptDraft {
             }
         }
     }
-
+    
     /// A finished transcript without transcription, for previews.
     public init(transcript: String) {
         text = transcript
         state = .ready
     }
-
+    
     public func cancel() {
         task?.cancel()
     }

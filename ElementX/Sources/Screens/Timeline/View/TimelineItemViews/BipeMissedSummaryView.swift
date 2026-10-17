@@ -4,15 +4,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 /// The "O que você perdeu" block above the read marker (bipe#98). Each line opens its message.
 struct BipeMissedSummaryView: View {
     let summary: BipeMissedSummary
     let onTap: (String) -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(BipeStrings.groupMissedTitle)
@@ -20,7 +20,7 @@ struct BipeMissedSummaryView: View {
                 .foregroundStyle(.compound.textActionAccent)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-
+            
             ForEach(summary.lines) { line in
                 Divider()
                 Button { onTap(line.eventID) } label: {
@@ -28,7 +28,7 @@ struct BipeMissedSummaryView: View {
                 }
                 .buttonStyle(.plain)
             }
-
+            
             Divider()
             Text(BipeStrings.groupMissedMore("\(summary.otherCount)"))
                 .font(.compound.bodySM)
@@ -42,7 +42,7 @@ struct BipeMissedSummaryView: View {
         .padding(.horizontal, 16)
         .padding(.top, 8)
     }
-
+    
     private func lineLabel(_ line: BipeMissedSummary.Line) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title(for: line))
@@ -60,7 +60,7 @@ struct BipeMissedSummaryView: View {
         .padding(.vertical, 8)
         .contentShape(Rectangle())
     }
-
+    
     private func title(for line: BipeMissedSummary.Line) -> String {
         switch line.kind {
         case .mention: BipeStrings.groupMissedMention(line.senderName)
@@ -73,8 +73,8 @@ struct BipeMissedSummaryView: View {
 struct BipeMissedSummaryView_Previews: PreviewProvider {
     static var previews: some View {
         BipeMissedSummaryView(summary: .init(lines: [.init(kind: .mention, eventID: "$1", senderName: "Bia", text: "@gabi você leva o carvão?"),
-                                                        .init(kind: .reply, eventID: "$2", senderName: "Léo", text: "Fechado, 13h lá em casa"),
-                                                        .init(kind: .poll, eventID: "$3", senderName: "Léo", text: "Sábado ou domingo?")],
-                                                otherCount: 142)) { _ in }
+                                                     .init(kind: .reply, eventID: "$2", senderName: "Léo", text: "Fechado, 13h lá em casa"),
+                                                     .init(kind: .poll, eventID: "$3", senderName: "Léo", text: "Sábado ou domingo?")],
+                                             otherCount: 142)) { _ in }
     }
 }

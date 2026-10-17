@@ -40,4 +40,3 @@ protocol ElementCallWidgetDriverProtocol {
     @discardableResult
     func handleMessage(_ message: String) async -> Result<Bool, ElementCallWidgetDriverError>
 }
-

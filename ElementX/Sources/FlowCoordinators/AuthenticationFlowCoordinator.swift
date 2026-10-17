@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftState
 import SwiftUI
 
@@ -496,8 +496,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .signedIn(let userSession):
                     self?.stateMachine.tryEvent(.signedIn, userInfo: userSession)
-                case .createdWithInvite(let inviterUserID):
+                case .createdWithInvite(let inviterUserID, let inviterHandle):
                     self?.appSettings.bipePendingInviterUserID = inviterUserID
+                    self?.appSettings.bipePendingInviterHandle = inviterHandle
                 }
             }
             .store(in: &cancellables)

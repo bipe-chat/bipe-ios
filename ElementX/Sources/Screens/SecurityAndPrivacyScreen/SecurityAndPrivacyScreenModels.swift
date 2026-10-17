@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Foundation
 import BipeKit
+import Foundation
 
 enum SecurityAndPrivacyScreenViewModelAction {
     case displayEditAddressScreen
@@ -113,7 +113,7 @@ struct SecurityAndPrivacyScreenViewState: BindableState {
     var shouldShowAccessSectionFooter: Bool {
         if (bindings.desiredSettings.accessType.isSpaceMembers && isSpaceMembersOptionSelectable) ||
             (bindings.desiredSettings.accessType.isAskToJoinWithSpaceMembers && isAskToJoinWithSpaceMembersOptionSelectable),
-            case .multiple = spaceSelection {
+           case .multiple = spaceSelection {
             return true
         }
         

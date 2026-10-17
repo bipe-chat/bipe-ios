@@ -13,17 +13,17 @@ public struct BipeHandleChange: Codable, Sendable, Hashable {
     public let old: String?
     public let new: String?
     public let at: Date
-
+    
     /// The most Matrix IDs per `POST /v1/handle-changes` call.
     public static let batchSize = 100
-
+    
     public init(userId: String, old: String?, new: String?, at: Date) {
         self.userId = userId
         self.old = old
         self.new = new
         self.at = at
     }
-
+    
     /// The timeline line. `name` is the person's display name in the room. `nil` when the change has neither handle.
     public func line(name: String) -> String? {
         switch (old, new) {
@@ -33,7 +33,7 @@ public struct BipeHandleChange: Codable, Sendable, Hashable {
         case (nil, nil): nil
         }
     }
-
+    
     /// A stable ID for the local timeline item.
     public var lineID: String {
         "bipe-handle-change-\(userId)-\(Int(at.timeIntervalSince1970 * 1000))"
@@ -45,12 +45,12 @@ public nonisolated enum BipeHandleChangePlacement {
     /// One loaded timeline item, oldest first. `timestamp` is `nil` for items without a time (pagination indicators).
     public struct Anchor: Sendable {
         public let timestamp: Date?
-
+        
         public init(timestamp: Date?) {
             self.timestamp = timestamp
         }
     }
-
+    
     /// The insertion index for each change that belongs in the loaded range, sorted by index then time.
     /// - A change older than the first loaded item is outside the range (back-pagination brings it in later).
     /// - A change newer than the last item shows at the end only when the timeline is live (`includesEnd`).
@@ -63,13 +63,17 @@ public nonisolated enum BipeHandleChangePlacement {
                                   includesEnd: Bool) -> [(index: Int, change: BipeHandleChange)] {
         let timed = anchors.enumerated().compactMap { offset, anchor in anchor.timestamp.map { (offset, $0) } }
         guard let first = timed.first, let last = timed.last else { return [] }
-
+        
         var result: [(index: Int, change: BipeHandleChange)] = []
         for change in changes where members.contains(change.userId) {
             guard change.at >= first.1 else { continue }
-            if let joined = joinedAt[change.userId], change.at < joined { continue }
+            if let joined = joinedAt[change.userId], change.at < joined {
+                continue
+            }
             if change.at > last.1 {
-                if includesEnd { result.append((last.0 + 1, change)) }
+                if includesEnd {
+                    result.append((last.0 + 1, change))
+                }
                 continue
             }
             // Before the first item that is newer than the change.
@@ -88,55 +92,61 @@ public final class BipeHandleChangeStore {
     private let apiClient: BipeAPIClient
     private let accessToken: @MainActor () -> String?
     private let fileURL: URL?
-
+    
     private var changesByUser: [String: [BipeHandleChange]]
     /// People asked about at least once.
     private var fetchedUsers: Set<String>
     private var inFlight: Set<String> = []
-
+    
     private let changesSubject = PassthroughSubject<Void, Never>()
     /// Fires on the main actor when new changes arrive.
-    public var changesPublisher: AnyPublisher<Void, Never> { changesSubject.eraseToAnyPublisher() }
-
+    public var changesPublisher: AnyPublisher<Void, Never> {
+        changesSubject.eraseToAnyPublisher()
+    }
+    
     private struct Cache: Codable {
         var changes: [BipeHandleChange]
         var fetchedUsers: [String]
     }
-
+    
     /// `cacheDirectory`: where the per-account cache file lives. `nil` keeps it in memory only.
     public init(apiClient: BipeAPIClient, userID: String, cacheDirectory: URL?, accessToken: @escaping @MainActor () -> String?) {
         self.apiClient = apiClient
         self.accessToken = accessToken
         let safeName = userID.unicodeScalars.map { CharacterSet.alphanumerics.contains($0) ? String($0) : "_" }.joined()
         fileURL = cacheDirectory?.appending(path: "bipe-handle-changes-\(safeName).json")
-
+        
         let cache = fileURL.flatMap { try? Data(contentsOf: $0) }.flatMap { try? Self.decoder.decode(Cache.self, from: $0) }
         changesByUser = Dictionary(grouping: cache?.changes ?? [], by: \.userId)
         fetchedUsers = Set(cache?.fetchedUsers ?? [])
     }
-
+    
     /// Cached changes of these people, oldest first.
     public func changes(for userIDs: Set<String>) -> [BipeHandleChange] {
         userIDs.flatMap { changesByUser[$0] ?? [] }.sorted { $0.at < $1.at }
     }
-
+    
     /// The people with cached changes or an earlier fetch.
     public var knownUserIDs: Set<String> {
         fetchedUsers.union(changesByUser.keys)
     }
-
+    
     /// Fetches new changes for these people. Failures keep the cache; the next call tries again.
     public func refresh(userIDs: some Sequence<String>) async {
         let wanted = Set(userIDs).subtracting(inFlight)
         guard !wanted.isEmpty else { return }
         inFlight.formUnion(wanted)
         defer { inFlight.subtract(wanted) }
-
+        
         // People without cached changes go without `since`; the others share the oldest of their latest times.
         let (known, unknown) = wanted.sorted().reduce(into: ([String](), [String]())) { result, userID in
-            if changesByUser[userID]?.isEmpty == false { result.0.append(userID) } else { result.1.append(userID) }
+            if changesByUser[userID]?.isEmpty == false {
+                result.0.append(userID)
+            } else {
+                result.1.append(userID)
+            }
         }
-
+        
         var gotNew = false
         for chunk in Self.chunks(unknown) {
             gotNew = await fetch(chunk, since: nil) || gotNew
@@ -144,26 +154,28 @@ public final class BipeHandleChangeStore {
         for chunk in Self.chunks(known) {
             gotNew = await fetch(chunk, since: since(for: chunk)) || gotNew
         }
-
+        
         save()
-        if gotNew { changesSubject.send() }
+        if gotNew {
+            changesSubject.send()
+        }
     }
-
+    
     /// The latest cached time of each person, then the oldest of those. `nil` when one of them has no cached change.
     func since(for userIDs: [String]) -> Date? {
         let latest = userIDs.map { changesByUser[$0]?.last?.at }
         guard !latest.contains(where: { $0 == nil }) else { return nil }
         return latest.compactMap(\.self).min()
     }
-
+    
     // MARK: - Private
-
+    
     private static func chunks(_ userIDs: [String]) -> [[String]] {
         stride(from: 0, to: userIDs.count, by: BipeHandleChange.batchSize).map {
             Array(userIDs[$0..<min($0 + BipeHandleChange.batchSize, userIDs.count)])
         }
     }
-
+    
     /// `true` when the answer had a change the cache did not have.
     private func fetch(_ userIDs: [String], since: Date?) async -> Bool {
         do {
@@ -185,20 +197,20 @@ public final class BipeHandleChangeStore {
             return false
         }
     }
-
+    
     private func save() {
         guard let fileURL else { return }
         let cache = Cache(changes: changesByUser.values.flatMap(\.self), fetchedUsers: fetchedUsers.sorted())
         guard let data = try? Self.encoder.encode(cache) else { return }
         try? data.write(to: fileURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
     }
-
+    
     private static let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .millisecondsSince1970
         return encoder
     }()
-
+    
     private static let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .millisecondsSince1970

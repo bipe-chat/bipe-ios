@@ -32,10 +32,10 @@ final class BipeStickerPickerScreenCoordinator: CoordinatorProtocol {
     
     init(parameters: BipeStickerPickerScreenCoordinatorParameters) {
         viewModel = BipeStickerPickerScreenViewModel(clientProxy: parameters.clientProxy,
-                                                        roomProxy: parameters.roomProxy,
-                                                        threadRootEventID: parameters.threadRootEventID,
-                                                        mediaProvider: parameters.mediaProvider,
-                                                        userIndicatorController: parameters.userIndicatorController)
+                                                     roomProxy: parameters.roomProxy,
+                                                     threadRootEventID: parameters.threadRootEventID,
+                                                     mediaProvider: parameters.mediaProvider,
+                                                     userIndicatorController: parameters.userIndicatorController)
     }
     
     func start() {

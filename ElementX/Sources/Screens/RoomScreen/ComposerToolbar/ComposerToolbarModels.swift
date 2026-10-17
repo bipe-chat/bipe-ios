@@ -6,9 +6,9 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import MatrixRustSDK
-import BipeKit
 import SwiftUI
 import WysiwygComposer
 
@@ -83,6 +83,8 @@ struct ComposerToolbarViewState: BindableState {
     
     var isRoomEncrypted: Bool
     var isLocationSharingEnabled: Bool
+    /// Bipe: DMs have no polls.
+    var isDM = false
     
     var keyCommands: [WysiwygKeyCommand] = []
     

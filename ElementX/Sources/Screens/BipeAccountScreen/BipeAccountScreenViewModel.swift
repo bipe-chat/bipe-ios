@@ -5,6 +5,7 @@
 //
 
 import BipeKit
+import Combine
 import LocalAuthentication
 import SwiftUI
 
@@ -18,8 +19,14 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
     private let appLockService: AppLockServiceProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let credentialStore = BipeCredentialStore.bipeApp
-
-    init(apiClient: BipeAPIClient,
+    
+    private let actionsSubject: PassthroughSubject<BipeAccountScreenViewModelAction, Never> = .init()
+    var actionsPublisher: AnyPublisher<BipeAccountScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
+    }
+    
+    init(mode: BipeAccountScreenMode,
+         apiClient: BipeAPIClient,
          clientProxy: ClientProxyProtocol,
          appLockService: AppLockServiceProtocol,
          userIndicatorController: UserIndicatorControllerProtocol) {
@@ -27,21 +34,31 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
         self.clientProxy = clientProxy
         self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
-
-        super.init(initialViewState: BipeAccountScreenViewState())
-
-        Task { await load() }
+        
+        super.init(initialViewState: BipeAccountScreenViewState(mode: mode))
+        
+        Task {
+            await load()
+            // Bipe (ADR 0112): "Trocar senha" in Sua conta goes straight to the check and the form.
+            if mode == .pin {
+                await verifyDeviceOwnerThenEditPIN()
+            }
+        }
     }
-
+    
     override func process(viewAction: BipeAccountScreenViewAction) {
         switch viewAction {
         case .editPIN:
             Task { await verifyDeviceOwnerThenEditPIN() }
         case .pinChanged:
             let pin = BipePIN.sanitize(state.bindings.pin)
-            if pin != state.bindings.pin { state.bindings.pin = pin }
+            if pin != state.bindings.pin {
+                state.bindings.pin = pin
+            }
             let confirmation = BipePIN.sanitize(state.bindings.pinConfirmation)
-            if confirmation != state.bindings.pinConfirmation { state.bindings.pinConfirmation = confirmation }
+            if confirmation != state.bindings.pinConfirmation {
+                state.bindings.pinConfirmation = confirmation
+            }
         case .savePIN:
             Task { await savePIN() }
         case .cancelPIN:
@@ -58,9 +75,9 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
                                                  secondaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil))
         }
     }
-
+    
     // MARK: - Private
-
+    
     private func load() async {
         defer { state.isLoading = false }
         do {
@@ -72,7 +89,7 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             show(error)
         }
     }
-
+    
     /// ADR 0057: a signed-in device changes the PIN after a biometric check (or the device passcode). No old PIN.
     private func verifyDeviceOwnerThenEditPIN() async {
         let context = LAContext()
@@ -92,15 +109,15 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
         state.bindings.pinConfirmation = ""
         state.isEditingPIN = true
     }
-
+    
     private func savePIN() async {
         guard state.canSavePIN else { return }
         let pin = state.bindings.pin
         let isBetaAccount = state.isBetaAccount
-
+        
         startLoading()
         defer { stopLoading() }
-
+        
         do {
             try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) in
                 try await apiClient.setPIN(pin, accessToken: token)
@@ -121,26 +138,26 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             appLockService.bipeUseAccountPIN(pin)
             closePINForm()
             userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.pinChanged, icon: \.checkCircle))
-            await load()
+            actionsSubject.send(.done)
         } catch {
             MXLog.error("Bipe PIN save failed: \(error)")
             show(error)
         }
     }
-
+    
     private func closePINForm() {
         state.isEditingPIN = false
         state.bindings.pin = ""
         state.bindings.pinConfirmation = ""
     }
-
+    
     private func saveEmail() async {
         guard state.canSaveEmail else { return }
         let email = state.bindings.email.trimmingCharacters(in: .whitespacesAndNewlines)
-
+        
         startLoading()
         defer { stopLoading() }
-
+        
         do {
             try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) in
                 try await apiClient.setRecoveryEmail(email, accessToken: token)
@@ -153,11 +170,11 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             show(error)
         }
     }
-
+    
     private func removeEmail() async {
         startLoading()
         defer { stopLoading() }
-
+        
         do {
             try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) in
                 try await apiClient.removeRecoveryEmail(accessToken: token)
@@ -169,26 +186,26 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             show(error)
         }
     }
-
+    
     private func withTokenRetry<T>(_ request: (String) async throws(BipeAPIError) -> T) async throws(BipeAPIError) -> T {
         try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }, request)
     }
-
+    
     private func show(_ error: BipeAPIError) {
         state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: error.localizedMessage)
     }
-
+    
     // MARK: - User Indicators
-
+    
     private let loadingIndicatorID = "\(BipeAccountScreenViewModel.self)-Loading"
-
+    
     private func startLoading() {
         userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID,
                                                               type: .modal,
                                                               title: L10n.commonLoading,
                                                               persistent: true))
     }
-
+    
     private func stopLoading() {
         userIndicatorController.retractIndicatorWithId(loadingIndicatorID)
     }

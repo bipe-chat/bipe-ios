@@ -23,10 +23,10 @@ final class LocalizationTests {
         
         #expect(L10n.testLanguageIdentifier == "en")
         
-        // set app language to Italian
-        Bundle.overrideLocalizations = ["it"]
+        // set app language to Brazilian Portuguese (Bipe ships pt-BR and en only)
+        Bundle.overrideLocalizations = ["pt-BR"]
         
-        #expect(L10n.testLanguageIdentifier == "it")
+        #expect(L10n.testLanguageIdentifier == "pt-br")
     }
     
     /// Test fallback language for a language not supported at all
@@ -35,16 +35,17 @@ final class LocalizationTests {
         //  set app language to something Element don't support at all (chose non existing identifier)
         Bundle.overrideLocalizations = ["xx"]
         
-        #expect(L10n.testLanguageIdentifier == "en")
+        // Bipe: the development language is pt-BR.
+        #expect(L10n.testLanguageIdentifier == "pt-br")
     }
     
     /// Test fallback language for a language supported but poorly translated
     @Test
     func fallbackOnNotTranslatedKey() {
         //  set app language to something Element supports but use a key that is not translated (we have a key that should never be translated)
-        Bundle.overrideLocalizations = ["it"]
+        Bundle.overrideLocalizations = ["pt-BR"]
         
-        #expect(L10n.testLanguageIdentifier == "it")
+        #expect(L10n.testLanguageIdentifier == "pt-br")
         #expect(L10n.testUntranslatedDefaultLanguageIdentifier == "en")
     }
     
@@ -57,11 +58,11 @@ final class LocalizationTests {
         #expect(L10n.commonMemberCount(1) == "1 Member")
         #expect(L10n.commonMemberCount(2) == "2 Members")
         
-        //  set app language to Italian
-        Bundle.overrideLocalizations = ["it"]
+        //  set app language to Brazilian Portuguese
+        Bundle.overrideLocalizations = ["pt-BR"]
         
-        #expect(L10n.commonMemberCount(1) == "1 Membro")
-        #expect(L10n.commonMemberCount(2) == "2 Membri")
+        #expect(L10n.commonMemberCount(1) == "1 membro")
+        #expect(L10n.commonMemberCount(2) == "2 membros")
     }
     
     /// Test plurals fallback language for a language not supported at all
@@ -70,8 +71,9 @@ final class LocalizationTests {
         //  set app language to something Element don't support at all ("invalid identifier")
         Bundle.overrideLocalizations = ["xx"]
         
-        #expect(L10n.commonMemberCount(1) == "1 Member")
-        #expect(L10n.commonMemberCount(2) == "2 Members")
+        // Bipe: the development language is pt-BR.
+        #expect(L10n.commonMemberCount(1) == "1 membro")
+        #expect(L10n.commonMemberCount(2) == "2 membros")
     }
     
     /// Test untranslated strings

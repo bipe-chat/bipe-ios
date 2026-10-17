@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import MatrixRustSDK
 import BipeKit
+import MatrixRustSDK
 import UIKit
 import UniformTypeIdentifiers
 
@@ -57,10 +57,22 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             if isDM, case .roomCreate = content {
                 return nil
             }
+            // Bipe: a DM has no room setup lines (BIPE.md "DMs are DMs").
+            if isDM, case .roomEncryption = content {
+                return nil
+            }
             return buildStateTimelineItem(for: eventItemProxy, state: content, isOutgoing: isOutgoing)
         case .roomMembership(userId: let userID, let displayName, change: let change, let reason):
             if isDM, change == .joined, userID == self.userID {
                 return nil
+            }
+            // Bipe: a DM has no invite or join lines, and the other person leaves the conversation, not a room.
+            if isDM, change == .joined || change == .invited || change == .invitationAccepted {
+                return nil
+            }
+            if isDM, change == .left {
+                let text = userID == self.userID ? BipeStrings.dmLeftByYou : BipeStrings.dmLeft(displayName ?? userID)
+                return buildStateTimelineItem(for: eventItemProxy, text: text, isOutgoing: isOutgoing)
             }
             return buildStateMembershipChangeTimelineItem(for: eventItemProxy, memberUserID: userID, memberDisplayName: displayName, membershipChange: change, reason: reason, isOutgoing: isOutgoing)
         case .profileChange(let displayName, let prevDisplayName, let avatarUrl, let prevAvatarUrl):
@@ -649,8 +661,8 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
     
     /// Bipe: scam pattern check for incoming text. Runs off the main thread (TimelineController builds items in a detached task).
     private func bipeAddingScamWarning(to content: TextRoomTimelineItemContent,
-                                          _ eventItemProxy: EventTimelineItemProxy,
-                                          _ isOutgoing: Bool) -> TextRoomTimelineItemContent {
+                                       _ eventItemProxy: EventTimelineItemProxy,
+                                       _ isOutgoing: Bool) -> TextRoomTimelineItemContent {
         guard !isOutgoing, let eventID = eventItemProxy.id.eventID else { return content }
         var content = content
         content.bipeScamWarning = ScamDetector.warningKind(for: content.body, eventID: eventID)
@@ -659,8 +671,8 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
     
     /// Bipe: the same check on the transcript of an incoming voice message (bipe/docs/audio.md).
     private func bipeAddingScamWarning(to content: AudioRoomTimelineItemContent,
-                                          _ eventItemProxy: EventTimelineItemProxy,
-                                          _ isOutgoing: Bool) -> AudioRoomTimelineItemContent {
+                                       _ eventItemProxy: EventTimelineItemProxy,
+                                       _ isOutgoing: Bool) -> AudioRoomTimelineItemContent {
         guard !isOutgoing, let eventID = eventItemProxy.id.eventID, let transcript = content.caption else { return content }
         var content = content
         content.bipeScamWarning = ScamDetector.warningKind(for: transcript, eventID: eventID)

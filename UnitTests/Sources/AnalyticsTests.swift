@@ -30,8 +30,8 @@ final class AnalyticsTests {
         // When the user is prompted for analytics.
         let showPrompt = analytics.shouldShowAnalyticsPrompt
         
-        // Then the prompt should be shown.
-        #expect(showPrompt, "A prompt should be shown for a new user.")
+        // Then the prompt should not be shown. Bipe has no analytics configuration (bipe#55).
+        #expect(!showPrompt, "Bipe never shows the analytics prompt.")
     }
     
     @Test
@@ -87,8 +87,8 @@ final class AnalyticsTests {
         // The analytics should be enabled
         #expect(appSettings.analyticsConsentState == .optedIn)
         #expect(analytics.isEnabled)
-        // Analytics client should have been started
-        #expect(analyticsClient.startAnalyticsConfigurationCalled)
+        // Bipe: the analytics client never starts without a configuration (bipe#55).
+        #expect(!analyticsClient.startAnalyticsConfigurationCalled)
     }
     
     @Test
@@ -108,7 +108,8 @@ final class AnalyticsTests {
         // Analytics should start
         #expect(analytics.isEnabled)
         analytics.startIfEnabled()
-        #expect(analyticsClient.startAnalyticsConfigurationCalled)
+        // Bipe: the analytics client never starts without a configuration (bipe#55).
+        #expect(!analyticsClient.startAnalyticsConfigurationCalled)
     }
     
     @Test
@@ -120,8 +121,8 @@ final class AnalyticsTests {
         // When forgetting analytics consents
         analytics.resetConsentState()
         
-        // Then the analytics prompt should be presented again
+        // Then the consent state is unknown again. Bipe still shows no prompt (bipe#55).
         #expect(appSettings.analyticsConsentState == .unknown)
-        #expect(analytics.shouldShowAnalyticsPrompt)
+        #expect(!analytics.shouldShowAnalyticsPrompt)
     }
 }

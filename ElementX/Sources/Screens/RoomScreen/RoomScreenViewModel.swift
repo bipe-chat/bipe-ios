@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
 import MatrixRustSDK
@@ -20,6 +21,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
     private let userSettings: UserSettings
     private let analyticsService: AnalyticsServiceProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
+    private let bipeHandleResolver: BipeHandleResolver?
     
     private var initialSelectedPinnedEventID: String?
     private let pinnedEventStringBuilder: RoomEventStringBuilder
@@ -62,6 +64,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
         userSettings = userSession.userSettings
         self.analyticsService = analyticsService
         self.userIndicatorController = userIndicatorController
+        bipeHandleResolver = userSession.bipeHandleResolver
         
         self.initialSelectedPinnedEventID = initialSelectedPinnedEventID
         pinnedEventStringBuilder = .pinnedEventStringBuilder(userID: roomProxy.ownUserID)
@@ -78,6 +81,15 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
         
         updateRoomInfo(roomProxy.infoPublisher.value)
         setupSubscriptions(ongoingCallRoomIDPublisher: ongoingCallRoomIDPublisher)
+        
+        NotificationCenter.default.publisher(for: .bipeInviterGreetingDidChange)
+            .filter { [userID = clientProxy.userID] in $0.object as? String == userID }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                updateBipeInviterHint(roomProxy.infoPublisher.value)
+            }
+            .store(in: &cancellables)
         
         Task {
             await updateVerificationBadge()
@@ -120,7 +132,14 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
             actionsSubject.send(.stopLiveLocationSharing)
         case .tappedOpenLiveLocation:
             actionsSubject.send(.displayLiveLocation)
+        case .sayHiToBipeInviter:
+            Task { await sayHiToBipeInviter() }
         }
+    }
+    
+    func bipeOwnMessageSent() {
+        guard state.bipeInviterHandle != nil else { return }
+        clientProxy.bipeEndInviterGreeting()
     }
     
     func stop() {
@@ -335,6 +354,39 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
         }
     }
     
+    // MARK: Bipe inviter greeting (ADR 0034)
+    
+    private func updateBipeInviterHint(_ roomInfo: RoomInfoProxyProtocol) {
+        guard roomInfo.isDirect, let greeting = clientProxy.bipeInviterGreeting else {
+            state.bipeInviterHandle = nil
+            return
+        }
+        let isChatWithInviter = roomInfo.heroes.contains { $0.userId == greeting.userID }
+            || (try? clientProxy.directRoomForUserID(greeting.userID).get()) == roomProxy.id
+        guard isChatWithInviter else {
+            state.bipeInviterHandle = nil
+            return
+        }
+        guard state.bipeInviterHandle == nil else { return }
+        state.bipeInviterHandle = greeting.handle ?? String(greeting.userID.trimmingPrefix("@"))
+        Task { [weak self] in
+            guard let self, let handle = await greeting.displayHandle(resolver: bipeHandleResolver),
+                  state.bipeInviterHandle != nil else { return }
+            state.bipeInviterHandle = handle
+        }
+    }
+    
+    private func sayHiToBipeInviter() async {
+        guard state.bipeInviterHandle != nil else { return }
+        switch await roomProxy.timeline.sendMessage(BipeStrings.inviterGreeting, html: nil, inReplyToEventID: nil, intentionalMentions: .empty) {
+        case .success:
+            bipeOwnMessageSent()
+        case .failure(let error):
+            MXLog.error("Bipe: could not send the greeting: \(error)")
+            state.bindings.alertInfo = .init(id: .unknown, title: L10n.errorUnknown)
+        }
+    }
+    
     private func updateRoomInfo(_ roomInfo: RoomInfoProxyProtocol) {
         state.roomTitle = roomInfo.displayNameOrID
         state.roomAvatar = roomInfo.avatar
@@ -343,6 +395,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
         state.activeRoomCallIntent = roomInfo.activeRoomCallIntent
         state.hasSuccessor = roomInfo.successor != nil
         state.isDM = roomInfo.isDM
+        updateBipeInviterHint(roomInfo)
         
         let pinnedEventIDs = roomInfo.pinnedEventIDs
         // Only update the loading state of the banner

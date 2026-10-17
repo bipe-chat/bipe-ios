@@ -80,6 +80,16 @@ struct HomeScreenRoomList: View {
                         }
                         
                         Button {
+                            context.send(viewAction: .setRoomMuted(roomIdentifier: room.id, isMuted: !room.badges.isMuteShown))
+                        } label: {
+                            if room.badges.isMuteShown {
+                                Label(L10n.commonUnmute, icon: \.notifications)
+                            } else {
+                                Label(L10n.commonMute, icon: \.notificationsOff)
+                            }
+                        }
+                        
+                        Button {
                             context.send(viewAction: .showRoomDetails(roomIdentifier: room.id))
                         } label: {
                             Label(L10n.commonSettings, icon: \.settings)
@@ -96,7 +106,7 @@ struct HomeScreenRoomList: View {
                         Button(role: .destructive) {
                             context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
                         } label: {
-                            Label(L10n.actionLeaveRoom, icon: \.leave)
+                            Label(room.isDirect ? L10n.actionLeaveConversation : L10n.actionLeaveRoom, icon: \.leave) // Bipe: a DM is a conversation
                         }
                     }
             }

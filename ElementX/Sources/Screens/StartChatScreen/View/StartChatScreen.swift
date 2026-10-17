@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct StartChatScreen: View {
@@ -33,6 +33,7 @@ struct StartChatScreen: View {
                           disablesInteractiveDismiss: true)
         .compoundSearchField()
         .alert(item: $context.alertInfo)
+        .bipeInviteSheets(shareSheetLink: $context.bipeInviteShareLink, qrCodeLink: .constant(nil))
         .sheet(item: $context.selectedUserToInvite) { userToInvite in
             SendInviteConfirmationView(userToInvite: userToInvite,
                                        mediaProvider: context.mediaProvider) {
@@ -99,13 +100,11 @@ struct StartChatScreen: View {
     
     private var inviteFriendsSection: some View {
         Section {
-            ListRow(kind: .custom {
-                MatrixUserShareLink(userID: context.viewState.userID) {
-                    ListRowLabel.default(title: L10n.actionInvitePeopleToApp(InfoPlistReader.main.bundleDisplayName),
-                                         icon: \.shareIos)
-                }
-            })
-            .accessibilityIdentifier(A11yIdentifiers.startChatScreen.inviteFriends)
+            // Bipe: shares a personal invite, not a profile link (sign-up needs an invite).
+            ListRow(label: .default(title: L10n.actionInvitePeopleToApp(InfoPlistReader.main.bundleDisplayName),
+                                    icon: \.shareIos),
+                    kind: .button { context.send(viewAction: .bipeInviteToApp) })
+                .accessibilityIdentifier(A11yIdentifiers.startChatScreen.inviteFriends)
         }
     }
     
@@ -132,13 +131,32 @@ struct StartChatScreen: View {
         }
     }
     
+    @ViewBuilder
     private var noResultsContent: some View {
-        Text(context.viewState.bipeHandleNotFound.map(BipeStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
-            .font(.compound.bodyLG)
-            .foregroundColor(.compound.textSecondary)
-            .frame(maxWidth: .infinity)
-            .listRowBackground(Color.clear)
-            .accessibilityIdentifier(A11yIdentifiers.startChatScreen.searchNoResults)
+        // Bipe: the search finds exact handles only, so a name finds nobody. Say so (ADR 0111).
+        VStack(spacing: 8) {
+            Text(context.viewState.bipeHandleNotFound.map(BipeStrings.startChatHandleNotFound) ?? L10n.commonNoResults)
+                .font(.compound.bodyLG)
+                .foregroundColor(.compound.textSecondary)
+            Text(BipeStrings.startChatSearchByHandle)
+                .font(.compound.bodyMD)
+                .foregroundColor(.compound.textSecondary)
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .listRowBackground(Color.clear)
+        .accessibilityIdentifier(A11yIdentifiers.startChatScreen.searchNoResults)
+        
+        if let inviter = context.viewState.bipeInviter {
+            Section {
+                ListRow(label: .default(title: BipeStrings.inviterCardTitle(inviter.handle),
+                                        description: BipeStrings.inviterCardBody,
+                                        icon: \.chat),
+                        kind: .navigationLink {
+                            context.send(viewAction: .selectUser(UserProfile(userID: inviter.userID)))
+                        })
+            }
+        }
     }
     
     private var toolbar: some ToolbarContent {
