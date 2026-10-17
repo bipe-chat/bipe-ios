@@ -8,6 +8,7 @@
 
 import BipeKit
 import Compound
+import MatrixRustSDK
 import SwiftUI
 
 struct RoomDetailsScreen: View {
@@ -368,8 +369,6 @@ struct RoomDetailsScreen: View {
 }
 
 // MARK: - Previews
-
-import MatrixRustSDK
 
 @available(iOS 26.0, *)
 struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {

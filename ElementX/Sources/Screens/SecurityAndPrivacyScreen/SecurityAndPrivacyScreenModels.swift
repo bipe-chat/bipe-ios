@@ -113,7 +113,7 @@ struct SecurityAndPrivacyScreenViewState: BindableState {
     var shouldShowAccessSectionFooter: Bool {
         if (bindings.desiredSettings.accessType.isSpaceMembers && isSpaceMembersOptionSelectable) ||
             (bindings.desiredSettings.accessType.isAskToJoinWithSpaceMembers && isAskToJoinWithSpaceMembersOptionSelectable),
-            case .multiple = spaceSelection {
+           case .multiple = spaceSelection {
             return true
         }
         
