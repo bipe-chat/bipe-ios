@@ -902,12 +902,12 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 
                 switch action {
                 case .logout:
-                    BipeCredentialStore.bipeApp.deletePassword() // Bipe: the next sign-in needs the token and the PIN.
+                    bipeDeleteStoredPassword() // Bipe: the next sign-in needs the token and the PIN.
                     stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: false))
                 case .clearCache:
                     stateMachine.processEvent(.clearCache)
                 case .forceLogout:
-                    BipeCredentialStore.bipeApp.deletePassword()
+                    bipeDeleteStoredPassword()
                     stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: true))
                 }
             }
@@ -1050,6 +1050,15 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             }
     }
     
+    /// Bipe: deletes the signed-in account's password only (ADR 0086). Without a session, every password goes.
+    private func bipeDeleteStoredPassword() {
+        if let userID = userSession?.clientProxy.userID {
+            BipeCredentialStore.bipeApp.deletePassword(for: userID)
+        } else {
+            BipeCredentialStore.bipeApp.deleteAllPasswords()
+        }
+    }
+    
     private func observeAppLockChanges() {
         appLockFlowCoordinator.actions.sink { [weak self] action in
             guard let self else { return }
@@ -1059,7 +1068,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             case .unlockApp:
                 windowManager.switchToMain()
             case .forceLogout:
-                BipeCredentialStore.bipeApp.deletePassword() // Bipe: a forgotten app lock PIN must not sign in again silently.
+                bipeDeleteStoredPassword() // Bipe: a forgotten app lock PIN must not sign in again silently.
                 stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: true))
             }
         }

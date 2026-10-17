@@ -92,8 +92,8 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         let pin = state.bindings.pin
         
         switch state.mode {
-        case .token:
-            await recoverWithToken(pin: pin)
+        case .token(let userID):
+            await recoverWithToken(pin: pin, userID: userID)
         case .emailLink(let linkToken):
             await confirmEmailLink(linkToken, pin: pin)
         case .choose, .waiting:
@@ -101,8 +101,8 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         }
     }
     
-    private func recoverWithToken(pin: String) async {
-        guard let token = credentialStore.recoveryToken() else {
+    private func recoverWithToken(pin: String, userID: String) async {
+        guard let token = credentialStore.recoveryToken(for: userID) else {
             switchMode(to: .choose)
             return
         }
@@ -114,13 +114,13 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             let credentials = try await apiClient.recoverWithToken(token.secret, pin: pin)
             confirmedPIN = pin
             // This device's own token recovery must not alert this device.
-            BipeRecoveryAlerts.acknowledgeCompletedTokenRecoveriesOnNextCheck()
+            BipeRecoveryAlerts.acknowledgeCompletedTokenRecoveriesOnNextCheck(for: credentials.userId)
             await finishSignIn(credentials)
         } catch {
             MXLog.error("Bipe token recovery failed: \(error)")
             if case .server(.recoveryInvalid, _, _) = error {
-                credentialStore.deleteRecoveryToken()
-                state.hasRecoveryToken = false
+                credentialStore.deleteRecoveryToken(for: token.userID)
+                state.hasRecoveryToken = credentialStore.recoveryToken() != nil
                 switchMode(to: .choose)
                 state.notice = error.localizedMessage
                 return

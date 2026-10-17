@@ -128,7 +128,7 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
                 }
                 credentialStore.save(credentials)
                 MXLog.info("Bipe: moved \(credentials.userId) to device-first")
-            } else if credentialStore.recoveryToken() == nil {
+            } else if credentialStore.recoveryToken(for: clientProxy.userID) == nil {
                 // A device-first account whose token never reached this Apple account: issue one and sync it.
                 let token = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> String in
                     try await apiClient.newRecoveryToken(accessToken: token)
