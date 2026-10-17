@@ -17,7 +17,7 @@ enum BipeWaysBackReader {
                      recoveryKey: clientProxy.secureBackupController.recoveryState.value == .enabled,
                      syncedToken: BipeCredentialStore.bipeApp.recoveryToken()?.userID == clientProxy.userID)
     }
-
+    
     /// Loads the account state, then counts. The status is `nil` when the call fails.
     static func load(apiClient: BipeAPIClient, clientProxy: ClientProxyProtocol) async -> (status: BipeAccountStatus?, waysBack: BipeWaysBack) {
         var status: BipeAccountStatus?

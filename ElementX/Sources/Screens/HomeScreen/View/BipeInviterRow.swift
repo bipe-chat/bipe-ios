@@ -12,7 +12,7 @@ import SwiftUI
 struct BipeInviterRow: View {
     let inviterHandle: String
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
@@ -21,7 +21,7 @@ struct BipeInviterRow: View {
                     .frame(width: 32, height: 32)
                     .background(.compound.iconAccentPrimary, in: Circle())
                     .accessibilityHidden(true)
-
+                
                 VStack(alignment: .leading, spacing: 0) {
                     Text(BipeStrings.inviterCardTitle(inviterHandle))
                         .font(.compound.bodyLGSemibold)
@@ -31,7 +31,7 @@ struct BipeInviterRow: View {
                         .foregroundStyle(.compound.textSecondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+                
                 CompoundIcon(\.chevronRight, size: .small, relativeTo: .compound.bodyLG)
                     .foregroundStyle(.compound.iconTertiaryAlpha)
                     .accessibilityHidden(true)

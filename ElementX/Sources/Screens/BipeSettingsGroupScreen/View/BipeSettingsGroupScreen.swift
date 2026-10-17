@@ -12,7 +12,7 @@ import SwiftUI
 struct BipeSettingsGroupScreen: View {
     @Bindable var context: BipeSettingsGroupScreenViewModel.Context
     @Environment(\.openURL) private var openURL
-
+    
     var body: some View {
         Form {
             ForEach(context.viewState.blocks) { block in
@@ -52,18 +52,22 @@ struct BipeSettingsGroupScreen: View {
             }
         }
     }
-
+    
     private static var version: String {
         ProcessInfo.isRunningTests ? "0.0.0 (1)" : "\(InfoPlistReader.main.bundleShortVersionString) (\(InfoPlistReader.main.bundleVersion))"
     }
     
     private var isShowingExport: Binding<Bool> {
         Binding(get: { context.viewState.bindings.exportFileURL != nil },
-                set: { if !$0 { context.exportFileURL = nil } })
+                set: {
+                    if !$0 {
+                        context.exportFileURL = nil
+                    }
+                })
     }
     
     // MARK: - Rows
-
+    
     @ViewBuilder
     private func rowView(_ row: BipeSettingsRow) -> some View {
         switch row {
@@ -73,7 +77,7 @@ struct BipeSettingsGroupScreen: View {
             linkRow(row, value: context.viewState.handle.map { "@\($0)" } ?? BipeStrings.settingsHandleNone)
         case .profilePublicProfile:
             linkRow(row, value: context.viewState.publicProfileEnabled.map { $0 ? BipeStrings.publicProfileOn : BipeStrings.publicProfileOff })
-        
+            
         case .privacyMessaging:
             linkRow(row, value: context.viewState.whoCanMessage?.title)
         case .privacyRequestPhotos:
@@ -101,7 +105,7 @@ struct BipeSettingsGroupScreen: View {
         case .privacyExport:
             ListRow(label: .plain(title: row.title),
                     kind: .button { context.send(viewAction: .export) })
-        
+            
         case .accountWaysBackStatus:
             waysBackCard
         case .accountBiometricUnlock:
@@ -116,7 +120,7 @@ struct BipeSettingsGroupScreen: View {
             linkRow(row, value: context.viewState.recoveryKeySet ? BipeStrings.accountRecoveryKeySaved : BipeStrings.accountRecoveryKeyMissing)
         case .accountThisDevice:
             infoRow(row, value: UIDevice.current.name)
-        
+            
         case .chatsAppearance:
             ListRow(label: .plain(title: row.title),
                     kind: .picker(selection: $context.appAppearance,
@@ -151,7 +155,7 @@ struct BipeSettingsGroupScreen: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private var waysBackCard: some View {
         if let waysBack = context.viewState.waysBack {
@@ -198,7 +202,7 @@ struct BipeSettingsGroupScreen: View {
                 details: value.map { .title($0) },
                 kind: .navigationLink { context.send(viewAction: .open(row)) })
     }
-
+    
     private func urlRow(_ row: BipeSettingsRow) -> some View {
         ListRow(label: .plain(title: row.title),
                 details: .systemIcon(.arrowUpRight),
@@ -225,7 +229,7 @@ struct BipeSettingsGroupScreen_Previews: PreviewProvider {
                                                             userSession: UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "@alice:bipe.net.br")))),
                                                             appLockService: AppLockServiceMock.mock(),
                                                             userIndicatorController: UserIndicatorControllerMock())
-
+    
     static var previews: some View {
         ElementNavigationStack {
             BipeSettingsGroupScreen(context: viewModel.context)

@@ -18,9 +18,9 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     let isBipeAccount: Bool
     /// The `flag:<name>` gates that are on.
     var flags: Set<String> = []
-
+    
     // MARK: Seu perfil
-
+    
     var displayName: String?
     var handle: String?
     var publicProfileEnabled: Bool?
@@ -48,16 +48,18 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     var isWaitingTimelineMediaVisibility = false
     
     var bindings: BipeSettingsGroupScreenViewStateBindings
-
+    
     /// The registry sections, cut into Form sections so that a row footer sits right under its row.
     var blocks: [BipeSettingsBlock] {
         group.sections.flatMap { section in
             BipeSettingsBlock.blocks(for: section, rows: section.rowsShownOnIOS { flags.contains($0) }.filter(isShown))
         }
     }
-
+    
     private func isShown(_ row: BipeSettingsRow) -> Bool {
-        if row == .accountBiometricUnlock, biometryName == nil { return false }
+        if row == .accountBiometricUnlock, biometryName == nil {
+            return false
+        }
         return isBipeAccount || !row.needsBipeAccount
     }
 }
@@ -110,7 +112,7 @@ struct BipeSettingsBlock: Identifiable {
     let title: String?
     let rows: [BipeSettingsRow]
     let footer: String?
-
+    
     static func blocks(for section: BipeSettingsSection, rows: [BipeSettingsRow]) -> [BipeSettingsBlock] {
         guard !rows.isEmpty else { return [] }
         var blocks: [BipeSettingsBlock] = []

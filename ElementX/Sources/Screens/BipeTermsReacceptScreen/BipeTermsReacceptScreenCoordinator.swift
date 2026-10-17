@@ -22,18 +22,18 @@ enum BipeTermsReacceptScreenCoordinatorAction {
 final class BipeTermsReacceptScreenCoordinator: CoordinatorProtocol {
     private let viewModel: BipeTermsReacceptScreenViewModelProtocol
     private var cancellables = Set<AnyCancellable>()
-
+    
     private let actionsSubject: PassthroughSubject<BipeTermsReacceptScreenCoordinatorAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeTermsReacceptScreenCoordinatorAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(parameters: BipeTermsReacceptScreenCoordinatorParameters) {
         viewModel = BipeTermsReacceptScreenViewModel(apiClient: parameters.apiClient,
                                                      clientProxy: parameters.clientProxy,
                                                      site: parameters.site)
     }
-
+    
     func start() {
         viewModel.actionsPublisher.sink { [weak self] action in
             switch action {
@@ -43,7 +43,7 @@ final class BipeTermsReacceptScreenCoordinator: CoordinatorProtocol {
         }
         .store(in: &cancellables)
     }
-
+    
     func toPresentable() -> AnyView {
         AnyView(BipeTermsReacceptScreen(context: viewModel.context))
     }

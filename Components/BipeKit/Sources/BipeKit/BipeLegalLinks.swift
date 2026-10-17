@@ -12,11 +12,11 @@ public enum BipeLegalLinks {
     public static func termsURL(site: URL) -> URL {
         site.appending(path: isEnglish ? BipeRegistries.enTermsPath : BipeRegistries.termsPath)
     }
-
+    
     public static func privacyURL(site: URL) -> URL {
         site.appending(path: isEnglish ? BipeRegistries.enPrivacyPath : BipeRegistries.privacyPath)
     }
-
+    
     private static var isEnglish: Bool {
         BipeAPIClient.emailLanguage == "en"
     }

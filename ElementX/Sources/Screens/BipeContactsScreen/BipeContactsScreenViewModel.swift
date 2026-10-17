@@ -67,7 +67,6 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
             }
         }
     }
-
     
     // MARK: - Private
     

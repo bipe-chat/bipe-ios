@@ -445,8 +445,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         let appSettings = userSession.userSettings.app
         let coordinator = BipeTermsReacceptScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
-                                                                                clientProxy: userSession.clientProxy,
-                                                                                site: appSettings.websiteURL))
+                                                                               clientProxy: userSession.clientProxy,
+                                                                               site: appSettings.websiteURL))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 guard let self else { return }

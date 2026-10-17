@@ -33,7 +33,9 @@ struct BipeContactsScreenRow: Identifiable, Equatable {
     let contactName: String?
     let joinedWithInvite: Bool
     
-    var id: String { userID }
+    var id: String {
+        userID
+    }
 }
 
 struct BipeContactsScreenViewState: BindableState {
