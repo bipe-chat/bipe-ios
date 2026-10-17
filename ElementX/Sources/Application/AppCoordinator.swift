@@ -760,15 +760,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         return coordinator
     }
     
-    /// Bipe ADR 0034: keeps the inviter for the chat list card and the in-chat prompt, then opens the chat.
-    /// When the chat cannot open, the chat list stays and its card retries.
-    private func openChatWithInviter(_ inviterUserID: String, handle: String?, userSession: UserSessionProtocol, flowCoordinator: UserSessionFlowCoordinator) async {
-        BipeInviteStore(userID: userSession.clientProxy.userID).setInviterGreeting(BipeInviterGreeting(userID: inviterUserID, handle: handle))
-        if let roomID = await userSession.clientProxy.bipeDirectRoom(with: inviterUserID) {
-            flowCoordinator.handleAppRoute(.room(roomID: roomID, via: []), animated: false)
-        }
-    }
-    
     private func runPostSessionSetupTasks() async {
         guard let userSession, let userSessionFlowCoordinator else {
             fatalError("User session not setup")
@@ -816,33 +807,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         if let storedInlineReply {
             await processInlineReply(roomID: storedInlineReply.roomID, replyText: storedInlineReply.message)
         }
-    }
-    
-    /// Bipe: one handle change store per session (ADR 0066). Only accounts on the Bipe server have handles.
-    private func makeBipeHandleChanges(for userSession: UserSessionProtocol) -> BipeHandleChangeStore? {
-        guard userSession.bipeHandleResolver != nil else {
-            bipeHandleChanges = nil
-            return nil
-        }
-        let store = BipeHandleChangeStore(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
-                                          userID: userSession.clientProxy.userID,
-                                          cacheDirectory: .cachesDirectory) { [weak clientProxy = userSession.clientProxy] in
-            clientProxy?.accessToken
-        }
-        bipeHandleChanges = store
-        return store
-    }
-    
-    /// Bipe: after the room list loads, fetches the history of the people already cached and of each room's heroes.
-    /// Opening a room fetches its full member list (`TimelineController`).
-    private func refreshBipeHandleChangesAfterSync(clientProxy: ClientProxyProtocol) async {
-        let provider = clientProxy.staticRoomSummaryProvider
-        for await state in provider.statePublisher.values where state.isLoaded {
-            break
-        }
-        guard let store = bipeHandleChanges else { return }
-        let heroes = provider.roomListPublisher.value.filter(\.isJoined).flatMap { $0.heroes.map(\.id) }
-        await store.refresh(userIDs: store.knownUserIDs.union(heroes))
     }
     
     private func startAuthenticationSoftLogout() {
@@ -1089,57 +1053,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     
     // MARK: - Bipe accounts (ADR 0086, bipe#267)
     
-    /// Shows another signed-in account. Its session is restored when it isn't live; the current one pauses.
-    private func bipeSwitchAccount(to userID: String) {
-        guard userID != userSession?.clientProxy.userID else { return }
-        showLoadingIndicator()
-        Task {
-            defer { hideLoadingIndicator() }
-            // Pause the current account before the manager makes the other one active.
-            await pauseClientServices(isBackgroundTask: false)
-            guard let target = await userSessionManager.activate(userID: userID) else {
-                await resumeClientServices()
-                showLoginErrorToast()
-                return
-            }
-            bipeShowAccount(target, isNewLogin: false)
-        }
-    }
-    
-    /// The authentication flow as a sheet over the current session, up to the cap of personal accounts.
-    private func bipeStartAddingAccount() {
-        guard authenticationFlowCoordinator == nil,
-              BipeAccountCap.canAdd(personalAccounts: userSessionManager.userIDs.count) else { return }
-        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true)
-        authenticationFlowCoordinator = coordinator
-        coordinator.start()
-    }
-    
-    /// Replaces the session UI with `userSession`'s. A new login is added to the manager first. The caller has paused the
-    /// services of the account on screen.
-    private func bipeShowAccount(_ userSession: UserSessionProtocol, isNewLogin: Bool) {
-        windowManager.closeAllSecondaryWindows()
-        userSessionFlowCoordinator?.stop()
-        elementCallService.setUserSession(nil)
-        tearDownUserSession()
-        
-        if isNewLogin {
-            userSessionManager.add(userSession)
-            appSettings.isEventCacheBuiltWithThreads = true
-        }
-        configureActiveSession()
-        setupUserSession(isNewLogin: isNewLogin)
-    }
-    
-    /// Bipe: deletes the signed-in account's password only (ADR 0086). Without a session, every password goes.
-    private func bipeDeleteStoredPassword() {
-        if let userID = userSession?.clientProxy.userID {
-            BipeCredentialStore.bipeApp.deletePassword(for: userID)
-        } else {
-            BipeCredentialStore.bipeApp.deleteAllPasswords()
-        }
-    }
-    
     private func observeAppLockChanges() {
         appLockFlowCoordinator.actions.sink { [weak self] action in
             guard let self else { return }
@@ -1358,6 +1271,98 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         MXLog.info("Ending background task.")
         appMediator.endBackgroundTask(backgroundTask)
         self.backgroundTask = nil
+    }
+}
+
+// MARK: - Bipe
+
+/// Bipe-only parts of the app coordinator, outside the class body so upstream code keeps its size (SwiftLint type_body_length).
+extension AppCoordinator {
+    /// Bipe ADR 0034: keeps the inviter for the chat list card and the in-chat prompt, then opens the chat.
+    /// When the chat cannot open, the chat list stays and its card retries.
+    private func openChatWithInviter(_ inviterUserID: String, handle: String?, userSession: UserSessionProtocol, flowCoordinator: UserSessionFlowCoordinator) async {
+        BipeInviteStore(userID: userSession.clientProxy.userID).setInviterGreeting(BipeInviterGreeting(userID: inviterUserID, handle: handle))
+        if let roomID = await userSession.clientProxy.bipeDirectRoom(with: inviterUserID) {
+            flowCoordinator.handleAppRoute(.room(roomID: roomID, via: []), animated: false)
+        }
+    }
+    
+    /// Bipe: one handle change store per session (ADR 0066). Only accounts on the Bipe server have handles.
+    private func makeBipeHandleChanges(for userSession: UserSessionProtocol) -> BipeHandleChangeStore? {
+        guard userSession.bipeHandleResolver != nil else {
+            bipeHandleChanges = nil
+            return nil
+        }
+        let store = BipeHandleChangeStore(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
+                                          userID: userSession.clientProxy.userID,
+                                          cacheDirectory: .cachesDirectory) { [weak clientProxy = userSession.clientProxy] in
+            clientProxy?.accessToken
+        }
+        bipeHandleChanges = store
+        return store
+    }
+    
+    /// Bipe: after the room list loads, fetches the history of the people already cached and of each room's heroes.
+    /// Opening a room fetches its full member list (`TimelineController`).
+    private func refreshBipeHandleChangesAfterSync(clientProxy: ClientProxyProtocol) async {
+        let provider = clientProxy.staticRoomSummaryProvider
+        for await state in provider.statePublisher.values where state.isLoaded {
+            break
+        }
+        guard let store = bipeHandleChanges else { return }
+        let heroes = provider.roomListPublisher.value.filter(\.isJoined).flatMap { $0.heroes.map(\.id) }
+        await store.refresh(userIDs: store.knownUserIDs.union(heroes))
+    }
+    
+    /// Shows another signed-in account. Its session is restored when it isn't live; the current one pauses.
+    private func bipeSwitchAccount(to userID: String) {
+        guard userID != userSession?.clientProxy.userID else { return }
+        showLoadingIndicator()
+        Task {
+            defer { hideLoadingIndicator() }
+            // Pause the current account before the manager makes the other one active.
+            await pauseClientServices(isBackgroundTask: false)
+            guard let target = await userSessionManager.activate(userID: userID) else {
+                await resumeClientServices()
+                showLoginErrorToast()
+                return
+            }
+            bipeShowAccount(target, isNewLogin: false)
+        }
+    }
+    
+    /// The authentication flow as a sheet over the current session, up to the cap of personal accounts.
+    private func bipeStartAddingAccount() {
+        guard authenticationFlowCoordinator == nil,
+              BipeAccountCap.canAdd(personalAccounts: userSessionManager.userIDs.count) else { return }
+        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true)
+        authenticationFlowCoordinator = coordinator
+        coordinator.start()
+    }
+    
+    /// Replaces the session UI with `userSession`'s. A new login is added to the manager first. The caller has paused the
+    /// services of the account on screen.
+    private func bipeShowAccount(_ userSession: UserSessionProtocol, isNewLogin: Bool) {
+        windowManager.closeAllSecondaryWindows()
+        userSessionFlowCoordinator?.stop()
+        elementCallService.setUserSession(nil)
+        tearDownUserSession()
+        
+        if isNewLogin {
+            userSessionManager.add(userSession)
+            appSettings.isEventCacheBuiltWithThreads = true
+        }
+        configureActiveSession()
+        setupUserSession(isNewLogin: isNewLogin)
+    }
+    
+    /// Bipe: deletes the signed-in account's password only (ADR 0086). Without a session, every password goes.
+    private func bipeDeleteStoredPassword() {
+        if let userID = userSession?.clientProxy.userID {
+            BipeCredentialStore.bipeApp.deletePassword(for: userID)
+        } else {
+            BipeCredentialStore.bipeApp.deleteAllPasswords()
+        }
     }
 }
 
