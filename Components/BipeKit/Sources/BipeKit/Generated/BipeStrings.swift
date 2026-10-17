@@ -1642,6 +1642,12 @@ public enum BipeStrings {
 
     public static var notificationsToneError: String { NSLocalizedString("bipe_notifications_tone_error", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var notificationsMismatchTitle: String { NSLocalizedString("bipe_notifications_mismatch_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsMismatchBody: String { NSLocalizedString("bipe_notifications_mismatch_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var actionContinue: String { NSLocalizedString("bipe_action_continue", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var accountBiometricWordAndroid: String { NSLocalizedString("bipe_account_biometric_word_android", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static func chatsLiveLocationDistance(_ p1: String) -> String {

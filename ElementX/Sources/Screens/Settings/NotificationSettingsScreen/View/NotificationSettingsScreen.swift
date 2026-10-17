@@ -238,16 +238,16 @@ struct NotificationSettingsScreen: View {
             ListRow(kind: .custom {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(L10n.screenNotificationSettingsConfigurationMismatch)
+                        Text(BipeStrings.notificationsMismatchTitle) // Bipe
                             .font(.compound.bodyLGSemibold)
-                        Text(L10n.screenNotificationSettingsConfigurationMismatchDescription)
+                        Text(BipeStrings.notificationsMismatchBody) // Bipe
                             .font(.compound.bodyMD)
                             .foregroundColor(.compound.textSecondary)
                     }
                     Button {
                         context.send(viewAction: .fixConfigurationMismatchTapped)
                     } label: {
-                        Text(L10n.actionContinue)
+                        Text(BipeStrings.actionContinue) // Bipe
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.compound(.primary, size: .medium))
