@@ -15011,6 +15011,48 @@ nonisolated class UserSessionManagerMock: UserSessionManagerProtocol, @unchecked
         removeUserIDReceivedInvocationsLock.withLock { removeUserIDUnderlyingReceivedInvocations.append(userID) }
         removeUserIDClosure?(userID)
     }
+    //MARK: - activate
+
+    private let activateUserIDCallsCountLock = NSLock()
+    private nonisolated(unsafe) var activateUserIDUnderlyingCallsCount = 0
+    var activateUserIDCallsCount: Int {
+        get { activateUserIDCallsCountLock.withLock { activateUserIDUnderlyingCallsCount } }
+        set { activateUserIDCallsCountLock.withLock { activateUserIDUnderlyingCallsCount = newValue } }
+    }
+    var activateUserIDCalled: Bool {
+        return activateUserIDCallsCount > 0
+    }
+    private let activateUserIDReceivedUserIDLock = NSLock()
+    private nonisolated(unsafe) var activateUserIDUnderlyingReceivedUserID: String?
+    var activateUserIDReceivedUserID: String? {
+        get { activateUserIDReceivedUserIDLock.withLock { activateUserIDUnderlyingReceivedUserID } }
+        set { activateUserIDReceivedUserIDLock.withLock { activateUserIDUnderlyingReceivedUserID = newValue } }
+    }
+    private let activateUserIDReceivedInvocationsLock = NSLock()
+    private nonisolated(unsafe) var activateUserIDUnderlyingReceivedInvocations: [String] = []
+    var activateUserIDReceivedInvocations: [String] {
+        get { activateUserIDReceivedInvocationsLock.withLock { activateUserIDUnderlyingReceivedInvocations } }
+        set { activateUserIDReceivedInvocationsLock.withLock { activateUserIDUnderlyingReceivedInvocations = newValue } }
+    }
+
+    private let activateUserIDReturnValueLock = NSLock()
+    private nonisolated(unsafe) var activateUserIDUnderlyingReturnValue: UserSessionProtocol?
+    var activateUserIDReturnValue: UserSessionProtocol? {
+        get { activateUserIDReturnValueLock.withLock { activateUserIDUnderlyingReturnValue } }
+        set { activateUserIDReturnValueLock.withLock { activateUserIDUnderlyingReturnValue = newValue } }
+    }
+    nonisolated(unsafe) var activateUserIDClosure: ((String) async -> UserSessionProtocol?)?
+
+    @concurrent func activate(userID: String) async -> UserSessionProtocol? {
+        activateUserIDCallsCountLock.withLock { activateUserIDUnderlyingCallsCount += 1 }
+        activateUserIDReceivedUserID = userID
+        activateUserIDReceivedInvocationsLock.withLock { activateUserIDUnderlyingReceivedInvocations.append(userID) }
+        if let activateUserIDClosure = activateUserIDClosure {
+            return await activateUserIDClosure(userID)
+        } else {
+            return activateUserIDReturnValue
+        }
+    }
     //MARK: - reset
 
     private let resetCallsCountLock = NSLock()

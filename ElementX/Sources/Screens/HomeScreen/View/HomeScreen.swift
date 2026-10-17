@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Compound
 import SwiftUI
@@ -103,10 +104,37 @@ struct HomeScreen: View {
     private var settingsButton: some View {
         AvatarSettingsButton(userProfile: context.viewState.userProfile,
                              mediaProvider: context.mediaProvider) {
-            context.send(viewAction: .showSettings)
+            // Bipe: with two or more accounts a tap switches to the next one (ADR 0086, bipe#267).
+            context.send(viewAction: context.viewState.bipeAccounts.count > 1 ? .bipeSwitchToNextAccount : .showSettings)
         }
+        .contextMenu { bipeAccountMenu }
         .accessibilityLabel(L10n.commonSettings)
         .accessibilityIdentifier(A11yIdentifiers.homeScreen.userAvatar)
+    }
+    
+    /// Bipe: a long press on the avatar lists the accounts, then "Adicionar conta" up to the cap (ADR 0086, bipe#267).
+    @ViewBuilder
+    private var bipeAccountMenu: some View {
+        ForEach(context.viewState.bipeAccounts) { account in
+            Button {
+                context.send(viewAction: .bipeSwitchAccount(userID: account.userID))
+            } label: {
+                if account.isCurrent {
+                    Label(account.label, icon: \.check)
+                } else {
+                    Text(account.label)
+                }
+            }
+        }
+        if context.viewState.bipeCanAddAccount {
+            Button {
+                context.send(viewAction: .bipeAddAccount)
+            } label: {
+                Label(BipeStrings.accountAdd, icon: \.plus)
+            }
+        } else {
+            Text(BipeStrings.accountCapReached(String(context.viewState.bipeMaxAccounts)))
+        }
     }
     
     @ViewBuilder

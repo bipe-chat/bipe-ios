@@ -79,11 +79,18 @@ extension BipeCredentialStore {
     }
 }
 
+/// Bipe: the accounts signed in on this phone, read from the session keychain (ADR 0086). Known before any session is live.
+enum BipeSignedInAccounts {
+    static var userIDs: [String] {
+        KeychainController(service: .sessions, accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier).restorationTokens().map(\.userID)
+    }
+}
+
 /// Bipe: the device PIN locks the app and belongs to the phone, not to an account (ADR 0086).
 enum BipeDevicePIN {
     /// The device PIN follows the account PIN while the phone holds one account, so a one-account user keeps one PIN.
     static var followsAccountPIN: Bool {
-        KeychainController(service: .sessions, accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier).restorationTokens().count <= 1
+        BipeSignedInAccounts.userIDs.count <= 1
     }
 }
 

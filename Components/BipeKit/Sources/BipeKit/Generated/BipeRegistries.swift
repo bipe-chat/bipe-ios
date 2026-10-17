@@ -677,6 +677,8 @@ public enum BipeRegistries {
     public static let guardianApprovalsMax = 2
     public static let recoveryLinkMinutes = 60
     public static let emailVerifyLinkHours = 24
+    /// Personal accounts on one phone (ADR 0086). Fallback for max_accounts in GET /v1/me/account.
+    public static let maxPersonalAccounts = 2
 
     /// Terms and privacy accepted at sign-up (ADR 0113; registries/legal.json). Paths are on the public site.
     public static let legalVersion = "2026-10-16"

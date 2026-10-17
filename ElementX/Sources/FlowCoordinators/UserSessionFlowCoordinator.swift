@@ -19,6 +19,9 @@ enum UserSessionFlowCoordinatorAction {
     case clearCache
     /// Logout and disable App Lock without any confirmation. The user forgot their PIN.
     case forceLogout
+    /// Bipe: show another account on this phone, or add one (ADR 0086, bipe#267).
+    case bipeSwitchAccount(userID: String)
+    case bipeAddAccount
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
@@ -333,6 +336,10 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                     presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
                 case .hideCallScreenOverlay:
                     hideCallScreenOverlay()
+                case .bipeSwitchAccount(let userID):
+                    actionsSubject.send(.bipeSwitchAccount(userID: userID))
+                case .bipeAddAccount:
+                    actionsSubject.send(.bipeAddAccount)
                 case .logout:
                     Task { await self.runLogoutFlow() }
                 }

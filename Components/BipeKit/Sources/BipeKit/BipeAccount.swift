@@ -43,6 +43,8 @@ public struct BipeAccountStatus: Decodable, Sendable, Equatable {
     public let recoveries: [BipeRecovery]
     /// The last legal version this account accepted (ADR 0113). Absent for accounts made before ADR 0113.
     public let termsVersion: String?
+    /// Personal accounts one phone may hold (ADR 0086). Absent from an older server.
+    public let maxAccounts: Int?
 }
 
 /// Contract: `Recovery`.
