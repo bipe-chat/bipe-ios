@@ -1679,4 +1679,52 @@ public enum BipeStrings {
     }
 
     public static var chatsLiveLocationPermissionLink: String { NSLocalizedString("bipe_chats_live_location_permission_link", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func onboardingInvitedBy(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_onboarding_invited_by", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var onboardingJoinWithInvite: String { NSLocalizedString("bipe_onboarding_join_with_invite", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingHaveInvite: String { NSLocalizedString("bipe_onboarding_have_invite", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingHaveAccount: String { NSLocalizedString("bipe_onboarding_have_account", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviteCodeTitle: String { NSLocalizedString("bipe_invite_code_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviteCodeBody: String { NSLocalizedString("bipe_invite_code_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviteCodeNone: String { NSLocalizedString("bipe_invite_code_none", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var waitlistBody: String { NSLocalizedString("bipe_waitlist_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var waitlistJoin: String { NSLocalizedString("bipe_waitlist_join", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var waitlistDone: String { NSLocalizedString("bipe_waitlist_done", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupNameTitle: String { NSLocalizedString("bipe_signup_name_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var signupSigninFailed: String { NSLocalizedString("bipe_signup_signin_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryBeta: String { NSLocalizedString("bipe_recovery_beta", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryBetaBody: String { NSLocalizedString("bipe_recovery_beta_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var recoveryBetaPassword: String { NSLocalizedString("bipe_recovery_beta_password", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func notificationsPromptTitle(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_notifications_prompt_title", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var notificationsPromptTitleGeneric: String { NSLocalizedString("bipe_notifications_prompt_title_generic", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsPromptBody: String { NSLocalizedString("bipe_notifications_prompt_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsPromptAllow: String { NSLocalizedString("bipe_notifications_prompt_allow", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var handlePromptTitle: String { NSLocalizedString("bipe_handle_prompt_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var handlePromptBody: String { NSLocalizedString("bipe_handle_prompt_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var handlePromptAction: String { NSLocalizedString("bipe_handle_prompt_action", tableName: "Bipe", bundle: .module, comment: "") }
 }
