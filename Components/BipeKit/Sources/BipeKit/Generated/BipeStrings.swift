@@ -1822,6 +1822,10 @@ public enum BipeStrings {
 
     public static var notificationsPromptAllow: String { NSLocalizedString("bipe_notifications_prompt_allow", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var remoteBannerUpdate: String { NSLocalizedString("bipe_remote_banner_update", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var remoteBannerDismiss: String { NSLocalizedString("bipe_remote_banner_dismiss", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var handlePromptTitle: String { NSLocalizedString("bipe_handle_prompt_title", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var handlePromptBody: String { NSLocalizedString("bipe_handle_prompt_body", tableName: "Bipe", bundle: .module, comment: "") }

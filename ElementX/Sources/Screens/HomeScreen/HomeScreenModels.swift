@@ -51,6 +51,9 @@ enum HomeScreenViewAction {
     /// Bipe (bipe#200, bipe#415): the "Escolha seu @" card and its "Agora não".
     case openBipeHandlePrompt
     case dismissBipeHandlePrompt
+    /// Bipe (ADR 0117, bipe#386): the remote critical banner.
+    case openBipeRemoteBanner
+    case dismissBipeRemoteBanner
     case setupRecovery
     case confirmRecoveryKey
     case resetEncryption
@@ -172,6 +175,14 @@ struct HomeScreenViewState: BindableState {
     /// Bipe (bipe#200, bipe#415): the account has no @ and the card was never dismissed.
     var bipeNeedsHandle = false
     
+    /// Bipe (ADR 0117, bipe#386): the remote critical banner, above the account tasks. Conversas only.
+    var bipeRemoteBanner: BipeRemoteBanner?
+    var bipeRemoteBannerState = BipeRemoteBanner.State.hidden
+    
+    var shouldShowBipeRemoteBanner: Bool {
+        bipeRemoteBannerState != .hidden && bipeScope == .chats && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering
+    }
+    
     var shouldShowBipeHandlePrompt: Bool {
         bipeNeedsHandle && bipeScope == .chats && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering
     }
@@ -220,7 +231,7 @@ struct HomeScreenViewState: BindableState {
     }
     
     var shouldShowBanner: Bool {
-        securityBannerMode.isShown || shouldShowNewSoundBanner || shouldShowBipeInviterRow || shouldShowBipeHandlePrompt
+        securityBannerMode.isShown || shouldShowNewSoundBanner || shouldShowBipeInviterRow || shouldShowBipeHandlePrompt || shouldShowBipeRemoteBanner
     }
 }
 
