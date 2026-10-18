@@ -46,23 +46,39 @@ struct BipeRecoveryScreen: View {
     
     // MARK: - Choose
     
-    @ViewBuilder
+    /// Rows in the order of bipe-shared `registries/onboarding.json` (bipe#415), the same as Android.
+    /// A row with a `planned:` gate stays hidden until its issue ships.
     private var chooseSections: some View {
-        if context.viewState.hasRecoveryToken {
-            Section {
-                ListRow(label: .default(title: BipeStrings.pinEnterTitle, description: BipeStrings.recoveryTokenFound, icon: \.lock),
-                        kind: .button { context.send(viewAction: .useRecoveryToken) })
+        ForEach(BipeOnboardingRecoveryRow.allCases.filter { $0.gate == nil }, id: \.self) { row in
+            switch row {
+            case .token:
+                if context.viewState.hasRecoveryToken {
+                    Section {
+                        ListRow(label: .default(title: BipeStrings.pinEnterTitle, description: BipeStrings.recoveryTokenFound, icon: \.lock),
+                                kind: .button { context.send(viewAction: .useRecoveryToken) })
+                    }
+                }
+            case .oldPhone:
+                Section {
+                    ListRow(label: .default(title: BipeStrings.recoveryQr, description: BipeStrings.recoveryQrBody, icon: \.qrCode),
+                            kind: .button { context.send(viewAction: .loginWithQR) })
+                } footer: {
+                    Text(BipeStrings.recoveryQrNeverFromOthers)
+                        .compoundListSectionFooter()
+                }
+            case .email:
+                emailSection
+            case .beta:
+                // Beta accounts made before ADR 0057 still sign in with their email and password.
+                Section {
+                    ListRow(label: .default(title: BipeStrings.recoveryBeta, description: BipeStrings.recoveryBetaBody, icon: \.userProfile),
+                            kind: .button { context.send(viewAction: .signInWithEmail) })
+                }
             }
         }
-        
-        Section {
-            ListRow(label: .default(title: BipeStrings.recoveryQr, description: BipeStrings.recoveryQrBody, icon: \.qrCode),
-                    kind: .button { context.send(viewAction: .loginWithQR) })
-        } footer: {
-            Text(BipeStrings.recoveryQrNeverFromOthers)
-                .compoundListSectionFooter()
-        }
-        
+    }
+    
+    private var emailSection: some View {
         Section {
             ListRow(label: .plain(title: BipeStrings.recoveryEmail,
                                   description: BipeStrings.recoveryEmailBody(String(BipeRegistries.recoveryDelayHoursEmail))),
@@ -80,12 +96,6 @@ struct BipeRecoveryScreen: View {
                         kind: .button { context.send(viewAction: .requestEmail) })
                     .disabled(!context.viewState.canRequestEmail)
             }
-        }
-        
-        // Beta accounts made before ADR 0057 still sign in with their email and password.
-        Section {
-            ListRow(label: .default(title: L10n.screenOnboardingSignInManually, icon: \.userProfile),
-                    kind: .button { context.send(viewAction: .signInWithEmail) })
         }
     }
     

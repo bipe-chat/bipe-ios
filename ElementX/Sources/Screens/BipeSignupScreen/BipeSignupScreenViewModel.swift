@@ -10,8 +10,9 @@ import SwiftUI
 
 typealias BipeSignupScreenViewModelType = StateStoreViewModelV2<BipeSignupScreenViewState, BipeSignupScreenViewAction>
 
-/// Device-first sign-up (ADR 0057, ADR 0059) in short steps (bipe#196): name, optional handle and email, and invite;
-/// then an 8-digit PIN; then, without an email, the fallback prompt. App Attest runs when the account is created.
+/// Device-first sign-up (ADR 0057, ADR 0059) in the steps of bipe-shared `registries/onboarding.json` (bipe#415):
+/// the invite code (unless a link brought it), the name and terms, an 8-digit PIN, then the fallback prompt.
+/// The @ comes later (bipe#200). App Attest runs when the account is created.
 /// The API returns a hidden password and a recovery token once. The app keeps both in the keychain and signs in
 /// with the password (`m.login.password`), so no browser opens.
 class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreenViewModelProtocol {
@@ -20,7 +21,6 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     private let appLockService: AppLockServiceProtocol?
     private let userIndicatorController: UserIndicatorControllerProtocol
     
-    private let handleChecker: BipeHandleAvailabilityChecker
     /// The new account's PIN, kept in memory until the sign-in succeeds. Then it becomes the app lock PIN.
     private var pendingAppLockPIN: String?
     /// The new account's credentials, kept in memory until the sign-in succeeds.
@@ -32,6 +32,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     }
     
     init(inviteCode: BipeInviteCode? = nil,
+         startsWithInviteCode: Bool = true,
          apiClient: BipeAPIClient,
          signIn: BipeAccountSignIn,
          appLockService: AppLockServiceProtocol?,
@@ -41,11 +42,11 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         self.signIn = signIn
         self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
-        handleChecker = BipeHandleAvailabilityChecker(apiClient: apiClient)
         
         let site = signIn.appSettings.websiteURL
         var initialState = BipeSignupScreenViewState(termsURL: BipeLegalLinks.termsURL(site: site),
-                                                     privacyURL: BipeLegalLinks.privacyURL(site: site))
+                                                     privacyURL: BipeLegalLinks.privacyURL(site: site),
+                                                     firstStep: inviteCode == nil && startsWithInviteCode ? .inviteCode : .name)
         initialState.bindings.inviteCode = inviteCode?.value ?? ""
         initialState.isCompany = accountType == .company
         super.init(initialViewState: initialState)
@@ -58,11 +59,6 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     
     override func process(viewAction: BipeSignupScreenViewAction) {
         switch viewAction {
-        case .handleChanged:
-            state.handleError = nil
-            handleChecker.check(state.bindings.handle) { [weak self] status in
-                self?.state.handleStatus = status
-            }
         case .inviteCodeChanged:
             state.inviteCodeError = nil
             state.inviterHandle = nil
@@ -84,19 +80,26 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             if confirmation != state.bindings.pinConfirmation {
                 state.bindings.pinConfirmation = confirmation
             }
-        case .continue:
+        case .primary:
             continueStep()
-        case .back:
-            state.step = switch state.step {
-            case .form, .pin: .form
-            case .fallback: .pin
+        case .text(let target):
+            switch target {
+            case .waitlist:
+                state.bindings.isWaitlistPresented = true
+            case .create:
+                // Fallback "Agora não": the account without an email.
+                state.bindings.email = ""
+                state.isFallbackEmailOpen = false
+                Task { await submit() }
+            default:
+                MXLog.error("Unexpected sign-up text button: \(target)")
             }
-        case .openFallbackEmail:
-            state.isFallbackEmailOpen = true
-        case .skipFallback:
-            state.bindings.email = ""
-            state.isFallbackEmailOpen = false
-            Task { await submit() }
+        case .back:
+            let steps = BipeOnboardingStep.allCases
+            guard let index = steps.firstIndex(of: state.step), state.step != state.firstStep, index > 0 else { return }
+            state.step = steps[index - 1]
+        case .joinWaitlist:
+            Task { await joinWaitlist() }
         }
     }
     
@@ -104,19 +107,43 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     
     private func continueStep() {
         switch state.step {
-        case .form:
-            guard state.canContinueForm else { return }
+        case .inviteCode:
+            guard state.canContinueInviteCode else { return }
+            state.step = .name
+        case .name:
+            guard state.canContinueName else { return }
             state.step = .pin
         case .pin:
             guard state.isPINValid else { return }
-            if state.trimmedEmail.isEmpty, !state.isAccountCreated {
-                state.step = .fallback
-            } else {
+            if state.isAccountCreated {
                 Task { await submit() }
+            } else {
+                state.step = .fallback
             }
         case .fallback:
-            guard state.canSubmitFallbackEmail || state.isAccountCreated else { return }
-            Task { await submit() }
+            if state.isAccountCreated {
+                Task { await submit() }
+            } else if !state.isFallbackEmailOpen {
+                state.isFallbackEmailOpen = true
+            } else if state.canSubmitFallbackEmail {
+                Task { await submit() }
+            }
+        }
+    }
+    
+    private func joinWaitlist() async {
+        guard state.canJoinWaitlist else { return }
+        state.waitlistError = nil
+        let email = state.bindings.waitlistEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lang = Locale.current.language.languageCode == .english ? "en" : "pt"
+        startLoading()
+        defer { stopLoading() }
+        do {
+            try await apiClient.joinWaitlist(email: email, lang: lang)
+            state.isWaitlistJoined = true
+        } catch {
+            MXLog.error("Bipe waitlist failed: \(error)")
+            state.waitlistError = error.localizedMessage
         }
     }
     
@@ -146,7 +173,6 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
     /// The new account's credentials and the PIN it really has. On a retry after a lost answer the server returns the
     /// account of the first try (ADR 0094), so the PIN is the one that try sent.
     private func createAccount() async -> (BipeCredentials, String)? {
-        let handle = BipeHandle.sanitize(state.bindings.handle)
         let displayName = state.bindings.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         let email = state.trimmedEmail
         let credentialStore = signIn.credentialStore
@@ -175,7 +201,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                 return BipeSignupRequest(inviteCode: state.inviteCode?.value,
                                          email: email.isEmpty ? nil : email,
                                          pin: pin,
-                                         handle: handle.isEmpty ? nil : handle,
+                                         handle: nil,
                                          displayName: displayName.isEmpty ? nil : displayName,
                                          attestation: attestation,
                                          signupKey: pending.key,
@@ -242,14 +268,17 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             actionsSubject.send(.signedIn(userSession))
         case .failure(let error):
             MXLog.error("Bipe sign-in after sign-up failed: \(error)")
-            state.bindings.alertInfo = AlertInfo(id: .error)
+            state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: BipeStrings.signupSigninFailed)
         }
     }
     
-    /// An error keeps the default: an invite is required (ADR 0072).
+    /// An error keeps the default: an invite is required (ADR 0072). An open server skips an empty code step.
     private func loadSignupConfig() async {
         guard let config = try? await apiClient.signupConfig() else { return }
         state.isInviteRequired = config.inviteRequired
+        if !config.inviteRequired, state.step == .inviteCode, state.isInviteCodeEmpty {
+            state.step = .name
+        }
     }
     
     /// Shows who invited the user, or marks a code that no longer works. Failures stay silent: sign-up checks the code again.
@@ -271,27 +300,20 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             // A field error opens the step that holds the field.
             case .emailTaken:
                 state.emailError = message
-                if state.step == .fallback {
-                    state.isFallbackEmailOpen = true
-                } else {
-                    state.step = .form
-                }
+                state.step = .fallback
+                state.isFallbackEmailOpen = true
                 return
             case .pinWeak:
                 state.pinError = message
                 state.step = .pin
                 return
-            case .handleTaken, .handleInvalid:
-                state.handleError = message
-                state.step = .form
-                return
             case .inviteInvalid:
                 state.inviteCodeError = message
-                state.step = .form
+                state.step = .inviteCode
                 return
             case .termsRequired:
-                // The alert below says why; the form holds the checkbox.
-                state.step = .form
+                // The alert below says why; the name step holds the checkbox.
+                state.step = .name
             default:
                 break
             }

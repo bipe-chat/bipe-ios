@@ -39,6 +39,12 @@ public struct BipeAPIClient: Sendable {
         return response.challenge
     }
     
+    /// `POST /v1/waitlist`. No auth. Always 202 for a well-formed request, so it never tells whether the address is known (ADR 0025).
+    /// `lang` is "pt" or "en", the language of the one email Bipe sends.
+    public func joinWaitlist(email: String, lang: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "POST", path: ["v1", "waitlist"], body: WaitlistRequest(email: email, platform: "ios", lang: lang, source: "app"))
+    }
+    
     // MARK: - Terms (ADR 0113)
     
     /// `POST /v1/me/terms`. Records that the person ticked the box for this version. `version` must be ``BipeRegistries/legalVersion``.
@@ -313,6 +319,13 @@ public struct BipeAPIClient: Sendable {
     
     private struct SetHandleRequest: Encodable {
         let handle: String
+    }
+    
+    private struct WaitlistRequest: Encodable {
+        let email: String
+        let platform: String
+        let lang: String
+        let source: String
     }
     
     private struct TermsAcceptance: Encodable {

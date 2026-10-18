@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 @testable import ElementX
 import MatrixRustSDKMocks
 import Testing
@@ -54,6 +55,43 @@ final class AuthenticationStartScreenViewModelTests {
             #expect(client.urlForOauthOauthConfigurationPromptLoginHintDeviceIdAdditionalScopesCallsCount == 0)
             #expect(authenticationService.homeserver.value.loginMode == .unknown)
         }
+    }
+    
+    // MARK: - Bipe (bipe#415)
+    
+    // The start screen buttons come from bipe-shared registries/onboarding.json. Android asserts the same variants in
+    // OnBoardingPresenterTest, so a start screen that drifts from the registry fails on both.
+    
+    @Test
+    func bipeStartIsInviteFirst() async throws {
+        #expect(appSettings.usesBipeSignup)
+        await setupViewModel()
+        
+        #expect(context.viewState.bipeStart == .inviteOnly)
+        #expect(context.viewState.bipeStart?.primary == BipeOnboardingButton(titleKey: "bipe_onboarding_have_invite", target: .inviteCode))
+        #expect(context.viewState.bipeStart?.text == [BipeOnboardingButton(titleKey: "bipe_onboarding_have_account", target: .recovery)])
+        
+        let deferred = deferFulfillment(viewModel.actions) { $0 == .bipeSignup(startsWithInviteCode: true) }
+        context.send(viewAction: .bipe(.inviteCode))
+        try await deferred.fulfill()
+    }
+    
+    @Test
+    func bipeStartWithInviteLinkSkipsTheCode() async throws {
+        await setupViewModel(bipePendingInviteCode: BipeInviteCode("ABCD-EFGH-JKMN"))
+        
+        #expect(context.viewState.bipeStart == .invited)
+        #expect(context.viewState.bipeStart?.primary == BipeOnboardingButton(titleKey: "bipe_onboarding_join_with_invite", target: .name))
+        
+        let deferred = deferFulfillment(viewModel.actions) { $0 == .bipeSignup(startsWithInviteCode: false) }
+        context.send(viewAction: .bipe(.name))
+        try await deferred.fulfill()
+    }
+    
+    @Test
+    func bipeStartForOpenSignupGoesToTheName() {
+        #expect(BipeOnboardingStart.variant(invitePending: false, inviteRequired: false) == .open)
+        #expect(BipeOnboardingStart.open.primary == BipeOnboardingButton(titleKey: "bipe_signup_title", target: .name))
     }
     
     @Test
@@ -289,7 +327,8 @@ final class AuthenticationStartScreenViewModelTests {
                                 provisioningParameters: AccountProvisioningParameters? = nil,
                                 supportsOAuth: Bool = true,
                                 supportsPasswordLogin: Bool = true,
-                                availableSecrets: ClassicAppAccount.AvailableSecrets = .complete) async {
+                                availableSecrets: ClassicAppAccount.AvailableSecrets = .complete,
+                                bipePendingInviteCode: BipeInviteCode? = nil) async {
         // Manually create a configuration as the default account provider setting is immutable.
         client = ClientSDKMock(.init(oAuthLoginURL: supportsOAuth ? "https://account.company.com/authorize" : nil,
                                      supportsOAuthCreatePrompt: false,
@@ -324,7 +363,8 @@ final class AuthenticationStartScreenViewModelTests {
                                                        appSettings: appSettings,
                                                        mediaProvider: MediaProviderMock(.init()),
                                                        notificationCenter: notificationCenter,
-                                                       userIndicatorController: UserIndicatorControllerMock())
+                                                       userIndicatorController: UserIndicatorControllerMock(),
+                                                       bipePendingInviteCode: bipePendingInviteCode)
         
         // Add a fake window in order for the OAuth flow to continue
         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {

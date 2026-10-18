@@ -113,8 +113,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private var cancellables = Set<AnyCancellable>()
     
     private var oAuthPresenter: OAuthAuthenticationPresenter?
-    /// Bipe: the code from an invite link, handed to the next sign-up screen.
+    /// Bipe: the code from an invite link. The start screen shows who invited; sign-up skips the code step.
     private var pendingInviteCode: BipeInviteCode?
+    /// Bipe: false when the start screen's button goes straight to the name (bipe#415).
+    private var bipeSignupStartsWithInviteCode = true
     
     // periphery:ignore - retaining purpose
     private var bugReportFlowCoordinator: BugReportFlowCoordinator?
@@ -174,7 +176,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
             if stateMachine.state != .startScreen {
                 clearRoute(animated: animated)
             }
-            stateMachine.tryEvent(.bipeSignup)
+            // bipe#415: the start screen says who invited, with "Entrar com o convite" as its one filled button.
+            if stateMachine.state == .startScreen {
+                showStartScreen(fromState: .startScreen)
+            }
         case .bipeRecoveryLink(let token):
             guard appSettings.usesBipeSignup else { return }
             if stateMachine.state != .startScreen {
@@ -325,7 +330,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                                                              appMediator: appMediator,
                                                              appSettings: appSettings,
                                                              mediaProvider: mediaProvider,
-                                                             userIndicatorController: userIndicatorController)
+                                                             userIndicatorController: userIndicatorController,
+                                                             bipePendingInviteCode: pendingInviteCode,
+                                                             bipeAPIClient: appSettings.usesBipeSignup ? BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL) : nil)
         let coordinator = AuthenticationStartScreenCoordinator(parameters: parameters)
         
         coordinator.actions
@@ -347,6 +354,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                     } else {
                         stateMachine.tryEvent(.selectServer(.register))
                     }
+                case .bipeSignup(let startsWithInviteCode):
+                    bipeSignupStartsWithInviteCode = startsWithInviteCode
+                    stateMachine.tryEvent(.bipeSignup)
                     
                 case .loginDirectlyWithOAuth(let oAuthData, let window):
                     showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
@@ -501,9 +511,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     // MARK: - Bipe Sign-up
     
     private func showBipeSignupScreen() {
-        let inviteCode = pendingInviteCode
-        pendingInviteCode = nil
-        let parameters = BipeSignupScreenCoordinatorParameters(inviteCode: inviteCode,
+        // The code stays: back on the start screen, "Entrar com o convite" still uses it.
+        let parameters = BipeSignupScreenCoordinatorParameters(inviteCode: pendingInviteCode,
+                                                               startsWithInviteCode: bipeSignupStartsWithInviteCode,
                                                                apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
                                                                signIn: BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings),
                                                                appLockService: appLockService,

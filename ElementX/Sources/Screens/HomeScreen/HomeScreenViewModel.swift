@@ -82,6 +82,9 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         }
         
         updateBipeInviterGreeting()
+        if bipeScope == .chats {
+            Task { await loadBipeHandlePrompt() }
+        }
         NotificationCenter.default.publisher(for: .bipeInviterGreetingDidChange)
             .filter { [userID = userSession.clientProxy.userID] in $0.object as? String == userID }
             .receive(on: DispatchQueue.main)
@@ -288,6 +291,11 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             actionsSubject.send(.presentCreateGroupScreen)
         case .openBipeInviterChat:
             Task { await openBipeInviterChat() }
+        case .openBipeHandlePrompt:
+            dismissBipeHandlePrompt()
+            actionsSubject.send(.presentBipeHandleScreen)
+        case .dismissBipeHandlePrompt:
+            dismissBipeHandlePrompt()
         case .spaceFilters:
             if spaceFilterSubject.value != nil {
                 spaceFilterSubject.send(nil)
@@ -523,6 +531,21 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                   userSession.clientProxy.bipeInviterGreeting != nil else { return }
             state.bipeInviterHandle = handle
         }
+    }
+    
+    /// The card shows once the server says the account has no @. A failed read shows nothing.
+    private func loadBipeHandlePrompt() async {
+        let appSettings = userSettings.app
+        guard appSettings.usesBipeSignup, !appSettings.bipeHasDismissedHandlePrompt,
+              let accessToken = userSession.clientProxy.accessToken else { return }
+        let apiClient = BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL)
+        guard let myHandle = try? await apiClient.myHandle(accessToken: accessToken) else { return }
+        state.bipeNeedsHandle = myHandle.handle == nil
+    }
+    
+    private func dismissBipeHandlePrompt() {
+        userSettings.app.bipeHasDismissedHandlePrompt = true
+        state.bipeNeedsHandle = false
     }
     
     private static let bipeInviterChatLoadingID = "BipeInviterChatLoading"

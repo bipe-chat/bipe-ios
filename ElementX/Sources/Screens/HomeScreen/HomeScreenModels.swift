@@ -28,6 +28,8 @@ enum HomeScreenViewModelAction {
     case presentStartChatScreen
     /// Bipe: the Grupos empty state opens the create room screen directly (ADR 0053).
     case presentCreateGroupScreen
+    /// Bipe (bipe#200, bipe#415): the "Escolha seu @" card opens the username screen.
+    case presentBipeHandleScreen
     /// Bipe: the account menu on the avatar (ADR 0086, bipe#267).
     case bipeSwitchAccount(userID: String)
     case bipeAddAccount
@@ -46,6 +48,9 @@ enum HomeScreenViewAction {
     case createGroup
     /// Bipe ADR 0034: the card that opens the chat with the inviter.
     case openBipeInviterChat
+    /// Bipe (bipe#200, bipe#415): the "Escolha seu @" card and its "Agora não".
+    case openBipeHandlePrompt
+    case dismissBipeHandlePrompt
     case setupRecovery
     case confirmRecoveryKey
     case resetEncryption
@@ -164,6 +169,13 @@ struct HomeScreenViewState: BindableState {
         bipeInviterHandle != nil && bipeScope == .chats && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering
     }
     
+    /// Bipe (bipe#200, bipe#415): the account has no @ and the card was never dismissed.
+    var bipeNeedsHandle = false
+    
+    var shouldShowBipeHandlePrompt: Bool {
+        bipeNeedsHandle && bipeScope == .chats && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering
+    }
+    
     var selectedRoomID: String?
     
     var hideInviteAvatars = false
@@ -208,7 +220,7 @@ struct HomeScreenViewState: BindableState {
     }
     
     var shouldShowBanner: Bool {
-        securityBannerMode.isShown || shouldShowNewSoundBanner || shouldShowBipeInviterRow
+        securityBannerMode.isShown || shouldShowNewSoundBanner || shouldShowBipeInviterRow || shouldShowBipeHandlePrompt
     }
 }
 

@@ -19,6 +19,8 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
     private let userIndicatorController: UserIndicatorControllerProtocol
     
     private let canReportProblem: Bool
+    private let bipePendingInviteCode: BipeInviteCode?
+    private let bipeAPIClient: BipeAPIClient?
     
     private var actionsSubject: PassthroughSubject<AuthenticationStartScreenViewModelAction, Never> = .init()
     
@@ -33,12 +35,16 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
          appSettings: AppSettings,
          mediaProvider: MediaProviderProtocol?,
          notificationCenter: NotificationCenter = .default,
-         userIndicatorController: UserIndicatorControllerProtocol) {
+         userIndicatorController: UserIndicatorControllerProtocol,
+         bipePendingInviteCode: BipeInviteCode? = nil,
+         bipeAPIClient: BipeAPIClient? = nil) {
         self.authenticationService = authenticationService
         self.provisioningParameters = provisioningParameters
         self.appMediator = appMediator
         self.userIndicatorController = userIndicatorController
         canReportProblem = isBugReportServiceEnabled
+        self.bipePendingInviteCode = bipePendingInviteCode
+        self.bipeAPIClient = bipeAPIClient
         
         let isQRCodeScanningSupported = !ProcessInfo.processInfo.isiOSAppOnMac
         let isClassicAppAccountAllowed = if let classicAppAccount = authenticationService.classicAppAccount {
@@ -75,8 +81,14 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
         if appSettings.usesBipeSignup {
             // Bipe ADR 0057: no login screen. The button opens the ways back into an account.
             bipeViewState.bipeLoginButtonTitle = BipeStrings.recoveryTitle
+            // ADR 0072: an invite is required until the server says otherwise.
+            bipeViewState.bipeStart = .variant(invitePending: bipePendingInviteCode != nil, inviteRequired: true)
         }
         super.init(initialViewState: bipeViewState, mediaProvider: mediaProvider)
+        
+        if appSettings.usesBipeSignup {
+            Task { await loadBipeSignupMode() }
+        }
         
         notificationCenter.publisher(for: UIApplication.didBecomeActiveNotification)
             .sink { [weak self] _ in
@@ -103,6 +115,17 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
             Task { await login() }
         case .register:
             actionsSubject.send(.register)
+        case .bipe(let target):
+            switch target {
+            case .recovery:
+                actionsSubject.send(.login)
+            case .inviteCode:
+                actionsSubject.send(.bipeSignup(startsWithInviteCode: true))
+            case .name:
+                actionsSubject.send(.bipeSignup(startsWithInviteCode: false))
+            default:
+                MXLog.error("Unexpected start screen target: \(target)")
+            }
             
         case .continueWithClassic(let account):
             Task { await login(classicAppAccount: account) }
@@ -117,6 +140,18 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
     }
     
     // MARK: - Private
+    
+    /// The start screen variant follows the server's sign-up mode (ADR 0072) and shows who invited.
+    /// A failed read keeps the invite-first variant.
+    private func loadBipeSignupMode() async {
+        guard let bipeAPIClient else { return }
+        if let code = bipePendingInviteCode, let preview = try? await bipeAPIClient.invitePreview(code: code.value), preview.valid {
+            state.bipeInviterHandle = preview.inviterHandle
+        }
+        if let config = try? await bipeAPIClient.signupConfig() {
+            state.bipeStart = .variant(invitePending: bipePendingInviteCode != nil, inviteRequired: config.inviteRequired)
+        }
+    }
     
     private func login(classicAppAccount: ClassicAppAccount? = nil) async {
         if let classicAppAccount {

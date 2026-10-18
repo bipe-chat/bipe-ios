@@ -13,6 +13,9 @@ import SwiftUI
 struct BipeWelcomeView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     
+    /// "@ana te chamou para o Bipe." replaces the welcome line and the title when an invite is pending (bipe#415).
+    var invitedBy: String?
+    
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -22,13 +25,15 @@ struct BipeWelcomeView: View {
                     .padding(.bottom, 32)
             }
             
-            Text(BipeStrings.onboardingWelcome)
-                .font(.compound.bodyLGSemibold)
-                .foregroundStyle(.compound.textPrimary)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 8)
+            if invitedBy == nil {
+                Text(BipeStrings.onboardingWelcome)
+                    .font(.compound.bodyLGSemibold)
+                    .foregroundStyle(.compound.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom, 8)
+            }
             
-            Text(BipeStrings.onboardingTitle)
+            Text(invitedBy ?? BipeStrings.onboardingTitle)
                 .font(.compound.headingXLBold)
                 .foregroundStyle(.compound.textPrimary)
                 .multilineTextAlignment(.center)
