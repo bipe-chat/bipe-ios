@@ -21,6 +21,8 @@ public enum BipeRegistries {
         "suporte bipe": .bipe,
         "equipe bipe": .bipe,
         "seguranca bipe": .bipe,
+        "novidades do bipe": .bipe,
+        "novidades bipe": .bipe,
         "banco do brasil": .bank,
         "caixa": .bank,
         "caixa economica federal": .bank,
@@ -566,6 +568,14 @@ public enum BipeRegistries {
     public static let handleOwnerMinLength = 2
     public static let ownedHandles: Set<String> = [
         "mz",
+        "bipe",
+        "suporte",
+    ]
+
+    /// Full Matrix user IDs of official Bipe accounts. Match exactly; names and handles are not proof.
+    public static let officialAccountIDs: Set<String> = [
+        "@suporte:bipe.net.br",
+        "@bipe:bipe.net.br",
     ]
 
     /// Public profile rules (ADR 0041). Lengths count Unicode scalars. The server is the authority.
