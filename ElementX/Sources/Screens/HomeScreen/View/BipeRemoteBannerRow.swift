@@ -15,7 +15,7 @@ struct BipeRemoteBannerRow: View {
     let isUpdate: Bool
     let action: () -> Void
     let onDismiss: () -> Void
-
+    
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Button(action: action) {
@@ -25,7 +25,7 @@ struct BipeRemoteBannerRow: View {
                         .frame(width: 32, height: 32)
                         .background(.compound.iconAccentPrimary, in: Circle())
                         .accessibilityHidden(true)
-
+                    
                     VStack(alignment: .leading, spacing: 2) {
                         Text(banner.title)
                             .font(.compound.bodyLGSemibold)
@@ -47,7 +47,7 @@ struct BipeRemoteBannerRow: View {
             .buttonStyle(.plain)
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isButton)
-
+            
             if !isUpdate {
                 Button(action: onDismiss) {
                     CompoundIcon(\.close, size: .small, relativeTo: .compound.bodyLG)
@@ -68,7 +68,7 @@ struct BipeRemoteBannerRow_Previews: PreviewProvider {
             BipeRemoteBannerRow(banner: notice, isUpdate: true) { } onDismiss: { }
         }
     }
-
+    
     private static var notice: BipeRemoteBanner {
         // swiftlint:disable:next force_try
         try! JSONDecoder().decode(BipeRemoteBanner.self, from: Data("""

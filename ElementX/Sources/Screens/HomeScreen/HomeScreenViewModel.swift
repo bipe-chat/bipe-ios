@@ -559,7 +559,9 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     /// ADR 0117: on launch and on foreground. A failed read keeps the banner that is on screen.
     private func loadBipeRemoteBanner() async {
         guard let banner = try? await BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL).remoteBanner() else {
-            if state.bipeRemoteBanner != nil { updateBipeRemoteBannerState() }
+            if state.bipeRemoteBanner != nil {
+                updateBipeRemoteBannerState()
+            }
             return
         }
         state.bipeRemoteBanner = banner

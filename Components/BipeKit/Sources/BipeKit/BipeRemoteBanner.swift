@@ -13,7 +13,7 @@ public struct BipeRemoteBanner: Decodable, Sendable, Equatable {
         public let ios: URL
         public let android: URL
     }
-
+    
     public enum State: Equatable, Sendable {
         case hidden
         /// Opens `link`. The person can dismiss it by `id`.
@@ -21,7 +21,7 @@ public struct BipeRemoteBanner: Decodable, Sendable, Equatable {
         /// The app is below `minAppVersion`: opens the update link and cannot be dismissed.
         case update(URL)
     }
-
+    
     public let id: String
     public let title: String
     public let text: String
@@ -29,7 +29,7 @@ public struct BipeRemoteBanner: Decodable, Sendable, Equatable {
     public let minAppVersion: String?
     public let updateLinks: UpdateLinks?
     public let expiresAt: String
-
+    
     public func state(appVersion: String, now: Date = .now) -> State {
         guard let expiry = Self.parseDate(expiresAt), now < expiry else { return .hidden }
         if let minAppVersion, Self.compareVersions(appVersion, minAppVersion) < 0, let updateLinks {
@@ -37,7 +37,7 @@ public struct BipeRemoteBanner: Decodable, Sendable, Equatable {
         }
         return .notice
     }
-
+    
     /// Compares dotted versions part by part as numbers. Each part counts its leading digits only ("2-dev" is 2).
     public static func compareVersions(_ a: String, _ b: String) -> Int {
         let pa = a.split(separator: ".", omittingEmptySubsequences: false)
@@ -45,15 +45,17 @@ public struct BipeRemoteBanner: Decodable, Sendable, Equatable {
         for index in 0..<max(pa.count, pb.count) {
             let x = index < pa.count ? leadingNumber(pa[index]) : 0
             let y = index < pb.count ? leadingNumber(pb[index]) : 0
-            if x != y { return x < y ? -1 : 1 }
+            if x != y {
+                return x < y ? -1 : 1
+            }
         }
         return 0
     }
-
+    
     private static func leadingNumber(_ part: Substring) -> Int {
         Int(part.prefix { $0.isASCII && $0.isNumber }) ?? 0
     }
-
+    
     private static func parseDate(_ value: String) -> Date? {
         let withFraction = ISO8601DateFormatter()
         withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
