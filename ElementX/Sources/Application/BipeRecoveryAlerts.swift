@@ -28,7 +28,11 @@ final class BipeRecoveryAlerts {
     /// IDs shown in this run, so a foreground event during an open alert does not stack a second one.
     private var shownThisRun: Set<String> = []
     
-    private static let acknowledgeTokenRecoveriesKey = "bipe.recoveries.acknowledgeCompletedTokens"
+    /// The one flag of all accounts before bipe#265. Read once by the next check, then removed.
+    private static let legacyAcknowledgeTokenRecoveriesKey = "bipe.recoveries.acknowledgeCompletedTokens"
+    private var acknowledgeTokenRecoveriesKey: String {
+        Self.acknowledgeTokenRecoveriesKey(for: clientProxy.userID)
+    }
     
     init(apiClient: BipeAPIClient,
          clientProxy: ClientProxyProtocol,
@@ -44,9 +48,13 @@ final class BipeRecoveryAlerts {
         self.onTermsOutdated = onTermsOutdated
     }
     
-    /// This device redeemed a token. Its own completed token recovery must not alert it.
-    static func acknowledgeCompletedTokenRecoveriesOnNextCheck(defaults: UserDefaults = .standard) {
-        defaults.set(true, forKey: acknowledgeTokenRecoveriesKey)
+    /// This device redeemed a token of `userID`. Its own completed token recovery must not alert it.
+    static func acknowledgeCompletedTokenRecoveriesOnNextCheck(for userID: String, defaults: UserDefaults = .standard) {
+        defaults.set(true, forKey: acknowledgeTokenRecoveriesKey(for: userID))
+    }
+    
+    private static func acknowledgeTokenRecoveriesKey(for userID: String) -> String {
+        "bipe.recoveries.acknowledgeCompletedTokens.\(userID)"
     }
     
     func check() async {
@@ -65,14 +73,19 @@ final class BipeRecoveryAlerts {
             return
         }
         failedReads = 0
+        BipeAccountCap.onServerValue(status.maxAccounts)
+        if let accountType = status.accountType {
+            BipeAccountLabels.rememberCompany(accountType == .company, for: clientProxy.userID)
+        }
         
         var acknowledged = acknowledgedIDs()
         let completedTokens = status.recoveries.filter { $0.state == .completed && $0.method == .token }.map(\.id)
         // First check of this account on this device, or right after this device's own token recovery.
-        if acknowledged == nil || defaults.bool(forKey: Self.acknowledgeTokenRecoveriesKey) {
+        if acknowledged == nil || defaults.bool(forKey: acknowledgeTokenRecoveriesKey) || defaults.bool(forKey: Self.legacyAcknowledgeTokenRecoveriesKey) {
             acknowledged = (acknowledged ?? []).union(completedTokens)
             setAcknowledgedIDs(acknowledged ?? [])
-            defaults.removeObject(forKey: Self.acknowledgeTokenRecoveriesKey)
+            defaults.removeObject(forKey: acknowledgeTokenRecoveriesKey)
+            defaults.removeObject(forKey: Self.legacyAcknowledgeTokenRecoveriesKey)
         }
         
         // No version (an account from before ADR 0113) counts as outdated. The screen covers the app and an alert

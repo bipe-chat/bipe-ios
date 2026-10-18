@@ -19,6 +19,11 @@ enum UserSessionFlowCoordinatorAction {
     case clearCache
     /// Logout and disable App Lock without any confirmation. The user forgot their PIN.
     case forceLogout
+    /// Bipe: show another account on this phone, or add one (ADR 0086, bipe#267).
+    case bipeSwitchAccount(userID: String)
+    case bipeAddAccount
+    /// Bipe: "Criar conta da empresa" (ADR 0087, bipe#269).
+    case bipeCreateCompanyAccount
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
@@ -333,6 +338,10 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                     presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
                 case .hideCallScreenOverlay:
                     hideCallScreenOverlay()
+                case .bipeSwitchAccount(let userID):
+                    actionsSubject.send(.bipeSwitchAccount(userID: userID))
+                case .bipeAddAccount:
+                    actionsSubject.send(.bipeAddAccount)
                 case .logout:
                     Task { await self.runLogoutFlow() }
                 }
@@ -517,6 +526,9 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             handleAppRoute(.userProfile(userID: userID), animated: true)
         case .openSelfChat:
             Task { await openSelfChat() }
+        case .bipeCreateCompanyAccount:
+            navigationTabCoordinator.setSheetCoordinator(nil) // Settings in a sheet on iPad and Mac.
+            actionsSubject.send(.bipeCreateCompanyAccount)
         }
     }
     

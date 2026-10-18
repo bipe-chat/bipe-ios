@@ -35,7 +35,8 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
          apiClient: BipeAPIClient,
          signIn: BipeAccountSignIn,
          appLockService: AppLockServiceProtocol?,
-         userIndicatorController: UserIndicatorControllerProtocol) {
+         userIndicatorController: UserIndicatorControllerProtocol,
+         accountType: BipeAccountType = .personal) {
         self.apiClient = apiClient
         self.signIn = signIn
         self.appLockService = appLockService
@@ -46,6 +47,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
         var initialState = BipeSignupScreenViewState(termsURL: BipeLegalLinks.termsURL(site: site),
                                                      privacyURL: BipeLegalLinks.privacyURL(site: site))
         initialState.bindings.inviteCode = inviteCode?.value ?? ""
+        initialState.isCompany = accountType == .company
         super.init(initialViewState: initialState)
         
         if let inviteCode {
@@ -177,9 +179,11 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
                                          displayName: displayName.isEmpty ? nil : displayName,
                                          attestation: attestation,
                                          signupKey: pending.key,
-                                         termsVersion: state.bindings.isTermsAccepted ? BipeRegistries.legalVersion : nil)
+                                         termsVersion: state.bindings.isTermsAccepted ? BipeRegistries.legalVersion : nil,
+                                         accountType: state.isCompany ? .company : nil)
             }
             MXLog.info("Bipe sign-up created \(response.userId)")
+            BipeAccountLabels.rememberCompany(state.isCompany, for: response.userId)
             guard let credentials = response.credentials else {
                 MXLog.error("Bipe sign-up returned no device-first credentials")
                 state.bindings.alertInfo = AlertInfo(id: .error)

@@ -119,8 +119,8 @@ struct BipeSignupScreen: View {
             VStack(alignment: .leading, spacing: 20) {
                 TextField(text: $context.displayName) { placeholder("") }
                     .focused($focusedField, equals: .displayName)
-                    .textFieldStyle(.compound(labelText: BipeStrings.signupDisplayName,
-                                              footerText: BipeStrings.signupDisplayNameFooter))
+                    .textFieldStyle(.compound(labelText: context.viewState.isCompany ? BipeStrings.companyName : BipeStrings.signupDisplayName,
+                                              footerText: context.viewState.isCompany ? BipeStrings.companyCreateFooter : BipeStrings.signupDisplayNameFooter))
                     .textContentType(.name)
                     .submitLabel(.next)
                     .onSubmit { focusedField = .handle }

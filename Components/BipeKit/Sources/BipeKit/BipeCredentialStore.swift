@@ -13,6 +13,8 @@ import Security
 /// - The recovery token syncs through iCloud Keychain (`kSecAttrSynchronizable`). On a new phone the token and the PIN
 ///   get a new password from the API (`POST /v1/recovery/token`). The token alone gives no access.
 /// - A pending email recovery (its claim secret) stays on this device.
+/// - Every account has its own password and token item, keyed by Matrix ID in `kSecAttrAccount` (ADR 0086). A second
+///   account never replaces the first. Items from before bipe#265 already carry the Matrix ID there, so nothing moves.
 public nonisolated struct BipeCredentialStore: Sendable {
     /// A credential and the account it belongs to.
     public struct Item: Sendable, Equatable, CustomStringConvertible {
@@ -53,37 +55,55 @@ public nonisolated struct BipeCredentialStore: Sendable {
     
     // MARK: - Credentials
     
-    /// Stores the password on this device and syncs the token. Replaces what was stored before.
+    /// Stores the password on this device and syncs the token. Replaces what was stored before for this account only.
     /// `false` when the password cannot be read back: keep any pending sign-up, it is the only other copy.
     @discardableResult
     public func save(_ credentials: BipeCredentials) -> Bool {
         write(.password, account: credentials.userId, value: Data(credentials.password.utf8), synchronizable: false)
         saveRecoveryToken(credentials.recoveryToken, for: credentials.userId)
-        return password() == Item(userID: credentials.userId, secret: credentials.password)
+        return password(for: credentials.userId) == Item(userID: credentials.userId, secret: credentials.password)
     }
     
     public func saveRecoveryToken(_ token: String, for userID: String) {
         write(.recoveryToken, account: userID, value: Data(token.utf8), synchronizable: true)
     }
     
-    /// The password stored on this device, if any.
+    /// The newest password stored on this device, if any.
     public func password() -> Item? {
-        read(.password).flatMap { item in String(data: item.data, encoding: .utf8).map { Item(userID: item.account, secret: $0) } }
+        read(.password).flatMap(Self.item)
     }
     
-    /// The recovery token, from this device or synced from another device of the same Apple account.
+    public func password(for userID: String) -> Item? {
+        read(.password, account: userID).flatMap(Self.item)
+    }
+    
+    /// The newest recovery token, from this device or synced from another device of the same Apple account.
     public func recoveryToken() -> Item? {
-        read(.recoveryToken).flatMap { item in String(data: item.data, encoding: .utf8).map { Item(userID: item.account, secret: $0) } }
+        read(.recoveryToken).flatMap(Self.item)
     }
     
-    /// After an explicit sign-out: the next sign-in on this device needs the token and the PIN.
-    public func deletePassword() {
+    /// The newest recovery token of an account not in `signedIn`: adding an account never recovers one already on the phone.
+    public func recoveryToken(excluding signedIn: Set<String>) -> Item? {
+        readAll(.recoveryToken).filter { !signedIn.contains($0.account) }.first.flatMap(Self.item)
+    }
+    
+    public func recoveryToken(for userID: String) -> Item? {
+        read(.recoveryToken, account: userID).flatMap(Self.item)
+    }
+    
+    /// After an explicit sign-out: the next sign-in of this account on this device needs the token and the PIN.
+    public func deletePassword(for userID: String) {
+        delete(.password, account: userID)
+    }
+    
+    /// When the account that signs out is not known: no account on this device signs in silently again.
+    public func deleteAllPasswords() {
         delete(.password)
     }
     
     /// After the API rejected the token (`recovery_invalid`).
-    public func deleteRecoveryToken() {
-        delete(.recoveryToken)
+    public func deleteRecoveryToken(for userID: String) {
+        delete(.recoveryToken, account: userID)
     }
     
     // MARK: - Pending sign-up
@@ -155,22 +175,28 @@ public nonisolated struct BipeCredentialStore: Sendable {
         return decoder
     }()
     
-    private func baseQuery(_ service: Service) -> [String: Any] {
+    private static func item(_ stored: (account: String, data: Data)) -> Item? {
+        String(data: stored.data, encoding: .utf8).map { Item(userID: stored.account, secret: $0) }
+    }
+    
+    private func baseQuery(_ service: Service, account: String? = nil) -> [String: Any] {
         var query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrService as String: service.rawValue,
                                     // Finds synced and local items alike.
                                     kSecAttrSynchronizable as String: kSecAttrSynchronizableAny]
+        if let account {
+            query[kSecAttrAccount as String] = account
+        }
         if let accessGroup {
             query[kSecAttrAccessGroup as String] = accessGroup
         }
         return query
     }
     
-    /// One item per service: a new account replaces the old one.
+    /// One item per service and account: a new value replaces only the same account's item.
     private func write(_ service: Service, account: String, value: Data, synchronizable: Bool) {
-        delete(service)
-        var item = baseQuery(service)
-        item[kSecAttrAccount as String] = account
+        delete(service, account: account)
+        var item = baseQuery(service, account: account)
         item[kSecValueData as String] = value
         item[kSecAttrSynchronizable as String] = synchronizable ? kCFBooleanTrue : kCFBooleanFalse
         // A synchronizable item cannot use a ThisDeviceOnly class.
@@ -181,20 +207,44 @@ public nonisolated struct BipeCredentialStore: Sendable {
         }
     }
     
-    private func read(_ service: Service) -> (account: String, data: Data)? {
+    /// Every item of the service, newest first.
+    private func readAll(_ service: Service) -> [(account: String, data: Data)] {
         var query = baseQuery(service)
         query[kSecReturnData as String] = true
         query[kSecReturnAttributes as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        query[kSecMatchLimit as String] = kSecMatchLimitAll
         var result: AnyObject?
         guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
-              let attributes = result as? [String: Any],
-              let account = attributes[kSecAttrAccount as String] as? String,
-              let data = attributes[kSecValueData as String] as? Data else { return nil }
+              let items = result as? [[String: Any]] else { return [] }
+        return items
+            .sorted { ($0[kSecAttrModificationDate as String] as? Date ?? .distantPast) > ($1[kSecAttrModificationDate as String] as? Date ?? .distantPast) }
+            .compactMap { item in
+                guard let account = item[kSecAttrAccount as String] as? String,
+                      let data = item[kSecValueData as String] as? Data else { return nil }
+                return (account, data)
+            }
+    }
+    
+    /// The item of `account`, or the newest item of the service when `account` is `nil`.
+    private func read(_ service: Service, account: String? = nil) -> (account: String, data: Data)? {
+        var query = baseQuery(service, account: account)
+        query[kSecReturnData as String] = true
+        query[kSecReturnAttributes as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitAll
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let items = result as? [[String: Any]] else { return nil }
+        let newest = items.max { lhs, rhs in
+            (lhs[kSecAttrModificationDate as String] as? Date ?? .distantPast) < (rhs[kSecAttrModificationDate as String] as? Date ?? .distantPast)
+        }
+        guard let newest,
+              let account = newest[kSecAttrAccount as String] as? String,
+              let data = newest[kSecValueData as String] as? Data else { return nil }
         return (account, data)
     }
     
-    private func delete(_ service: Service) {
-        SecItemDelete(baseQuery(service) as CFDictionary)
+    /// Deletes the item of `account`, or every item of the service when `account` is `nil`.
+    private func delete(_ service: Service, account: String? = nil) {
+        SecItemDelete(baseQuery(service, account: account) as CFDictionary)
     }
 }

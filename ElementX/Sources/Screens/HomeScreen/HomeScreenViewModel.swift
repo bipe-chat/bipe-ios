@@ -93,6 +93,14 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             .weakAssign(to: \.state.userProfile, on: self)
             .store(in: &cancellables)
         
+        // Bipe: the account menu on the avatar (ADR 0086, bipe#267). The session UI is rebuilt when accounts change.
+        userSession.clientProxy.userProfilePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] profile in
+                self?.updateBipeAccounts(profile: profile)
+            }
+            .store(in: &cancellables)
+        
         userSession.sessionSecurityStatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] securityState in
@@ -257,8 +265,21 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         case .multiAccountAnnouncementAppeared:
             MXLog.info("The multi-account announcement has been seen.")
             userSettings.app.hasSeenMultiAccountAnnouncement = true
-        case .dismissMultiAccountAnnouncement, .addAccount: // There is no add account flow to start yet.
+        case .dismissMultiAccountAnnouncement:
             state.bindings.isPresentingMultiAccountAnnouncement = false
+        case .addAccount, .bipeAddAccount:
+            state.bindings.isPresentingMultiAccountAnnouncement = false
+            guard state.bipeCanAddAccount else { return }
+            actionsSubject.send(.bipeAddAccount)
+        case .bipeSwitchToNextAccount:
+            guard let next = state.bipeAccounts.first(where: { !$0.isCurrent }) else {
+                actionsSubject.send(.presentSettingsScreen)
+                return
+            }
+            actionsSubject.send(.bipeSwitchAccount(userID: next.userID))
+        case .bipeSwitchAccount(let userID):
+            guard userID != userSession.clientProxy.userID else { return }
+            actionsSubject.send(.bipeSwitchAccount(userID: userID))
         case .updateVisibleItemRange(let range):
             roomSummaryProvider?.updateVisibleRange(range)
         case .startChat:
@@ -626,6 +647,22 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                                                               title: isDirect ? BipeStrings.dmLeftByYou : L10n.commonCurrentUserLeftRoom,
                                                               icon: \.check))
         actionsSubject.send(.roomLeft(roomIdentifier: roomID))
+    }
+    
+    // MARK: Bipe accounts
+    
+    /// Bipe: the current account first, then the other accounts signed in on the phone. The live sessions publisher lists
+    /// only accounts whose session is open, so the keychain gives the list.
+    private func updateBipeAccounts(profile: UserProfile) {
+        let currentUserID = userSession.clientProxy.userID
+        BipeAccountLabels.remember(displayName: profile.displayName, for: currentUserID)
+        let current = BipeAccountMenuItem(userID: currentUserID, label: profile.displayName ?? currentUserID, isCurrent: true,
+                                          isCompany: BipeAccountLabels.isCompany(currentUserID))
+        let others = BipeSignedInAccounts.userIDs.filter { $0 != currentUserID }.sorted().map {
+            BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false, isCompany: BipeAccountLabels.isCompany($0))
+        }
+        state.bipeAccounts = [current] + others
+        state.bipeMaxAccounts = BipeAccountCap.maxPersonalAccounts()
     }
     
     // MARK: Multi-account announcement

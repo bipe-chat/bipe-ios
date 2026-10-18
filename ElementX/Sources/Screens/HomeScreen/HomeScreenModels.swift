@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
 import UIKit
@@ -27,6 +28,9 @@ enum HomeScreenViewModelAction {
     case presentStartChatScreen
     /// Bipe: the Grupos empty state opens the create room screen directly (ADR 0053).
     case presentCreateGroupScreen
+    /// Bipe: the account menu on the avatar (ADR 0086, bipe#267).
+    case bipeSwitchAccount(userID: String)
+    case bipeAddAccount
     case logout
 }
 
@@ -51,6 +55,10 @@ enum HomeScreenViewAction {
     case multiAccountAnnouncementAppeared
     case dismissMultiAccountAnnouncement
     case addAccount
+    /// Bipe: a tap on the avatar with two or more accounts, and the rows of the account menu (ADR 0086, bipe#267).
+    case bipeSwitchToNextAccount
+    case bipeSwitchAccount(userID: String)
+    case bipeAddAccount
     case updateVisibleItemRange(Range<Int>)
     case spaceFilters
     case markRoomAsUnread(roomIdentifier: String)
@@ -103,8 +111,33 @@ enum HomeScreenSecurityBannerMode: Equatable {
     }
 }
 
+/// Bipe: one row of the account menu on the avatar (ADR 0086, bipe#267).
+struct BipeAccountMenuItem: Identifiable, Equatable {
+    let userID: String
+    let label: String
+    let isCurrent: Bool
+    /// ADR 0087: does not count in the cap.
+    let isCompany: Bool
+    
+    var id: String {
+        userID
+    }
+}
+
 struct HomeScreenViewState: BindableState {
     var userProfile: UserProfile
+    
+    /// Bipe: every account on the phone, the current one first (ADR 0086, bipe#267).
+    var bipeAccounts: [BipeAccountMenuItem] = []
+    var bipeMaxAccounts = BipeRegistries.maxPersonalAccounts
+    var bipeCanAddAccount: Bool {
+        bipeAccounts.filter { !$0.isCompany }.count < bipeMaxAccounts
+    }
+    
+    /// ADR 0087: the company's name in the top bar when the account on screen is a company account.
+    var bipeCompanyName: String? {
+        bipeAccounts.first { $0.isCurrent && $0.isCompany }?.label
+    }
     
     var securityBannerMode = HomeScreenSecurityBannerMode.none
     var shouldShowNewSoundBanner = false

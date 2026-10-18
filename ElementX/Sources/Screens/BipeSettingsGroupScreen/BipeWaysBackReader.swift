@@ -19,7 +19,7 @@ enum BipeWaysBackReader {
                                     // ADR 0096: no linked-account screen on iOS yet (bipe#307).
                                     linkedAccount: false,
                                     recoveryKey: clientProxy.secureBackupController.recoveryState.value == .enabled,
-                                    syncedToken: BipeCredentialStore.bipeApp.recoveryToken()?.userID == clientProxy.userID)
+                                    syncedToken: BipeCredentialStore.bipeApp.recoveryToken(for: clientProxy.userID) != nil)
         // Without the account state the email is unknown: no count goes to the tab.
         if status != nil {
             counted.send((clientProxy.userID, waysBack))

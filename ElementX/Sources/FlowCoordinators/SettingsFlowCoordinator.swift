@@ -20,6 +20,8 @@ enum SettingsFlowCoordinatorAction {
     case openUserProfile(userID: String)
     /// Bipe: open the self-chat (ADR 0053).
     case openSelfChat
+    /// Bipe: "Criar conta da empresa" (ADR 0087, bipe#269).
+    case bipeCreateCompanyAccount
 }
 
 class SettingsFlowCoordinator: FlowCoordinatorProtocol {
@@ -215,6 +217,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             startLinkNewDeviceFlow()
         case .accountSignOut:
             actionsSubject.send(.runLogoutFlow)
+        case .accountCreateCompany:
+            actionsSubject.send(.bipeCreateCompanyAccount)
         case .chatsMediaQuality:
             presentMediaUploadQualitySettings()
         case .chatsLiveLocation:

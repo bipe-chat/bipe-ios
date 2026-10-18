@@ -687,6 +687,8 @@ public enum BipeRegistries {
     public static let guardianApprovalsMax = 2
     public static let recoveryLinkMinutes = 60
     public static let emailVerifyLinkHours = 24
+    /// Personal accounts on one phone (ADR 0086). Fallback for max_accounts in GET /v1/me/account.
+    public static let maxPersonalAccounts = 2
 
     /// Terms and privacy accepted at sign-up (ADR 0113; registries/legal.json). Paths are on the public site.
     public static let legalVersion = "2026-10-16"
@@ -694,4 +696,9 @@ public enum BipeRegistries {
     public static let privacyPath = "/privacidade/"
     public static let enTermsPath = "/en/terms/"
     public static let enPrivacyPath = "/en/privacy/"
+
+    /// Badge signing keys a release build trusts (ADR 0123; registries/badge-keys.json): kid to raw Ed25519 public key, base64url.
+    public static let badgeKeys: [String: String] = [
+        "prod-2026-10": "9j3_slBroZbxa3B6Tdgcm_U-O_LIdrNFXzDgY8oLwxE",
+    ]
 }

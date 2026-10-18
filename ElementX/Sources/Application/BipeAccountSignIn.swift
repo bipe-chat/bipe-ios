@@ -59,7 +59,7 @@ struct BipeAccountSignIn {
         let result = await signIn(userID: stored.userID, password: stored.secret)
         if case .failure(.invalidCredentials) = result {
             // A token recovery on another device set a new password. The token path is next.
-            credentialStore.deletePassword()
+            credentialStore.deletePassword(for: stored.userID)
         }
         return result
     }
@@ -79,9 +79,26 @@ extension BipeCredentialStore {
     }
 }
 
+/// Bipe: the accounts signed in on this phone, read from the session keychain (ADR 0086). Known before any session is live.
+enum BipeSignedInAccounts {
+    static var userIDs: [String] {
+        KeychainController(service: .sessions, accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier).restorationTokens().map(\.userID)
+    }
+}
+
+/// Bipe: the device PIN locks the app and belongs to the phone, not to an account (ADR 0086).
+enum BipeDevicePIN {
+    /// The device PIN follows the account PIN while the phone holds one account, so a one-account user keeps one PIN.
+    static var followsAccountPIN: Bool {
+        BipeSignedInAccounts.userIDs.count <= 1
+    }
+}
+
 extension AppLockServiceProtocol {
-    /// Bipe: the account PIN also locks the app (ADR 0057). Biometric unlock stays on when the device supports it.
+    /// Bipe: an account PIN the user just typed or set becomes the device PIN (ADR 0057) while it follows the account PIN,
+    /// or when no app lock is set yet (ADR 0086). Biometric unlock stays on when the device supports it.
     func bipeUseAccountPIN(_ pin: String) {
+        guard BipeDevicePIN.followsAccountPIN || !isEnabled else { return }
         guard case .success = setupPINCode(pin) else {
             MXLog.error("Bipe: could not use the account PIN for the app lock")
             return
