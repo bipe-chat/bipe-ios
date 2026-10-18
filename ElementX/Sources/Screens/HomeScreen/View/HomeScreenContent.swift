@@ -119,7 +119,11 @@ struct HomeScreenContent: View {
                     RoomListFiltersView(state: $context.filtersState)
                 }
                 
-                if context.viewState.shouldShowBipeInviterRow, let inviterHandle = context.viewState.bipeInviterHandle {
+                // Bipe (ADR 0117, bipe#385): the banner slot shows account tasks only, the first one in this order:
+                // recovery key, inviter row (ADR 0111). A task leaves when it is done. No news cards here.
+                if case let .show(state) = context.viewState.securityBannerMode {
+                    HomeScreenRecoveryKeyConfirmationBanner(state: state, context: context)
+                } else if context.viewState.shouldShowBipeInviterRow, let inviterHandle = context.viewState.bipeInviterHandle {
                     BipeInviterRow(inviterHandle: inviterHandle) {
                         context.send(viewAction: .openBipeInviterChat)
                     }
@@ -129,12 +133,6 @@ struct HomeScreenContent: View {
                     BipeRequestsRow(count: context.viewState.bipeRequestCount) {
                         context.filtersState.activateFilter(.invites)
                     }
-                }
-                
-                if case let .show(state) = context.viewState.securityBannerMode {
-                    HomeScreenRecoveryKeyConfirmationBanner(state: state, context: context)
-                } else if context.viewState.shouldShowNewSoundBanner {
-                    HomeScreenNewSoundBanner { context.send(viewAction: .dismissNewSoundBanner) }
                 }
             }
             .background(Color.compound.bgCanvasDefault)
