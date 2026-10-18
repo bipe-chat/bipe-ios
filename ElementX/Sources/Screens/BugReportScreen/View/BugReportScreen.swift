@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import PhotosUI
 import SwiftUI
@@ -56,7 +57,7 @@ struct BugReportScreen: View {
                 .lineLimit(4, reservesSpace: true)
                 .accessibilityIdentifier(A11yIdentifiers.bugReportScreen.report)
         } footer: {
-            Text(L10n.screenBugReportEditorDescription)
+            Text(BipeStrings.helpProblemDescription)
                 .compoundListSectionFooter()
         }
     }

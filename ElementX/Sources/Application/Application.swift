@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 @main
@@ -65,7 +66,7 @@ struct Application: App {
         .handlesExternalEvents(matching: ["*"])
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button(L10n.actionStartChat) { }
+                Button(BipeStrings.actionStartChat) { }
                     .disabled(true)
             }
             

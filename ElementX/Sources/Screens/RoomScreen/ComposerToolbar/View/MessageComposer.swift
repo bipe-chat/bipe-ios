@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 import WysiwygComposer
@@ -293,12 +294,12 @@ struct MessageComposer_Previews: PreviewProvider, TestablePreview {
     
     static func messageComposer(_ content: NSAttributedString = .init(string: ""),
                                 mode: ComposerMode = .default,
-                                placeholder: String = L10n.richTextEditorComposerPlaceholder) -> MessageComposer {
+                                placeholder: String = BipeStrings.chatsMessagePlaceholder) -> MessageComposer {
         let viewModel = WysiwygComposerViewModel(minHeight: 22,
                                                  maxExpandedHeight: 250)
         viewModel.setMarkdownContent(content.string)
         
-        let composerView = WysiwygComposerView(placeholder: L10n.richTextEditorComposerPlaceholder,
+        let composerView = WysiwygComposerView(placeholder: BipeStrings.chatsMessagePlaceholder,
                                                viewModel: viewModel,
                                                itemProviderHelper: nil,
                                                keyCommands: nil,

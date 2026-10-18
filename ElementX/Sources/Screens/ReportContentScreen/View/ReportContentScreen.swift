@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -28,11 +29,11 @@ struct ReportContentScreen: View {
     
     private var reasonSection: some View {
         Section {
-            ListRow(label: .plain(title: L10n.screenReportContentHint),
+            ListRow(label: .plain(title: BipeStrings.reportMessageReason),
                     kind: .textField(text: $context.reasonText, axis: .vertical))
                 .lineLimit(4, reservesSpace: true)
         } footer: {
-            Text(L10n.screenReportContentExplanation)
+            Text(BipeStrings.reportMessageBody)
                 .compoundListSectionFooter()
         }
     }

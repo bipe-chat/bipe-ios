@@ -158,8 +158,8 @@ struct RoomDetailsScreenViewStateBindings {
         
         var title: String {
             switch action {
-            case .ignore: return L10n.screenDmDetailsBlockUser
-            case .unignore: return L10n.screenDmDetailsUnblockUser
+            case .ignore: return BipeStrings.actionBlockPerson
+            case .unignore: return BipeStrings.actionUnblockPerson
             }
         }
         

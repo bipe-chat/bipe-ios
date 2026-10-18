@@ -254,7 +254,7 @@ struct ComposerToolbar: View {
     
     private var composerPlaceholder: String {
         // Bipe ADR 0087: "Respondendo como <empresa>" in a company account.
-        context.viewState.bipeReplyingAs.map(BipeStrings.companyReplyingAs) ?? L10n.richTextEditorComposerPlaceholder
+        context.viewState.bipeReplyingAs.map(BipeStrings.companyReplyingAs) ?? BipeStrings.chatsMessagePlaceholder
     }
     
     private var composerView: WysiwygComposerView {

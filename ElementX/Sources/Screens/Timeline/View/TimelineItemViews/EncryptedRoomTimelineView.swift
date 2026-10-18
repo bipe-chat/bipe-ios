@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -97,7 +98,7 @@ struct EncryptedRoomTimelineView_Previews: PreviewProvider, TestablePreview {
     
     private static func expectedItemWith(timestamp: Date, isOutgoing: Bool, senderId: String) -> EncryptedRoomTimelineItem {
         EncryptedRoomTimelineItem(id: .randomEvent,
-                                  body: L10n.commonUnableToDecryptNoAccess,
+                                  body: BipeStrings.chatMessageNoAccess,
                                   encryptionType: .megolmV1AesSha2(sessionID: "foo", cause: .sentBeforeWeJoined),
                                   timestamp: timestamp,
                                   isOutgoing: isOutgoing,
