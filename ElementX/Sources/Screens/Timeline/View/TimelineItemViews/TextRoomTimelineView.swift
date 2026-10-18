@@ -47,7 +47,7 @@ struct TextRoomTimelineView: View, TextBasedRoomTimelineViewProtocol {
                     .frame(maxWidth: TimelineMediaFrame.maxLinkPreviewWidth)
                     .padding(.bottom, 16)
                 }
-
+                
                 if let scamWarning = timelineItem.content.bipeScamWarning {
                     BipeScamWarningView(kind: scamWarning)
                         .frame(maxWidth: TimelineMediaFrame.maxLinkPreviewWidth)

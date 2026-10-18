@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
 import GameKit
@@ -89,6 +90,17 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
                 self?.process(viewAction: .sendMessage)
             }
         ]
+        
+        if BipeAccountLabels.isCompany(roomProxy.ownUserID) {
+            state.bipeReplyingAs = BipeAccountLabels.label(for: roomProxy.ownUserID)
+        }
+        
+        roomProxy.infoPublisher
+            .map(\.isDM)
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates()
+            .weakAssign(to: \.state.isDM, on: self)
+            .store(in: &cancellables)
         
         roomProxy.infoPublisher
             .map(\.isEncrypted)

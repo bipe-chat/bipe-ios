@@ -4,26 +4,26 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct BipeSignupScreen: View {
     @Bindable var context: BipeSignupScreenViewModel.Context
-
+    
     private enum Field: Hashable {
         case displayName, handle, email, pin, pinConfirmation, inviteCode
     }
-
+    
     @FocusState private var focusedField: Field?
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
                 header
                     .padding(.top, UIConstants.titleTopPaddingToNavigationBar)
                     .padding(.bottom, 32)
-
+                
                 switch context.viewState.step {
                 case .form: formStep
                 case .pin: pinStep
@@ -54,7 +54,7 @@ struct BipeSignupScreen: View {
             }
         }
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         if context.viewState.step != .form {
@@ -68,26 +68,26 @@ struct BipeSignupScreen: View {
             }
         }
     }
-
+    
     private var header: some View {
         VStack(spacing: 8) {
             BigIcon(icon: headerIcon)
                 .padding(.bottom, 8)
-
+            
             if let headerTitle {
                 Text(headerTitle)
                     .font(.compound.headingMDBold)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.compound.textPrimary)
             }
-
+            
             Text(headerBody)
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textSecondary)
         }
     }
-
+    
     private var headerIcon: KeyPath<CompoundIcons, Image> {
         switch context.viewState.step {
         case .form: \.userProfileSolid
@@ -95,7 +95,7 @@ struct BipeSignupScreen: View {
         case .fallback: \.keySolid
         }
     }
-
+    
     private var headerTitle: String? {
         switch context.viewState.step {
         case .form: nil
@@ -103,7 +103,7 @@ struct BipeSignupScreen: View {
         case .fallback: BipeStrings.fallbackTitle
         }
     }
-
+    
     private var headerBody: String {
         switch context.viewState.step {
         case .form: context.viewState.inviterHandle.map(BipeStrings.signupInvitedBy) ?? BipeStrings.signupDeviceHeader
@@ -111,20 +111,20 @@ struct BipeSignupScreen: View {
         case .fallback: BipeStrings.fallbackBody
         }
     }
-
+    
     // MARK: Form
-
+    
     private var formStep: some View {
         VStack(alignment: .leading, spacing: 32) {
             VStack(alignment: .leading, spacing: 20) {
                 TextField(text: $context.displayName) { placeholder("") }
                     .focused($focusedField, equals: .displayName)
-                    .textFieldStyle(.compound(labelText: BipeStrings.signupDisplayName,
-                                              footerText: BipeStrings.signupDisplayNameFooter))
+                    .textFieldStyle(.compound(labelText: context.viewState.isCompany ? BipeStrings.companyName : BipeStrings.signupDisplayName,
+                                              footerText: context.viewState.isCompany ? BipeStrings.companyCreateFooter : BipeStrings.signupDisplayNameFooter))
                     .textContentType(.name)
                     .submitLabel(.next)
                     .onSubmit { focusedField = .handle }
-
+                
                 TextField(text: $context.handle) { placeholder(BipeStrings.handlePlaceholder) }
                     .focused($focusedField, equals: .handle)
                     .textFieldStyle(.compound(labelText: BipeStrings.signupHandle,
@@ -134,21 +134,28 @@ struct BipeSignupScreen: View {
                     .autocorrectionDisabled()
                     .submitLabel(.next)
                     .onSubmit { focusedField = .inviteCode }
-
+                
                 inviteCodeField
-
+                
                 emailField
                     .submitLabel(.continue)
                     .onSubmit(continueStep)
             }
             .disabled(context.viewState.isAccountCreated)
-
-            Button(L10n.actionContinue, action: continueStep)
-                .buttonStyle(.compound(.primary))
-                .disabled(!context.viewState.canContinueForm)
+            
+            VStack(spacing: 20) {
+                BipeTermsCheckbox(isAccepted: $context.isTermsAccepted,
+                                  termsURL: context.viewState.termsURL,
+                                  privacyURL: context.viewState.privacyURL)
+                    .disabled(context.viewState.isAccountCreated)
+                
+                Button(L10n.actionContinue, action: continueStep)
+                    .buttonStyle(.compound(.primary))
+                    .disabled(!context.viewState.canContinueForm)
+            }
         }
     }
-
+    
     private var inviteCodeField: some View {
         VStack(alignment: .leading, spacing: 8) {
             TextField(text: $context.inviteCode) { placeholder("XXXX-XXXX-XXXX") }
@@ -160,7 +167,7 @@ struct BipeSignupScreen: View {
                 .autocorrectionDisabled()
                 .submitLabel(.next)
                 .onSubmit { focusedField = .email }
-
+            
             // PasteButton reads the clipboard without the system paste prompt. It takes a link or a whole message.
             if context.viewState.inviteCode == nil {
                 PasteButton(payloadType: String.self) { strings in
@@ -172,7 +179,7 @@ struct BipeSignupScreen: View {
             }
         }
     }
-
+    
     private var emailField: some View {
         TextField(text: $context.email) { placeholder("") }
             .focused($focusedField, equals: .email)
@@ -184,13 +191,13 @@ struct BipeSignupScreen: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
     }
-
+    
     private var emailFooter: String {
         context.viewState.isEmailAcceptable ? BipeStrings.signupEmailOptionalFooter : BipeStrings.signupEmailInvalid
     }
-
+    
     // MARK: PIN
-
+    
     private var pinStep: some View {
         VStack(alignment: .leading, spacing: 32) {
             VStack(alignment: .leading, spacing: 20) {
@@ -202,7 +209,7 @@ struct BipeSignupScreen: View {
                                               state: context.viewState.pinError != nil || context.viewState.pinProblem != nil ? .error : .default))
                     .keyboardType(.numberPad)
                     .textContentType(.oneTimeCode)
-
+                
                 SecureField(text: $context.pinConfirmation) { placeholder("") }
                     .focused($focusedField, equals: .pinConfirmation)
                     .textFieldStyle(.compound(labelText: BipeStrings.pinConfirmTitle,
@@ -212,30 +219,32 @@ struct BipeSignupScreen: View {
                     .textContentType(.oneTimeCode)
             }
             .disabled(context.viewState.isAccountCreated)
-
+            
             Button(L10n.actionContinue, action: continueStep)
                 .buttonStyle(.compound(.primary))
                 .disabled(!context.viewState.isPINValid && !context.viewState.isAccountCreated)
         }
         .onChange(of: context.pin) { _, pin in
             // A full PIN moves on to the second field.
-            if pin.count == BipeRegistries.pinLength, context.viewState.pinProblem == nil { focusedField = .pinConfirmation }
+            if pin.count == BipeRegistries.pinLength, context.viewState.pinProblem == nil {
+                focusedField = .pinConfirmation
+            }
         }
     }
-
+    
     // MARK: Fallback
-
+    
     private var fallbackStep: some View {
         VStack(alignment: .leading, spacing: 20) {
             if context.viewState.isFallbackEmailOpen {
                 Text(BipeStrings.fallbackEmailBody(String(BipeRegistries.recoveryDelayHoursEmail)))
                     .font(.compound.bodyMD)
                     .foregroundColor(.compound.textSecondary)
-
+                
                 emailField
                     .submitLabel(.done)
                     .onSubmit(continueStep)
-
+                
                 Button(BipeStrings.signupSubmit, action: continueStep)
                     .buttonStyle(.compound(.primary))
                     .disabled(!context.viewState.canSubmitFallbackEmail && !context.viewState.isAccountCreated)
@@ -246,7 +255,7 @@ struct BipeSignupScreen: View {
                 }
                 .buttonStyle(.compound(.primary))
             }
-
+            
             Button(BipeStrings.fallbackSkip) {
                 focusedField = nil
                 context.send(viewAction: .skipFallback)
@@ -254,11 +263,11 @@ struct BipeSignupScreen: View {
             .buttonStyle(.compound(.tertiary))
         }
     }
-
+    
     private func placeholder(_ text: String) -> Text {
         Text(text).foregroundColor(.compound.textSecondary)
     }
-
+    
     private func continueStep() {
         focusedField = nil
         context.send(viewAction: .continue)
@@ -268,14 +277,27 @@ struct BipeSignupScreen: View {
 // MARK: - Previews
 
 struct BipeSignupScreen_Previews: PreviewProvider {
-    static let viewModel = BipeSignupScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                     signIn: BipeAccountSignIn(authenticationService: AuthenticationService.mock, appSettings: .volatile()),
-                                                     appLockService: nil,
-                                                     userIndicatorController: UserIndicatorControllerMock())
-
+    static let viewModel = makeViewModel(isTermsAccepted: false)
+    static let termsAcceptedViewModel = makeViewModel(isTermsAccepted: true)
+    
     static var previews: some View {
         ElementNavigationStack {
             BipeSignupScreen(context: viewModel.context)
         }
+        .previewDisplayName("Terms unticked")
+        
+        ElementNavigationStack {
+            BipeSignupScreen(context: termsAcceptedViewModel.context)
+        }
+        .previewDisplayName("Terms ticked")
+    }
+    
+    static func makeViewModel(isTermsAccepted: Bool) -> BipeSignupScreenViewModel {
+        let viewModel = BipeSignupScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
+                                                  signIn: BipeAccountSignIn(authenticationService: AuthenticationService.mock, appSettings: .volatile()),
+                                                  appLockService: nil,
+                                                  userIndicatorController: UserIndicatorControllerMock())
+        viewModel.context.isTermsAccepted = isTermsAccepted
+        return viewModel
     }
 }

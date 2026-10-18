@@ -18,13 +18,13 @@ struct VoiceMessageRoomTimelineView: View {
             VStack(alignment: .leading, spacing: 8) {
                 VoiceMessageRoomTimelineContent(timelineItem: timelineItem,
                                                 playerState: playerState)
-
+                
                 bipeTranscriptAndWarning
             }
             .frame(maxWidth: 400)
         }
     }
-
+    
     /// Bipe: the sender-side transcript and its scam warning (bipe/docs/audio.md).
     @ViewBuilder
     private var bipeTranscriptAndWarning: some View {

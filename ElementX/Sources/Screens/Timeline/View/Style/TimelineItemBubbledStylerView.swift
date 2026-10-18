@@ -210,16 +210,6 @@ struct TimelineItemBubbledStylerView<Content: View>: View {
     
     var messageBubbleWithActions: some View {
         messageBubble
-            .onTapGesture {
-                // We need a tap gesture before the long press gesture below, otherwise something
-                // on iOS 17 hijacks the long press and you can't bring up the context menu. This
-                // is no longer an issue on iOS 18. Note: it's fine for this to be empty, we handle
-                // specific taps within the timeline views themselves.
-            }
-            // The UIKit recogniser would still receive touches through the selection overlay.
-            .longPressWithFeedback(isEnabled: !isMessageSelectionActive) {
-                context.send(viewAction: .displayTimelineItemMenu(itemID: timelineItem.id))
-            }
             .swipeRightAction {
                 CompoundIcon(\.reply)
                     .foregroundColor(.compound.iconPrimary)
@@ -231,16 +221,22 @@ struct TimelineItemBubbledStylerView<Content: View>: View {
                                                                        action: .reply(isThread: timelineItem.properties.isThreaded)))
             }
             .contextMenu {
+                // An empty menu shows nothing, so selection mode keeps long press for toggling.
                 if !isMessageSelectionActive {
-                    macContextMenu
+                    contextMenu
                 }
+            } preview: {
+                TimelineItemContextMenuPreview(item: timelineItem) {
+                    messageBubble
+                }
+                .environmentObject(context)
             }
             .pinnedIndicator(isPinned: isPinned, isOutgoing: timelineItem.isOutgoing)
             .padding(.top, messageBubbleTopPadding)
     }
     
     @ViewBuilder
-    private var macContextMenu: some View {
+    private var contextMenu: some View {
         let provider = TimelineItemMenuActionProvider(timelineItem: timelineItem,
                                                       canCurrentUserSendMessage: context.viewState.canCurrentUserSendMessage,
                                                       canCurrentUserRedactSelf: context.viewState.canCurrentUserRedactSelf,
@@ -251,7 +247,7 @@ struct TimelineItemBubbledStylerView<Content: View>: View {
                                                       areThreadsEnabled: context.viewState.areThreadsEnabled,
                                                       timelineKind: context.viewState.timelineKind,
                                                       emojiProvider: context.viewState.emojiProvider)
-        TimelineItemMacContextMenu(item: timelineItem, actionProvider: provider) { action in
+        TimelineItemContextMenu(item: timelineItem, actionProvider: provider) { action in
             context.send(viewAction: .handleTimelineItemMenuAction(itemID: timelineItem.id, action: action))
         }
     }

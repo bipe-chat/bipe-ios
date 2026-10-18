@@ -21,7 +21,7 @@ public nonisolated enum ScamWarningKind: String, Sendable, Hashable {
     case receipt
     case newNumber
     case urgency
-
+    
     /// The pt-BR first explanation. It never says the message IS a scam.
     public var message: String {
         switch self {
@@ -49,7 +49,7 @@ public extension ScamDetector {
         if let cached = warningCache.withLock({ $0[eventID] }), cached.bodyHash == bodyHash {
             return cached.kind
         }
-
+        
         let kind = warningKind(forMatchIDs: matchIDs(in: message), message: message)
         warningCache.withLock { cache in
             if cache.count >= maxCachedEvents {
@@ -59,7 +59,7 @@ public extension ScamDetector {
         }
         return kind
     }
-
+    
     /// Picks the most actionable warning from `matchIDs(in:)` output. Kinds in `skipping` are passed over.
     /// Must match bipe-shared/test-vectors/scam-warnings.json.
     static func warningKind(forMatchIDs matchIDs: [String], message: String, skipping: Set<ScamWarningKind> = []) -> ScamWarningKind? {
@@ -67,9 +67,11 @@ public extension ScamDetector {
         let phrases = matchIDs.compactMap { $0.hasPrefix("urgency:") ? String($0.dropFirst("urgency:".count)) : nil }
         let normalized = NameNormalizer.normalize(message, homoglyphs: [:])
         let hosts = linkHosts(in: message)
-
+        
         return warningKindPriority.first { kind in
-            if skipping.contains(kind) { return false }
+            if skipping.contains(kind) {
+                return false
+            }
             return switch kind {
             // A threat with a payment demand (sextortion, "I know where you live"). A threat alone is not this kind.
             case .extortion: containsAny(normalized, BipeRegistries.extortionThreatPhrases)
@@ -102,14 +104,14 @@ public extension ScamDetector {
             }
         }
     }
-
+    
     /// A link host. `folded` is a link-pattern match on the host-folded message. `plain` is the same UTF-16 range
     /// of the message normalised without folding, so it keeps homoglyphs.
     struct LinkHost: Equatable {
         let folded: String
         let plain: String
     }
-
+    
     /// Every link host in the message. Must match bipe-shared `linkHosts`.
     static func linkHosts(in message: String) -> [LinkHost] {
         let plain = NameNormalizer.normalize(message, homoglyphs: [:]) as NSString
@@ -122,36 +124,36 @@ public extension ScamDetector {
             }
         }
     }
-
+    
     // MARK: - Private
-
+    
     private struct CachedWarning: Sendable {
         let bodyHash: Int
         let kind: ScamWarningKind?
     }
-
+    
     private static let maxCachedEvents = 2000
     private static let warningCache = Mutex<[String: CachedWarning]>([:])
-
+    
     /// bipe-shared validates that the priority lists every kind once, so `compactMap` drops nothing.
     private static let warningKindPriority = BipeRegistries.scamWarningKindPriority.compactMap(ScamWarningKind.init(rawValue:))
-
+    
     private static let deliveryWordLists = [
         BipeRegistries.deliveryParcelWords,
         BipeRegistries.deliveryHoldWords,
         BipeRegistries.deliveryFeeWords
     ]
-
+    
     private static let installSafeDomains = BipeRegistries.officialDomains + BipeRegistries.appStoreDomains
-
+    
     private static let bankAlertWordLists = [
         BipeRegistries.bankAlertSubjectWords,
         BipeRegistries.bankAlertThreatWords
     ]
-
+    
     // bipe-shared validates every regex at generation time, so a compile failure here is not expected.
     private static let linkExpressions = BipeRegistries.linkPatterns.compactMap { try? NSRegularExpression(pattern: $0.regex) }
-
+    
     /// True when the host copies a brand: its folded form names a brand and its plain form is not that brand's domain.
     /// A short host label ("bcb", "gov") must be a whole label, so "receitas.globo.com" does not match "receita".
     private static func isLookalike(_ host: LinkHost) -> Bool {
@@ -162,16 +164,16 @@ public extension ScamDetector {
         guard namesBrand else { return false }
         return !isUnder(host.plain, BipeRegistries.officialDomains)
     }
-
+    
     /// True when the plain host is one of `domains` or a subdomain of one.
     private static func isUnder(_ plain: String, _ domains: [String]) -> Bool {
         domains.contains { plain == $0 || plain.hasSuffix(".\($0)") }
     }
-
+    
     private static func containsAny(_ normalized: String, _ words: [String]) -> Bool {
         words.contains { containsCodeUnits(normalized, $0) }
     }
-
+    
     /// True when the normalised text has one of `terms` as a whole word: each run of characters outside [0-9a-z]
     /// becomes one space, then the term must have a space on each side.
     private static func containsWord(_ normalized: String, _ terms: Set<String>) -> Bool {

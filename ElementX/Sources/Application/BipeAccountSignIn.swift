@@ -18,13 +18,13 @@ struct BipeAccountSignIn {
     let authenticationService: AuthenticationServiceProtocol
     let appSettings: AppSettings
     let credentialStore: BipeCredentialStore
-
+    
     init(authenticationService: AuthenticationServiceProtocol, appSettings: AppSettings) {
         self.authenticationService = authenticationService
         self.appSettings = appSettings
         credentialStore = .bipeApp
     }
-
+    
     /// Keeps the credentials (password on this device, token synced) and signs in with them.
     func signIn(with credentials: BipeCredentials) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
         // A pending sign-up stays until the caller has signed in and set the app lock: it holds the PIN, and
@@ -34,7 +34,7 @@ struct BipeAccountSignIn {
         }
         return await signIn(userID: credentials.userId, password: credentials.password)
     }
-
+    
     /// Finishes a sign-up whose answer never reached this device (ADR 0094). `nil` when there is nothing to finish.
     func resumePendingSignup(apiClient: BipeAPIClient) async -> Result<UserSessionProtocol, AuthenticationServiceError>? {
         guard let pending = credentialStore.pendingSignup() else { return nil }
@@ -51,7 +51,7 @@ struct BipeAccountSignIn {
             return nil
         }
     }
-
+    
     /// Signs in with the password stored on this device. `nil` when there is none.
     func signInWithStoredPassword() async -> Result<UserSessionProtocol, AuthenticationServiceError>? {
         guard let stored = credentialStore.password() else { return nil }
@@ -59,11 +59,11 @@ struct BipeAccountSignIn {
         let result = await signIn(userID: stored.userID, password: stored.secret)
         if case .failure(.invalidCredentials) = result {
             // A token recovery on another device set a new password. The token path is next.
-            credentialStore.deletePassword()
+            credentialStore.deletePassword(for: stored.userID)
         }
         return result
     }
-
+    
     private func signIn(userID: String, password: String) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
         if case .failure(let error) = await authenticationService.configure(for: appSettings.defaultAccountProvider.serverNameOrBaseURL, flow: .login) {
             return .failure(error)
@@ -79,9 +79,26 @@ extension BipeCredentialStore {
     }
 }
 
+/// Bipe: the accounts signed in on this phone, read from the session keychain (ADR 0086). Known before any session is live.
+enum BipeSignedInAccounts {
+    static var userIDs: [String] {
+        KeychainController(service: .sessions, accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier).restorationTokens().map(\.userID)
+    }
+}
+
+/// Bipe: the device PIN locks the app and belongs to the phone, not to an account (ADR 0086).
+enum BipeDevicePIN {
+    /// The device PIN follows the account PIN while the phone holds one account, so a one-account user keeps one PIN.
+    static var followsAccountPIN: Bool {
+        BipeSignedInAccounts.userIDs.count <= 1
+    }
+}
+
 extension AppLockServiceProtocol {
-    /// Bipe: the account PIN also locks the app (ADR 0057). Biometric unlock stays on when the device supports it.
+    /// Bipe: an account PIN the user just typed or set becomes the device PIN (ADR 0057) while it follows the account PIN,
+    /// or when no app lock is set yet (ADR 0086). Biometric unlock stays on when the device supports it.
     func bipeUseAccountPIN(_ pin: String) {
+        guard BipeDevicePIN.followsAccountPIN || !isEnabled else { return }
         guard case .success = setupPINCode(pin) else {
             MXLog.error("Bipe: could not use the account PIN for the app lock")
             return

@@ -19,19 +19,22 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
     private let serverNameOrBaseURL: String
     private let appLockService: AppLockServiceProtocol?
     private let userIndicatorController: UserIndicatorControllerProtocol
-
-    private var credentialStore: BipeCredentialStore { signIn.credentialStore }
+    
+    private var credentialStore: BipeCredentialStore {
+        signIn.credentialStore
+    }
+    
     /// The PIN typed on this phone during this run. After the sign-in it becomes the app lock PIN.
     private var confirmedPIN: String?
-
+    
     @CancellableTask private var pollTask: Task<Void, Never>?
     private static let pollInterval: Duration = .seconds(60)
-
+    
     private let actionsSubject: PassthroughSubject<BipeRecoveryScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<BipeRecoveryScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(mode: BipeRecoveryScreenMode,
          apiClient: BipeAPIClient,
          signIn: BipeAccountSignIn,
@@ -44,11 +47,11 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         self.serverNameOrBaseURL = serverNameOrBaseURL
         self.appLockService = appLockService
         self.userIndicatorController = userIndicatorController
-
-        super.init(initialViewState: BipeRecoveryScreenViewState(mode: mode, hasRecoveryToken: signIn.credentialStore.recoveryToken() != nil))
+        
+        super.init(initialViewState: BipeRecoveryScreenViewState(mode: mode, hasRecoveryToken: signIn.credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) != nil))
         startPollingIfWaiting()
     }
-
+    
     override func process(viewAction: BipeRecoveryScreenViewAction) {
         switch viewAction {
         case .updateWindow(let window):
@@ -57,9 +60,13 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         case .pinChanged:
             state.pinError = nil
             let pin = BipePIN.sanitize(state.bindings.pin)
-            if pin != state.bindings.pin { state.bindings.pin = pin }
+            if pin != state.bindings.pin {
+                state.bindings.pin = pin
+            }
             let confirmation = BipePIN.sanitize(state.bindings.pinConfirmation)
-            if confirmation != state.bindings.pinConfirmation { state.bindings.pinConfirmation = confirmation }
+            if confirmation != state.bindings.pinConfirmation {
+                state.bindings.pinConfirmation = confirmation
+            }
         case .submitPIN:
             Task { await submitPIN() }
         case .forgotPIN:
@@ -71,49 +78,49 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         case .signInWithEmail:
             Task { await signInWithEmail() }
         case .useRecoveryToken:
-            guard let token = credentialStore.recoveryToken() else { return }
+            guard let token = credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) else { return }
             switchMode(to: .token(userID: token.userID))
         case .refreshClaim:
             Task { await claim() }
         }
     }
-
+    
     // MARK: - PIN
-
+    
     private func submitPIN() async {
         guard state.canSubmitPIN else { return }
         let pin = state.bindings.pin
-
+        
         switch state.mode {
-        case .token:
-            await recoverWithToken(pin: pin)
+        case .token(let userID):
+            await recoverWithToken(pin: pin, userID: userID)
         case .emailLink(let linkToken):
             await confirmEmailLink(linkToken, pin: pin)
         case .choose, .waiting:
             break
         }
     }
-
-    private func recoverWithToken(pin: String) async {
-        guard let token = credentialStore.recoveryToken() else {
+    
+    private func recoverWithToken(pin: String, userID: String) async {
+        guard let token = credentialStore.recoveryToken(for: userID) else {
             switchMode(to: .choose)
             return
         }
-
+        
         startLoading()
         defer { stopLoading() }
-
+        
         do {
             let credentials = try await apiClient.recoverWithToken(token.secret, pin: pin)
             confirmedPIN = pin
             // This device's own token recovery must not alert this device.
-            BipeRecoveryAlerts.acknowledgeCompletedTokenRecoveriesOnNextCheck()
+            BipeRecoveryAlerts.acknowledgeCompletedTokenRecoveriesOnNextCheck(for: credentials.userId)
             await finishSignIn(credentials)
         } catch {
             MXLog.error("Bipe token recovery failed: \(error)")
             if case .server(.recoveryInvalid, _, _) = error {
-                credentialStore.deleteRecoveryToken()
-                state.hasRecoveryToken = false
+                credentialStore.deleteRecoveryToken(for: token.userID)
+                state.hasRecoveryToken = credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) != nil
                 switchMode(to: .choose)
                 state.notice = error.localizedMessage
                 return
@@ -121,11 +128,11 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             handlePINError(error)
         }
     }
-
+    
     private func confirmEmailLink(_ linkToken: BipeRecoveryLinkToken, pin: String) async {
         startLoading()
         defer { stopLoading() }
-
+        
         do {
             let started = try await apiClient.confirmRecoveryEmail(linkToken: linkToken.value,
                                                                    pin: state.isNewPIN ? nil : pin,
@@ -143,7 +150,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             handlePINError(error)
         }
     }
-
+    
     private func handlePINError(_ error: BipeAPIError) {
         state.bindings.pin = ""
         state.bindings.pinConfirmation = ""
@@ -157,7 +164,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: error.localizedMessage)
         }
     }
-
+    
     /// A blocked or forgotten PIN: the email link sets a new one, after the safety wait.
     private func forgotPIN() {
         if case .emailLink = state.mode {
@@ -170,15 +177,15 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             switchMode(to: .choose)
         }
     }
-
+    
     // MARK: - Email
-
+    
     private func requestEmail() async {
         guard state.canRequestEmail else { return }
-
+        
         startLoading()
         defer { stopLoading() }
-
+        
         do {
             try await apiClient.requestRecoveryEmail(state.bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
             state.emailSent = true
@@ -187,9 +194,9 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: error.localizedMessage)
         }
     }
-
+    
     // MARK: - Waiting
-
+    
     private func startPollingIfWaiting() {
         guard case .waiting = state.mode else {
             pollTask = nil
@@ -203,10 +210,10 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             }
         }
     }
-
+    
     private func claim() async {
         guard case .waiting(let recovery) = state.mode else { return }
-
+        
         let result: BipeRecoveryClaim
         do {
             result = try await apiClient.claimRecovery(id: recovery.recoveryId, claimSecret: recovery.claimSecret)
@@ -217,7 +224,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             MXLog.error("Bipe recovery claim failed: \(error)")
             return
         }
-
+        
         switch (result.state, result.purpose) {
         case (.waiting, _):
             break
@@ -239,29 +246,29 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             endRecovery(notice: BipeStrings.errorRecoveryInvalid)
         }
     }
-
+    
     private func endRecovery(notice: String) {
         credentialStore.deletePendingRecovery()
-        if let token = credentialStore.recoveryToken() {
+        if let token = credentialStore.recoveryToken(excluding: Set(BipeSignedInAccounts.userIDs)) {
             switchMode(to: .token(userID: token.userID))
         } else {
             switchMode(to: .choose)
         }
         state.notice = notice
     }
-
+    
     // MARK: - Beta accounts
-
+    
     /// A beta account (email and own password) signs in through MAS, as before. Settings then offer the move to a PIN.
     private func signInWithEmail() async {
         guard let window = state.window else {
             state.bindings.alertInfo = AlertInfo(id: .error)
             return
         }
-
+        
         startLoading()
         defer { stopLoading() }
-
+        
         guard case .success = await authenticationService.configure(for: serverNameOrBaseURL, flow: .login),
               case .success(let data) = await authenticationService.urlForOAuthLogin(loginHint: nil) else {
             state.bindings.alertInfo = AlertInfo(id: .error)
@@ -269,9 +276,9 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         }
         actionsSubject.send(.continueWithOAuth(data: data, window: window))
     }
-
+    
     // MARK: - Common
-
+    
     private func finishSignIn(_ credentials: BipeCredentials) async {
         switch await signIn.signIn(with: credentials) {
         case .success(let userSession):
@@ -285,7 +292,7 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
             state.bindings.alertInfo = AlertInfo(id: .error)
         }
     }
-
+    
     private func switchMode(to mode: BipeRecoveryScreenMode) {
         state.mode = mode
         state.notice = nil
@@ -296,18 +303,18 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         state.bindings.pinConfirmation = ""
         startPollingIfWaiting()
     }
-
+    
     // MARK: - User Indicators
-
+    
     private let loadingIndicatorID = "\(BipeRecoveryScreenViewModel.self)-Loading"
-
+    
     private func startLoading() {
         userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID,
                                                               type: .modal,
                                                               title: L10n.commonLoading,
                                                               persistent: true))
     }
-
+    
     private func stopLoading() {
         userIndicatorController.retractIndicatorWithId(loadingIndicatorID)
     }

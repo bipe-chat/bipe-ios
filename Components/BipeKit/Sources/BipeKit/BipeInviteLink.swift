@@ -11,7 +11,7 @@ import Foundation
 public nonisolated enum BipeInviteLink {
     /// Rule: bipe-shared/registries/invite-codes.json (generated). Cases: test-vectors/invite-codes.json.
     private static let pattern = try? NSRegularExpression(pattern: BipeRegistries.inviteCodePattern)
-
+    
     /// The invite code in a link, normalised, or `nil` when the URL is not an invite link.
     public static func code(from url: URL) -> String? {
         guard url.scheme == "https", BipeProfileLink.isBipeLinkHost(url) else {
@@ -21,7 +21,7 @@ public nonisolated enum BipeInviteLink {
         guard components.count == 2, components[0] == "convite" else { return nil }
         return normalizedCode(components[1])
     }
-
+    
     /// `XXXX-XXXX-XXXX` from anything a user typed or pasted: a code, an invite link or a whole message. `nil` when it holds no code.
     public static func normalizedCode(_ raw: String) -> String? {
         let text = String(raw.prefix(BipeRegistries.inviteCodeMaxInputLength)).uppercased()
@@ -35,13 +35,18 @@ public nonisolated enum BipeInviteLink {
 /// A normalised invite code. Prints redacted, because routes and actions get logged.
 public nonisolated struct BipeInviteCode: Hashable, Sendable, CustomStringConvertible, CustomDebugStringConvertible {
     public let value: String
-
+    
     /// `nil` when `raw` cannot be a code.
     public init?(_ raw: String) {
         guard let value = BipeInviteLink.normalizedCode(raw) else { return nil }
         self.value = value
     }
-
-    public var description: String { "BipeInviteCode(redacted)" }
-    public var debugDescription: String { description }
+    
+    public var description: String {
+        "BipeInviteCode(redacted)"
+    }
+    
+    public var debugDescription: String {
+        description
+    }
 }

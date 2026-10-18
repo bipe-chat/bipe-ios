@@ -16,7 +16,9 @@ import SwiftUI
 struct HomeScreenEmptyStateView: View {
     let context: HomeScreenViewModel.Context
     
-    private var isGroups: Bool { context.viewState.bipeScope == .groups }
+    private var isGroups: Bool {
+        context.viewState.bipeScope == .groups
+    }
     
     var body: some View {
         VStack(spacing: 2) {

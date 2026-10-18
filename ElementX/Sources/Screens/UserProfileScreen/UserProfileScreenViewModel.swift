@@ -88,20 +88,25 @@ class UserProfileScreenViewModel: UserProfileScreenViewModelType, UserProfileScr
         async let profileResult = fetchProfile()
         async let identityResult = fetchUserIdentity()
         
+        // Bipe: Synapse answers 403 for users who share no room with us (limit_profile_requests_to_users_who_share_rooms).
+        // Fall back to the bare user ID so Message still works; the header shows the @handle when the resolver has one.
+        let userProfile: UserProfile
         switch await profileResult {
-        case .success(let userProfile):
-            state.userProfile = userProfile
-            state.permalink = (try? matrixToUserPermalink(userId: state.userID)).flatMap(URL.init(string:))
-            
-            switch userSession.clientProxy.directRoomForUserID(userProfile.id) {
-            case .success(let roomID):
-                state.dmRoomID = roomID
-            case .failure:
-                break
-            }
+        case .success(let profile):
+            userProfile = profile
         case .failure(let error):
-            state.bindings.alertInfo = .init(id: .unknown)
-            MXLog.error("Failed to find user profile: \(error)")
+            userProfile = UserProfile(userID: state.userID)
+            MXLog.info("Profile unavailable, using the user ID only: \(error)")
+        }
+        
+        state.userProfile = userProfile
+        state.permalink = (try? matrixToUserPermalink(userId: state.userID)).flatMap(URL.init(string:))
+        
+        switch userSession.clientProxy.directRoomForUserID(userProfile.id) {
+        case .success(let roomID):
+            state.dmRoomID = roomID
+        case .failure:
+            break
         }
         
         if case let .success(.some(identity)) = await identityResult {

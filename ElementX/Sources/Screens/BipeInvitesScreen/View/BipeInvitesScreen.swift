@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 struct BipeInvitesScreen: View {
@@ -30,39 +30,14 @@ struct BipeInvitesScreen: View {
         } message: {
             Text(BipeStrings.invitesNameFooter)
         }
-        .sheet(item: $context.shareSheetLink) { link in
-            AppActivityView(activityItems: [BipeStrings.invitesShareMessage(link.url.absoluteString)])
-                .ignoresSafeArea(edges: .bottom)
-                .presentationDetents([.medium, .large])
-        }
-        .sheet(item: $context.qrCodeLink) { link in
-            BipeInviteQRCodeSheet(url: link.url, shareTitle: L10n.actionShare)
-                .presentationDetents([.large])
-        }
+        .bipeInviteSheets(shareSheetLink: $context.shareSheetLink, qrCodeLink: $context.qrCodeLink)
     }
     
     private var inviteSection: some View {
-        Section {
-            VStack(spacing: 12) {
-                Button { context.send(viewAction: .inviteByLink) } label: {
-                    Label(BipeStrings.invitesInviteSomeone, icon: \.shareIos)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.compound(.primary))
-                
-                Button { context.send(viewAction: .inviteInPerson) } label: {
-                    Label(BipeStrings.invitesShowQr, icon: \.qrCode)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.compound(.secondary))
-            }
-            .disabled(!context.viewState.canCreate)
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
-        } footer: {
-            Text(context.viewState.footer)
-                .compoundListSectionFooter()
-        }
+        BipeInviteButtonsSection(canCreate: context.viewState.canCreate,
+                                 footer: context.viewState.footer,
+                                 inviteByLink: { context.send(viewAction: .inviteByLink) },
+                                 inviteInPerson: { context.send(viewAction: .inviteInPerson) })
     }
     
     @ViewBuilder
@@ -133,13 +108,21 @@ struct BipeInvitesScreen: View {
     
     private var isNamingPresented: Binding<Bool> {
         Binding(get: { context.namingInviteID != nil },
-                set: { if !$0 { context.namingInviteID = nil } })
+                set: {
+                    if !$0 {
+                        context.namingInviteID = nil
+                    }
+                })
     }
     
     /// The name the person gave the invite, else its code, so each row can be told apart.
     private func title(for invite: BipeInvite) -> String {
-        if let name = context.viewState.names[invite.id] { return name }
-        if let url = context.viewState.shareURLs[invite.id], let code = BipeInviteLink.code(from: url) { return code }
+        if let name = context.viewState.names[invite.id] {
+            return name
+        }
+        if let url = context.viewState.shareURLs[invite.id], let code = BipeInviteLink.code(from: url) {
+            return code
+        }
         return BipeStrings.invitesLink
     }
     
@@ -157,12 +140,59 @@ struct BipeInvitesScreen: View {
     }
 }
 
+/// The two invite buttons and the quota under them. The invites and contacts screens both show it.
+struct BipeInviteButtonsSection: View {
+    let canCreate: Bool
+    let footer: String
+    let inviteByLink: () -> Void
+    let inviteInPerson: () -> Void
+    
+    var body: some View {
+        Section {
+            VStack(spacing: 12) {
+                Button(action: inviteByLink) {
+                    Label(BipeStrings.invitesInviteSomeone, icon: \.shareIos)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.compound(.primary))
+                
+                Button(action: inviteInPerson) {
+                    Label(BipeStrings.invitesShowQr, icon: \.qrCode)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.compound(.secondary))
+            }
+            .disabled(!canCreate)
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+        } footer: {
+            Text(footer)
+                .compoundListSectionFooter()
+        }
+    }
+}
+
+extension View {
+    /// The share sheet and the QR code sheet for a new or pending invite link.
+    func bipeInviteSheets(shareSheetLink: Binding<BipeInviteShareLink?>, qrCodeLink: Binding<BipeInviteShareLink?>) -> some View {
+        sheet(item: shareSheetLink) { link in
+            AppActivityView(activityItems: [BipeStrings.invitesShareMessage(link.url.absoluteString)])
+                .ignoresSafeArea(edges: .bottom)
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(item: qrCodeLink) { link in
+            BipeInviteQRCodeSheet(url: link.url, shareTitle: L10n.actionShare)
+                .presentationDetents([.large])
+        }
+    }
+}
+
 // MARK: - Previews
 
 struct BipeInvitesScreen_Previews: PreviewProvider {
     static let viewModel = BipeInvitesScreenViewModel(apiClient: BipeAPIClient(baseURL: "https://api.example.com"),
-                                                         clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
-                                                         userIndicatorController: UserIndicatorControllerMock())
+                                                      clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
+                                                      userIndicatorController: UserIndicatorControllerMock())
     
     static var previews: some View {
         ElementNavigationStack {

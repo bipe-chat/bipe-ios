@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -23,7 +24,7 @@ struct MediaUploadQualitySettingsScreen: View {
             }
         }
         .compoundList()
-        .navigationTitle(L10n.commonMediaUploadQuality)
+        .navigationTitle(BipeStrings.chatsMediaQuality) // Bipe: Element has no pt-BR here (ADR 0112)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

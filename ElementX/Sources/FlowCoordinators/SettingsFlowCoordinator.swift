@@ -6,8 +6,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftUI
 
 enum SettingsFlowCoordinatorAction {
@@ -20,6 +20,8 @@ enum SettingsFlowCoordinatorAction {
     case openUserProfile(userID: String)
     /// Bipe: open the self-chat (ADR 0053).
     case openSelfChat
+    /// Bipe: "Criar conta da empresa" (ADR 0087, bipe#269).
+    case bipeCreateCompanyAccount
 }
 
 class SettingsFlowCoordinator: FlowCoordinatorProtocol {
@@ -71,7 +73,9 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         case .settings:
             presentSettingsScreen(animated: animated)
         case .chatBackupSettings:
-            startEncryptionSettingsFlow()
+            // Bipe: the recovery key lives in Sua conta (ADR 0112).
+            presentBipeSettingsGroup(.account)
+            presentBipeRecoveryKey()
         default:
             break
         }
@@ -150,14 +154,14 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     presentBipePublicProfileScreen()
                 case .bipeMessaging:
                     presentBipeMessagingScreen()
-                case .bipeInvites:
-                    presentBipeInvitesScreen()
                 case .bipeContacts:
                     presentBipeContactsScreen()
                 case .bipeSelfChat:
                     actionsSubject.send(.openSelfChat)
                 case .bipeAccount:
-                    presentBipeAccountScreen()
+                    presentBipeSettingsGroup(.account)
+                case .bipeGroup(let group):
+                    presentBipeSettingsGroup(group)
                 }
             }
             .store(in: &cancellables)
@@ -165,12 +169,71 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.setRootCoordinator(settingsScreenCoordinator, animated: animated)
     }
     
+    // MARK: - Bipe settings groups (ADR 0112)
+    
+    private func presentBipeSettingsGroup(_ group: BipeSettingsGroup) {
+        guard !group.usesElementScreen else {
+            presentNotificationSettings()
+            return
+        }
+        
+        let coordinator = BipeSettingsGroupScreenCoordinator(parameters: .init(group: group,
+                                                                               userSession: flowParameters.userSession,
+                                                                               appLockService: appLockService,
+                                                                               userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .open(let row):
+                    self?.openBipeSettingsRow(row)
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    /// The rows that open another screen or flow. Old Element routes map here.
+    private func openBipeSettingsRow(_ row: BipeSettingsRow) {
+        switch row {
+        case .profileNamePhoto:
+            presentUserDetailsEditScreen()
+        case .profileHandle:
+            presentBipeHandleScreen()
+        case .profilePublicProfile:
+            presentBipePublicProfileScreen()
+        case .privacyMessaging:
+            presentBipeMessagingScreen()
+        case .privacyBlocked:
+            presentBlockedUsersScreen()
+        case .privacyContacts:
+            presentBipeContactsScreen()
+        case .accountChangePin:
+            presentBipeAccountScreen(mode: .pin)
+        case .accountEmail:
+            presentBipeAccountScreen(mode: .email)
+        case .accountRecoveryKey:
+            presentBipeRecoveryKey()
+        case .accountLinkDevice:
+            startLinkNewDeviceFlow()
+        case .accountSignOut:
+            actionsSubject.send(.runLogoutFlow)
+        case .accountCreateCompany:
+            actionsSubject.send(.bipeCreateCompanyAccount)
+        case .chatsMediaQuality:
+            presentMediaUploadQualitySettings()
+        case .chatsLiveLocation:
+            presentLocationSharingSettings()
+        default:
+            MXLog.error("Bipe settings row without a screen: \(row.rawValue)")
+        }
+    }
+    
     /// `onDone` runs after the screen pops, e.g. to reload the screen below.
     private func presentBipeHandleScreen(onDone: (() -> Void)? = nil) {
         let coordinator = BipeHandleScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                           clientProxy: flowParameters.userSession.clientProxy,
-                                                                           handleResolver: flowParameters.userSession.bipeHandleResolver,
-                                                                           userIndicatorController: flowParameters.userIndicatorController))
+                                                                        clientProxy: flowParameters.userSession.clientProxy,
+                                                                        handleResolver: flowParameters.userSession.bipeHandleResolver,
+                                                                        userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {
@@ -185,8 +248,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     private func presentBipePublicProfileScreen() {
         let coordinator = BipePublicProfileScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                                  userSession: flowParameters.userSession,
-                                                                                  userIndicatorController: flowParameters.userIndicatorController))
+                                                                               userSession: flowParameters.userSession,
+                                                                               userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self, weak coordinator] action in
                 switch action {
@@ -198,24 +261,60 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.push(coordinator)
     }
     
-    private func presentBipeAccountScreen() {
-        let coordinator = BipeAccountScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
+    private func presentBipeAccountScreen(mode: BipeAccountScreenMode) {
+        let coordinator = BipeAccountScreenCoordinator(parameters: .init(mode: mode,
+                                                                         apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
                                                                          clientProxy: flowParameters.userSession.clientProxy,
                                                                          appLockService: appLockService,
                                                                          userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .done:
+                    self?.navigationStackCoordinator.pop()
+                }
+            }
+            .store(in: &cancellables)
         navigationStackCoordinator.push(coordinator)
+    }
+    
+    /// Bipe: "Chave de recuperação" in Sua conta. With key storage on, the recovery key screen opens directly,
+    /// so Sua conta never shows Element's "Criptografia" screen. Without it, the full flow turns key storage on first.
+    private func presentBipeRecoveryKey() {
+        let clientProxy = flowParameters.userSession.clientProxy
+        guard clientProxy.secureBackupController.keyBackupState.value == .enabled else {
+            startEncryptionSettingsFlow()
+            return
+        }
+        
+        let sheetNavigationStackCoordinator = NavigationStackCoordinator()
+        let parameters = SecureBackupRecoveryKeyScreenCoordinatorParameters(secureBackupController: clientProxy.secureBackupController,
+                                                                            userIndicatorController: flowParameters.userIndicatorController,
+                                                                            isModallyPresented: true)
+        let coordinator = flowParameters.appHooks.recoveryKeyScreenHook.makeCoordinator(parameters: parameters,
+                                                                                        homeserver: clientProxy.homeserver)
+        coordinator.actions
+            .sink { [weak self] action in
+                switch action {
+                case .complete:
+                    self?.navigationStackCoordinator.setSheetCoordinator(nil)
+                }
+            }
+            .store(in: &cancellables)
+        sheetNavigationStackCoordinator.setRootCoordinator(coordinator, animated: true)
+        navigationStackCoordinator.setSheetCoordinator(sheetNavigationStackCoordinator)
     }
     
     private func presentBipeMessagingScreen() {
         let coordinator = BipeMessagingScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                              clientProxy: flowParameters.userSession.clientProxy))
+                                                                           clientProxy: flowParameters.userSession.clientProxy))
         navigationStackCoordinator.push(coordinator)
     }
     
     private func presentBipeInvitesScreen() {
         let coordinator = BipeInvitesScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                            clientProxy: flowParameters.userSession.clientProxy,
-                                                                            userIndicatorController: flowParameters.userIndicatorController))
+                                                                         clientProxy: flowParameters.userSession.clientProxy,
+                                                                         userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {
@@ -229,7 +328,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     
     private func presentBipeContactsScreen() {
         let coordinator = BipeContactsScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                                             clientProxy: flowParameters.userSession.clientProxy))
+                                                                          clientProxy: flowParameters.userSession.clientProxy,
+                                                                          userIndicatorController: flowParameters.userIndicatorController))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 switch action {

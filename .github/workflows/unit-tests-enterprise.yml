@@ -16,8 +16,8 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 60
 
-    # Skip in forks
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    # Bipe: Element-only (LFS snapshots, private submodule). Runs only in element-hq.
+    if: ${{ github.repository == 'element-hq/element-x-ios' }}
 
     concurrency:
       # Only allow a single run of this workflow on each branch, automatically cancelling older runs.

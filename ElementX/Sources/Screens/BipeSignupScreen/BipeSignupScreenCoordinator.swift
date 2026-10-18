@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftUI
 
 struct BipeSignupScreenCoordinatorParameters {
@@ -16,11 +16,13 @@ struct BipeSignupScreenCoordinatorParameters {
     /// The new account's PIN also locks the app.
     let appLockService: AppLockServiceProtocol?
     let userIndicatorController: UserIndicatorControllerProtocol
+    /// ADR 0087: "Criar conta da empresa" makes a company account.
+    var accountType = BipeAccountType.personal
 }
 
 enum BipeSignupScreenCoordinatorAction: CustomStringConvertible {
     case signedIn(UserSessionProtocol)
-    case createdWithInvite(inviterUserID: String)
+    case createdWithInvite(inviterUserID: String, inviterHandle: String?)
     
     var description: String {
         switch self {
@@ -48,7 +50,8 @@ final class BipeSignupScreenCoordinator: CoordinatorProtocol {
                                               apiClient: parameters.apiClient,
                                               signIn: parameters.signIn,
                                               appLockService: parameters.appLockService,
-                                              userIndicatorController: parameters.userIndicatorController)
+                                              userIndicatorController: parameters.userIndicatorController,
+                                              accountType: parameters.accountType)
     }
     
     func start() {
@@ -59,8 +62,8 @@ final class BipeSignupScreenCoordinator: CoordinatorProtocol {
             switch action {
             case .signedIn(let userSession):
                 actionsSubject.send(.signedIn(userSession))
-            case .createdWithInvite(let inviterUserID):
-                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID))
+            case .createdWithInvite(let inviterUserID, let inviterHandle):
+                actionsSubject.send(.createdWithInvite(inviterUserID: inviterUserID, inviterHandle: inviterHandle))
             }
         }
         .store(in: &cancellables)

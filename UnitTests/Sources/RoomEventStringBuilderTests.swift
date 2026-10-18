@@ -58,6 +58,25 @@ struct RoomEventStringBuilderTests {
         #expect(otherPollString?.string == "Bob: Poll: Which is better?", "Everyone else's polls should be prefixed with their display name.")
     }
     
+    @Test
+    func senderPrefixInDM() {
+        let ownItem = makeMessageItem(senderID: ownUserID, senderDisplayName: "Alice")
+        let ownMessageString = stringBuilder.buildAttributedString(for: ownItem.content, sender: ownItem.sender, isOutgoing: true, isDM: true)
+        #expect(ownMessageString?.string == "You: Hello, World!", "Your own messages in a DM should still be prefixed with 'You'")
+        
+        let otherItem = makeMessageItem(senderID: "@bob:matrix.org", senderDisplayName: "Bob")
+        let otherMessageString = stringBuilder.buildAttributedString(for: otherItem.content, sender: otherItem.sender, isOutgoing: false, isDM: true)
+        #expect(otherMessageString?.string == "Hello, World!", "The other person's messages in a DM shouldn't repeat their name.")
+        
+        let otherEmoteItem = makeMessageItem(senderID: "@bob:matrix.org", senderDisplayName: "Bob", type: .emote, message: "sighs")
+        let otherEmoteString = stringBuilder.buildAttributedString(for: otherEmoteItem.content, sender: otherEmoteItem.sender, isOutgoing: false, isDM: true)
+        #expect(otherEmoteString?.string == "* Bob sighs", "Emotes in a DM should keep the display name.")
+        
+        let otherPollItem = makePollItem(senderID: "@bob:matrix.org", senderDisplayName: "Bob")
+        let otherPollString = stringBuilder.buildAttributedString(for: otherPollItem.content, sender: otherPollItem.sender, isOutgoing: false, isDM: true)
+        #expect(otherPollString?.string == "Poll: Which is better?", "The other person's polls in a DM shouldn't repeat their name.")
+    }
+    
     // MARK: - Helpers
     
     private enum MockMessageType { case textMessage, emote }

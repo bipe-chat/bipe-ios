@@ -38,17 +38,8 @@ struct BipeInvitesScreenViewState: BindableState {
     }
     
     var footer: String {
-        guard !isLoading else { return BipeStrings.invitesExplainer }
-        guard available > 0 else {
-            guard let nextAvailableAt else { return BipeStrings.invitesNoneLeft }
-            return "\(BipeStrings.invitesNoneLeft) \(BipeStrings.invitesNext(nextAvailableAt.formatted(date: .abbreviated, time: .shortened)))"
-        }
-        // A large count means nothing to the person, so it shows only when few invites are left.
-        guard available <= Self.lowInviteCount else { return BipeStrings.invitesExplainer }
-        return "\(BipeStrings.invitesExplainer) \(BipeStrings.invitesAvailable(String(available)))"
+        BipeInviteQuota.footer(available: isLoading ? nil : available, nextAvailableAt: nextAvailableAt)
     }
-    
-    private static let lowInviteCount = 5
 }
 
 struct BipeInvitesScreenViewStateBindings {

@@ -6,10 +6,23 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
 // MARK: - Coordinator
+
+/// Bipe: a group the DM recipient can be invited to.
+struct BipeInviteToGroupOption: Identifiable {
+    let id: String
+    let name: String
+    let avatar: RoomAvatar
+}
+
+struct BipeInviteToGroupPicker: Identifiable {
+    let id = UUID()
+    let groups: [BipeInviteToGroupOption]
+}
 
 // MARK: View model
 
@@ -86,7 +99,8 @@ struct RoomDetailsScreenViewState: BindableState {
     }
     
     var hasTopicSection: Bool {
-        topic != nil || canEditRoomTopic
+        // Bipe: DMs have no topic.
+        dmRecipientInfo == nil && (topic != nil || canEditRoomTopic)
     }
     
     var bindings: RoomDetailsScreenViewStateBindings
@@ -181,6 +195,9 @@ struct RoomDetailsScreenViewStateBindings {
     /// A media item that will be previewed with QuickLook.
     var mediaPreviewItem: MediaPreviewItem?
     
+    /// Bipe: the groups offered by "Convidar para um grupo" in a DM.
+    var inviteToGroupPicker: BipeInviteToGroupPicker?
+    
     /// The view model used to display the leave space sheet, will only be used if the room is a space.
     var leaveSpaceViewModel: LeaveSpaceViewModel?
 }
@@ -203,6 +220,10 @@ struct LeaveRoomAlertItem: AlertProtocol {
     }
     
     var subtitle: String {
+        // Bipe: a DM is never a public or empty room to the user.
+        if isDM {
+            return BipeStrings.dmLeaveBody
+        }
         switch state {
         case .empty: return L10n.leaveRoomAlertEmptySubtitle
         case .private: return isDM ? L10n.leaveConversationAlertSubtitle : L10n.leaveRoomAlertPrivateSubtitle
@@ -214,6 +235,7 @@ struct LeaveRoomAlertItem: AlertProtocol {
 enum RoomDetailsScreenViewAction {
     case processTapPeople
     case processTapInvite
+    case inviteToGroup(roomID: String)
     case processTapLeave
     case processTapIgnore
     case processTapUnignore

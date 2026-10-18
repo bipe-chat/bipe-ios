@@ -6,13 +6,15 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftState
 import SwiftUI
 
 protocol AuthenticationFlowCoordinatorDelegate: AnyObject {
     func authenticationFlowCoordinator(didLoginWithSession userSession: UserSessionProtocol)
+    /// Bipe: the add-account sheet was closed without a sign-in (ADR 0086, bipe#267).
+    func authenticationFlowCoordinatorDidCancelAddingAccount()
 }
 
 class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
@@ -27,6 +29,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private let userIndicatorController: UserIndicatorControllerProtocol
     /// Bipe: the account PIN also locks the app (ADR 0057).
     private let appLockService: AppLockServiceProtocol?
+    /// Bipe: adding an account from a signed-in session shows the flow as a sheet over it, with no silent sign-in (ADR 0086).
+    private let isAddingAccount: Bool
+    /// Bipe: "Criar conta da empresa" goes straight to the sign-up as a company (ADR 0087).
+    private let bipeAccountType: BipeAccountType
     
     enum State: StateType {
         /// The state machine hasn't started.
@@ -122,9 +128,13 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
          appSettings: AppSettings,
          appHooks: AppHooks,
          userIndicatorController: UserIndicatorControllerProtocol,
-         appLockService: AppLockServiceProtocol? = nil) {
+         appLockService: AppLockServiceProtocol? = nil,
+         isAddingAccount: Bool = false,
+         bipeAccountType: BipeAccountType = .personal) {
         self.authenticationService = authenticationService
         self.appLockService = appLockService
+        self.isAddingAccount = isAddingAccount
+        self.bipeAccountType = bipeAccountType
         self.bugReportService = bugReportService
         self.navigationRootCoordinator = navigationRootCoordinator
         self.appMediator = appMediator
@@ -353,7 +363,16 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationStackCoordinator.setRootCoordinator(coordinator)
         
-        if fromState == .initial {
+        if fromState == .initial, isAddingAccount {
+            navigationRootCoordinator.setSheetCoordinator(navigationStackCoordinator) { [weak self] in
+                guard let self, stateMachine.state != .complete else { return }
+                delegate?.authenticationFlowCoordinatorDidCancelAddingAccount()
+            }
+            if bipeAccountType == .company {
+                // After the start transition ends.
+                Task { self.stateMachine.tryEvent(.bipeSignup) }
+            }
+        } else if fromState == .initial {
             navigationRootCoordinator.setRootCoordinator(navigationStackCoordinator)
             if appSettings.usesBipeSignup {
                 Task { await resumeBipeAccount() }
@@ -488,7 +507,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                                                                apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
                                                                signIn: BipeAccountSignIn(authenticationService: authenticationService, appSettings: appSettings),
                                                                appLockService: appLockService,
-                                                               userIndicatorController: userIndicatorController)
+                                                               userIndicatorController: userIndicatorController,
+                                                               accountType: bipeAccountType)
         let coordinator = BipeSignupScreenCoordinator(parameters: parameters)
         
         coordinator.actionsPublisher
@@ -496,8 +516,9 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .signedIn(let userSession):
                     self?.stateMachine.tryEvent(.signedIn, userInfo: userSession)
-                case .createdWithInvite(let inviterUserID):
+                case .createdWithInvite(let inviterUserID, let inviterHandle):
                     self?.appSettings.bipePendingInviterUserID = inviterUserID
+                    self?.appSettings.bipePendingInviterHandle = inviterHandle
                 }
             }
             .store(in: &cancellables)

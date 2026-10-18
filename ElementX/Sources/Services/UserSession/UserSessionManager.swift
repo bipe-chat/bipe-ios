@@ -109,6 +109,28 @@ final class UserSessionManager: UserSessionManagerProtocol {
         accounts.removeValue(forKey: userID)
     }
     
+    func activate(userID: String) async -> UserSessionProtocol? {
+        guard accounts.keys.contains(userID) else { return nil }
+        
+        let userSession: UserSessionProtocol
+        if let live = accounts[userID] ?? nil {
+            userSession = live
+        } else {
+            switch await userSessionStore.restoreUserSession(userID: userID) {
+            case .success(let restored):
+                userSession = restored
+            case .failure(let error):
+                MXLog.error("Failed restoring \(userID) to switch to it: \(error)")
+                return nil
+            }
+        }
+        
+        appSettings.userSettings(for: userID).account.lastSelectedDate = .now
+        accounts.removeValue(forKey: userID)
+        accounts.updateValue(userSession, forKey: userID, insertingAt: 0)
+        return userSession
+    }
+    
     func reset() {
         userSessionStore.reset()
         accounts.removeAll()

@@ -7,10 +7,10 @@
 //
 
 import AVKit
+import BipeKit
 import Combine
 import Compound
 import ElementCall
-import BipeKit
 import SwiftState
 import SwiftUI
 
@@ -19,6 +19,11 @@ enum UserSessionFlowCoordinatorAction {
     case clearCache
     /// Logout and disable App Lock without any confirmation. The user forgot their PIN.
     case forceLogout
+    /// Bipe: show another account on this phone, or add one (ADR 0086, bipe#267).
+    case bipeSwitchAccount(userID: String)
+    case bipeAddAccount
+    /// Bipe: "Criar conta da empresa" (ADR 0087, bipe#269).
+    case bipeCreateCompanyAccount
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
@@ -43,6 +48,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     private let groupsTabFlowCoordinator: ChatsTabFlowCoordinator
     private let groupsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     private let youTabFlowCoordinator: SettingsFlowCoordinator
+    private let youTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     private let bipeSelfChat: BipeSelfChat
     
     private let searchScreenCoordinator: SearchScreenCoordinator?
@@ -50,6 +56,10 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     private let searchTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails?
     
     private var settingsFlowCoordinator: SettingsFlowCoordinator?
+    
+    private var bipeTermsReacceptCoordinator: BipeTermsReacceptScreenCoordinator?
+    /// Set while this account still has to accept the terms (ADR 0113): what to run after it accepts.
+    private var bipePendingTermsReaccept: (() -> Void)?
     
     enum State: StateType {
         /// The state machine hasn't started.
@@ -90,7 +100,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationTabCoordinator = NavigationTabCoordinator()
         navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: navigationTabCoordinator,
-                                                                                   handleResolver: flowParameters.userSession.bipeHandleResolver))
+                                                                                handleResolver: flowParameters.userSession.bipeHandleResolver))
         
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
@@ -111,7 +121,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                                         isInTab: true,
                                                         navigationStackCoordinator: youStackCoordinator,
                                                         flowParameters: flowParameters)
-        let youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: BipeStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
+        youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: BipeStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
         bipeSelfChat = BipeSelfChat(clientProxy: flowParameters.userSession.clientProxy)
         
         if flowParameters.userSession.userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
@@ -246,7 +256,9 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         guard let roomID else { return currentTab }
         // The self-chat has one member, so the SDK files it as a group. It opens in Conversas.
-        if roomID == bipeSelfChat.cachedRoomID { return .chats }
+        if roomID == bipeSelfChat.cachedRoomID {
+            return .chats
+        }
         guard let summary = userSession.clientProxy.roomSummaryForIdentifier(roomID) else { return currentTab }
         return BipeRoomListScope(summary: summary) == .groups ? .groups : .chats
     }
@@ -326,6 +338,10 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                     presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
                 case .hideCallScreenOverlay:
                     hideCallScreenOverlay()
+                case .bipeSwitchAccount(let userID):
+                    actionsSubject.send(.bipeSwitchAccount(userID: userID))
+                case .bipeAddAccount:
+                    actionsSubject.send(.bipeAddAccount)
                 case .logout:
                     Task { await self.runLogoutFlow() }
                 }
@@ -379,6 +395,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                     navigationTabCoordinator.setFullScreenCoverCoordinator(onboardingStackCoordinator, animated: animated)
                 case .dismiss:
                     navigationTabCoordinator.setFullScreenCoverCoordinator(nil)
+                    presentPendingBipeTermsReaccept() // Bipe: waited for onboarding (ADR 0113)
                 case .logoutConfirmed:
                     actionsSubject.send(.logout)
                 }
@@ -387,6 +404,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         setupCallObservers()
         setupUnreadNotificationsObserver()
+        setupBipeWaysBackObserver()
         
         searchScreenCoordinator?.actionsPublisher
             .sink { [weak self] action in
@@ -416,6 +434,46 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         if onboardingFlowCoordinator.shouldStart {
             clearRoute(animated: false)
             onboardingFlowCoordinator.start()
+        }
+    }
+    
+    // MARK: - Terms (Bipe ADR 0113)
+    
+    /// Shows the blocking terms re-accept screen. It never shows twice. While onboarding or a sheet is up it waits:
+    /// onboarding's dismissal shows it, else the next account check does.
+    func presentBipeTermsReacceptScreen(onAccepted: @escaping () -> Void) {
+        bipePendingTermsReaccept = onAccepted
+        presentPendingBipeTermsReaccept()
+    }
+    
+    private func presentPendingBipeTermsReaccept() {
+        guard let onAccepted = bipePendingTermsReaccept,
+              bipeTermsReacceptCoordinator == nil,
+              navigationTabCoordinator.fullScreenCoverCoordinator == nil,
+              navigationTabCoordinator.sheetCoordinator == nil else {
+            return
+        }
+        
+        let appSettings = userSession.userSettings.app
+        let coordinator = BipeTermsReacceptScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL),
+                                                                               clientProxy: userSession.clientProxy,
+                                                                               site: appSettings.websiteURL))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                guard let self else { return }
+                switch action {
+                case .accepted:
+                    bipePendingTermsReaccept = nil
+                    navigationTabCoordinator.setFullScreenCoverCoordinator(nil)
+                    onAccepted()
+                }
+            }
+            .store(in: &cancellables)
+        
+        bipeTermsReacceptCoordinator = coordinator
+        // Onboarding can replace the cover; the screen comes back when onboarding closes.
+        navigationTabCoordinator.setFullScreenCoverCoordinator(coordinator) { [weak self] in
+            self?.bipeTermsReacceptCoordinator = nil
         }
     }
     
@@ -468,6 +526,9 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             handleAppRoute(.userProfile(userID: userID), animated: true)
         case .openSelfChat:
             Task { await openSelfChat() }
+        case .bipeCreateCompanyAccount:
+            navigationTabCoordinator.setSheetCoordinator(nil) // Settings in a sheet on iPad and Mac.
+            actionsSubject.send(.bipeCreateCompanyAccount)
         }
     }
     
@@ -614,23 +675,67 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 
                 let badgeCount = Int(userSession.clientProxy.totalUnreadNotifications)
                 
-                // Bipe ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
-                var chatsCount = 0
-                var groupsCount = 0
-                for summary in roomSummaries {
-                    switch BipeRoomListScope(summary: summary) {
-                    case .chats: chatsCount += Int(summary.unreadNotificationsCount)
-                    case .groups: groupsCount += Int(summary.unreadNotificationsCount)
-                    }
-                }
-                chatsTabDetails.badgeCount = chatsCount
-                groupsTabDetails.badgeCount = groupsCount
+                updateBipeTabBadges(roomSummaries: roomSummaries)
                 
                 await flowParameters.notificationManager.removeDeliveredNotificationsForFullyReadRooms(roomSummaries)
                 await flowParameters.notificationManager.updateAppBadgeCount(badgeCount)
             }
         }
         .store(in: &cancellables)
+        
+        userSession.userSettings.app.seenInvitesPublisher
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                updateBipeTabBadges(roomSummaries: roomListPublisher.value)
+            }
+            .store(in: &cancellables)
+    }
+    
+    /// Bipe ADR 0053: each tab counts its own rooms. Quiet groups only notify for mentions, replies and polls.
+    /// A group invite the user has not opened counts 1 on Grupos. DM invites stay behind the Pedidos row.
+    private func updateBipeTabBadges(roomSummaries: [RoomSummary]) {
+        let seenInvites = userSession.userSettings.app.seenInvites
+        var chatsCount = 0
+        var groupsCount = 0
+        for summary in roomSummaries {
+            switch BipeRoomListScope(summary: summary) {
+            case .chats:
+                chatsCount += Int(summary.unreadNotificationsCount)
+            case .groups:
+                if summary.joinRequestType?.isInvite == true {
+                    groupsCount += seenInvites.contains(summary.id) ? 0 : 1
+                } else {
+                    groupsCount += Int(summary.unreadNotificationsCount)
+                }
+            }
+        }
+        chatsTabDetails.badgeCount = chatsCount
+        groupsTabDetails.badgeCount = groupsCount
+    }
+    
+    /// Bipe ADR 0112: the Você tab shows a warning when the account has one way back or none,
+    /// the same count as the badge on the "Sua conta" row.
+    private func setupBipeWaysBackObserver() {
+        let clientProxy = userSession.clientProxy
+        let appSettings = userSession.userSettings.app
+        guard clientProxy.userIDServerName == appSettings.bipeSignupServerName else { return }
+        
+        BipeWaysBackReader.counted
+            .filter { $0.userID == clientProxy.userID }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.youTabDetails.bipeWarning = $0.waysBack.needsWarning }
+            .store(in: &cancellables)
+        
+        // A new recovery key changes the count. The first value also does the first count.
+        clientProxy.secureBackupController.recoveryState
+            .removeDuplicates()
+            .sink { _ in
+                Task {
+                    _ = await BipeWaysBackReader.load(apiClient: BipeAPIClient(baseURL: appSettings.bipeAPIBaseURL), clientProxy: clientProxy)
+                }
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Native calls

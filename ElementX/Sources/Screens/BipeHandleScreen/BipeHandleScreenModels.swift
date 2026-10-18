@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Compound
 import BipeKit
+import Compound
 import SwiftUI
 
 enum BipeHandleScreenViewModelAction {
@@ -33,7 +33,9 @@ struct BipeHandleScreenViewState: BindableState {
     }
     
     var footer: String {
-        if let handleError { return handleError }
+        if let handleError {
+            return handleError
+        }
         if isInCooldown, let changeableAt {
             return BipeStrings.handleCooldownUntil(changeableAt.formatted(date: .long, time: .shortened))
         }

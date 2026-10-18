@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -16,7 +17,7 @@ struct BlockedUsersScreen: View {
         content
             .compoundList()
             .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle(L10n.commonBlockedUsers)
+            .navigationTitle(BipeStrings.privacyBlocked) // Bipe: the Privacidade row name (ADR 0112)
             .alert(item: $context.alertInfo)
             .disabled(context.viewState.processingUserID != nil)
     }

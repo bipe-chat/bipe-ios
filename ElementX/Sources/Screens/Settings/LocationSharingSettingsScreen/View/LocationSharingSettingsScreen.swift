@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -23,7 +24,7 @@ struct LocationSharingSettingsScreen: View {
             liveLocationSection
         }
         .compoundList()
-        .navigationTitle(L10n.commonLocationSharing)
+        .navigationTitle(BipeStrings.chatsLiveLocation) // Bipe: Element has no pt-BR here (ADR 0112)
         .navigationBarTitleDisplayMode(.inline)
     }
     
@@ -38,13 +39,15 @@ struct LocationSharingSettingsScreen: View {
         Section {
             ListRow(kind: .custom {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(L10n.screenAdvancedSettingsLiveLocationUpdateDistance(context.liveLocationMinimumDistanceUpdate))
+                    // Bipe: "A cada 25 m"; Element's plural is English only.
+                    Text(BipeStrings.chatsLiveLocationDistance(Self.measurementFormatter.string(from: .init(value: Double(context.liveLocationMinimumDistanceUpdate),
+                                                                                                            unit: UnitLength.meters))))
                         .font(.compound.bodyLG)
                         .foregroundStyle(.compound.textPrimary)
                         // The internal hidden label of the slider will read voice over
                         .accessibilityHidden(true)
                     Slider(value: binding, in: 1...100) {
-                        Text(L10n.screenAdvancedSettingsLiveLocationUpdateDistance(context.liveLocationMinimumDistanceUpdate))
+                        Text(BipeStrings.chatsLiveLocation)
                     } minimumValueLabel: {
                         Text(Self.measurementFormatter.string(from: .init(value: 1,
                                                                           unit: UnitLength.meters)))
@@ -65,14 +68,15 @@ struct LocationSharingSettingsScreen: View {
             })
         } header: {
             VStack(alignment: .leading, spacing: 4) {
-                Text(L10n.screenAdvancedSettingsLiveLocationSectionTitle)
+                Text(BipeStrings.chatsLiveLocation)
                     .compoundListSectionHeader()
-                Text(L10n.screenAdvancedSettingsLiveLocationSectionDescription)
+                Text(BipeStrings.chatsLiveLocationFooter)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textSecondary)
             }
         } footer: {
-            Text(context.viewState.liveLocationUpdateFooterAttributedString)
+            // Bipe: Element's "Precise Location" hint is English only.
+            Text(BipeStrings.chatsLiveLocationPrecise)
                 .compoundListSectionFooter()
         }
     }

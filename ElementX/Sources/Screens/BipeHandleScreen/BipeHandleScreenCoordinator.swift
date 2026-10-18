@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftUI
 
 struct BipeHandleScreenCoordinatorParameters {
@@ -31,9 +31,9 @@ final class BipeHandleScreenCoordinator: CoordinatorProtocol {
     
     init(parameters: BipeHandleScreenCoordinatorParameters) {
         viewModel = BipeHandleScreenViewModel(apiClient: parameters.apiClient,
-                                                 clientProxy: parameters.clientProxy,
-                                                 handleResolver: parameters.handleResolver,
-                                                 userIndicatorController: parameters.userIndicatorController)
+                                              clientProxy: parameters.clientProxy,
+                                              handleResolver: parameters.handleResolver,
+                                              userIndicatorController: parameters.userIndicatorController)
     }
     
     func start() {

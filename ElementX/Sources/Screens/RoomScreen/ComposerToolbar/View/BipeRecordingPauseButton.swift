@@ -12,7 +12,7 @@ struct BipeRecordingPauseButton: View {
     @ObservedObject var recorderState: AudioRecorderState
     let pause: () -> Void
     let resume: () -> Void
-
+    
     var body: some View {
         Button {
             recorderState.isPaused ? resume() : pause()

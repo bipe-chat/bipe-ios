@@ -7,6 +7,7 @@
 //
 
 import AnalyticsEvents
+import BipeKit
 import Combine
 import MatrixRustSDK
 import SwiftUI
@@ -27,7 +28,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     
     private let roomSummaryProvider: RoomSummaryProviderProtocol?
     private var bipeEmptyTabFallbackTask: Task<Void, Never>?
-
+    
     private var actionsSubject: PassthroughSubject<HomeScreenViewModelAction, Never> = .init()
     var actions: AnyPublisher<HomeScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
@@ -80,9 +81,24 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             updateRooms()
         }
         
+        updateBipeInviterGreeting()
+        NotificationCenter.default.publisher(for: .bipeInviterGreetingDidChange)
+            .filter { [userID = userSession.clientProxy.userID] in $0.object as? String == userID }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateBipeInviterGreeting() }
+            .store(in: &cancellables)
+        
         userSession.clientProxy.userProfilePublisher
             .receive(on: DispatchQueue.main)
             .weakAssign(to: \.state.userProfile, on: self)
+            .store(in: &cancellables)
+        
+        // Bipe: the account menu on the avatar (ADR 0086, bipe#267). The session UI is rebuilt when accounts change.
+        userSession.clientProxy.userProfilePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] profile in
+                self?.updateBipeAccounts(profile: profile)
+            }
             .store(in: &cancellables)
         
         userSession.sessionSecurityStatePublisher
@@ -216,6 +232,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     
     // MARK: - Public
     
+    // swiftlint:disable:next function_body_length
     override func process(viewAction: HomeScreenViewAction) {
         switch viewAction {
         case .selectRoom(let roomIdentifier):
@@ -248,14 +265,29 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         case .multiAccountAnnouncementAppeared:
             MXLog.info("The multi-account announcement has been seen.")
             userSettings.app.hasSeenMultiAccountAnnouncement = true
-        case .dismissMultiAccountAnnouncement, .addAccount: // There is no add account flow to start yet.
+        case .dismissMultiAccountAnnouncement:
             state.bindings.isPresentingMultiAccountAnnouncement = false
+        case .addAccount, .bipeAddAccount:
+            state.bindings.isPresentingMultiAccountAnnouncement = false
+            guard state.bipeCanAddAccount else { return }
+            actionsSubject.send(.bipeAddAccount)
+        case .bipeSwitchToNextAccount:
+            guard let next = state.bipeAccounts.first(where: { !$0.isCurrent }) else {
+                actionsSubject.send(.presentSettingsScreen)
+                return
+            }
+            actionsSubject.send(.bipeSwitchAccount(userID: next.userID))
+        case .bipeSwitchAccount(let userID):
+            guard userID != userSession.clientProxy.userID else { return }
+            actionsSubject.send(.bipeSwitchAccount(userID: userID))
         case .updateVisibleItemRange(let range):
             roomSummaryProvider?.updateVisibleRange(range)
         case .startChat:
             actionsSubject.send(.presentStartChatScreen)
         case .createGroup:
             actionsSubject.send(.presentCreateGroupScreen)
+        case .openBipeInviterChat:
+            Task { await openBipeInviterChat() }
         case .spaceFilters:
             if spaceFilterSubject.value != nil {
                 spaceFilterSubject.send(nil)
@@ -312,6 +344,10 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         case .markRoomAsFavourite(let roomIdentifier, let isFavourite):
             Task {
                 await markRoomAsFavourite(roomIdentifier, isFavourite: isFavourite)
+            }
+        case .setRoomMuted(let roomIdentifier, let isMuted):
+            Task {
+                await setRoomMuted(roomIdentifier, isMuted: isMuted)
             }
         case .acceptInvite(let roomIdentifier):
             Task {
@@ -389,7 +425,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         } else {
             .empty // Bipe ADR 0053: the total counts every room, the tab's filter can leave none.
         }
-
+        
         if roomListMode == .skeletons || roomListMode == .awaitingCachedRooms, roomSummaryProviderState.isLoaded, !hasRooms {
             scheduleBipeEmptyTabFallback()
         }
@@ -412,20 +448,20 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             }
         }
     }
-
+    
     /// A loaded tab whose filter matches no room never publishes a room, so it would show skeletons forever.
     private func scheduleBipeEmptyTabFallback() {
         guard bipeEmptyTabFallbackTask == nil else { return }
-
+        
         bipeEmptyTabFallbackTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1))
             guard let self, let roomSummaryProvider else { return }
             bipeEmptyTabFallbackTask = nil
-
+            
             guard state.roomListMode == .skeletons || state.roomListMode == .awaitingCachedRooms,
                   roomSummaryProvider.statePublisher.value.isLoaded,
                   roomSummaryProvider.roomListPublisher.value.isEmpty else { return }
-
+            
             MXLog.info("Loaded with no rooms in this tab, setting view room list mode to \"empty\"")
             state.roomListMode = .empty
         }
@@ -474,6 +510,35 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         state.bipeRequestCount = requestCount
     }
     
+    // MARK: Bipe inviter greeting (ADR 0034)
+    
+    private func updateBipeInviterGreeting() {
+        guard let greeting = userSession.clientProxy.bipeInviterGreeting else {
+            state.bipeInviterHandle = nil
+            return
+        }
+        state.bipeInviterHandle = greeting.handle ?? String(greeting.userID.trimmingPrefix("@"))
+        Task { [weak self] in
+            guard let self, let handle = await greeting.displayHandle(resolver: userSession.bipeHandleResolver),
+                  userSession.clientProxy.bipeInviterGreeting != nil else { return }
+            state.bipeInviterHandle = handle
+        }
+    }
+    
+    private static let bipeInviterChatLoadingID = "BipeInviterChatLoading"
+    
+    private func openBipeInviterChat() async {
+        guard let greeting = userSession.clientProxy.bipeInviterGreeting else { return }
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.bipeInviterChatLoadingID, type: .modal, title: L10n.commonLoading, persistent: true))
+        let roomID = await userSession.clientProxy.bipeDirectRoom(with: greeting.userID)
+        userIndicatorController.retractIndicatorWithId(Self.bipeInviterChatLoadingID)
+        guard let roomID else {
+            state.bindings.alertInfo = AlertInfo(id: UUID(), title: L10n.errorUnknown)
+            return
+        }
+        actionsSubject.send(.presentRoom(roomIdentifier: roomID))
+    }
+    
     private func markRoomAsFavourite(_ roomID: String, isFavourite: Bool) async {
         guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID) else {
             MXLog.error("Failed retrieving room for identifier: \(roomID)")
@@ -485,6 +550,32 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             analyticsService.trackInteraction(name: .MobileRoomListRoomContextMenuFavouriteToggle)
         case .failure(let error):
             MXLog.error("Failed marking room \(roomID) as favourite: \(isFavourite) with error: \(error)")
+        }
+    }
+    
+    // Bipe: one-tap mute from the room list. No duration, the room stays muted until unmuted.
+    private func setRoomMuted(_ roomID: String, isMuted: Bool) async {
+        guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID) else {
+            MXLog.error("Failed retrieving room for identifier: \(roomID)")
+            return
+        }
+        
+        let notificationSettings = userSession.clientProxy.notificationSettings
+        do {
+            if isMuted {
+                try await notificationSettings.setNotificationMode(roomId: roomID, mode: .mute)
+            } else {
+                try await notificationSettings.unmuteRoom(roomId: roomID,
+                                                          isEncrypted: roomProxy.infoPublisher.value.isEncrypted,
+                                                          isOneToOne: roomProxy.infoPublisher.value.activeMembersCount == 2)
+            }
+        } catch {
+            MXLog.error("Failed setting room \(roomID) muted: \(isMuted) with error: \(error)")
+            state.bindings.alertInfo = .init(id: UUID(),
+                                             title: L10n.commonError,
+                                             message: roomProxy.infoPublisher.value.isDM // Bipe: a DM is a conversation
+                                                 ? (isMuted ? BipeStrings.dmErrorMuting : BipeStrings.dmErrorUnmuting)
+                                                 : (isMuted ? L10n.screenRoomDetailsErrorMuting : L10n.screenRoomDetailsErrorUnmuting))
         }
     }
     
@@ -542,7 +633,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         defer {
             userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)
         }
-        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: L10n.commonLeavingRoom, persistent: true))
+        let isDirect = state.rooms.first { $0.roomID == roomID }?.isDirect == true // Bipe: a DM is a conversation
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDirect ? BipeStrings.dmLeaving : L10n.commonLeavingRoom, persistent: true))
         
         guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID),
               case .success = await roomProxy.leaveRoom() else {
@@ -552,9 +644,25 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         userIndicatorController.submitIndicator(UserIndicator(id: UUID().uuidString,
                                                               type: .toast,
-                                                              title: L10n.commonCurrentUserLeftRoom,
+                                                              title: isDirect ? BipeStrings.dmLeftByYou : L10n.commonCurrentUserLeftRoom,
                                                               icon: \.check))
         actionsSubject.send(.roomLeft(roomIdentifier: roomID))
+    }
+    
+    // MARK: Bipe accounts
+    
+    /// Bipe: the current account first, then the other accounts signed in on the phone. The live sessions publisher lists
+    /// only accounts whose session is open, so the keychain gives the list.
+    private func updateBipeAccounts(profile: UserProfile) {
+        let currentUserID = userSession.clientProxy.userID
+        BipeAccountLabels.remember(displayName: profile.displayName, for: currentUserID)
+        let current = BipeAccountMenuItem(userID: currentUserID, label: profile.displayName ?? currentUserID, isCurrent: true,
+                                          isCompany: BipeAccountLabels.isCompany(currentUserID))
+        let others = BipeSignedInAccounts.userIDs.filter { $0 != currentUserID }.sorted().map {
+            BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false, isCompany: BipeAccountLabels.isCompany($0))
+        }
+        state.bipeAccounts = [current] + others
+        state.bipeMaxAccounts = BipeAccountCap.maxPersonalAccounts()
     }
     
     // MARK: Multi-account announcement

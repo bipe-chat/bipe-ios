@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -47,10 +48,10 @@ enum SettingsScreenCoordinatorAction {
     case bipeHandle
     case bipePublicProfile
     case bipeMessaging
-    case bipeInvites
     case bipeContacts
     case bipeSelfChat
     case bipeAccount
+    case bipeGroup(BipeSettingsGroup)
 }
 
 final class SettingsScreenCoordinator: CoordinatorProtocol {
@@ -128,14 +129,14 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.bipePublicProfile)
                 case .bipeMessaging:
                     actionsSubject.send(.bipeMessaging)
-                case .bipeInvites:
-                    actionsSubject.send(.bipeInvites)
                 case .bipeContacts:
                     actionsSubject.send(.bipeContacts)
                 case .bipeSelfChat:
                     actionsSubject.send(.bipeSelfChat)
                 case .bipeAccount:
                     actionsSubject.send(.bipeAccount)
+                case .bipeGroup(let group):
+                    actionsSubject.send(.bipeGroup(group))
                 }
             }
             .store(in: &cancellables)

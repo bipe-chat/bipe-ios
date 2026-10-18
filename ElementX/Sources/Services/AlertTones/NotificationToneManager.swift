@@ -35,8 +35,8 @@ nonisolated struct NotificationToneManager: NotificationToneManagerProtocol {
     static let defaultElementXMessageTone: NotificationTone = .createBundledSound(label: L10n.screenNotificationSettingsSoundElementDefault,
                                                                                   filename: "message.caf")
     
-    /// All default tones (system + Element X), sorted by name.
-    static let allDefaultAlerts: [NotificationTone] = (defaultSystemAlerts + defaultElementXAlerts).sorted()
+    /// All default tones (system + Element X), sorted by name. Bipe: the app's own tones first.
+    static let allDefaultAlerts: [NotificationTone] = defaultElementXAlerts + defaultSystemAlerts
     
     /// Filename of the active tone file used by the notification service.
     static let selectedToneFilename = "currentAlert.caf"

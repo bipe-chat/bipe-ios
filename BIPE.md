@@ -113,17 +113,42 @@ Not done (needs the domain, Apple team or brand):
 ## Device-first accounts (ADR 0057, ADR 0059, bipe#153)
 
 - **Sign-up:** `BipeSignupScreen`: name, optional handle, 8-digit PIN twice, optional recovery email, invite code, App Attest. `POST /v1/signup` without `password`. The API returns the hidden password and a recovery token once. The PIN is checked with `BipePIN.problem(for:)` (BipeKit, cases in `test-vectors/pins.json`).
-- **Keychain:** `BipeCredentialStore` (BipeKit). The hidden password is `AfterFirstUnlockThisDeviceOnly` and never syncs. The recovery token is `kSecAttrSynchronizable` (iCloud Keychain). A pending email recovery (its claim secret) stays on the device. Nothing is shown or logged. ADR 0059 overrides ADR 0057 here: the password does not sync.
+- **Keychain:** `BipeCredentialStore` (BipeKit). The hidden password is `AfterFirstUnlockThisDeviceOnly` and never syncs. The recovery token is `kSecAttrSynchronizable` (iCloud Keychain). A pending email recovery (its claim secret) stays on the device. Nothing is shown or logged. ADR 0059 overrides ADR 0057 here: the password does not sync. Each account has its own password and token item, keyed by Matrix ID in `kSecAttrAccount` (ADR 0086, bipe#265): a second account never replaces the first. Calls without a Matrix ID read the newest item. The pending sign-up and the pending email recovery stay one per device: they have no Matrix ID until they end.
 - **Password login without a browser:** `BipeAccountSignIn` calls `AuthenticationService.configure(for:flow:)` and then `login(username:password:…)` with the Matrix ID. That is the SDK's `Client.login`, a plain `m.login.password` to `/_matrix/client/v3/login`. MAS answers it through its compatibility layer (`passwords.enabled: true`). The SDK does not force OAuth for this call; OAuth support only changes what Element's own login screens offer. Element's guard stays: a login that returns a refresh token is signed out again.
 - **Lost sign-up answer (ADR 0094):** `BipeCredentialStore.pendingSignup(pin:)` stores a `signup_key` and the PIN (`ThisDeviceOnly`) before the first `POST /v1/signup`. Every try sends the key, so a retry returns the same account. `BipeSignupScreenViewModel` retries up to 4 times on network, `internal` and `signup_in_progress`, with a new App Attest attestation each time. The pending sign-up goes after sign-in and the app lock PIN are done.
 - **App start without a session** (`AuthenticationFlowCoordinator.resumeBipeAccount`): a pending email recovery opens the wait screen; else a pending sign-up without a stored password finishes through `POST /v1/signup/resume`; else the password on this device signs in silently (and a pending sign-up gives the app lock its PIN); else a synced token opens the PIN prompt (`POST /v1/recovery/token`, new password and token).
-- **Sign-out** deletes the password on this device (`AppCoordinator`, user sign-out and forced sign-out). The token stays, so the next sign-in needs the PIN. An auth error from the server keeps the password.
+- **Sign-out** deletes the signed-in account's password on this device (`AppCoordinator.bipeDeleteStoredPassword`, user sign-out and forced sign-out; without a session, every password). The token stays, so the next sign-in needs the PIN. An auth error from the server keeps the password.
 - **Recovery screen** (`BipeRecoveryScreen`, start screen button "Voltar pra sua conta"): token and PIN; old phone (QR, the old phone shows the code); recovery email (`POST /v1/recovery/email`); "Entrar manualmente" for beta accounts (MAS OAuth). Link `https://bipe.chat/recuperar/#<token>` → `AppRoute.bipeRecoveryLink` → PIN, or a new PIN after "Esqueci minha senha" → `POST /v1/recovery/email/confirm` → wait screen that polls `/claim` every minute.
-- **App lock:** the account PIN is the app lock PIN (`AppLockServiceProtocol.bipeUseAccountPIN`), with biometric unlock on when the device has it. A new app lock PIN has 8 digits and passes the shared rule. An older 4-digit app lock PIN still unlocks (`pinCodeLength` follows the stored PIN).
+- **App lock:** the app lock PIN is the device PIN (ADR 0086, bipe#266). It follows the account PIN while the phone holds one account (`BipeDevicePIN.followsAccountPIN`, `AppLockServiceProtocol.bipeUseAccountPIN`), with biometric unlock on when the device has it. With two or more accounts, a set device PIN stays and the PIN footer in Sua conta says so (`bipe_account_pin_footer_device`). A new app lock PIN has 8 digits and passes the shared rule. An older 4-digit app lock PIN still unlocks (`pinCodeLength` follows the stored PIN).
 - **Settings → "Trocar senha":** `BipeAccountScreen`. Device owner check (Face ID or passcode), then `PUT /v1/me/pin`. Blocked PIN state from `GET /v1/me/account`. Beta accounts: "Crie sua senha" sets the PIN, then `POST /v1/me/device-first` and stores the returned credentials. Recovery email: add, change, remove.
 - **Old devices:** `BipeRecoveryAlerts` reads `GET /v1/me/account` after sign-in and on every foreground. A waiting recovery shows `bipe_recovery_alert_*` with "Cancelar, não fui eu" (`POST /v1/me/recoveries/{id}/cancel`). A completed token recovery shows once. The device's own token recovery, and recoveries that existed before this device's first check, do not alert.
+- **Terms re-accept (ADR 0113, bipe#366):** `BipeRecoveryAlerts` shows `BipeTermsReacceptScreen` when a successful `GET /v1/me/account` has a `terms_version` other than `BipeRegistries.legalVersion` (none counts as other). Read errors show nothing: the server is the authority. Full-screen cover from `UserSessionFlowCoordinator.presentBipeTermsReacceptScreen`; no close, no swipe, no sign-out. Waits for onboarding. Recovery alerts wait until accepted (an alert cannot show over the cover); acceptance runs the check again. Checkbox row: `BipeTermsCheckbox`, shared with sign-up.
 - **Password saving:** `webcredentials:bipe.chat` in the associated domains; the AASA lists both app IDs (bipe-infra).
 - Not built: guardian and CPF recovery (no API yet), QR sign-in checks from bipe#152, the fallback prompt after sign-up (the optional email on the form is the only fallback).
+
+## Several accounts (ADR 0086, bipe#267)
+
+- **Chat list avatar** (`HomeScreen.settingsButton`): a tap with two or more accounts switches to the next one (one account: Você, as before). A long press opens a context menu: every account (`BipeAccountMenuItem`, current one checked), then "Adicionar conta" (`bipe_account_add`) up to the cap, else `bipe_account_cap_reached`. Account names come from `BipeAccountLabels` (BipeKit), because another account's session may not be live; the list comes from the session keychain (`BipeSignedInAccounts`), because `sessionsPublisher` lists live sessions only.
+- **Switch** (`AppCoordinator.bipeSwitchAccount`): pause the current session, `UserSessionManager.activate(userID:)` (restores the session when it is not live, moves it first), then rebuild the session UI. The state stays `signedIn`.
+- **Add account** (`bipeStartAddingAccount`): `AuthenticationFlowCoordinator(isAddingAccount: true)` shows the start screen as a sheet over the session, without the silent sign-in. A swipe down cancels. A sign-in adds the session and opens it (`isNewLogin: true`). The recovery screen offers only tokens of accounts not on the phone (`BipeCredentialStore.recoveryToken(excluding:)`).
+- **Cap:** `BipeAccountCap` (BipeKit): the last `max_accounts` from `GET /v1/me/account` (read in `BipeRecoveryAlerts`), else `BipeRegistries.maxPersonalAccounts` (2). Company accounts do not count (#269).
+- **Sign-out:** another account on the phone opens (`signedOut => restoringSession`). A sign-out after a forgotten device PIN removes every account from the phone (`userSessionManager.reset()`), so the PIN cannot be skipped to reach the other account.
+- Upstream's `multiAccountEnabled` flag and its announcement stay off.
+- Not done: the account avatar in the composer, the account name in notifications, a check that the NSE reads the right session per push (unverified), the ADR 0120 rounded square for a verified company (needs #252). Upstream develop has 28 newer commits with multi-account work ("Keep every signed-in account live", "Notify every signed-in account"); a rebase onto it can replace parts of this.
+
+## Company account, owner case (ADR 0087, bipe#269)
+
+- **Criar conta da empresa:** row `account.createCompany` in Sua conta, gated by `flag:companyAccount`. `BipeSettingsGroupScreenViewModel` turns the flag on only when `BipeAppAttest.isSupported` and the account on screen is not a company (ADR 0043). The row opens the add-account sheet straight on the sign-up screen in company mode (`AuthenticationFlowCoordinator(bipeAccountType: .company)`): the name field is "Nome da empresa", and `POST /v1/signup` sends `account_type: company` with the App Attest attestation.
+- **Account type** on the phone: `BipeAccountLabels.rememberCompany` at sign-up and from `account_type` in `GET /v1/me/account` (`BipeRecoveryAlerts`). A company account does not count in the cap (`HomeScreenViewState.bipeCanAddAccount`, `AppCoordinator.bipeStartAddingAccount`).
+- **Identity on screen:** the chat list title is the company's name (`HomeScreen.title`); the composer placeholder is "Respondendo como <empresa>" (`ComposerToolbarViewState.bipeReplyingAs`).
+- Not done: the CNPJ steps in the app (the claim UI is bipe#249 and #115; the API has them), the seal and the distinct colour in the top bar (#252, ADR 0120), the company's own recovery key and fallback prompts, a second seat verified from the owner's phone (Element's device verification may cover it; unverified).
+
+## Contacts and invites (growth loop step 2)
+
+- **One settings row**, "Contatos e convites", opens `BipeContactsScreen`. Invites have no settings row of their own.
+- **Contacts screen:** the invite buttons on top (`BipeInviteButtonsSection`, shared with `BipeInvitesScreen`), then people who joined with the user's invite (`GET /v1/me/invites`, status `used`), then address-book matches, then a "Convites ainda não usados" row with the count that opens `BipeInvitesScreen`. The counts reload on each appear, so they are current after a return from the invites screen.
+- **Start chat "Convidar pessoas":** creates a personal invite and opens the share sheet (`BipeInviteCreator.createIfAvailable`). Element shared a matrix.to profile link, which is a dead end for an invite-only sign-up.
+- `BipeInviteCreator` (BipeKit) is the one place that creates an invite and stores its link. `BipeInviteQuota` writes the quota text.
 
 ## Handle change lines (ADR 0066, bipe#166)
 
@@ -146,9 +171,9 @@ Not done (needs the domain, Apple team or brand):
 ## Tab bar (bipe ADR 0053)
 
 - **Tabs:** Conversas, Grupos, Você, plus search (`UserSessionFlowCoordinator.HomeTab`). The Spaces tab is not created; `SpacesTabFlowCoordinator` stays in the tree for rebases.
-- **Conversas and Grupos** are two `ChatsTabFlowCoordinator`s with a `BipeRoomListScope`. `clientProxy.roomSummaryProvider` lists Conversas (SDK category `people`, plus every invite); `bipeGroupsRoomSummaryProvider` lists Grupos (category `group`, joined). `NotificationSettingsEditScreenViewModel` reads `staticRoomSummaryProvider`, because the main provider no longer lists all rooms.
+- **Conversas and Grupos** are two `ChatsTabFlowCoordinator`s with a `BipeRoomListScope`. `clientProxy.roomSummaryProvider` lists Conversas (SDK category `people`, DM invites included); `bipeGroupsRoomSummaryProvider` lists Grupos (category `group`, joined or invited). Group invites show in Grupos, as on Android. `NotificationSettingsEditScreenViewModel` reads `staticRoomSummaryProvider`, because the main provider no longer lists all rooms.
 - **Routing:** `.room`, `.event`, `.roomDetails` and `.thread` open in the tab that lists the room (`bipeRoomTab(for:)`). Other room routes stay in the current tab.
-- **Badges:** each tab sums `unreadNotificationsCount` of its own rooms. The app icon badge stays the total.
+- **Badges:** each tab sums `unreadNotificationsCount` of its own rooms. A group invite not in `seenInvites` adds 1 to Grupos (`updateBipeTabBadges`). The app icon badge stays the total.
 - **Trap: the room count is not the tab's.** `RoomSummaryProviderState.loaded(totalNumberOfRooms:)` comes from the SDK and counts every room in the account, whatever the tab's filter. Never read it as "this tab has rooms". On 15 Oct 2026 Grupos showed skeletons forever for an account with chats and no groups: the home screen waited for rooms that the filter never published. `HomeScreenViewModel.scheduleBipeEmptyTabFallback` now shows the empty state after one second.
 - **No spaces in the create-group screen:** `StartChatFlowCoordinator` passes `spaceSelectionMode: .none`, so the space picker and the "space members" access types do not show. Spaces come back only as Comunidade inside Grupos (ADR 0084).
 - **Você** is `SettingsFlowCoordinator(isInTab: true)` in a stack in the tab: no close button, title "Você". `.settings` and `.chatBackupSettings` routes select the tab. On a Mac with secondary windows, settings still open in a window.
@@ -179,6 +204,21 @@ Not done (needs the domain, Apple team or brand):
 
 - **Login stuck on "loading" after choosing a server:** check the app log for `TimedOut` on `/.well-known/matrix/client`. On 11 October 2026 the cause was the phone's Tailscale routing, not the app. Logs: `xcrun devicectl device copy from --device <UDID> --domain-type appGroupDataContainer --domain-identifier group.chat.bipe.dev --source Library/Logs/chat.bipe.app.dev/<file> --destination <local file>`.
 
+## DMs are DMs (16 Oct 2026)
+
+- A DM never turns into a group. DM details: no topic (`hasTopicSection`), no polls history, no "Convidar" to the DM. "Convidar para um grupo" opens `BipeInviteToGroupSheet` with your joined groups from `staticRoomSummaryProvider` (not DMs, spaces, replaced rooms or the self-chat) and invites the other person to the one you pick. The group's invite permission is checked at pick time.
+- The composer "+" menu has no poll in a DM (`ComposerToolbarViewState.isDM`).
+- Leave in a DM says "Sair da conversa" with `bipe_dm_leave_body`.
+- No room setup lines in a DM timeline: `RoomTimelineItemFactory` drops invites, joins and "encryption enabled" (upstream already dropped the create event and your own join). A leave says "saiu da conversa" (`bipe_dm_left`). DM details are titled "Informações da conversa". The room list menu, leave toast and spinner, mute errors and the media empty states say "conversa" in a DM.
+- Leaving a DM is final for that room. The SDK finds a DM only among joined rooms (`get_dm_rooms`), so if you start a chat again, Bipe creates a new room. The other person keeps the old room: they see "Você está sozinho nesta conversa" and can invite you back to it.
+- Android does the same (`BipeInviteToGroup` in libraries/bipe).
+
+## Message menu (16 Oct 2026)
+
+- Long press on a message opens the native iOS context menu, not Element's sheet. `TimelineItemContextMenu`: reaction palette (emoji drawn into images, palettes only render images), actions, secondary actions. `TimelineItemContextMenuPreview`: the sheet's header (`TimelineItemMenuHeader`) above the bubble.
+- The sheet (`TimelineItemMenu`) stays for the VoiceOver action. `longPressWithFeedback` on the bubble is gone.
+- On a rebase, keep the context menu unconditional (upstream shows it only on a Mac).
+
 ## Differences from Android (ADR 0031)
 
 Each line is a difference with its reason. A difference not listed here is a bug. The table is generated from `bipe-shared/product/parity.json` (ADR 0092): change it there, then run `node tools/parity.mjs --write` in bipe-shared. Android's list: `../bipe-android/BIPE.md`.
@@ -191,11 +231,13 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | OAuth redirect | `<bundle id>:/oauth/callback` | `<application id>:/` | Element's default per platform; both are reverse-domain private-use schemes |
 | Push | APNs through Sygnal | FCM through Sygnal; UnifiedPush optional | OS push channel (#89, #90, #91) |
 | Sign-up attestation | App Attest | None yet | Play Integrity not built on Android (#92) **Gap** |
+| Criar conta da empresa | In Sua conta on a phone with App Attest | Not shown | A company account needs an attested device (ADR 0043, ADR 0087); Play Integrity not built on Android (#92) **Gap** |
 | Synced recovery token | iCloud Keychain | Block Store (gplay); none in the F-Droid build | Platform credential store (ADR 0059). F-Droid has no Google Play services |
 | App lock | Element's lock screen, the account PIN, biometrics on | Element's lock screen, 8-digit account PIN, biometric option | Element X lock screen per platform |
 | Check before a PIN change | Biometrics or the phone's passcode | Biometrics or the phone's screen lock; else the app lock PIN | `LAContext` on iOS, `BiometricPrompt` with `DEVICE_CREDENTIAL` on Android |
 | Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
 | Voice messages | Sender-side transcription, pause and resume | Shows the transcript and checks it for scams; no sender-side transcription | On-device recognition on low-end Android unmeasured (#80, #81) **Gap** |
+| Where invites live | Contatos e convites: invite buttons, people who joined with your invite, and unused invites in the contacts screen | Convidar pessoas in settings | Android has no contacts screen yet (#401) **Gap** |
 | Sticker from a photo | Subject cut-out (Vision) | Centred square crop | Cut-out needs ML Kit, not decided (#101) **Undecided** |
 | Sticker import | Chat export ZIP or files | Chat export ZIP or files; picker opens in WhatsApp's stickers folder | iOS apps cannot read WhatsApp's files |
 | Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) **Undecided** |
@@ -204,5 +246,8 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Search | Search tab (iOS 26+), inline before iOS 26 | Search button in the top bar of Conversas and Grupos | Platform idiom (ADR 0053) |
 | Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/bipe; same result for the user |
 | Conferir no Bipe: close | Back to the app that shared | Back to Bipe | The iOS check runs in the share extension; Android shows it in the app (ADR 0091) |
+| Message actions | Native context menu on long press: reaction row, actions, the message as preview | Element's bottom sheet | Platform idiom |
+| Terms screen and a recovery alert due together | Terms screen first, the alert right after Continue | Recovery alert first, then the terms screen | On iOS a root alert cannot show over the full-screen terms cover; on Android the terms screen is an overlay that waits for the alert |
+| Settings: Idioma | Row that opens the iPhone Ajustes | No row | iOS sets the app language in system settings; Android follows the system language |
 
 <!-- /parity:differences -->

@@ -22,11 +22,13 @@ struct TimelineItemMenu: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            messagePreview
-                .padding(.horizontal, 16)
-                .padding(.top, 32.0)
-                .padding(.bottom, 4.0)
-                .frame(idealWidth: 300.0)
+            TimelineItemMenuHeader(item: item) {
+                send(.itemSendInfoTapped(itemID: item.id))
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 32.0)
+            .padding(.bottom, 4.0)
+            .frame(idealWidth: 300.0)
             
             Divider()
                 .background(Color.compound.bgSubtlePrimary)
@@ -57,57 +59,6 @@ struct TimelineItemMenu: View {
         .presentationDetents([.medium, .large])
         .presentationBackground(Color.compound.bgCanvasDefault)
         .presentationDragIndicator(.visible)
-    }
-    
-    private var messagePreview: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(alignment: .top, spacing: 0.0) {
-                LoadableAvatarImage(url: item.sender.avatarURL,
-                                    name: item.sender.displayName,
-                                    contentID: item.sender.id,
-                                    avatarSize: .user(on: .timeline),
-                                    mediaProvider: context.mediaProvider)
-                    .accessibilityHidden(true)
-                
-                Spacer(minLength: 8.0)
-                
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(item.sender.displayName ?? item.sender.id)
-                        .font(.compound.bodySMSemibold)
-                        .foregroundColor(.compound.textPrimary)
-                        .textSelection(.enabled)
-                    
-                    Text(item.timelineMenuDescription)
-                        .font(.compound.bodyMD)
-                        .foregroundColor(.compound.textSecondary)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Spacer(minLength: 16.0)
-                
-                Text(item.timestamp.formattedTime())
-                    .font(.compound.bodyXS)
-                    .foregroundColor(.compound.textSecondary)
-            }
-            .accessibilityElement(children: .combine)
-            
-            if case let .sendingFailed(.verifiedUser(failure)) = item.properties.deliveryStatus {
-                Divider()
-                    .padding(.horizontal, -16)
-                
-                VerifiedUserSendFailureView(failure: failure,
-                                            members: context.viewState.members,
-                                            ownUserID: context.viewState.ownUserID) {
-                    send(.itemSendInfoTapped(itemID: item.id))
-                }
-                .padding(.bottom, 8)
-            } else if let authenticity = item.properties.encryptionAuthenticity {
-                Label(authenticity.message, icon: authenticity.icon, iconSize: .small, relativeTo: .compound.bodySMSemibold)
-                    .font(.compound.bodySMSemibold)
-                    .foregroundStyle(authenticity.foregroundStyle)
-            }
-        }
     }
     
     private var reactionsSection: some View {
@@ -198,6 +149,64 @@ struct TimelineItemMenu: View {
         // Otherwise we might get errors that a sheet is already presented
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             context.send(viewAction: action)
+        }
+    }
+}
+
+/// Sender, time and encryption state of an item. Shared by the menu sheet and the context menu preview.
+struct TimelineItemMenuHeader: View {
+    @EnvironmentObject private var context: TimelineViewModel.Context
+    
+    let item: EventBasedTimelineItemProtocol
+    let onSendInfoTapped: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .top, spacing: 0.0) {
+                LoadableAvatarImage(url: item.sender.avatarURL,
+                                    name: item.sender.displayName,
+                                    contentID: item.sender.id,
+                                    avatarSize: .user(on: .timeline),
+                                    mediaProvider: context.mediaProvider)
+                    .accessibilityHidden(true)
+                
+                Spacer(minLength: 8.0)
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(item.sender.displayName ?? item.sender.id)
+                        .font(.compound.bodySMSemibold)
+                        .foregroundColor(.compound.textPrimary)
+                        .textSelection(.enabled)
+                    
+                    Text(item.timelineMenuDescription)
+                        .font(.compound.bodyMD)
+                        .foregroundColor(.compound.textSecondary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Spacer(minLength: 16.0)
+                
+                Text(item.timestamp.formattedTime())
+                    .font(.compound.bodyXS)
+                    .foregroundColor(.compound.textSecondary)
+            }
+            .accessibilityElement(children: .combine)
+            
+            if case let .sendingFailed(.verifiedUser(failure)) = item.properties.deliveryStatus {
+                Divider()
+                    .padding(.horizontal, -16)
+                
+                VerifiedUserSendFailureView(failure: failure,
+                                            members: context.viewState.members,
+                                            ownUserID: context.viewState.ownUserID,
+                                            action: onSendInfoTapped)
+                    .padding(.bottom, 8)
+            } else if let authenticity = item.properties.encryptionAuthenticity {
+                Label(authenticity.message, icon: authenticity.icon, iconSize: .small, relativeTo: .compound.bodySMSemibold)
+                    .font(.compound.bodySMSemibold)
+                    .foregroundStyle(authenticity.foregroundStyle)
+            }
         }
     }
 }

@@ -75,7 +75,7 @@ struct AppLockSetupPINScreen: View {
                 .font(.compound.bodyMD)
                 .multilineTextAlignment(.center)
                 .foregroundColor(subtitleColor)
-
+            
             // Bipe: nobody from Bipe asks for the PIN (bipe#182).
             Text(BipeStrings.pinNeverAsked)
                 .font(.compound.bodySM)

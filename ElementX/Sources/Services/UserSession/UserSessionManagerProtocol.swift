@@ -44,6 +44,9 @@ protocol UserSessionManagerProtocol: AnyObject {
     func add(_ userSession: UserSessionProtocol)
     /// Deletes an account's credentials and data, and forgets its session.
     func remove(userID: String)
+    /// Bipe: makes a signed in account the active one, restoring its session first when it isn't live (ADR 0086).
+    /// `nil` when the session can't be restored.
+    func activate(userID: String) async -> UserSessionProtocol?
     /// Deletes every account's credentials and data.
     func reset()
 }

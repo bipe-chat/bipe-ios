@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import Combine
 import BipeKit
+import Combine
 import SwiftUI
 
 typealias BipeStickerPickerScreenViewModelType = StateStoreViewModelV2<BipeStickerPickerScreenViewState, BipeStickerPickerScreenViewAction>

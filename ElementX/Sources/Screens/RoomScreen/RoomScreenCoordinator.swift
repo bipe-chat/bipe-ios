@@ -113,6 +113,7 @@ final class RoomScreenCoordinator: CoordinatorProtocol {
     
     // MARK: - Public
     
+    // swiftlint:disable:next function_body_length
     func start() {
         timelineViewModel.actions
             .sink { [weak self] action in
@@ -179,6 +180,12 @@ final class RoomScreenCoordinator: CoordinatorProtocol {
                 guard let self else { return }
                 
                 timelineViewModel.process(composerAction: action)
+                switch action {
+                case .sendMessage, .voiceMessage(.send):
+                    roomViewModel.bipeOwnMessageSent() // Bipe ADR 0034
+                default:
+                    break
+                }
             }
             .store(in: &cancellables)
         

@@ -104,19 +104,14 @@ final class BugReportServiceTests {
     @Test
     @MainActor
     func configurations() async throws {
-        guard case let .url(initialURL) = userSettings.app.bugReportRageshakeURL.publisher.value else {
-            Issue.record("Unexpected initial configuration.")
-            return
-        }
+        // Bipe: there is no rageshake server by default, so the service starts disabled.
+        #expect(userSettings.app.bugReportRageshakeURL.publisher.value == .disabled)
         
         let service = BugReportService(rageshakeURLPublisher: userSettings.app.bugReportRageshakeURL.publisher,
                                        applicationID: "mock_app_id",
                                        sdkGitSHA: "1234",
                                        session: .mock,
                                        appHooks: AppHooks())
-        #expect(service.isEnabled)
-        
-        userSettings.app.bugReportRageshakeURL.applyRemoteValue(.disabled)
         #expect(!service.isEnabled)
         
         userSettings.app.bugReportRageshakeURL.applyRemoteValue(.url("https://bugs.server.net/submit"))
@@ -136,12 +131,11 @@ final class BugReportServiceTests {
         
         #expect(customConfigurationResponse.reportURL == "https://bugs.server.net/123")
         
+        userSettings.app.bugReportRageshakeURL.applyRemoteValue(.disabled)
+        #expect(!service.isEnabled)
+        
         userSettings.app.bugReportRageshakeURL.reset()
-        #expect(service.isEnabled)
-        
-        let defaultConfigurationResponse = try await service.submitBugReport(bugReport, progressListener: progressSubject).get()
-        
-        #expect(defaultConfigurationResponse.reportURL == initialURL.absoluteString.replacingOccurrences(of: "submit", with: "123"))
+        #expect(!service.isEnabled)
     }
 }
 
