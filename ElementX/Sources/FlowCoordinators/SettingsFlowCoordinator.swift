@@ -121,11 +121,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 case .moderationAndSafety:
                     presentModerationAndSafetySettings()
                 case .bugReport:
-                    bugReportFlowCoordinator = BugReportFlowCoordinator(parameters: .init(presentationMode: .push(navigationStackCoordinator),
-                                                                                          userIndicatorController: flowParameters.userIndicatorController,
-                                                                                          bugReportService: flowParameters.bugReportService,
-                                                                                          userSession: flowParameters.userSession))
-                    bugReportFlowCoordinator?.start()
+                    presentBugReport()
                     
                 case .logout:
                     actionsSubject.send(.runLogoutFlow)
@@ -219,6 +215,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             actionsSubject.send(.runLogoutFlow)
         case .accountCreateCompany:
             actionsSubject.send(.bipeCreateCompanyAccount)
+        case .helpReportProblem:
+            presentBugReport()
         case .chatsMediaQuality:
             presentMediaUploadQualitySettings()
         case .chatsLiveLocation:
@@ -226,6 +224,15 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         default:
             MXLog.error("Bipe settings row without a screen: \(row.rawValue)")
         }
+    }
+    
+    /// "Avisar sobre um problema" (bipe#367): the report goes to the Bipe API.
+    private func presentBugReport() {
+        bugReportFlowCoordinator = BugReportFlowCoordinator(parameters: .init(presentationMode: .push(navigationStackCoordinator),
+                                                                              userIndicatorController: flowParameters.userIndicatorController,
+                                                                              bugReportService: flowParameters.bugReportService,
+                                                                              userSession: flowParameters.userSession))
+        bugReportFlowCoordinator?.start()
     }
     
     /// `onDone` runs after the screen pops, e.g. to reload the screen below.

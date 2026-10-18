@@ -326,7 +326,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         let parameters = AuthenticationStartScreenParameters(authenticationService: authenticationService,
                                                              provisioningParameters: provisioningParameters,
-                                                             isBugReportServiceEnabled: bugReportService.isEnabled,
+                                                             // Bipe: the Bipe API takes reports from signed-in users only (bipe#367).
+                                                             isBugReportServiceEnabled: false,
                                                              appMediator: appMediator,
                                                              appSettings: appSettings,
                                                              mediaProvider: mediaProvider,

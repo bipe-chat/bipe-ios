@@ -20,6 +20,8 @@ nonisolated struct BugReport: Equatable {
     let canContact: Bool
     var githubLabels: [String]
     let files: [URL]
+    /// Bipe: the Bipe API takes reports from signed-in users only (bipe#367).
+    var accessToken: String?
 }
 
 struct SubmitBugReportResponse: Decodable {
