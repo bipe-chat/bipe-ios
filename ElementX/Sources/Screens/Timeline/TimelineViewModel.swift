@@ -845,7 +845,9 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
         
         scrollToBottom()
         
-        if case .edit = mode { return }
+        if case .edit = mode {
+            return
+        }
         await bipeAskForNotificationsIfNeeded()
     }
     
