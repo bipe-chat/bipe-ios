@@ -611,13 +611,13 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                 errorLabel = L10n.commonWaitingForDecryptionKey
             case .verificationViolation:
                 encryptionType = .megolmV1AesSha2(sessionID: sessionID, cause: .verificationViolation)
-                errorLabel = L10n.commonUnableToDecryptVerificationViolation
+                errorLabel = BipeStrings.chatSenderKeysChanged
             case .unsignedDevice, .unknownDevice:
                 encryptionType = .megolmV1AesSha2(sessionID: sessionID, cause: .insecureDevice)
-                errorLabel = L10n.commonUnableToDecryptInsecureDevice
+                errorLabel = BipeStrings.chatSenderDeviceUnconfirmed
             case .sentBeforeWeJoined:
                 encryptionType = .megolmV1AesSha2(sessionID: sessionID, cause: .sentBeforeWeJoined)
-                errorLabel = L10n.commonUnableToDecryptNoAccess
+                errorLabel = BipeStrings.chatMessageNoAccess
             case .historicalMessageAndBackupIsDisabled:
                 encryptionType = .megolmV1AesSha2(sessionID: sessionID, cause: .historicalMessageAndBackupDisabled)
                 errorLabel = L10n.timelineDecryptionFailureHistoricalEventNoKeyBackup

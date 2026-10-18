@@ -22,19 +22,19 @@ struct HomeScreenEmptyStateView: View {
     
     var body: some View {
         VStack(spacing: 2) {
-            Text(isGroups ? BipeStrings.groupsEmptyTitle : L10n.screenRoomlistEmptyTitle)
+            Text(isGroups ? BipeStrings.groupsEmptyTitle : BipeStrings.chatsEmptyTitle)
                 .font(.compound.bodyLG)
                 .foregroundColor(.compound.textSecondary)
                 .multilineTextAlignment(.center)
             
-            Text(isGroups ? BipeStrings.groupsEmptyBody : L10n.screenRoomlistEmptyMessage)
+            Text(isGroups ? BipeStrings.groupsEmptyBody : BipeStrings.chatsEmptyBody)
                 .font(.compound.bodyLG)
                 .foregroundColor(.compound.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 16)
             
             Button { context.send(viewAction: isGroups ? .createGroup : .startChat) } label: {
-                Label(isGroups ? BipeStrings.groupsEmptyAction : L10n.actionStartChat, icon: isGroups ? \.plus : \.chat)
+                Label(isGroups ? BipeStrings.groupsEmptyAction : BipeStrings.actionStartChat, icon: isGroups ? \.plus : \.chat)
                     .font(.compound.bodyLGSemibold)
                     .foregroundColor(.compound.textOnSolidPrimary)
                     .padding(.vertical, 6)

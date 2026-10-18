@@ -1679,4 +1679,50 @@ public enum BipeStrings {
     }
 
     public static var chatsLiveLocationPermissionLink: String { NSLocalizedString("bipe_chats_live_location_permission_link", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsMessagePlaceholder: String { NSLocalizedString("bipe_chats_message_placeholder", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsEmptyTitle: String { NSLocalizedString("bipe_chats_empty_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatsEmptyBody: String { NSLocalizedString("bipe_chats_empty_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var actionStartChat: String { NSLocalizedString("bipe_action_start_chat", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsPermissionTitle: String { NSLocalizedString("bipe_notifications_permission_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var notificationsPermissionBody: String { NSLocalizedString("bipe_notifications_permission_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatMessageUnavailable: String { NSLocalizedString("bipe_chat_message_unavailable", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatSenderDeviceUnconfirmed: String { NSLocalizedString("bipe_chat_sender_device_unconfirmed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatSenderKeysChanged: String { NSLocalizedString("bipe_chat_sender_keys_changed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var actionBlockPerson: String { NSLocalizedString("bipe_action_block_person", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var actionUnblockPerson: String { NSLocalizedString("bipe_action_unblock_person", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var microphonePermissionBody: String { NSLocalizedString("bipe_microphone_permission_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var cameraPermissionBody: String { NSLocalizedString("bipe_camera_permission_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var reportMessageReason: String { NSLocalizedString("bipe_report_message_reason", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var reportMessageBody: String { NSLocalizedString("bipe_report_message_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpReportProblem: String { NSLocalizedString("bipe_help_report_problem", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpProblemDescription: String { NSLocalizedString("bipe_help_problem_description", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var deviceConfirmAction: String { NSLocalizedString("bipe_device_confirm_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var keysConfirmAction: String { NSLocalizedString("bipe_keys_confirm_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var a11yChatPhoto: String { NSLocalizedString("bipe_a11y_chat_photo", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpProblemLanguage: String { NSLocalizedString("bipe_help_problem_language", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var chatMessageNoAccess: String { NSLocalizedString("bipe_chat_message_no_access", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var stickerLabel: String { NSLocalizedString("bipe_sticker_label", tableName: "Bipe", bundle: .module, comment: "") }
 }

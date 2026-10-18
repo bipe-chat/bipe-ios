@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -32,12 +33,12 @@ struct NotificationPermissionsScreen: View {
             BigIcon(icon: \.notificationsSolid)
                 .padding(.bottom, 8)
             
-            Text(L10n.screenNotificationOptinTitle)
+            Text(BipeStrings.notificationsPermissionTitle)
                 .font(.compound.headingMDBold)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textPrimary)
             
-            Text(L10n.screenNotificationOptinSubtitle)
+            Text(BipeStrings.notificationsPermissionBody)
                 .font(.compound.bodyMD)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.compound.textSecondary)

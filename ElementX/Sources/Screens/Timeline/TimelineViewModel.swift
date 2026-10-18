@@ -1134,7 +1134,7 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
         case .audioRecodingPermissionError:
             state.bindings.alertInfo = .init(id: type,
                                              title: L10n.dialogPermissionMicrophoneTitleIos(InfoPlistReader.main.bundleDisplayName),
-                                             message: L10n.dialogPermissionMicrophoneDescriptionIos,
+                                             message: BipeStrings.microphonePermissionBody,
                                              primaryButton: .init(title: L10n.commonSettings) { [weak self] in self?.appMediator.openAppSettings() },
                                              secondaryButton: .init(title: L10n.actionNotNow, role: .cancel, action: nil))
         case .pollEndConfirmation(let pollStartID):

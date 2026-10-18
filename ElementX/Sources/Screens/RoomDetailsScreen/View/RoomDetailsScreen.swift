@@ -311,7 +311,7 @@ struct RoomDetailsScreen: View {
     
     private func ignoreUserSection(user: RoomMemberDetails) -> some View {
         Section {
-            ListRow(label: .default(title: user.isIgnored ? L10n.screenDmDetailsUnblockUser : L10n.screenDmDetailsBlockUser,
+            ListRow(label: .default(title: user.isIgnored ? BipeStrings.actionUnblockPerson : BipeStrings.actionBlockPerson,
                                     icon: \.block,
                                     role: user.isIgnored ? nil : .destructive),
                     details: .isWaiting(context.viewState.isProcessingIgnoreRequest),

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -78,7 +79,7 @@ struct SpaceScreen: View {
                 }
                 .buttonStyle(.compound(.primary))
                 
-                Button(L10n.actionCreateRoom) {
+                Button(BipeStrings.groupsEmptyAction) {
                     context.send(viewAction: .createChildRoom)
                 }
                 .buttonStyle(.compound(.secondary))
@@ -127,7 +128,7 @@ struct SpaceScreen: View {
                     if context.viewState.canEditChildren {
                         Section {
                             Button { context.send(viewAction: .createChildRoom) } label: {
-                                Label(L10n.actionCreateRoom, icon: \.plus)
+                                Label(BipeStrings.groupsEmptyAction, icon: \.plus)
                             }
                             
                             Button { context.send(viewAction: .addExistingRooms) } label: {

@@ -27,7 +27,7 @@ struct BlockedUsersScreen: View {
     @ViewBuilder
     private var content: some View {
         if context.viewState.blockedUsers.isEmpty {
-            Text(L10n.screenBlockedUsersEmpty)
+            Text(BipeStrings.privacyBlockedNone)
                 .font(.compound.bodyMD)
                 .foregroundColor(.compound.textSecondary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

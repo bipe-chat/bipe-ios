@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Compound
 import SwiftUI
@@ -27,7 +28,7 @@ struct LinkNewDeviceScreen: View {
             }
             .background()
             .backgroundStyle(.compound.bgSubtleSecondary)
-            .navigationTitle(L10n.commonLinkNewDevice)
+            .navigationTitle(BipeStrings.accountLinkDevice)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
         }

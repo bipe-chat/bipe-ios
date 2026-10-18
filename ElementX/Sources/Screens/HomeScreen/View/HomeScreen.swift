@@ -148,7 +148,7 @@ struct HomeScreen: View {
             } label: {
                 CompoundIcon(\.plus)
             }
-            .accessibilityLabel(L10n.actionStartChat)
+            .accessibilityLabel(BipeStrings.actionStartChat)
             .accessibilityIdentifier(A11yIdentifiers.homeScreen.startChat)
         default:
             EmptyView()

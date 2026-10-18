@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 import MatrixRustSDK
 
@@ -33,11 +34,11 @@ nonisolated struct RoomEventStringBuilder {
                 return messageEventStringBuilder.buildAttributedString(for: messageContent.msgType, senderDisplayName: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .sticker:
                 if messageEventStringBuilder.style == .typeBolded {
-                    var string = AttributedString(L10n.commonSticker)
+                    var string = AttributedString(BipeStrings.stickerLabel)
                     string.bold()
                     return string
                 }
-                return prefix(L10n.commonSticker, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
+                return prefix(BipeStrings.stickerLabel, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .poll(let question, _, _, _, _, _, _):
                 if messageEventStringBuilder.style == .typeBolded {
                     let questionPlaceholder = "{question}"
@@ -52,9 +53,9 @@ nonisolated struct RoomEventStringBuilder {
                 return prefix(L10n.commonMessageRemoved, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
             case .unableToDecrypt(let encryptedMessage):
                 let errorMessage = switch encryptedMessage {
-                case .megolmV1AesSha2(_, .sentBeforeWeJoined): L10n.commonUnableToDecryptNoAccess
-                case .megolmV1AesSha2(_, .verificationViolation): L10n.commonUnableToDecryptVerificationViolation
-                case .megolmV1AesSha2(_, .unknownDevice), .megolmV1AesSha2(_, .unsignedDevice): L10n.commonUnableToDecryptInsecureDevice
+                case .megolmV1AesSha2(_, .sentBeforeWeJoined): BipeStrings.chatMessageNoAccess
+                case .megolmV1AesSha2(_, .verificationViolation): BipeStrings.chatSenderKeysChanged
+                case .megolmV1AesSha2(_, .unknownDevice), .megolmV1AesSha2(_, .unsignedDevice): BipeStrings.chatSenderDeviceUnconfirmed
                 default: L10n.commonWaitingForDecryptionKey
                 }
                 return prefix(errorMessage, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 import SwiftUI
 
@@ -26,7 +27,7 @@ struct StickerRoomTimelineView: View {
                 }
                 .timelineMediaFrame(imageInfo: timelineItem.imageInfo)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(L10n.commonSticker), \(timelineItem.body)")
+                .accessibilityLabel("\(BipeStrings.stickerLabel), \(timelineItem.body)")
                 .onTapGesture {
                     context?.send(viewAction: .mediaTapped(itemID: timelineItem.id))
                 }
