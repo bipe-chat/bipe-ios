@@ -9,8 +9,10 @@ import Combine
 import SwiftUI
 
 struct BipeSignupScreenCoordinatorParameters {
-    /// From an invite link. Pre-fills the code field.
+    /// From an invite link. Skips the code step.
     var inviteCode: BipeInviteCode?
+    /// False when the start screen's button goes straight to the name (open sign-up, ADR 0072).
+    var startsWithInviteCode = true
     let apiClient: BipeAPIClient
     let signIn: BipeAccountSignIn
     /// The new account's PIN also locks the app.
@@ -47,6 +49,7 @@ final class BipeSignupScreenCoordinator: CoordinatorProtocol {
         self.parameters = parameters
         
         viewModel = BipeSignupScreenViewModel(inviteCode: parameters.inviteCode,
+                                              startsWithInviteCode: parameters.startsWithInviteCode,
                                               apiClient: parameters.apiClient,
                                               signIn: parameters.signIn,
                                               appLockService: parameters.appLockService,

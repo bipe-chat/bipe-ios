@@ -141,7 +141,8 @@ class OnboardingFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     private var requiresNotificationsSetup: Bool {
-        !userSettings.app.hasRunNotificationPermissionsOnboarding
+        // Bipe (bipe#199, bipe#415): the notification ask comes after the first message, not in first run.
+        !userSettings.app.usesBipeSignup && !userSettings.app.hasRunNotificationPermissionsOnboarding
     }
     
     private func configureStateMachine() {

@@ -7,6 +7,7 @@
 //
 
 import AnalyticsEvents
+import BipeKit
 import Combine
 import MatrixRustSDK
 import SwiftUI
@@ -415,6 +416,8 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
                     }
                 case .presentSettingsScreen:
                     actionsSubject.send(.showSettings)
+                case .presentBipeHandleScreen:
+                    presentBipeHandleScreen()
                 case .presentFeedbackScreen:
                     stateMachine.processEvent(.feedbackScreen)
                 case .presentSecureBackupSettings:
@@ -473,6 +476,26 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
         navigationSplitCoordinator.setSheetCoordinator(navigationStackCoordinator) { [weak self] in
             self?.stateMachine.processEvent(.dismissedReportRoomScreen)
         }
+    }
+    
+    /// Bipe (bipe#200, bipe#415): the "Escolha seu @" card opens the username screen in a sheet. No state machine state,
+    /// like the sticker picker: a swipe down or saving closes it.
+    private func presentBipeHandleScreen() {
+        let stackCoordinator = NavigationStackCoordinator()
+        let coordinator = BipeHandleScreenCoordinator(parameters: .init(apiClient: BipeAPIClient(baseURL: userSession.userSettings.app.bipeAPIBaseURL),
+                                                                        clientProxy: userSession.clientProxy,
+                                                                        handleResolver: userSession.bipeHandleResolver,
+                                                                        userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .done:
+                    self?.navigationSplitCoordinator.setSheetCoordinator(nil)
+                }
+            }
+            .store(in: &cancellables)
+        stackCoordinator.setRootCoordinator(coordinator)
+        navigationSplitCoordinator.setSheetCoordinator(stackCoordinator)
     }
     
     private func presentDeclineAndBlockScreen(userID: String, roomID: String) {

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -64,31 +65,22 @@ struct AuthenticationStartScreen: View {
     
     var content: some View {
         // Bipe: logo, promise and value points instead of Element's logo and welcome text.
-        BipeWelcomeView()
+        BipeWelcomeView(invitedBy: bipeInvitedBy)
+    }
+    
+    /// "@ana te chamou para o Bipe." when a link brought an invite and the preview named the inviter.
+    private var bipeInvitedBy: String? {
+        guard context.viewState.bipeStart == .invited, let handle = context.viewState.bipeInviterHandle else { return nil }
+        return BipeStrings.onboardingInvitedBy("@\(handle)")
     }
     
     /// The main action buttons.
     var buttons: some View {
         VStack(spacing: 16) {
-            if context.viewState.showQRCodeLoginButton {
-                Button { context.send(viewAction: .loginWithQR) } label: {
-                    Label(L10n.screenOnboardingSignInWithQrCode, icon: \.qrCode)
-                }
-                .buttonStyle(.compound(.primary))
-                .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.signInWithQr)
-            }
-            
-            Button { context.send(viewAction: .login) } label: {
-                Text(context.viewState.loginButtonTitle)
-            }
-            .buttonStyle(.compound(.primary))
-            .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.signIn)
-            
-            if context.viewState.showCreateAccountButton {
-                Button { context.send(viewAction: .register) } label: {
-                    Text(L10n.screenCreateAccountTitle)
-                }
-                .buttonStyle(.compound(.tertiary))
+            if let bipeStart = context.viewState.bipeStart {
+                bipeButtons(bipeStart)
+            } else {
+                elementButtons
             }
             
             versionText
@@ -106,6 +98,43 @@ struct AuthenticationStartScreen: View {
         }
         .padding(.horizontal, verticalSizeClass == .compact ? 128 : 24)
         .readableFrame()
+    }
+    
+    /// Bipe: one filled button and its text buttons, from bipe-shared `registries/onboarding.json` (bipe#415).
+    @ViewBuilder
+    private func bipeButtons(_ start: BipeOnboardingStart) -> some View {
+        Button(start.primary.title) { context.send(viewAction: .bipe(start.primary.target)) }
+            .buttonStyle(.compound(.primary))
+            .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.signIn)
+        
+        ForEach(start.text, id: \.titleKey) { button in
+            Button(button.title) { context.send(viewAction: .bipe(button.target)) }
+                .buttonStyle(.compound(.tertiary))
+        }
+    }
+    
+    @ViewBuilder
+    private var elementButtons: some View {
+        if context.viewState.showQRCodeLoginButton {
+            Button { context.send(viewAction: .loginWithQR) } label: {
+                Label(L10n.screenOnboardingSignInWithQrCode, icon: \.qrCode)
+            }
+            .buttonStyle(.compound(.primary))
+            .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.signInWithQr)
+        }
+        
+        Button { context.send(viewAction: .login) } label: {
+            Text(context.viewState.loginButtonTitle)
+        }
+        .buttonStyle(.compound(.primary))
+        .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.signIn)
+        
+        if context.viewState.showCreateAccountButton {
+            Button { context.send(viewAction: .register) } label: {
+                Text(L10n.screenCreateAccountTitle)
+            }
+            .buttonStyle(.compound(.tertiary))
+        }
     }
     
     var versionText: Text {

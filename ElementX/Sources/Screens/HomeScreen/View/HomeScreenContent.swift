@@ -120,12 +120,18 @@ struct HomeScreenContent: View {
                 }
                 
                 // Bipe (ADR 0117, bipe#385): the banner slot shows account tasks only, the first one in this order:
-                // recovery key, inviter row (ADR 0111). A task leaves when it is done. No news cards here.
+                // recovery key, inviter row (ADR 0111), "Escolha seu @" (bipe#415). A task leaves when it is done. No news cards here.
                 if case let .show(state) = context.viewState.securityBannerMode {
                     HomeScreenRecoveryKeyConfirmationBanner(state: state, context: context)
                 } else if context.viewState.shouldShowBipeInviterRow, let inviterHandle = context.viewState.bipeInviterHandle {
                     BipeInviterRow(inviterHandle: inviterHandle) {
                         context.send(viewAction: .openBipeInviterChat)
+                    }
+                } else if context.viewState.shouldShowBipeHandlePrompt {
+                    BipeHandlePromptRow {
+                        context.send(viewAction: .openBipeHandlePrompt)
+                    } onDismiss: {
+                        context.send(viewAction: .dismissBipeHandlePrompt)
                     }
                 }
                 

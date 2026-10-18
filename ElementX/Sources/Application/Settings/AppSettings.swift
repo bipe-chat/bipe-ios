@@ -119,6 +119,14 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference
     var bipePendingInviterHandle: String?
     
+    /// Bipe (bipe#199, bipe#415): the notification ask after the first sent message ran on this device. It shows once.
+    @UserPreference(defaultValue: false)
+    var bipeHasAskedNotifications: Bool
+    
+    /// Bipe (bipe#200, bipe#415): the "Escolha seu @" card on the chat list was dismissed or used. It shows no more.
+    @UserPreference(defaultValue: false)
+    var bipeHasDismissedHandlePrompt: Bool
+    
     /// Defaults to `true` for new users, and we use a migration to set it to `false` for existing users.
     @UserPreference(defaultValue: true)
     var hasSeenNewSoundBanner: Bool

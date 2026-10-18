@@ -12,9 +12,12 @@ import Combine
 import MatrixRustSDK
 import OrderedCollections
 import SwiftUI
+import UserNotifications
 
 typealias TimelineViewModelType = StateStoreViewModel<TimelineViewState, TimelineViewAction>
 
+// Bipe: upstream sits at the 1000-line limit; the Bipe hooks add two lines (bipe#415).
+// swiftlint:disable:next type_body_length
 class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
     private enum Constants {
         static let paginationEventLimit: UInt16 = 20
@@ -843,6 +846,8 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
         }
         
         scrollToBottom()
+        
+        await bipeAskForNotificationsIfNeeded(after: mode)
     }
     
     private func trackComposerMode(_ mode: ComposerMode) {
@@ -1177,6 +1182,7 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
             state.bindings.alertInfo = .init(id: .unableToInvite,
                                              title: L10n.commonUnableToInviteTitle,
                                              message: L10n.commonUnableToInviteMessage)
+        case .bipeNotifications: break // Built with its room name in bipeAskForNotificationsIfNeeded.
         case .unknown:
             state.bindings.alertInfo = .init(id: .unknown, title: L10n.commonError)
         }
@@ -1341,4 +1347,41 @@ extension EnvironmentValues {
 
 private enum SlashCommand: String, CaseIterable {
     case join = "/join "
+}
+
+// MARK: - Bipe notification ask
+
+private extension TimelineViewModel {
+    /// Bipe (bipe#199, bipe#415): the first sent message is the moment to ask for notifications, not first run.
+    /// A Bipe ask first, then the system prompt. Once per device; a "no" never blocks.
+    func bipeAskForNotificationsIfNeeded(after mode: ComposerMode) async {
+        if case .edit = mode {
+            return
+        }
+        let appSettings = userSettings.app
+        guard appSettings.usesBipeSignup, !appSettings.bipeHasAskedNotifications else { return }
+        appSettings.bipeHasAskedNotifications = true
+        guard await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .notDetermined else { return }
+        
+        let info = roomProxy.infoPublisher.value
+        let prompt = BipeOnboardingPrompt.notifications
+        let title = if info.isDM, let name = info.displayName {
+            BipeStrings.notificationsPromptTitle(name)
+        } else {
+            BipeStrings.notificationsPromptTitleGeneric
+        }
+        state.bindings.alertInfo = .init(id: .bipeNotifications,
+                                         title: title,
+                                         message: BipeStrings.notificationsPromptBody,
+                                         primaryButton: .init(title: prompt.primary.title) {
+                                             Task {
+                                                 let granted = await (try? UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+                                                 MXLog.info("Bipe notification ask granted: \(granted)")
+                                                 if granted {
+                                                     UIApplication.shared.registerForRemoteNotifications()
+                                                 }
+                                             }
+                                         },
+                                         secondaryButton: prompt.text.first.map { .init(title: $0.title, role: .cancel, action: nil) })
+    }
 }

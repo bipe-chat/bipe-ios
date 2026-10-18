@@ -274,6 +274,8 @@ enum TimelineAlertInfoType: Hashable {
     case encryptionForwarder(String)
     case inviteAgain
     case unableToInvite
+    /// Bipe: the notification ask after the first sent message (bipe#199).
+    case bipeNotifications
     case unknown
 }
 

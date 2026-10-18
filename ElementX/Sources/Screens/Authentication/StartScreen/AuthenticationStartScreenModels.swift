@@ -6,12 +6,14 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 enum AuthenticationStartScreenViewModelAction: Equatable {
     case loginWithQR
     case login
     case register
+    case bipeSignup(startsWithInviteCode: Bool)
     
     case loginDirectlyWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
     case loginDirectlyWithPassword(loginHint: String?)
@@ -37,6 +39,10 @@ struct AuthenticationStartScreenViewState: BindableState {
     
     /// Bipe: "Get back into your account" instead of "Sign in to …".
     var bipeLoginButtonTitle: String?
+    /// Bipe: the start screen variant from bipe-shared `registries/onboarding.json` (bipe#415). `nil` outside Bipe sign-up.
+    var bipeStart: BipeOnboardingStart?
+    /// Bipe: the inviter's handle from the invite preview, without @.
+    var bipeInviterHandle: String?
     
     var loginButtonTitle: String {
         if let bipeLoginButtonTitle {
@@ -69,6 +75,8 @@ enum AuthenticationStartScreenViewAction {
     case loginWithQR
     case login
     case register
+    /// Bipe: a start screen button, by its target in the registry.
+    case bipe(BipeOnboardingTarget)
     
     case continueWithClassic(ClassicAppAccount)
     case otherOptions(ClassicAppAccount)

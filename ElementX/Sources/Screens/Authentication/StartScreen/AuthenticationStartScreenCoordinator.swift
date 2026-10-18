@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -17,12 +18,17 @@ struct AuthenticationStartScreenParameters {
     let appSettings: AppSettings
     let mediaProvider: MediaProviderProtocol?
     let userIndicatorController: UserIndicatorControllerProtocol
+    /// Bipe: the invite from a link, and the API that reads the sign-up mode (bipe#415).
+    var bipePendingInviteCode: BipeInviteCode?
+    var bipeAPIClient: BipeAPIClient?
 }
 
 enum AuthenticationStartScreenCoordinatorAction {
     case loginWithQR
     case login
     case register
+    /// Bipe: the start screen's sign-up button. `startsWithInviteCode` is false when the code is known or not needed.
+    case bipeSignup(startsWithInviteCode: Bool)
     
     case loginDirectlyWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
     case loginDirectlyWithPassword(loginHint: String?)
@@ -47,7 +53,9 @@ final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
                                                        appMediator: parameters.appMediator,
                                                        appSettings: parameters.appSettings,
                                                        mediaProvider: parameters.mediaProvider,
-                                                       userIndicatorController: parameters.userIndicatorController)
+                                                       userIndicatorController: parameters.userIndicatorController,
+                                                       bipePendingInviteCode: parameters.bipePendingInviteCode,
+                                                       bipeAPIClient: parameters.bipeAPIClient)
     }
     
     // MARK: - Public
@@ -64,6 +72,8 @@ final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.login)
                 case .register:
                     actionsSubject.send(.register)
+                case .bipeSignup(let startsWithInviteCode):
+                    actionsSubject.send(.bipeSignup(startsWithInviteCode: startsWithInviteCode))
                     
                 case .loginDirectlyWithOAuth(let data, let window):
                     actionsSubject.send(.loginDirectlyWithOAuth(data: data, window: window))
