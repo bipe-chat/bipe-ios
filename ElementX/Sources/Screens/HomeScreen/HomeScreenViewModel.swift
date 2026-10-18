@@ -171,11 +171,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             }
             .store(in: &cancellables)
         
-        userSettings.app.hasSeenNewSoundBannerPublisher
-            .sink { [weak self] hasSeenNewSoundBanner in
-                self?.state.shouldShowNewSoundBanner = !hasSeenNewSoundBanner
-            }
-            .store(in: &cancellables)
+        // Bipe (ADR 0117, bipe#385): upstream's new sound banner never shows; news goes to the Novidades room.
         
         userSession.clientProxy.hideInviteAvatarsPublisher
             .removeDuplicates()
