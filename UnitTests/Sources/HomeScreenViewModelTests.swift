@@ -374,7 +374,7 @@ final class HomeScreenViewModelTests {
     func newSoundBanner() {
         // Bipe (ADR 0117, bipe#385): the banner slot shows account tasks only, so the new sound banner never shows.
         userSettings.app.hasSeenNewSoundBanner = false
-
+        
         setupViewModel()
         #expect(!context.viewState.shouldShowBanner)
         #expect(!context.viewState.shouldShowNewSoundBanner)
