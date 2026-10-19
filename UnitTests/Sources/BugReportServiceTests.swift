@@ -104,15 +104,15 @@ final class BugReportServiceTests {
     @Test
     @MainActor
     func configurations() async throws {
-        // Bipe: there is no rageshake server by default, so the service starts disabled.
-        #expect(userSettings.app.bugReportRageshakeURL.publisher.value == .disabled)
+        // Bipe: reports go to the Bipe API by default (bipe#367).
+        #expect(userSettings.app.bugReportRageshakeURL.publisher.value == .url("https://api.bipe.net.br/v1/bug-reports/submit"))
         
         let service = BugReportService(rageshakeURLPublisher: userSettings.app.bugReportRageshakeURL.publisher,
                                        applicationID: "mock_app_id",
                                        sdkGitSHA: "1234",
                                        session: .mock,
                                        appHooks: AppHooks())
-        #expect(!service.isEnabled)
+        #expect(service.isEnabled)
         
         userSettings.app.bugReportRageshakeURL.applyRemoteValue(.url("https://bugs.server.net/submit"))
         #expect(service.isEnabled)
@@ -135,7 +135,7 @@ final class BugReportServiceTests {
         #expect(!service.isEnabled)
         
         userSettings.app.bugReportRageshakeURL.reset()
-        #expect(!service.isEnabled)
+        #expect(service.isEnabled)
     }
 }
 

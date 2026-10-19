@@ -30,7 +30,8 @@ struct BugReportScreenViewModelTests {
         
         #expect(context.reportText == "")
         #expect(context.viewState.screenshot == nil)
-        #expect(context.sendingLogsEnabled)
+        // Bipe: logs are off until the person turns them on (bipe#367).
+        #expect(!context.sendingLogsEnabled)
     }
     
     @Test
@@ -90,6 +91,7 @@ struct BugReportScreenViewModelTests {
             }
         }
         
+        context.sendingLogsEnabled = true
         context.send(viewAction: .submit)
         try await deferred.fulfill()
         
