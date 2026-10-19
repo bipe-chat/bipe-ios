@@ -266,16 +266,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             state.securityBannerMode = .dismissed
         case .dismissNewSoundBanner:
             userSettings.app.hasSeenNewSoundBanner = true
-        case .screenAppeared:
-            // Use a task otherwise the presentation isn't animated.
-            Task { presentMultiAccountAnnouncementIfNeeded() }
-        case .multiAccountAnnouncementAppeared:
-            MXLog.info("The multi-account announcement has been seen.")
-            userSettings.app.hasSeenMultiAccountAnnouncement = true
-        case .dismissMultiAccountAnnouncement:
-            state.bindings.isPresentingMultiAccountAnnouncement = false
-        case .addAccount, .bipeAddAccount:
-            state.bindings.isPresentingMultiAccountAnnouncement = false
+        case .bipeAddAccount:
             guard state.bipeCanAddAccount else { return }
             actionsSubject.send(.bipeAddAccount)
         case .bipeSwitchToNextAccount:
@@ -731,27 +722,6 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         }
         state.bipeAccounts = [current] + others
         state.bipeMaxAccounts = BipeAccountCap.maxPersonalAccounts()
-    }
-    
-    // MARK: Multi-account announcement
-    
-    private func presentMultiAccountAnnouncementIfNeeded() {
-        // Never announce it to someone who already uses several accounts, even once they've removed some.
-        if availableSessionsPublisher.value.count > 1, !userSettings.app.hasSeenMultiAccountAnnouncement {
-            MXLog.info("Several accounts are signed in, marking the multi-account announcement as seen.")
-            userSettings.app.hasSeenMultiAccountAnnouncement = true
-        }
-        
-        // An unverified session gets the identity confirmation cover first, the room list appears again once it's dismissed.
-        guard userSettings.app.multiAccountEnabled,
-              !userSettings.app.hasSeenMultiAccountAnnouncement,
-              userSession.sessionSecurityStatePublisher.value.verificationState == .verified,
-              !state.bindings.isPresentingMultiAccountAnnouncement else {
-            return
-        }
-        
-        MXLog.info("Presenting the multi-account announcement.")
-        state.bindings.isPresentingMultiAccountAnnouncement = true
     }
     
     // MARK: Invites

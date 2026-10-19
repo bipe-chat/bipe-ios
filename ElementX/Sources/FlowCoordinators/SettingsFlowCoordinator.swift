@@ -109,9 +109,6 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 case let .userStatusEmojiPicker(continuation):
                     presentEmojiPicker(emojiPickerContinuation: continuation)
                     
-                case .addAccount:
-                    break // Nothing to present until the add account flow exists.
-                    
                 case let .manageAccount(url):
                     presentAccountManagementURL(url)
                 case .linkNewDevice:
