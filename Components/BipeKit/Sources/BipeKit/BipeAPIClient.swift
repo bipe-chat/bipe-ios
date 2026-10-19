@@ -288,6 +288,22 @@ public struct BipeAPIClient: Sendable {
         }
     }
     
+    /// `GET /v1/accounts/{userId}/type`. No auth. `nil` for an account without a Bipe sign-up, or a type this build does not know.
+    public func accountType(userID: String) async throws(BipeAPIError) -> BipeAccountType? {
+        let (data, response) = try await exchange(method: "GET", path: ["v1", "accounts", userID, "type"], rawBody: nil, accessToken: nil)
+        switch response.statusCode {
+        case 200:
+            guard let decoded = try? Self.decoder.decode(AccountTypeResponse.self, from: data) else {
+                throw .unexpectedResponse(statusCode: response.statusCode)
+            }
+            return BipeAccountType(rawValue: decoded.accountType)
+        case 404:
+            return nil
+        default:
+            throw .unexpectedResponse(statusCode: response.statusCode)
+        }
+    }
+    
     // MARK: - Data export (LGPD art. 18, ADR 0112, bipe#364)
     
     /// `GET /v1/me/export`. The server data of the caller as one JSON file. Messages stay on the device and are not in it.
@@ -367,6 +383,10 @@ public struct BipeAPIClient: Sendable {
     
     private struct InviteConnectionsResponse: Decodable {
         let userIds: [String]
+    }
+    
+    private struct AccountTypeResponse: Decodable {
+        let accountType: String
     }
     
     private struct InviteName: Encodable {
