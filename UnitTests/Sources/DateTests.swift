@@ -75,9 +75,13 @@ struct DateTests {
         let threeDaysAgo = try #require(calendar.date(byAdding: .day, value: -3, to: startOfToday))
         #expect(threeDaysAgo.formattedDateSeparator() == threeDaysAgo.formatted(.dateTime.weekday(.wide)))
         
-        // This test will fail during the first 6 days of the year.
-        let startOfTheYear = try #require(calendar.dateInterval(of: .year, for: startOfToday)?.start)
-        #expect(startOfTheYear.formattedDateSeparator() == startOfTheYear.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+        // Until 8 January a week ago is still last year, so this case shows the year too.
+        let aWeekAgo = try #require(calendar.date(byAdding: .day, value: -7, to: startOfToday))
+        if calendar.isDate(aWeekAgo, equalTo: startOfToday, toGranularity: .year) {
+            #expect(aWeekAgo.formattedDateSeparator() == aWeekAgo.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+        } else {
+            #expect(aWeekAgo.formattedDateSeparator() == aWeekAgo.formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
+        }
         
         let theMillennium = try #require(calendar.date(from: DateComponents(year: 2000, month: 1, day: 1)))
         #expect(theMillennium.formattedDateSeparator() == theMillennium.formatted(.dateTime.weekday(.wide).day().month(.wide).year()))
