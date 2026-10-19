@@ -271,7 +271,6 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         case .dismissNewSoundBanner:
             userSettings.app.hasSeenNewSoundBanner = true
         case .bipeAddAccount:
-            guard state.bipeCanAddAccount else { return }
             actionsSubject.send(.bipeAddAccount)
         case .bipeSwitchToNextAccount:
             guard let next = state.bipeAccounts.first(where: { !$0.isCurrent }) else {
@@ -755,7 +754,6 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false, isCompany: BipeAccountLabels.isCompany($0))
         }
         state.bipeAccounts = [current] + others
-        state.bipeMaxAccounts = BipeAccountCap.maxPersonalAccounts()
     }
     
     // MARK: Invites
