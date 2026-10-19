@@ -1532,13 +1532,29 @@ public enum BipeStrings {
 
     public static var accountAdd: String { NSLocalizedString("bipe_account_add", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var accountOnDevice: String { NSLocalizedString("bipe_account_on_device", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountNewTitle: String { NSLocalizedString("bipe_account_new_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountNewPersonal: String { NSLocalizedString("bipe_account_new_personal", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountNewPersonalBody: String { NSLocalizedString("bipe_account_new_personal_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountNewCompany: String { NSLocalizedString("bipe_account_new_company", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountNewCompanyBody: String { NSLocalizedString("bipe_account_new_company_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountNewExisting: String { NSLocalizedString("bipe_account_new_existing", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountNewExistingBody: String { NSLocalizedString("bipe_account_new_existing_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func accountNewInviteNote(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_account_new_invite_note", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
     public static func accountCapReached(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_account_cap_reached", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
-
-    public static var companyCreate: String { NSLocalizedString("bipe_company_create", tableName: "Bipe", bundle: .module, comment: "") }
-
-    public static var companyCreateFooter: String { NSLocalizedString("bipe_company_create_footer", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var companyName: String { NSLocalizedString("bipe_company_name", tableName: "Bipe", bundle: .module, comment: "") }
 
