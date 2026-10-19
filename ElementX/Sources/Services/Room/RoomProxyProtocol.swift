@@ -147,6 +147,9 @@ protocol JoinedRoomProxyProtocol: RoomProxyProtocol {
     
     func flagAsFavourite(_ isFavourite: Bool) async -> Result<Void, RoomProxyError>
     
+    /// Bipe: archive or unarchive (the `m.lowpriority` tag).
+    func flagAsLowPriority(_ isLowPriority: Bool) async -> Result<Void, RoomProxyError>
+    
     // MARK: - Power Levels
     
     func applyPowerLevelChanges(_ changes: RoomPowerLevelChanges) async -> Result<Void, RoomProxyError>

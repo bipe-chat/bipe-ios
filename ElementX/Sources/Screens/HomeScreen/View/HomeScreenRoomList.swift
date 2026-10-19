@@ -6,12 +6,26 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 struct HomeScreenRoomList: View {
     @Environment(\.supportsMultipleWindows) private var supportsMultipleWindows
     
     @ObservedObject var context: HomeScreenViewModel.Context
+    
+    /// Bipe: the list shows only archived rooms while the archive is open, so the action there is unarchive.
+    private var isShowingArchive: Bool {
+        context.viewState.isShowingBipeArchive
+    }
+    
+    private var archiveTitle: String {
+        isShowingArchive ? BipeStrings.unarchiveAction : BipeStrings.archiveAction
+    }
+    
+    private var archiveSymbol: String {
+        isShowingArchive ? "tray.and.arrow.up" : "archivebox"
+    }
     
     var body: some View {
         // Hide the room list when the search bar is focused but the query is empty
@@ -42,6 +56,9 @@ struct HomeScreenRoomList: View {
                     .simultaneousGesture(TapGesture(count: 2).onEnded {
                         context.send(viewAction: .detachRoom(roomIdentifier: room.id))
                     })
+                    .bipeSwipeAction(title: archiveTitle, systemImage: archiveSymbol) {
+                        context.send(viewAction: .setRoomArchived(roomIdentifier: room.id, isArchived: !isShowingArchive))
+                    }
                     .contextMenu {
                         if room.badges.isDotShown {
                             Button {
@@ -77,6 +94,12 @@ struct HomeScreenRoomList: View {
                             } label: {
                                 Label(L10n.commonFavourite, icon: \.favourite)
                             }
+                        }
+                        
+                        Button {
+                            context.send(viewAction: .setRoomArchived(roomIdentifier: room.id, isArchived: !isShowingArchive))
+                        } label: {
+                            Label(archiveTitle, systemImage: archiveSymbol)
                         }
                         
                         Button {

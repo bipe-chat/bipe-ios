@@ -68,6 +68,8 @@ enum HomeScreenViewAction {
     case markRoomAsUnread(roomIdentifier: String)
     case markRoomAsRead(roomIdentifier: String)
     case markRoomAsFavourite(roomIdentifier: String, isFavourite: Bool)
+    /// Bipe: swipe to archive (the `m.lowpriority` tag).
+    case setRoomArchived(roomIdentifier: String, isArchived: Bool)
     case setRoomMuted(roomIdentifier: String, isMuted: Bool)
     
     case acceptInvite(roomIdentifier: String)
@@ -156,6 +158,17 @@ struct HomeScreenViewState: BindableState {
     
     /// Bipe: the home tab this list belongs to (ADR 0053).
     var bipeScope = BipeRoomListScope.chats
+    
+    /// Bipe: joined rooms of this tab in the archive.
+    var bipeArchivedCount = 0
+    
+    var isShowingBipeArchive: Bool {
+        bindings.filtersState.isFilterActive(.lowPriority)
+    }
+    
+    var shouldShowBipeArchivedRow: Bool {
+        bipeArchivedCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && (roomListMode == .rooms || roomListMode == .empty)
+    }
     
     var shouldShowBipeRequestsRow: Bool {
         bipeRequestCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && roomListMode == .rooms

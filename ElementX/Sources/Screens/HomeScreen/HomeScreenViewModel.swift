@@ -68,9 +68,12 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                    mediaProvider: userSession.mediaProvider)
         
         Task { [weak self] in
-            guard let self, await bipeSelfChat.refresh() else { return }
-            updateRooms()
+            await self?.bipeSelfChat.refresh()
         }
+        NotificationCenter.default.publisher(for: BipeSelfChat.cachedRoomIDDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateRooms() }
+            .store(in: &cancellables)
         
         if userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
             state.isRoomListSearchEnabled = false
@@ -81,6 +84,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             updateRooms()
         }
         
+        observeBipeArchivedCount()
         updateBipeInviterGreeting()
         if bipeScope == .chats {
             Task { await loadBipeHandlePrompt() }
@@ -352,6 +356,10 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             Task {
                 await markRoomAsFavourite(roomIdentifier, isFavourite: isFavourite)
             }
+        case .setRoomArchived(let roomIdentifier, let isArchived):
+            Task {
+                await setRoomArchived(roomIdentifier, isArchived: isArchived)
+            }
         case .setRoomMuted(let roomIdentifier, let isMuted):
             Task {
                 await setRoomMuted(roomIdentifier, isMuted: isMuted)
@@ -610,6 +618,32 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         case .failure(let error):
             MXLog.error("Failed marking room \(roomID) as favourite: \(isFavourite) with error: \(error)")
         }
+    }
+    
+    private func setRoomArchived(_ roomID: String, isArchived: Bool) async {
+        guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID) else {
+            MXLog.error("Failed retrieving room for identifier: \(roomID)")
+            return
+        }
+        
+        if case .failure(let error) = await roomProxy.flagAsLowPriority(isArchived) {
+            MXLog.error("Failed setting room \(roomID) archived: \(isArchived) with error: \(error)")
+            userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
+        }
+    }
+    
+    /// Bipe: the static provider lists every room, archived ones too. The tab's own provider hides them.
+    private func observeBipeArchivedCount() {
+        userSession.clientProxy.staticRoomSummaryProvider.roomListPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] summaries in
+                guard let self else { return }
+                let selfChatRoomID = bipeSelfChat.cachedRoomID
+                state.bipeArchivedCount = summaries.count(where: { summary in
+                    summary.isJoined && summary.isLowPriority && summary.id != selfChatRoomID && BipeRoomListScope(summary: summary) == state.bipeScope
+                })
+            }
+            .store(in: &cancellables)
     }
     
     // Bipe: one-tap mute from the room list. No duration, the room stays muted until unmuted.

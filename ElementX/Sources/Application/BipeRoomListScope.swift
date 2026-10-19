@@ -28,11 +28,11 @@ enum BipeRoomListScope {
         }
     }
     
-    /// Filter chips that make no sense inside the tab.
+    /// Filter chips that make no sense inside the tab. Archived chats open from their own row, not a chip.
     var hiddenFilters: Set<RoomListFilter> {
         switch self {
-        case .chats: [.people, .rooms]
-        case .groups: [.people, .rooms, .invites]
+        case .chats: [.people, .rooms, .lowPriority]
+        case .groups: [.people, .rooms, .invites, .lowPriority]
         }
     }
     

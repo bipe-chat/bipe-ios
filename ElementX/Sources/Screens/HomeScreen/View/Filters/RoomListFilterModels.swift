@@ -44,7 +44,7 @@ enum RoomListFilter: Int, CaseIterable, Identifiable {
         case .invites:
             return BipeStrings.requestsTitle // Bipe: invites are message requests.
         case .lowPriority:
-            return L10n.screenRoomlistFilterLowPriority
+            return BipeStrings.archivedTitle // Bipe: low priority is the archive.
         }
     }
     
