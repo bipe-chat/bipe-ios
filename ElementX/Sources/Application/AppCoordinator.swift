@@ -727,7 +727,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     }
     
     private func startAuthentication() {
-        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: false, accountType: .personal)
+        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: false)
         authenticationFlowCoordinator = coordinator
         coordinator.start()
         
@@ -737,7 +737,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
     }
     
-    private func makeAuthenticationFlowCoordinator(isAddingAccount: Bool, accountType: BipeAccountType) -> AuthenticationFlowCoordinator {
+    /// Bipe: `bipeSignup` opens the sign-up straight away, with its account type and the invite code when one was made.
+    private func makeAuthenticationFlowCoordinator(isAddingAccount: Bool,
+                                                   bipeSignup: (accountType: BipeAccountType, inviteCode: BipeInviteCode?)? = nil) -> AuthenticationFlowCoordinator {
         let encryptionKeyProvider = EncryptionKeyProvider()
         let classicAppManager = ClassicAppManager()
         let authenticationService = AuthenticationService(userSessionManager: userSessionManager,
@@ -756,7 +758,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                         userIndicatorController: userIndicatorController,
                                                         appLockService: appLockFlowCoordinator.appLockService,
                                                         isAddingAccount: isAddingAccount,
-                                                        bipeAccountType: accountType)
+                                                        bipeAccountType: bipeSignup?.accountType ?? .personal,
+                                                        bipeOpensSignup: bipeSignup != nil,
+                                                        bipeInviteCode: bipeSignup?.inviteCode)
         coordinator.delegate = self
         return coordinator
     }
@@ -908,10 +912,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                     stateMachine.processEvent(.signOut(isSoft: false, disableAppLock: true))
                 case .bipeSwitchAccount(let userID):
                     bipeSwitchAccount(to: userID)
-                case .bipeAddAccount:
-                    bipeStartAddingAccount(accountType: .personal)
-                case .bipeCreateCompanyAccount:
-                    bipeStartAddingAccount(accountType: .company)
+                case .bipeAddAccount(let choice):
+                    bipeStartAddingAccount(choice)
                 }
             }
             .store(in: &cancellables)
@@ -1332,15 +1334,20 @@ extension AppCoordinator {
         }
     }
     
-    /// The authentication flow as a sheet over the current session. Personal accounts stop at the cap; company accounts
-    /// do not count (ADR 0087).
-    private func bipeStartAddingAccount(accountType: BipeAccountType) {
+    /// The authentication flow as a sheet over the current session, from the "Nova conta" window (bipe#445, #446). A personal
+    /// sign-up stops at the cap; company accounts do not count (ADR 0087). A sign-in opens the start screen.
+    private func bipeStartAddingAccount(_ choice: BipeNewAccountChoice) {
         guard authenticationFlowCoordinator == nil else { return }
-        if accountType == .personal {
-            let personal = userSessionManager.userIDs.filter { !BipeAccountLabels.isCompany($0) }.count
-            guard BipeAccountCap.canAdd(personalAccounts: personal) else { return }
+        let coordinator: AuthenticationFlowCoordinator
+        switch choice {
+        case .signUp(let accountType, let inviteCode):
+            if accountType == .personal {
+                guard BipeAccountCap.canAdd(signedInUserIDs: userSessionManager.userIDs) else { return }
+            }
+            coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true, bipeSignup: (accountType, inviteCode))
+        case .signIn:
+            coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true)
         }
-        let coordinator = makeAuthenticationFlowCoordinator(isAddingAccount: true, accountType: accountType)
         authenticationFlowCoordinator = coordinator
         coordinator.start()
     }

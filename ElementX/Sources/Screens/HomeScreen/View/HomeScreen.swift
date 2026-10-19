@@ -109,29 +109,31 @@ struct HomeScreen: View {
         .accessibilityIdentifier(A11yIdentifiers.homeScreen.userAvatar)
     }
     
-    /// Bipe: a long press on the avatar lists the accounts, then "Adicionar conta" up to the cap (ADR 0086, bipe#267).
+    /// Bipe: a long press on the avatar picks the account, then "Nova conta" opens the new account window (ADR 0086,
+    /// bipe#267, #446). The inline picker lets iOS draw its own checkmark on the current account.
     @ViewBuilder
     private var bipeAccountMenu: some View {
-        ForEach(context.viewState.bipeAccounts) { account in
-            Button {
-                context.send(viewAction: .bipeSwitchAccount(userID: account.userID))
-            } label: {
-                if account.isCurrent {
-                    Label(account.label, icon: \.check)
-                } else {
+        if !context.viewState.bipeAccounts.isEmpty {
+            Picker(BipeStrings.accountOnDevice, selection: bipeCurrentAccount) {
+                ForEach(context.viewState.bipeAccounts) { account in
                     Text(account.label)
+                        .tag(account.userID)
                 }
             }
+            .pickerStyle(.inline)
+            
+            Divider()
         }
-        if context.viewState.bipeCanAddAccount {
-            Button {
-                context.send(viewAction: .bipeAddAccount)
-            } label: {
-                Label(BipeStrings.accountAdd, icon: \.plus)
-            }
-        } else {
-            Text(BipeStrings.accountCapReached(String(context.viewState.bipeMaxAccounts)))
+        Button {
+            context.send(viewAction: .bipeAddAccount)
+        } label: {
+            Label(BipeStrings.accountAdd, icon: \.plus)
         }
+    }
+    
+    private var bipeCurrentAccount: Binding<String> {
+        Binding(get: { context.viewState.bipeAccounts.first(where: \.isCurrent)?.userID ?? "" },
+                set: { context.send(viewAction: .bipeSwitchAccount(userID: $0)) })
     }
     
     @ViewBuilder

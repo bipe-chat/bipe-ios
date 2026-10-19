@@ -31,8 +31,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private let appLockService: AppLockServiceProtocol?
     /// Bipe: adding an account from a signed-in session shows the flow as a sheet over it, with no silent sign-in (ADR 0086).
     private let isAddingAccount: Bool
-    /// Bipe: "Criar conta da empresa" goes straight to the sign-up as a company (ADR 0087).
+    /// Bipe: the account type of the sign-up (ADR 0087).
     private let bipeAccountType: BipeAccountType
+    /// Bipe: the "Nova conta" window opens the add-account sheet straight on the sign-up (bipe#445, #446).
+    private let bipeOpensSignup: Bool
     
     enum State: StateType {
         /// The state machine hasn't started.
@@ -132,11 +134,15 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
          userIndicatorController: UserIndicatorControllerProtocol,
          appLockService: AppLockServiceProtocol? = nil,
          isAddingAccount: Bool = false,
-         bipeAccountType: BipeAccountType = .personal) {
+         bipeAccountType: BipeAccountType = .personal,
+         bipeOpensSignup: Bool = false,
+         bipeInviteCode: BipeInviteCode? = nil) {
         self.authenticationService = authenticationService
         self.appLockService = appLockService
         self.isAddingAccount = isAddingAccount
         self.bipeAccountType = bipeAccountType
+        self.bipeOpensSignup = bipeOpensSignup
+        pendingInviteCode = bipeInviteCode
         self.bugReportService = bugReportService
         self.navigationRootCoordinator = navigationRootCoordinator
         self.appMediator = appMediator
@@ -379,7 +385,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 guard let self, stateMachine.state != .complete else { return }
                 delegate?.authenticationFlowCoordinatorDidCancelAddingAccount()
             }
-            if bipeAccountType == .company {
+            if bipeOpensSignup {
                 // After the start transition ends.
                 Task { self.stateMachine.tryEvent(.bipeSignup) }
             }
