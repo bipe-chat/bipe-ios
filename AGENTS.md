@@ -411,6 +411,7 @@ Skill clash this file? This file win. Build settings, entitlements, Info.plist k
 
 - CI must stay green. `scripts/verify` is the fast check: format, lint and compile, app and test sources. Unit tests run only in CI. Run it before every push; the pre-push hook runs it when this clone has `git config core.hooksPath .bipe-hooks` (set it once per clone; worktrees share it).
 - A push with red local checks is not allowed. Never use `git push --no-verify`.
+- One heavy build at a time on the Mac, across the Bipe repos and Starlings (2026-10-19): four Bipe xcodebuilds, two Bipe verifies and four Starlings gates once ran together and every build stalled for hours. Never call `xcodebuild` directly. `scripts/verify` and `Tools/Bipe/testflight.sh` run it under `build-lock` (`~/.local/bin`, installed by the Starlings land queue), which waits while another build holds the lock and names it. For a one-off build, wrap it: `build-lock "bipe-ios <what>" xcodebuild ...`. `build-lock --status` shows the holder.
 - If CI still fails on your pull request, fix it before you start other work. Never leave a red pull request at the end of a run.
 
 ## Decisions

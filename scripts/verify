@@ -11,7 +11,15 @@ if [ "${1:-}" != --all ] && [ -z "$(git diff --name-only "$base" HEAD | grep -v 
   exit 0
 fi
 export PATH="$PATH:/opt/homebrew/bin"
+# One heavy build at a time on the Mac, across the Bipe repos and Starlings (AGENTS.md, "Before you push").
+# build-lock waits while another build holds the lock and names it. Without it (CI, another Mac) the build runs as before.
+lock=$(command -v build-lock || echo "$HOME/.local/bin/build-lock")
+heavy() {
+  if [ -x "$lock" ]; then "$lock" "bipe-ios verify" "$@"; return; fi
+  [ -n "${CI:-}" ] || echo "verify: build-lock is not installed; building without the machine lock" >&2
+  "$@"
+}
 swiftformat --lint .
-xcodebuild build-for-testing -project ElementX.xcodeproj -scheme UnitTests \
+heavy xcodebuild build-for-testing -project ElementX.xcodeproj -scheme UnitTests \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO -quiet
 echo "verify: ok"

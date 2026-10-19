@@ -27,8 +27,12 @@ if [ -f "$ASC_KEY_PATH" ]; then
   AUTH+=(-authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
 fi
 
+# One heavy build at a time on the Mac, across the Bipe repos and Starlings (AGENTS.md, "Before you push").
+LOCK=$(command -v build-lock || echo "$HOME/.local/bin/build-lock")
+[ -x "$LOCK" ] || LOCK=
+
 echo "Archiving $BIPE_VERSION ($BUILD_NUMBER)"
-xcodebuild archive -project ElementX.xcodeproj -scheme ElementX -configuration Release \
+${LOCK:+"$LOCK" "bipe-ios testflight"} xcodebuild archive -project ElementX.xcodeproj -scheme ElementX -configuration Release \
   -destination 'generic/platform=iOS' -archivePath "$ARCHIVE" "${AUTH[@]}" \
   ${PACKAGES:+-clonedSourcePackagesDirPath "$PACKAGES"} \
   MARKETING_VERSION="$BIPE_VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" "$@"
