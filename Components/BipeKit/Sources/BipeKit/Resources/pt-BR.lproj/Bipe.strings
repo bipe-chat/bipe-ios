@@ -824,3 +824,8 @@
 "bipe_support_welcome" = "Oi! Aqui você fala com a equipe do Bipe. Conte o que aconteceu ou o que você quer ver no app. A gente responde nesta conversa.";
 "bipe_support_report_received" = "Recebemos seu relato de problema. A equipe vai ler e responde nesta conversa.";
 "bipe_support_already_open" = "Você já tem uma conversa com o suporte. Continue por aqui.";
+"bipe_app_lock_title" = "Bipe bloqueado";
+"bipe_app_lock_biometric" = "Use o %1$@ para abrir";
+"bipe_archive_action" = "Arquivar";
+"bipe_unarchive_action" = "Desarquivar";
+"bipe_archived_title" = "Arquivadas";
