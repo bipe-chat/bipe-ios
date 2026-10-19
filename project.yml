@@ -47,13 +47,16 @@ options:
       file: true # https://github.com/yonaskolb/XcodeGen/issues/1556
   postGenCommand: cd Tools/XcodeGen && sh postGenCommand.sh
 
+# Version and build number: generated from bipe-shared/product/version.json (ADR 0088).
+configFiles:
+  Debug: Tools/Bipe/Version.xcconfig
+  Release: Tools/Bipe/Version.xcconfig
+
 settings:
   CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: true
   ENABLE_BITCODE: false
   APP_NAME: ElementX
   KEYCHAIN_ACCESS_GROUP_IDENTIFIER: "$(DEVELOPMENT_TEAM).$(BASE_BUNDLE_IDENTIFIER)"
-  MARKETING_VERSION: 26.10.2 # Set in bipe-shared/product/version.json (ADR 0088); the drift check compares.
-  CURRENT_PROJECT_VERSION: 1
   SUPPORTS_MACCATALYST: false
   ARCHS: arm64
 
