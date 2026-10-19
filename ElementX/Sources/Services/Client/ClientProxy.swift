@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 @preconcurrency import Combine
 import CryptoKit
 import ElementCall
@@ -392,14 +393,16 @@ class ClientProxy: ClientProxyProtocol {
         (client as? Client).flatMap { ElementCallSDKTransport(client: $0) }
     }
     
+    /// Bipe: the FFI check is true only for an OAuth session, and Bipe signs in with `m.login.password` (ADR 0118).
+    /// QR linking works when the server advertises MSC4108 and this device holds the account's hidden password.
     var isLoginWithQRCodeSupported: Bool {
         get async {
-            do {
-                return try await client.isLoginWithQrCodeSupported()
-            } catch {
-                MXLog.error("Failed checking QR code support with error: \(error)")
+            guard BipeCredentialStore(accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier).password(for: userID) != nil else {
+                MXLog.info("No hidden password on this device, QR linking is not supported.")
                 return false
             }
+            guard let homeserverURL = URL(string: homeserver) else { return false }
+            return await BipeMatrixAccountAPI(homeserver: homeserverURL).supportsQRLogin()
         }
     }
     

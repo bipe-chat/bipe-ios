@@ -213,7 +213,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             presentBipeAccountScreen(mode: .email)
         case .accountRecoveryKey:
             presentBipeRecoveryKey()
-        case .accountLinkDevice:
+        case .accountLinkedDevices:
             startLinkNewDeviceFlow()
         case .accountSignOut:
             actionsSubject.send(.runLogoutFlow)

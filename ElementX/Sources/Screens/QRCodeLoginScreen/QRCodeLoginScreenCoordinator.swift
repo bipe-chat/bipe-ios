@@ -14,6 +14,8 @@ struct QRCodeLoginScreenCoordinatorParameters {
     let canSignInManually: Bool
     let orientationManager: OrientationManagerProtocol
     let appMediator: AppMediatorProtocol
+    /// Bipe: approve a web sign-in in a private web view in place of the system browser (ADR 0118).
+    var bipeWebApproval: BipeWebApprovalDependencies?
 }
 
 enum QRCodeLoginScreenCoordinatorAction: CustomStringConvertible {
@@ -55,7 +57,8 @@ final class QRCodeLoginScreenCoordinator: CoordinatorProtocol {
     init(parameters: QRCodeLoginScreenCoordinatorParameters) {
         viewModel = QRCodeLoginScreenViewModel(mode: parameters.mode,
                                                canSignInManually: parameters.canSignInManually,
-                                               appMediator: parameters.appMediator)
+                                               appMediator: parameters.appMediator,
+                                               bipeWebApproval: parameters.bipeWebApproval)
         orientationManager = parameters.orientationManager
     }
     
