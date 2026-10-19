@@ -48,6 +48,26 @@ public enum BipeStrings {
 
     public static var badgeSuspendedBody: String { NSLocalizedString("bipe_badge_suspended_body", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var badgeCompany: String { NSLocalizedString("bipe_badge_company", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyLegalName: String { NSLocalizedString("bipe_badge_company_legal_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyTradeName: String { NSLocalizedString("bipe_badge_company_trade_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyCnpj: String { NSLocalizedString("bipe_badge_company_cnpj", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyChecked: String { NSLocalizedString("bipe_badge_company_checked", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyValidUntil: String { NSLocalizedString("bipe_badge_company_valid_until", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyBody: String { NSLocalizedString("bipe_badge_company_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyRevoked: String { NSLocalizedString("bipe_badge_company_revoked", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanyRevokedNotActive: String { NSLocalizedString("bipe_badge_company_revoked_not_active", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var badgeCompanySuspended: String { NSLocalizedString("bipe_badge_company_suspended", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var warningNicknameConfirmTitle: String { NSLocalizedString("bipe_warning_nickname_confirm_title", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static func warningNicknameConfirmBody(_ p1: String, _ p2: String) -> String {
@@ -1821,10 +1841,6 @@ public enum BipeStrings {
     public static var notificationsPromptBody: String { NSLocalizedString("bipe_notifications_prompt_body", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var notificationsPromptAllow: String { NSLocalizedString("bipe_notifications_prompt_allow", tableName: "Bipe", bundle: .module, comment: "") }
-
-    public static var remoteBannerUpdate: String { NSLocalizedString("bipe_remote_banner_update", tableName: "Bipe", bundle: .module, comment: "") }
-
-    public static var remoteBannerDismiss: String { NSLocalizedString("bipe_remote_banner_dismiss", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var handlePromptTitle: String { NSLocalizedString("bipe_handle_prompt_title", tableName: "Bipe", bundle: .module, comment: "") }
 
