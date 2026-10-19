@@ -125,13 +125,30 @@ class UserSessionStore: UserSessionStoreProtocol {
         }
         
         let bipeHandleResolver = await makeBipeHandleResolver(clientProxy: clientProxy)
+        let bipeCompanySeals = await makeBipeCompanySeals(clientProxy: clientProxy)
         
         return UserSession(clientProxy: clientProxy,
                            userSettings: userSettings,
                            mediaProvider: mediaProvider,
                            voiceMessageMediaManager: voiceMessageMediaManager,
                            liveLocationManager: liveLocationManager,
-                           bipeHandleResolver: bipeHandleResolver)
+                           bipeHandleResolver: bipeHandleResolver,
+                           bipeCompanySeals: bipeCompanySeals)
+    }
+    
+    /// Bipe: company badges exist only for accounts on the Bipe server.
+    private func makeBipeCompanySeals(clientProxy: ClientProxyProtocol) async -> BipeCompanySeals? {
+        let serverName = appSettings.bipeSignupServerName
+        let apiBaseURL = appSettings.bipeAPIBaseURL
+        return await MainActor.run {
+            guard clientProxy.userIDServerName == serverName else { return nil }
+            return BipeCompanySeals(apiClient: BipeAPIClient(baseURL: apiBaseURL),
+                                    serverName: serverName,
+                                    sessionUserID: clientProxy.userID) { [weak clientProxy] userID in
+                guard let clientProxy else { throw CancellationError() }
+                return try await clientProxy.userIdentity(for: userID, fallBackToServer: true).get()?.masterKey
+            }
+        }
     }
     
     /// Bipe: handles exist only for accounts on the Bipe server.

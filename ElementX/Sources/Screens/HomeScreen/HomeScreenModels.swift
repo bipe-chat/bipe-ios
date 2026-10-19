@@ -316,6 +316,9 @@ struct HomeScreenRoom: Identifiable, Equatable {
     
     let isTombstoned: Bool
     
+    /// Bipe: the other person in a DM, for the company seal (bipe#252).
+    var dmUserID: String?
+    
     var displayedLastMessage: AttributedString? {
         if isTombstoned {
             AttributedString(L10n.screenRoomlistTombstonedRoomDescription)
@@ -393,7 +396,8 @@ extension HomeScreenRoom {
                   avatar: summary.avatar,
                   statusEmoji: summary.statusEmoji,
                   canonicalAlias: summary.canonicalAlias,
-                  isTombstoned: summary.isTombstoned)
+                  isTombstoned: summary.isTombstoned,
+                  dmUserID: summary.isDirect && summary.heroes.count == 1 ? summary.heroes[0].id : nil)
     }
 }
 

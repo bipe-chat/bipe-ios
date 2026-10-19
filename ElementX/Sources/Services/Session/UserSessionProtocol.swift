@@ -31,6 +31,8 @@ protocol UserSessionProtocol: Sendable {
     var contentScannerService: ContentScannerServiceProtocol? { get }
     /// Bipe: Matrix ID to handle. `nil` for accounts outside the Bipe server.
     var bipeHandleResolver: BipeHandleResolver? { get }
+    /// Bipe: verified company badges (bipe#252). `nil` for accounts outside the Bipe server.
+    var bipeCompanySeals: BipeCompanySeals? { get }
     
     var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> { get }
     

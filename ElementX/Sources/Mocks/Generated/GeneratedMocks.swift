@@ -14452,6 +14452,7 @@ nonisolated class UserIdentityProxyMock: UserIdentityProxyProtocol, @unchecked S
         set(value) { underlyingVerificationState = value }
     }
     nonisolated(unsafe) var underlyingVerificationState: UserIdentityVerificationState!
+    nonisolated(unsafe) var masterKey: String?
 
 }
 nonisolated class UserIndicatorControllerMock: UserIndicatorControllerProtocol, @unchecked Sendable {
@@ -15141,6 +15142,7 @@ nonisolated class UserSessionMock: UserSessionProtocol, @unchecked Sendable {
     nonisolated(unsafe) var underlyingLiveLocationManager: LiveLocationManagerProtocol!
     nonisolated(unsafe) var contentScannerService: ContentScannerServiceProtocol?
     nonisolated(unsafe) var bipeHandleResolver: BipeHandleResolver?
+    nonisolated(unsafe) var bipeCompanySeals: BipeCompanySeals?
     var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> {
         get { return underlyingSessionSecurityStatePublisher }
         set(value) { underlyingSessionSecurityStatePublisher = value }

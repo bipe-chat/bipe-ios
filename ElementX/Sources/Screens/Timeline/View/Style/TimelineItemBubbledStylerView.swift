@@ -148,6 +148,8 @@ struct TimelineItemBubbledStylerView<Content: View>: View {
                         .font(.compound.bodyMDSemibold)
                         .foregroundStyle(.compound.decorativeColor(for: timelineItem.sender.id).text)
                     
+                    BipeCompanySeal(userID: timelineItem.sender.id, size: 14)
+                    
                     if let statusEmoji = timelineItem.sender.status.displayed?.emoji {
                         Text(String(statusEmoji))
                             .font(.compound.bodyMDSemibold)
