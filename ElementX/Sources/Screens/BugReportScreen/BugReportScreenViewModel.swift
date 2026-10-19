@@ -34,7 +34,7 @@ class BugReportScreenViewModel: BugReportScreenViewModelType, BugReportScreenVie
         self.logFiles = logFiles
         
         let canSendLogFiles = Self.validate(logFiles)
-        let bindings = BugReportScreenViewStateBindings(reportText: "", sendingLogsEnabled: canSendLogFiles, canContact: false)
+        let bindings = BugReportScreenViewStateBindings(reportText: "", sendingLogsEnabled: false, canContact: false) // Bipe: logs only when the user turns them on (ADR 0114).
         super.init(initialViewState: BugReportScreenViewState(canSendLogFiles: canSendLogFiles,
                                                               screenshot: screenshot,
                                                               bindings: bindings,

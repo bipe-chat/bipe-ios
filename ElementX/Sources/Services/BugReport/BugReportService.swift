@@ -26,6 +26,9 @@ class BugReportService: NSObject, BugReportServiceProtocol {
     
     let lastCrashEventIDSubject = CurrentValueSubject<String?, Never>(nil)
     
+    /// Bipe: the Bipe API takes reports only with the session's access token (ADR 0114).
+    var bipeAccessToken: (@MainActor () -> String?)?
+    
     init(rageshakeURLPublisher: CurrentValuePublisher<RageshakeConfiguration, Never>,
          applicationID: String,
          sdkGitSHA: String,
@@ -118,6 +121,9 @@ class BugReportService: NSObject, BugReportServiceProtocol {
         
         var request = URLRequest(url: rageshakeURL)
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        if let token = await bipeAccessToken?() {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         
         request.httpMethod = "POST"
         request.httpBody = body as Data

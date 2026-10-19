@@ -51,7 +51,15 @@ public struct BipeAPIClient: Sendable {
     public func acceptTerms(version: String, accessToken: String) async throws(BipeAPIError) {
         let _: NoContent = try await send(method: "POST", path: ["v1", "me", "terms"], body: TermsAcceptance(termsVersion: version), accessToken: accessToken)
     }
-    
+
+    // MARK: - Support DM (ADR 0114)
+
+    /// `POST /v1/me/support`. The caller's room with the support account. The server invites the caller; the app joins.
+    public func supportRoomID(accessToken: String) async throws(BipeAPIError) -> String {
+        let response: SupportRoomResponse = try await send(method: "POST", path: ["v1", "me", "support"], body: Empty?.none, accessToken: accessToken)
+        return response.roomId
+    }
+
     // MARK: - Device-first accounts (ADR 0057, ADR 0059)
     
     /// `GET /v1/me/account`. PIN state, recovery email and the recoveries of the last 7 days.
@@ -284,7 +292,11 @@ public struct BipeAPIClient: Sendable {
     
     /// Stands in for an empty 204 body.
     private struct NoContent: Decodable { }
-    
+
+    private struct SupportRoomResponse: Decodable {
+        let roomId: String
+    }
+
     private struct AttestChallengeResponse: Decodable {
         let challenge: String
     }
@@ -793,6 +805,8 @@ public enum BipeAPIErrorCode: String, Sendable {
     case emailUnavailable = "email_unavailable"
     /// 403. Reason `missing` or `outdated` (ADR 0113).
     case termsRequired = "terms_required"
+    /// 503. The support account is not set up on the server (ADR 0114).
+    case supportUnavailable = "support_unavailable"
 }
 
 public enum BipeAPIError: Error, Sendable, Equatable {
@@ -846,6 +860,7 @@ public enum BipeAPIError: Error, Sendable, Equatable {
             case .recoveryInvalid: BipeStrings.errorRecoveryInvalid
             case .emailUnavailable: BipeStrings.errorEmailUnavailable
             case .termsRequired: BipeStrings.signupTermsRequired
+            case .supportUnavailable: BipeStrings.supportOpenFailed
             case .badRequest, .notFound, .internal: BipeStrings.errorGeneric
             }
         case .network:
