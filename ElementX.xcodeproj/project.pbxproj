@@ -525,6 +525,7 @@
 		4D66CEBE490B2F118F4CEC8A /* EditRoomAddressScreenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBD21AF0131AA38FF9534FAD /* EditRoomAddressScreenModels.swift */; };
 		4DAEE2468669848B6C9F55B4 /* TimelineReadReceiptsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33035418BB35754232985871 /* TimelineReadReceiptsView.swift */; };
 		4DCA7F73CCB96F867CB86F52 /* BipeProfileHeaderSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B72E9E2C666A843F8E9247E /* BipeProfileHeaderSection.swift */; };
+		4DE6792CC11469A50E4B15F3 /* BipeRemoteBannerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E09460212D648F8F3DBD131 /* BipeRemoteBannerRow.swift */; };
 		4DEEFB73181C3B023DB42686 /* NetworkMonitorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1575947B7A6FE08C57FE5EE4 /* NetworkMonitorProtocol.swift */; };
 		4E0D9E09B52CEC4C0E6211A8 /* MediaPickerScreenCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F49FB9EE2913234F06CE68 /* MediaPickerScreenCoordinator.swift */; };
 		4E36A66E0EDA74BF3A036FD0 /* RoomChangeRolesScreenViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAD8C633AA57948B34EDCF7 /* RoomChangeRolesScreenViewModelProtocol.swift */; };
@@ -2593,6 +2594,7 @@
 		7DC017C3CB6B0F7C63F460F2 /* SecureBackupLogoutConfirmationScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureBackupLogoutConfirmationScreenViewModel.swift; sourceTree = "<group>"; };
 		7DDBF99755A9008CF8C8499E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7DDF49CEBC0DFC59C308335F /* RoomMemberDetailsScreenViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomMemberDetailsScreenViewModelProtocol.swift; sourceTree = "<group>"; };
+		7E09460212D648F8F3DBD131 /* BipeRemoteBannerRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeRemoteBannerRow.swift; sourceTree = "<group>"; };
 		7E8562F4D7DE073BC32902AB /* EncryptionResetScreenViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionResetScreenViewModelProtocol.swift; sourceTree = "<group>"; };
 		7EA2AFF6EB59FE25234D29F3 /* ElementCallServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElementCallServiceTests.swift; sourceTree = "<group>"; };
 		7EB58E4E8D6D634C246AD5C2 /* RoomInviterLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomInviterLabel.swift; sourceTree = "<group>"; };
@@ -4939,6 +4941,7 @@
 			children = (
 				23BD9BDCDC91BD99653B3F75 /* BipeHandlePromptRow.swift */,
 				E09E3E09DFD3A311C957901E /* BipeInviterRow.swift */,
+				7E09460212D648F8F3DBD131 /* BipeRemoteBannerRow.swift */,
 				41C39D72D72BC0FACEE5CC7A /* BipeRequestsRow.swift */,
 				8D152423EE6CF0ECCC84091A /* BloomModifier.swift */,
 				B902EA6CD3296B0E10EE432B /* HomeScreen.swift */,
@@ -9142,6 +9145,7 @@
 				232B257DE1EC713019B3708B /* BipeRecoveryScreenModels.swift in Sources */,
 				5EA9A7CC679DCCD7EE67DE1A /* BipeRecoveryScreenViewModel.swift in Sources */,
 				3029DB1C54AA401E9DC2FB05 /* BipeRecoveryScreenViewModelProtocol.swift in Sources */,
+				4DE6792CC11469A50E4B15F3 /* BipeRemoteBannerRow.swift in Sources */,
 				AE80D13B73EB165EB412CE83 /* BipeRequestsRow.swift in Sources */,
 				2E24ED96ED565533C5C7BD23 /* BipeRoomListScope.swift in Sources */,
 				B00C07C7F8DE67EAB0C4C44A /* BipeScamWarningView.swift in Sources */,

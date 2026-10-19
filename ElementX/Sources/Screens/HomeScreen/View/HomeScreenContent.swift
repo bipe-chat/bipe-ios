@@ -119,6 +119,15 @@ struct HomeScreenContent: View {
                     RoomListFiltersView(state: $context.filtersState)
                 }
                 
+                // Bipe (ADR 0117, bipe#386): the remote critical banner sits above the account tasks.
+                if context.viewState.shouldShowBipeRemoteBanner, let banner = context.viewState.bipeRemoteBanner {
+                    BipeRemoteBannerRow(banner: banner, isUpdate: context.viewState.bipeRemoteBannerState != .notice) {
+                        context.send(viewAction: .openBipeRemoteBanner)
+                    } onDismiss: {
+                        context.send(viewAction: .dismissBipeRemoteBanner)
+                    }
+                }
+                
                 // Bipe (ADR 0117, bipe#385): the banner slot shows account tasks only, the first one in this order:
                 // recovery key, inviter row (ADR 0111), "Escolha seu @" (bipe#415). A task leaves when it is done. No news cards here.
                 if case let .show(state) = context.viewState.securityBannerMode {

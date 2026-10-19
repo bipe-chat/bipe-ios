@@ -84,6 +84,10 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         updateBipeInviterGreeting()
         if bipeScope == .chats {
             Task { await loadBipeHandlePrompt() }
+            Task { await loadBipeRemoteBanner() }
+            NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+                .sink { [weak self] _ in Task { await self?.loadBipeRemoteBanner() } }
+                .store(in: &cancellables)
         }
         NotificationCenter.default.publisher(for: .bipeInviterGreetingDidChange)
             .filter { [userID = userSession.clientProxy.userID] in $0.object as? String == userID }
@@ -296,6 +300,10 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             actionsSubject.send(.presentBipeHandleScreen)
         case .dismissBipeHandlePrompt:
             dismissBipeHandlePrompt()
+        case .openBipeRemoteBanner:
+            openBipeRemoteBanner()
+        case .dismissBipeRemoteBanner:
+            dismissBipeRemoteBanner()
         case .spaceFilters:
             if spaceFilterSubject.value != nil {
                 spaceFilterSubject.send(nil)
@@ -546,6 +554,43 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     private func dismissBipeHandlePrompt() {
         userSettings.app.bipeHasDismissedHandlePrompt = true
         state.bipeNeedsHandle = false
+    }
+    
+    /// ADR 0117: on launch and on foreground. A failed read keeps the banner that is on screen.
+    private func loadBipeRemoteBanner() async {
+        guard let banner = try? await BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL).remoteBanner() else {
+            if state.bipeRemoteBanner != nil {
+                updateBipeRemoteBannerState()
+            }
+            return
+        }
+        state.bipeRemoteBanner = banner
+        updateBipeRemoteBannerState()
+    }
+    
+    private func updateBipeRemoteBannerState() {
+        guard let banner = state.bipeRemoteBanner else {
+            state.bipeRemoteBannerState = .hidden
+            return
+        }
+        let bannerState = banner.state(appVersion: InfoPlistReader.main.bundleShortVersionString)
+        // An update banner cannot be dismissed. A notice stays closed until a banner with a new id.
+        state.bipeRemoteBannerState = bannerState == .notice && userSettings.app.bipeDismissedRemoteBannerID == banner.id ? .hidden : bannerState
+    }
+    
+    private func openBipeRemoteBanner() {
+        guard let banner = state.bipeRemoteBanner else { return }
+        switch state.bipeRemoteBannerState {
+        case .update(let url): UIApplication.shared.open(url)
+        case .notice: UIApplication.shared.open(banner.link)
+        case .hidden: break
+        }
+    }
+    
+    private func dismissBipeRemoteBanner() {
+        guard let banner = state.bipeRemoteBanner, state.bipeRemoteBannerState == .notice else { return }
+        userSettings.app.bipeDismissedRemoteBannerID = banner.id
+        state.bipeRemoteBannerState = .hidden
     }
     
     private static let bipeInviterChatLoadingID = "BipeInviterChatLoading"

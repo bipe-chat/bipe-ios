@@ -127,6 +127,10 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference(defaultValue: false)
     var bipeHasDismissedHandlePrompt: Bool
     
+    /// Bipe (ADR 0117, bipe#386): the id of the last remote banner the person closed. A new id shows again.
+    @UserPreference
+    var bipeDismissedRemoteBannerID: String?
+    
     /// Defaults to `true` for new users, and we use a migration to set it to `false` for existing users.
     @UserPreference(defaultValue: true)
     var hasSeenNewSoundBanner: Bool
