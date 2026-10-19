@@ -152,6 +152,7 @@ Not done (needs the domain, Apple team or brand):
 
 - **Conta da empresa:** a row of the "Nova conta" window (bipe#445), shown only when `BipeAppAttest.isSupported` and the account on screen is not a company (ADR 0043). The old Sua conta row `account.createCompany` and its `flag:companyAccount` are gone. The row opens the add-account sheet straight on the sign-up screen in company mode (`AuthenticationFlowCoordinator(bipeAccountType: .company, bipeOpensSignup: true)`), with the invite from the account on screen: the name field is "Nome da empresa" (footer `bipe_account_new_company_body`), and `POST /v1/signup` sends `account_type: company` with the App Attest attestation.
 - **Account type** on the phone: `BipeAccountLabels.rememberCompany` at sign-up and from `account_type` in `GET /v1/me/account` (`BipeRecoveryAlerts`). A company account does not count in the cap (`BipeAccountCap.canAdd(signedInUserIDs:)`).
+- **Avatar shape (ADR 0132, bipe#397):** a company account is a rounded square everywhere `LoadableAvatarImage` draws a user (its `contentID` is the Matrix ID), verified or not. `BipeCompanySeals.isCompany` reads `GET /v1/accounts/{userId}/type` (public, cached a day; known companies kept in UserDefaults). Unknown type or a failed fetch: circle. Android is a circle until #397 reaches it.
 - **Identity on screen:** the chat list title is the company's name (`HomeScreen.title`); the composer placeholder is "Respondendo como <empresa>" (`ComposerToolbarViewState.bipeReplyingAs`).
 - Not done: the CNPJ steps in the app (the claim UI is bipe#249 and #115; the API has them), the seal and the distinct colour in the top bar (#252, ADR 0120), the company's own recovery key and fallback prompts, a second seat verified from the owner's phone (Element's device verification may cover it; unverified).
 
@@ -269,5 +270,6 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | App lock screen during biometrics | Bipe logo, Bipe bloqueado and the Face ID or Touch ID prompt | Element's lock screen | Built on iOS first (#435) **Gap** |
 | Terms screen and a recovery alert due together | Terms screen first, the alert right after Continue | Recovery alert first, then the terms screen | On iOS a root alert cannot show over the full-screen terms cover; on Android the terms screen is an overlay that waits for the alert |
 | Settings: Idioma | Row that opens the iPhone Ajustes | No row | iOS sets the app language in system settings; Android follows the system language |
+| Company avatar shape | Rounded square for a company account, verified or not (ADR 0132) | Circle | Built on iOS first (#397) **Gap** |
 
 <!-- /parity:differences -->

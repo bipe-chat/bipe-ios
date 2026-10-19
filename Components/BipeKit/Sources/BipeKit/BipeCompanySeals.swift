@@ -20,7 +20,10 @@ public enum BipeCompanySealState: Equatable, Sendable {
     case suspended
 }
 
-/// Fetches, verifies and caches company badges. One instance per user session.
+/// Fetches, verifies and caches company badges, and which accounts are companies. One instance per user session.
+///
+/// The account type draws a company avatar as a rounded square, verified or not (ADR 0132). It never changes after
+/// sign-up, so known companies stay in `UserDefaults`. An unknown type gives a circle.
 ///
 /// Reads are synchronous and observable, like ``BipeHandleResolver``. A failed fetch never shows a seal (fail closed).
 /// The notices need a seal seen before, so the store keeps the IDs with a seal in `UserDefaults`.
@@ -34,6 +37,7 @@ public final class BipeCompanySeals {
     public let serverName: String
     
     private var entries: [String: Entry] = [:]
+    private var companies: Set<String>
     
     @ObservationIgnored private let apiClient: BipeAPIClient
     @ObservationIgnored private let masterKey: @MainActor (String) async throws -> String?
@@ -41,9 +45,13 @@ public final class BipeCompanySeals {
     @ObservationIgnored private let seenKey: String
     @ObservationIgnored private var seen: Set<String>
     @ObservationIgnored private var inFlight: Set<String> = []
+    @ObservationIgnored private let companiesKey: String
+    @ObservationIgnored private var typeExpiry: [String: Date] = [:]
+    @ObservationIgnored private var typesInFlight: Set<String> = []
     
     private static let ttl: TimeInterval = 10 * 60
     private static let errorTTL: TimeInterval = 2 * 60
+    private static let typeTTL: TimeInterval = 24 * 60 * 60
     
     /// `masterKey` returns the account's cross-signing master key from the Matrix SDK, `nil` when the account has none.
     /// It throws when the lookup fails: the store then treats it as a network error, not as a suspended seal.
@@ -58,6 +66,8 @@ public final class BipeCompanySeals {
         self.defaults = defaults
         seenKey = "bipe.companySeals.seen.\(sessionUserID)"
         seen = Set(defaults.stringArray(forKey: seenKey) ?? [])
+        companiesKey = "bipe.companySeals.companies.\(sessionUserID)"
+        companies = Set(defaults.stringArray(forKey: companiesKey) ?? [])
     }
     
     /// The cached state. Queues a fetch when the cache has no fresh value.
@@ -82,7 +92,42 @@ public final class BipeCompanySeals {
         return nil
     }
     
+    /// Whether the account is a company (ADR 0132). Queues a fetch when the cache has no fresh value.
+    public func isCompany(_ userID: String) -> Bool {
+        guard userID.hasPrefix("@"), userID.hasSuffix(":\(serverName)") else { return false }
+        if (typeExpiry[userID] ?? .distantPast) < .now {
+            fetchType(userID)
+        }
+        return companies.contains(userID)
+    }
+    
     // MARK: - Private
+    
+    private func fetchType(_ userID: String) {
+        guard !typesInFlight.contains(userID) else { return }
+        typesInFlight.insert(userID)
+        Task { [weak self] in
+            await self?.loadType(userID)
+        }
+    }
+    
+    private func loadType(_ userID: String) async {
+        defer { typesInFlight.remove(userID) }
+        do {
+            let type = try await apiClient.accountType(userID: userID)
+            typeExpiry[userID] = .now.addingTimeInterval(Self.typeTTL)
+            setCompany(userID, type == .company)
+        } catch {
+            typeExpiry[userID] = .now.addingTimeInterval(Self.errorTTL)
+        }
+    }
+    
+    private func setCompany(_ userID: String, _ isCompany: Bool) {
+        let changed = isCompany ? companies.insert(userID).inserted : companies.remove(userID) != nil
+        if changed {
+            defaults.set(companies.sorted(), forKey: companiesKey)
+        }
+    }
     
     private func fetch(_ userID: String) {
         guard !inFlight.contains(userID) else { return }
