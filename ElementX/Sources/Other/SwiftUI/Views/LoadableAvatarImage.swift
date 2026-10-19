@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 struct LoadableAvatarImage: View {
@@ -23,6 +24,7 @@ struct LoadableAvatarImage: View {
     private let onTap: ((URL) -> Void)?
     
     @ScaledMetric private var frameSize: CGFloat
+    @Environment(\.bipeCompanySeals) private var bipeCompanySeals
     
     init(url: URL?,
          name: String?,
@@ -62,9 +64,14 @@ struct LoadableAvatarImage: View {
                 Color.compound.bgCanvasDefault
                     .allowedDynamicRange(.standard) // Workaround an iOS 27.0 bug where full white goes HDR in a toolbar.
             }
-            .avatarShape(shape, scaledSize: _frameSize)
+            .avatarShape(bipeShape, scaledSize: _frameSize)
             .allowedDynamicRange(.standard) // Prevent loaded avatars from triggering HDR display.
             .environment(\.shouldAutomaticallyLoadImages, true) // We always load avatars.
+    }
+    
+    /// Bipe (ADR 0132): a company account is a rounded square. `contentID` is the Matrix ID for a user avatar.
+    private var bipeShape: Shape {
+        shape == .circle && bipeCompanySeals?.isCompany(contentID) == true ? .roundedRect : shape
     }
     
     @ViewBuilder
