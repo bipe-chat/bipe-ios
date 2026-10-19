@@ -1616,6 +1616,12 @@ public enum BipeStrings {
 
     public static var linkComputerNotSupported: String { NSLocalizedString("bipe_link_computer_not_supported", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static func linkComputerNeedsPin(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_link_computer_needs_pin", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var linkComputerCreatePin: String { NSLocalizedString("bipe_link_computer_create_pin", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var linkComputerDone: String { NSLocalizedString("bipe_link_computer_done", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var accountSignOut: String { NSLocalizedString("bipe_account_sign_out", tableName: "Bipe", bundle: .module, comment: "") }

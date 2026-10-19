@@ -10,6 +10,8 @@ import SwiftUI
 enum BipeLinkedDevicesScreenViewModelAction {
     /// The support check passed: open the scanner (desktop direction only, ADR 0116).
     case linkComputer
+    /// This phone has no hidden password, so it cannot approve a computer (ADR 0118): create the PIN first.
+    case createPIN
     case signOut(deviceID: String)
     case dismiss
 }
@@ -17,6 +19,8 @@ enum BipeLinkedDevicesScreenViewModelAction {
 struct BipeLinkedDevicesScreenViewState: BindableState {
     var isLoading = true
     var isCheckingSupport = false
+    /// A beta account has no hidden password on this phone until it creates its PIN.
+    var needsPIN = false
     /// The other devices of the account, newest use first. This phone is not in it.
     var devices: [BipeMatrixDevice] = []
     let showsLinkComputer: Bool
