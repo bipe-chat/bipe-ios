@@ -68,6 +68,8 @@ enum HomeScreenViewAction {
     case markRoomAsUnread(roomIdentifier: String)
     case markRoomAsRead(roomIdentifier: String)
     case markRoomAsFavourite(roomIdentifier: String, isFavourite: Bool)
+    /// Bipe: swipe to archive (the `m.lowpriority` tag).
+    case setRoomArchived(roomIdentifier: String, isArchived: Bool)
     case setRoomMuted(roomIdentifier: String, isMuted: Bool)
     
     case acceptInvite(roomIdentifier: String)
@@ -120,7 +122,7 @@ struct BipeAccountMenuItem: Identifiable, Equatable {
     let userID: String
     let label: String
     let isCurrent: Bool
-    /// ADR 0087: does not count in the cap.
+    /// ADR 0087: the top bar shows a company account's name.
     let isCompany: Bool
     
     var id: String {
@@ -133,10 +135,6 @@ struct HomeScreenViewState: BindableState {
     
     /// Bipe: every account on the phone, the current one first (ADR 0086, bipe#267).
     var bipeAccounts: [BipeAccountMenuItem] = []
-    var bipeMaxAccounts = BipeRegistries.maxPersonalAccounts
-    var bipeCanAddAccount: Bool {
-        bipeAccounts.filter { !$0.isCompany }.count < bipeMaxAccounts
-    }
     
     /// ADR 0087: the company's name in the top bar when the account on screen is a company account.
     var bipeCompanyName: String? {
@@ -156,6 +154,17 @@ struct HomeScreenViewState: BindableState {
     
     /// Bipe: the home tab this list belongs to (ADR 0053).
     var bipeScope = BipeRoomListScope.chats
+    
+    /// Bipe: joined rooms of this tab in the archive.
+    var bipeArchivedCount = 0
+    
+    var isShowingBipeArchive: Bool {
+        bindings.filtersState.isFilterActive(.lowPriority)
+    }
+    
+    var shouldShowBipeArchivedRow: Bool {
+        bipeArchivedCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && (roomListMode == .rooms || roomListMode == .empty)
+    }
     
     var shouldShowBipeRequestsRow: Bool {
         bipeRequestCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && roomListMode == .rooms

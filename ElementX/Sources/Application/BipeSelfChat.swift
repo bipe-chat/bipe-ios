@@ -13,6 +13,9 @@ import SwiftUI
 @MainActor
 final class BipeSelfChat {
     static let accountDataType = "chat.bipe.self_chat"
+    /// Posted when the cached room ID changes. The room lists hide the room again: the new room
+    /// reaches them before `createRoom` returns, and an empty room sends no later update.
+    static let cachedRoomIDDidChange = Notification.Name("BipeSelfChatCachedRoomIDDidChange")
     
     private struct Content: Codable {
         let roomID: String
@@ -33,17 +36,16 @@ final class BipeSelfChat {
         UserDefaults.standard.string(forKey: cacheKey)
     }
     
-    /// Reads the room ID from account data into the cache. Returns true when it changed.
-    func refresh() async -> Bool {
-        guard let roomID = await storedRoomID(), roomID != cachedRoomID else { return false }
-        UserDefaults.standard.set(roomID, forKey: cacheKey)
-        return true
+    /// Reads the room ID from account data into the cache.
+    func refresh() async {
+        guard let roomID = await storedRoomID() else { return }
+        cache(roomID)
     }
     
     /// Returns the self-chat room ID. Creates the room when it does not exist or was left.
     func roomID() async -> String? {
         if let roomID = await storedRoomID(), case .joined = await clientProxy.roomForIdentifier(roomID) {
-            UserDefaults.standard.set(roomID, forKey: cacheKey)
+            cache(roomID)
             return roomID
         }
         
@@ -58,7 +60,7 @@ final class BipeSelfChat {
         }
         
         // Cache first: the room list must hide the room even if the account data write fails.
-        UserDefaults.standard.set(roomID, forKey: cacheKey)
+        cache(roomID)
         
         guard let data = try? JSONEncoder().encode(Content(roomID: roomID)),
               let content = String(data: data, encoding: .utf8),
@@ -74,6 +76,12 @@ final class BipeSelfChat {
     
     private var cacheKey: String {
         "bipe.selfChat.\(clientProxy.userID)"
+    }
+    
+    private func cache(_ roomID: String) {
+        guard roomID != cachedRoomID else { return }
+        UserDefaults.standard.set(roomID, forKey: cacheKey)
+        NotificationCenter.default.post(name: Self.cachedRoomIDDidChange, object: nil)
     }
     
     private func storedRoomID() async -> String? {

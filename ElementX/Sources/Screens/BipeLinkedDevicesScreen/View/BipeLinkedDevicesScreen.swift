@@ -15,12 +15,13 @@ struct BipeLinkedDevicesScreen: View {
         Form {
             if context.viewState.showsLinkComputer {
                 Section {
-                    ListRow(label: .default(title: BipeStrings.linkedDevicesLinkComputer, icon: \.computer),
+                    ListRow(label: .default(title: context.viewState.needsPIN ? BipeStrings.linkComputerCreatePin : BipeStrings.linkedDevicesLinkComputer,
+                                            icon: context.viewState.needsPIN ? \.lock : \.computer),
                             details: .isWaiting(context.viewState.isCheckingSupport),
                             kind: .button { context.send(viewAction: .linkComputer) })
                         .disabled(context.viewState.isCheckingSupport)
                 } footer: {
-                    Text(BipeStrings.linkedDevicesFooter)
+                    Text(context.viewState.needsPIN ? BipeStrings.linkComputerNeedsPin(String(BipeRegistries.pinLength)) : BipeStrings.linkedDevicesFooter)
                         .compoundListSectionFooter()
                 }
             }

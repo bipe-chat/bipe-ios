@@ -140,7 +140,7 @@
 "bipe_invites_other_device" = "Made on another device. Share it from there.";
 "bipe_invites_name_action" = "Who is it for?";
 "bipe_invites_name_placeholder" = "Name";
-"bipe_invites_name_footer" = "Only you see this name, and only on this phone.";
+"bipe_invites_name_footer" = "Only you see this name.";
 "bipe_invites_share_message" = "Join me on Bipe: %1$@";
 "bipe_invites_none_left" = "No invites available right now.";
 "bipe_invites_empty" = "Invite someone to chat with you on Bipe.";
@@ -665,10 +665,17 @@
 "bipe_account_biometric_unlock" = "Unlock with %1$@";
 "bipe_account_pin_footer" = "The same %1$@-digit PIN locks the app and protects your way back into your account.";
 "bipe_account_pin_footer_device" = "This PIN protects your way back into this account. The one that locks the app belongs to the phone and stays the same.";
-"bipe_account_add" = "Add account";
+"bipe_account_add" = "New account";
+"bipe_account_on_device" = "Accounts on this phone";
+"bipe_account_new_title" = "New account";
+"bipe_account_new_personal" = "Personal account";
+"bipe_account_new_personal_body" = "Another account of yours, with another name and other contacts.";
+"bipe_account_new_company" = "Company account";
+"bipe_account_new_company_body" = "You answer as your company. It stays outside the personal account limit.";
+"bipe_account_new_existing" = "Sign in to an existing account";
+"bipe_account_new_existing_body" = "An account you made on another phone.";
+"bipe_account_new_invite_note" = "The invite comes from %1$@.";
 "bipe_account_cap_reached" = "This phone already has %1$@ accounts, the limit.";
-"bipe_company_create" = "Create a company account";
-"bipe_company_create_footer" = "An account just for your company, on this phone next to yours. It does not count toward the limit of personal accounts.";
 "bipe_company_name" = "Company name";
 "bipe_company_replying_as" = "Replying as %1$@";
 "bipe_account_ways_back" = "Ways back";
@@ -703,6 +710,8 @@
 "bipe_link_computer_error_title" = "Couldn't link the computer";
 "bipe_link_computer_error_sign_in" = "Bipe couldn't open the approval page. Try again.";
 "bipe_link_computer_not_supported" = "This phone can't link a computer right now.";
+"bipe_link_computer_needs_pin" = "To link a computer, create your %1$@-digit PIN first.";
+"bipe_link_computer_create_pin" = "Create PIN";
 "bipe_link_computer_done" = "Computer linked.";
 "bipe_account_sign_out" = "Sign out of this device";
 "bipe_privacy_who_can_talk" = "Who can talk to you";
@@ -822,3 +831,8 @@
 "bipe_support_welcome" = "Hi! This is where you talk to the Bipe team. Tell us what happened or what you want to see in the app. We answer in this chat.";
 "bipe_support_report_received" = "We got your problem report. The team will read it and answer in this chat.";
 "bipe_support_already_open" = "You already have a chat with support. Continue here.";
+"bipe_app_lock_title" = "Bipe is locked";
+"bipe_app_lock_biometric" = "Use %1$@ to open";
+"bipe_archive_action" = "Archive";
+"bipe_unarchive_action" = "Unarchive";
+"bipe_archived_title" = "Archived";

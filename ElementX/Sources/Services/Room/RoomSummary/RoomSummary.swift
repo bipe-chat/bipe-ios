@@ -56,6 +56,8 @@ nonisolated struct RoomSummary {
     let isMarkedUnread: Bool
     let isFavourite: Bool
     let isTombstoned: Bool
+    /// Bipe: archived. The Matrix `m.lowpriority` tag, so other clients see the same state.
+    var isLowPriority = false
     
     var hasUnreadMessages: Bool {
         unreadMessagesCount > 0

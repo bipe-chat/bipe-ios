@@ -18,6 +18,8 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
     private let notificationSettings: NotificationSettingsProxyProtocol
     private let userSettings: UserSettings
     private let baseFilter: [RoomListEntriesDynamicFilterKind]
+    /// Bipe: the home tabs always hide archived (low priority) rooms unless the archive is open.
+    private let hidesLowPriority: Bool
     
     private let roomListPageSize: UInt32
     /// Remember how many rooms we had on the previous requests so we can deduplicate
@@ -81,6 +83,7 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
         self.notificationSettings = notificationSettings
         self.userSettings = userSettings
         self.roomListPageSize = roomListPageSize
+        hidesLowPriority = bipeScope != nil || userSettings.app.lowPriorityFilterEnabled
         
         baseFilter = [.any(filters: [.all(filters: [.nonSpace, .nonLeft]),
                                      .all(filters: [.space, .invite])]),
@@ -167,7 +170,7 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
             
             rustFilters.append(.identifiers(identifiers: Array(roomIDs)))
             
-            if !filters.contains(.lowPriority), userSettings.app.lowPriorityFilterEnabled {
+            if !filters.contains(.lowPriority), hidesLowPriority {
                 rustFilters.append(.nonLowPriority)
             }
             
@@ -175,7 +178,7 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
         case let .all(filters):
             var rustFilters = filters.map(\.rustFilter) + baseFilter
             
-            if !filters.contains(.lowPriority), userSettings.app.lowPriorityFilterEnabled {
+            if !filters.contains(.lowPriority), hidesLowPriority {
                 rustFilters.append(.nonLowPriority)
             }
             
@@ -398,7 +401,8 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
                            activeCallIntent: activeCallIntent.map { .init(rustCallIntent: $0) },
                            isMarkedUnread: roomInfo.isMarkedUnread,
                            isFavourite: roomInfo.isFavourite,
-                           isTombstoned: roomInfo.successorRoom != nil)
+                           isTombstoned: roomInfo.successorRoom != nil,
+                           isLowPriority: roomInfo.isLowPriority)
     }
     
     private nonisolated static func buildDiff(from diff: RoomListEntriesUpdate, on rooms: [RoomSummary], eventStringBuilder: RoomEventStringBuilder) async -> CollectionDifference<RoomSummary>? {

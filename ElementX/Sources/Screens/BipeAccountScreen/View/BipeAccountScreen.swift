@@ -66,11 +66,11 @@ struct BipeAccountScreen: View {
         Section {
             ListRow(kind: .custom {
                 VStack(spacing: 16) {
-                    PINTextField(pinCode: $context.pin, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
+                    PINTextField(pinCode: $context.pin, isSecure: true, maxLength: BipeRegistries.pinLength, size: .dots)
                     Text(BipeStrings.pinConfirmTitle)
                         .font(.compound.bodyMD)
                         .foregroundStyle(.compound.textSecondary)
-                    PINTextField(pinCode: $context.pinConfirmation, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
+                    PINTextField(pinCode: $context.pinConfirmation, isSecure: true, maxLength: BipeRegistries.pinLength, size: .dots)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)

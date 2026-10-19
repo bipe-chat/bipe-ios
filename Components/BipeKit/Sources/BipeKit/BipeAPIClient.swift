@@ -193,6 +193,11 @@ public struct BipeAPIClient: Sendable {
         let _: NoContent = try await send(method: "DELETE", path: ["v1", "me", "invites", id], body: Empty?.none, accessToken: accessToken)
     }
     
+    /// `PUT /v1/me/invites/{inviteId}`. Names an invite of the caller; an empty name removes it.
+    public func nameInvite(id: String, name: String, accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "PUT", path: ["v1", "me", "invites", id], body: InviteName(name: name), accessToken: accessToken)
+    }
+    
     // MARK: - Messaging
     
     /// `GET /v1/me/messaging`. Who can message the caller.
@@ -362,6 +367,10 @@ public struct BipeAPIClient: Sendable {
     
     private struct InviteConnectionsResponse: Decodable {
         let userIds: [String]
+    }
+    
+    private struct InviteName: Encodable {
+        let name: String
     }
     
     private struct MessagingSetting: Codable {
@@ -697,17 +706,20 @@ public struct BipeInvite: Decodable, Sendable, Identifiable, Equatable {
     public let expiresAt: Date
     /// Only when `status` is `used`.
     public let joinedUserId: String?
+    /// The name the person gave the invite. Only they see it.
+    public let name: String?
     
     private enum CodingKeys: String, CodingKey {
-        case id, status, createdAt, expiresAt, joinedUserId
+        case id, status, createdAt, expiresAt, joinedUserId, name
     }
     
-    public init(id: String, status: BipeInviteStatus, createdAt: Date, expiresAt: Date, joinedUserId: String?) {
+    public init(id: String, status: BipeInviteStatus, createdAt: Date, expiresAt: Date, joinedUserId: String?, name: String? = nil) {
         self.id = id
         self.status = status
         self.createdAt = createdAt
         self.expiresAt = expiresAt
         self.joinedUserId = joinedUserId
+        self.name = name
     }
     
     public init(from decoder: Decoder) throws {
@@ -718,6 +730,7 @@ public struct BipeInvite: Decodable, Sendable, Identifiable, Equatable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         expiresAt = try container.decode(Date.self, forKey: .expiresAt)
         joinedUserId = try container.decodeIfPresent(String.self, forKey: .joinedUserId)
+        name = try container.decodeIfPresent(String.self, forKey: .name)
     }
 }
 
