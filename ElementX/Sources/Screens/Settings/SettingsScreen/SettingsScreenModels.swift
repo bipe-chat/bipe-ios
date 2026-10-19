@@ -15,8 +15,6 @@ enum SettingsScreenViewModelAction {
     case userDetails
     case userStatusEmojiPicker(EmojiPickerScreenContinuation)
     
-    case addAccount
-    
     case manageAccount(url: URL)
     case linkNewDevice
     case notifications
@@ -56,7 +54,6 @@ struct SettingsScreenViewState: BindableState {
     var userProfile: UserProfile
     var showUserStatusInput = false
     var showLinkNewDeviceButton: Bool
-    var showAddAccountButton: Bool
     var accountProfileURL: URL?
     var showAccountDeactivation: Bool
     var showDeveloperOptions: Bool
@@ -132,8 +129,6 @@ enum SettingsScreenViewAction {
     
     case userDetails
     case userStatus(UserStatusAction)
-    
-    case addAccount
     
     case manageAccount(url: URL)
     case linkNewDevice

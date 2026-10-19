@@ -59,10 +59,6 @@ enum HomeScreenViewAction {
     case resetEncryption
     case skipRecoveryKeyConfirmation
     case dismissNewSoundBanner
-    case screenAppeared
-    case multiAccountAnnouncementAppeared
-    case dismissMultiAccountAnnouncement
-    case addAccount
     /// Bipe: a tap on the avatar with two or more accounts, and the rows of the account menu (ADR 0086, bipe#267).
     case bipeSwitchToNextAccount
     case bipeSwitchAccount(userID: String)
@@ -244,7 +240,6 @@ struct HomeScreenViewStateBindings {
     var leaveRoomAlertItem: LeaveRoomAlertItem?
     
     var spaceFiltersViewModel: ChatsSpaceFiltersScreenViewModel?
-    var isPresentingMultiAccountAnnouncement = false
 }
 
 enum CallBadgeType {

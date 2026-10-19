@@ -143,7 +143,7 @@ Not done (needs the domain, Apple team or brand):
 - **Add account** (`bipeStartAddingAccount`): `AuthenticationFlowCoordinator(isAddingAccount: true)` shows the start screen as a sheet over the session, without the silent sign-in. A swipe down cancels. A sign-in adds the session and opens it (`isNewLogin: true`). The recovery screen offers only tokens of accounts not on the phone (`BipeCredentialStore.recoveryToken(excluding:)`).
 - **Cap:** `BipeAccountCap` (BipeKit): the last `max_accounts` from `GET /v1/me/account` (read in `BipeRecoveryAlerts`), else `BipeRegistries.maxPersonalAccounts` (2). Company accounts do not count (#269).
 - **Sign-out:** another account on the phone opens (`signedOut => restoringSession`). A sign-out after a forgotten device PIN removes every account from the phone (`userSessionManager.reset()`), so the PIN cannot be skipped to reach the other account.
-- Upstream's `multiAccountEnabled` flag and its announcement stay off.
+- Element's upstream multi-account UI (developer toggle, Add account row, announcement) is removed (bipe#434). The avatar is the only entry point.
 - Not done: the account avatar in the composer, the account name in notifications, a check that the NSE reads the right session per push (unverified), the ADR 0120 rounded square for a verified company (needs #252). Upstream develop has 28 newer commits with multi-account work ("Keep every signed-in account live", "Notify every signed-in account"); a rebase onto it can replace parts of this.
 
 ## Company account, owner case (ADR 0087, bipe#269)
