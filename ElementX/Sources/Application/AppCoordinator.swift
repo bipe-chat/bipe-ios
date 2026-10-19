@@ -1065,6 +1065,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             switch action {
             case .lockApp:
                 windowManager.switchToAlternate()
+            case .obscureApp:
+                windowManager.bipeCoverMain()
             case .unlockApp:
                 windowManager.switchToMain()
             case .forceLogout:
