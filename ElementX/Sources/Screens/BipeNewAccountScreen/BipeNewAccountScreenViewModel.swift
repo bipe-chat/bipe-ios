@@ -28,9 +28,9 @@ class BipeNewAccountScreenViewModel: BipeNewAccountScreenViewModelType, BipeNewA
          inviteCreator: BipeInviteCreator?) {
         self.inviteCreator = inviteCreator
         super.init(initialViewState: BipeNewAccountScreenViewState(accountName: accountName,
-                                                                    canAddPersonal: canAddPersonal,
-                                                                    maxPersonalAccounts: maxPersonalAccounts,
-                                                                    showsCompany: showsCompany))
+                                                                   canAddPersonal: canAddPersonal,
+                                                                   maxPersonalAccounts: maxPersonalAccounts,
+                                                                   showsCompany: showsCompany))
         
         if inviteCreator != nil {
             Task { await loadQuota() }

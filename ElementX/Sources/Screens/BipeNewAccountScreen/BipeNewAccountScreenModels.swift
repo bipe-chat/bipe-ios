@@ -64,7 +64,9 @@ struct BipeNewAccountScreenViewState: BindableState {
     
     private var canSignUp: Bool {
         guard creatingInviteFor == nil else { return false }
-        if case .noneLeft = invite { return false }
+        if case .noneLeft = invite {
+            return false
+        }
         return true
     }
 }
