@@ -275,6 +275,27 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         handleAppRoute(.room(roomID: roomID, via: []), animated: true)
     }
     
+    /// Bipe: the support DM (ADR 0114). The API makes the room and invites the user; the app joins it.
+    private func openSupportChat() async {
+        let clientProxy = flowParameters.userSession.clientProxy
+        let apiClient = BipeAPIClient(baseURL: flowParameters.userSession.userSettings.app.bipeAPIBaseURL)
+        do {
+            let roomID = try await BipeAPIClient.withTokenRetry(accessToken: { clientProxy.accessToken }) { token throws(BipeAPIError) in
+                try await apiClient.supportRoomID(accessToken: token)
+            }
+            if case .invited = await clientProxy.roomForIdentifier(roomID) {
+                guard case .success = await clientProxy.joinRoom(roomID, via: []) else {
+                    flowParameters.userIndicatorController.submitIndicator(.init(title: BipeStrings.supportOpenFailed))
+                    return
+                }
+            }
+            handleAppRoute(.room(roomID: roomID, via: []), animated: true)
+        } catch {
+            MXLog.error("Opening the support room failed: \(error)")
+            flowParameters.userIndicatorController.submitIndicator(.init(title: BipeStrings.supportOpenFailed))
+        }
+    }
+    
     /// Bipe: a `bipe.chat/@handle` link opens that user's profile.
     private func openBipeHandle(_ handle: String, animated: Bool) async {
         let userID = try? await flowParameters.userSession.bipeHandleResolver?.userID(forHandle: handle)
@@ -529,6 +550,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         case .bipeCreateCompanyAccount:
             navigationTabCoordinator.setSheetCoordinator(nil) // Settings in a sheet on iPad and Mac.
             actionsSubject.send(.bipeCreateCompanyAccount)
+        case .openSupportChat:
+            Task { await openSupportChat() }
         }
     }
     

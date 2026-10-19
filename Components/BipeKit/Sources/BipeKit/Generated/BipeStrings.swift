@@ -1827,4 +1827,18 @@ public enum BipeStrings {
     public static var handlePromptBody: String { NSLocalizedString("bipe_handle_prompt_body", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var handlePromptAction: String { NSLocalizedString("bipe_handle_prompt_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var settingsSupport: String { NSLocalizedString("bipe_settings_support", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var supportOpenFailed: String { NSLocalizedString("bipe_support_open_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var supportRoomName: String { NSLocalizedString("bipe_support_room_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var supportRoomTopic: String { NSLocalizedString("bipe_support_room_topic", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var supportWelcome: String { NSLocalizedString("bipe_support_welcome", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var supportReportReceived: String { NSLocalizedString("bipe_support_report_received", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var supportAlreadyOpen: String { NSLocalizedString("bipe_support_already_open", tableName: "Bipe", bundle: .module, comment: "") }
 }

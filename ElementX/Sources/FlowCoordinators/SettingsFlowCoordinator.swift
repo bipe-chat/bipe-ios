@@ -22,6 +22,8 @@ enum SettingsFlowCoordinatorAction {
     case openSelfChat
     /// Bipe: "Criar conta da empresa" (ADR 0087, bipe#269).
     case bipeCreateCompanyAccount
+    /// Bipe: the support DM (ADR 0114).
+    case openSupportChat
 }
 
 class SettingsFlowCoordinator: FlowCoordinatorProtocol {
@@ -221,6 +223,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             presentMediaUploadQualitySettings()
         case .chatsLiveLocation:
             presentLocationSharingSettings()
+        case .helpSupport:
+            actionsSubject.send(.openSupportChat)
         default:
             MXLog.error("Bipe settings row without a screen: \(row.rawValue)")
         }
