@@ -162,6 +162,7 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
         do {
             let created = try await inviteCreator.create()
             MXLog.info("Bipe invite created \(created)")
+            BipeHaptics.play(.success)
             await loadInvites()
             return BipeInviteShareLink(id: created.id, url: created.url)
         } catch {

@@ -156,9 +156,11 @@ class BipeRecoveryScreenViewModel: BipeRecoveryScreenViewModelType, BipeRecovery
         state.bindings.pinConfirmation = ""
         switch error {
         case .server(.pinBlocked, _, _):
+            BipeHaptics.play(.error)
             state.isPINBlocked = true
             state.pinError = BipeStrings.pinBlockedBody(String(BipeRegistries.pinMaxWrongTries))
         case .server(.pinWrong, _, _), .server(.pinWeak, _, _):
+            BipeHaptics.play(.error)
             state.pinError = error.localizedMessage
         default:
             state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: error.localizedMessage)

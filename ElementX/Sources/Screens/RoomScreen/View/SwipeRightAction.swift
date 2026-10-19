@@ -6,14 +6,13 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 struct SwipeRightAction<Label: View>: ViewModifier {
     private let actionThreshold = 50.0
     private let xOffsetThreshold = 100.0
     private let swipeThreshold = 1000.0
-    
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
     
     @State private var canStartAction = false
     @GestureState private var dragGestureActive = false
@@ -33,7 +32,7 @@ struct SwipeRightAction<Label: View>: ViewModifier {
             .onChange(of: dragGestureActive) { _, newValue in
                 if newValue == true {
                     if shouldStartAction() {
-                        feedbackGenerator.prepare()
+                        BipeHaptics.prepare(.threshold)
                         canStartAction = true
                     }
                 }
@@ -61,6 +60,7 @@ struct SwipeRightAction<Label: View>: ViewModifier {
                     }
                     
                     xOffset = 0.0
+                    hasReachedActionThreshold = false
                 default:
                     guard shouldStartAction() else {
                         return
@@ -88,10 +88,11 @@ struct SwipeRightAction<Label: View>: ViewModifier {
                     
                     if xOffset > actionThreshold {
                         if !hasReachedActionThreshold {
-                            feedbackGenerator.impactOccurred()
+                            BipeHaptics.play(.threshold)
                             hasReachedActionThreshold = true
                         }
-                    } else {
+                    } else if hasReachedActionThreshold {
+                        BipeHaptics.play(.release)
                         hasReachedActionThreshold = false
                     }
                 }

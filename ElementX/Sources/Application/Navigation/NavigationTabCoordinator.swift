@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -401,8 +402,20 @@ private struct NavigationTabCoordinatorView<Tag: Hashable>: View {
         }
     }
     
+    /// Bipe: a `tick` when the user picks another tab (ADR 0134). Route changes set `selectedTab` directly and play nothing.
+    private var bipeSelectedTab: Binding<Tag?> {
+        Binding {
+            navigationTabCoordinator.selectedTab
+        } set: { tab in
+            if tab != navigationTabCoordinator.selectedTab {
+                BipeHaptics.play(.tick)
+            }
+            navigationTabCoordinator.selectedTab = tab
+        }
+    }
+    
     var tabViewLayout: some View {
-        TabView(selection: $navigationTabCoordinator.selectedTab) {
+        TabView(selection: bipeSelectedTab) {
             ForEach(navigationTabCoordinator.tabModules) { module in
                 Tab(value: module.details.tag, role: module.details.isSearch ? .search : nil) {
                     module.coordinator?.toPresentable()

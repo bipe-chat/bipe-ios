@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -93,6 +94,7 @@ class AppLockSetupPINScreenViewModel: AppLockSetupPINScreenViewModelType, AppLoc
         let pinCode = state.bindings.pinCode
         guard pinCode == newPIN else {
             MXLog.warning("PIN mismatch.")
+            BipeHaptics.play(.error)
             displayAlert(.pinMismatch)
             return
         }
@@ -108,12 +110,14 @@ class AppLockSetupPINScreenViewModel: AppLockSetupPINScreenViewModelType, AppLoc
             }
         }
         
+        BipeHaptics.play(.success)
         actionsSubject.send(.complete)
     }
     
     /// Handles a PIN input for the unlock mode.
     private func unlock() {
         guard appLockService.unlock(with: state.bindings.pinCode) else {
+            BipeHaptics.play(.error)
             state.bindings.pinCode = ""
             if state.numberOfUnlockAttempts >= state.maximumAttempts {
                 displayAlert(.forceLogout)

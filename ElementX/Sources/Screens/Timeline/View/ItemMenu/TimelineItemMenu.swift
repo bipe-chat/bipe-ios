@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -18,7 +19,6 @@ struct TimelineItemMenu: View {
     
     let item: EventBasedTimelineItemProtocol
     let actions: TimelineItemMenuActions
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
     
     var body: some View {
         VStack(spacing: 8) {
@@ -103,7 +103,7 @@ struct TimelineItemMenu: View {
     
     private func reactionButton(for emoji: String) -> some View {
         Button {
-            feedbackGenerator.impactOccurred()
+            BipeHaptics.play(.tick)
             dismiss()
             context.send(viewAction: .toggleReaction(key: emoji, itemID: item.id))
         } label: {

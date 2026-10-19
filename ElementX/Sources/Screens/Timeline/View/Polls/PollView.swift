@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -39,8 +40,6 @@ enum PollViewState {
 }
 
 struct PollView: View {
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
-    
     let poll: Poll
     let state: PollViewState
     let sender: TimelineItemSender
@@ -107,7 +106,7 @@ struct PollView: View {
         Button {
             guard let answerIDs = poll.answerIDsAfterSelecting(optionID: option.id) else { return }
             actionHandler(.sendResponse(answerIDs: answerIDs))
-            feedbackGenerator.impactOccurred()
+            BipeHaptics.play(.tick)
         } label: {
             PollOptionView(pollOption: option,
                            showVotes: showVotes,

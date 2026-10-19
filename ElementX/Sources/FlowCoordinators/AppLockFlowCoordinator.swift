@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftState
 import SwiftUI
@@ -231,6 +232,9 @@ class AppLockFlowCoordinator: CoordinatorProtocol {
     /// Attempts to authenticate the user using Face ID, Touch ID or (possibly) Optic ID.
     private func attemptBiometricUnlock() async {
         let result = await appLockService.unlockWithBiometrics()
+        if case .unlocked = result {
+            BipeHaptics.play(.success)
+        }
         stateMachine.tryEvent(.didFinishBiometricUnlock(result))
     }
     

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -62,7 +63,7 @@ struct TimelineScrollButton: View {
                     .updating($isPressing) { current, state, _ in state = current }
                     .onEnded { _ in
                         consumedByLongPress = true
-                        UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                        BipeHaptics.play(.hold)
                         onLongPress()
                     })
                 .simultaneousGesture(DragGesture(minimumDistance: 0)

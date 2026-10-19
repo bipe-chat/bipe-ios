@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -53,6 +54,7 @@ class SecureBackupRecoveryKeyScreenViewModel: SecureBackupRecoveryKeyScreenViewM
             }
         case .copyKey:
             UIPasteboard.general.string = state.recoveryKey
+            BipeHaptics.play(.tap)
             userIndicatorController.submitIndicator(.init(title: "Copied recovery key"))
             state.doneButtonEnabled = true
         case .keySaved:

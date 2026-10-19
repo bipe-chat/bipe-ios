@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -15,6 +16,7 @@ struct CopyTextButton: View {
     var body: some View {
         Button {
             UIPasteboard.general.string = content
+            BipeHaptics.play(.tap)
         } label: {
             Label {
                 Text(content)

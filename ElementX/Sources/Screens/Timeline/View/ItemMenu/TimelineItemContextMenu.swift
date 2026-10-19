@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -26,6 +27,7 @@ struct TimelineItemContextMenu: View {
                     ControlGroup {
                         ForEach(menuActions.reactions.prefix(maxPaletteReactions), id: \.key) {
                             ReactionToggle(reaction: $0, reactions: reactions) {
+                                BipeHaptics.play(.tick)
                                 send(.toggleReaction(key: $0))
                             }
                         }

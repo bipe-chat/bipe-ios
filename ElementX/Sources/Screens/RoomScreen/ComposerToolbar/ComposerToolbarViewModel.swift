@@ -212,6 +212,7 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
             saveDraft()
         case .sendMessage:
             guard !state.sendButtonDisabled else { return }
+            BipeHaptics.play(.tap)
             
             switch state.composerMode {
             case .previewVoiceMessage:

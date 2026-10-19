@@ -136,6 +136,7 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
         do {
             let created = try await creator.create()
             MXLog.info("Bipe invite created \(created)")
+            BipeHaptics.play(.success)
             state.shareURLs[created.id] = created.url
             await load()
             return BipeInviteShareLink(id: created.id, url: created.url)
