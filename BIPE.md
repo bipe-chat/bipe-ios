@@ -259,6 +259,8 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/bipe; same result for the user |
 | Conferir no Bipe: close | Back to the app that shared | Back to Bipe | The iOS check runs in the share extension; Android shows it in the app (ADR 0091) |
 | Message actions | Native context menu on long press: reaction row, actions, the message as preview | Element's bottom sheet | Platform idiom |
+| Archive chats | Swipe or long press to archive (`m.lowpriority`); Arquivadas row at the top of the list | Not built | Built on iOS first (#435) **Gap** |
+| App lock screen during biometrics | Bipe logo, Bipe bloqueado and the Face ID or Touch ID prompt | Element's lock screen | Built on iOS first (#435) **Gap** |
 | Terms screen and a recovery alert due together | Terms screen first, the alert right after Continue | Recovery alert first, then the terms screen | On iOS a root alert cannot show over the full-screen terms cover; on Android the terms screen is an overlay that waits for the alert |
 | Settings: Idioma | Row that opens the iPhone Ajustes | No row | iOS sets the app language in system settings; Android follows the system language |
 
