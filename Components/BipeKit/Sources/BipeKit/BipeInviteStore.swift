@@ -10,6 +10,7 @@ import Security
 /// On-device memory for personal invites, per account.
 /// - Invite links: the server keeps only a hash of each code, so the link exists only where it was created.
 ///   Links are bearer secrets and live in the keychain.
+/// - Names: on the server. Older builds kept them here; see `localNames()`.
 /// - Seen joins: the invite IDs whose join the user was already told about. Not secret; UserDefaults.
 public nonisolated struct BipeInviteStore {
     private let userID: String
@@ -48,26 +49,14 @@ public nonisolated struct BipeInviteStore {
     
     // MARK: - Names
     
-    /// Names the person gave their invites, by invite ID. They stay on this device and never reach the server.
-    public func names() -> [String: String] {
+    /// Invite names from builds that kept them only on the device, by invite ID. The server keeps names now;
+    /// the invites screen uploads these once and then removes them.
+    public func localNames() -> [String: String] {
         defaults.dictionary(forKey: namesKey) as? [String: String] ?? [:]
     }
     
-    /// An empty name removes the entry.
-    public func saveName(_ name: String, forInviteID id: String) {
-        var current = names()
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        current[id] = trimmed.isEmpty ? nil : trimmed
-        defaults.set(current, forKey: namesKey)
-    }
-    
-    /// Drops names of invites the server no longer lists.
-    public func keepNames(forInviteIDs ids: Set<String>) {
-        let current = names()
-        let kept = current.filter { ids.contains($0.key) }
-        if kept.count != current.count {
-            defaults.set(kept, forKey: namesKey)
-        }
+    public func removeLocalNames() {
+        defaults.removeObject(forKey: namesKey)
     }
     
     // MARK: - Seen joins

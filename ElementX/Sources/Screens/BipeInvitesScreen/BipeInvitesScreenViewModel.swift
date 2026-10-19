@@ -33,7 +33,6 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
         
         var initialState = BipeInvitesScreenViewState()
         initialState.shareURLs = store.links()
-        initialState.names = store.names()
         super.init(initialViewState: initialState)
         
         Task { await load() }
@@ -60,9 +59,9 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
             state.bindings.namingInviteID = inviteID
         case .saveName:
             guard let inviteID = state.bindings.namingInviteID else { return }
-            store.saveName(state.bindings.nameDraft, forInviteID: inviteID)
-            state.names = store.names()
+            let name = state.bindings.nameDraft
             state.bindings.namingInviteID = nil
+            Task { await saveName(name, forInviteID: inviteID) }
         case .revoke(let inviteID):
             Task { await revoke(inviteID) }
         case .openUserProfile(let userID):
@@ -87,14 +86,44 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
             let pendingIDs = Set(myInvites.invites.filter { $0.status == .pending }.map(\.id))
             store.keepLinks(forPendingInviteIDs: pendingIDs)
             state.shareURLs = state.shareURLs.filter { pendingIDs.contains($0.key) }
-            store.keepNames(forInviteIDs: Set(myInvites.invites.map(\.id)))
-            state.names = store.names()
+            state.names = myInvites.invites.reduce(into: [:]) { names, invite in names[invite.id] = invite.name }
             let joinedIDs = Set(myInvites.invites.filter { $0.status == .used }.map(\.id))
             store.setSeenJoinedInviteIDs((store.seenJoinedInviteIDs() ?? []).union(joinedIDs))
+            await uploadLocalNames(listedIDs: Set(myInvites.invites.map(\.id)))
         } catch {
             MXLog.error("Bipe invites load failed: \(error)")
             show(error)
         }
+    }
+    
+    private func saveName(_ name: String, forInviteID inviteID: String) async {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) in
+                try await apiClient.nameInvite(id: inviteID, name: trimmed, accessToken: token)
+            }
+            state.names[inviteID] = trimmed.isEmpty ? nil : trimmed
+        } catch {
+            MXLog.error("Bipe invite name save failed: \(error)")
+            show(error)
+        }
+    }
+    
+    /// Older builds kept names only on the phone. Uploads those the server does not have yet, then removes them here.
+    private func uploadLocalNames(listedIDs: Set<String>) async {
+        let local = store.localNames().filter { listedIDs.contains($0.key) && state.names[$0.key] == nil }
+        for (inviteID, name) in local {
+            do {
+                try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) in
+                    try await apiClient.nameInvite(id: inviteID, name: name, accessToken: token)
+                }
+                state.names[inviteID] = name
+            } catch {
+                MXLog.error("Bipe invite name upload failed: \(error)")
+                return
+            }
+        }
+        store.removeLocalNames()
     }
     
     /// Creates an invite and returns its link, so the caller can open the share sheet or the QR code at once.
