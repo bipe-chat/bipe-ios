@@ -37,6 +37,7 @@ struct BugReportScreen: View {
         .navigationTitle(L10n.commonReportAProblem)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
+        .alert(item: $context.alertInfo)
         .interactiveDismissDisabled()
         .onChange(of: selectedScreenshot) { _, newItem in
             Task {

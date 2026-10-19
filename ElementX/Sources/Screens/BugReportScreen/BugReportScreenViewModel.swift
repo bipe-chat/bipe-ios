@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -114,7 +115,16 @@ class BugReportScreenViewModel: BugReportScreenViewModelType, BugReportScreenVie
                                                       progressListener: progressSubject) {
         case .success(let response):
             MXLog.info("Submission uploaded: \(response.reportURL ?? "The server didn't generate a report URL")")
-            actionsSubject.send(.submitFinished)
+            // Bipe: the person sees that the report arrived and where the answer comes, then the screen closes (bipe#367).
+            actionsSubject.send(.submitUploaded)
+            // The loading indicator stays up to 0.5 s after the retract; an alert set before that can close at once.
+            try? await Task.sleep(for: .seconds(0.6))
+            state.bindings.alertInfo = AlertInfo(id: UUID(),
+                                                 title: BipeStrings.helpReportSentTitle,
+                                                 message: BipeStrings.helpReportSentBody,
+                                                 primaryButton: .init(title: L10n.actionOk) { [weak self] in
+                                                     self?.actionsSubject.send(.submitFinished)
+                                                 })
         case .failure(let error):
             MXLog.error("Submission failed: \(error)")
             actionsSubject.send(.submitFailed(error: error))

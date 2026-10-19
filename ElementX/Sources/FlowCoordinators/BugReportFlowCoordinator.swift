@@ -80,7 +80,7 @@ class BugReportFlowCoordinator: FlowCoordinatorProtocol {
             case .viewLogs:
                 presentLogViewerScreen()
             case .finish:
-                showSuccess(label: L10n.actionDone)
+                // Bipe: the report screen already showed its confirmation (bipe#367).
                 dismiss()
             }
         }
@@ -134,9 +134,5 @@ class BugReportFlowCoordinator: FlowCoordinatorProtocol {
         case .sheet(let navigationStackCoordinator):
             navigationStackCoordinator.setSheetCoordinator(nil)
         }
-    }
-    
-    private func showSuccess(label: String) {
-        parameters.userIndicatorController.submitIndicator(UserIndicator(title: label))
     }
 }
