@@ -38,4 +38,5 @@ xcodebuild -exportArchive -archivePath "$ARCHIVE" \
   -exportOptionsPlist Tools/Bipe/ExportAppStore.plist \
   -exportPath "build/appstore-$BUILD_NUMBER" "${AUTH[@]}"
 
-echo "Uploaded $BIPE_VERSION ($BUILD_NUMBER). Add it to the external TestFlight group in App Store Connect."
+echo "Uploaded $BIPE_VERSION ($BUILD_NUMBER). Giving it to the external testers."
+ASC_KEY_ID=$ASC_KEY_ID ASC_ISSUER_ID=$ASC_ISSUER_ID ASC_KEY_PATH=$ASC_KEY_PATH node Tools/Bipe/testflight-distribute.mjs "$BUILD_NUMBER"
