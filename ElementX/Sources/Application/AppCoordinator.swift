@@ -782,7 +782,10 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             let inviterHandle = appSettings.bipePendingInviterHandle
             appSettings.bipePendingInviterUserID = nil
             appSettings.bipePendingInviterHandle = nil
-            await openChatWithInviter(inviterUserID, handle: inviterHandle, userSession: userSession, flowCoordinator: userSessionFlowCoordinator)
+            // An invite from another account on this phone (Nova conta, bipe#445) is not an inviter to greet.
+            if !userSessionManager.userIDs.contains(inviterUserID) {
+                await openChatWithInviter(inviterUserID, handle: inviterHandle, userSession: userSession, flowCoordinator: userSessionFlowCoordinator)
+            }
         }
         
         if userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName {
