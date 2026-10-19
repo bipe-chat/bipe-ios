@@ -145,8 +145,8 @@ class UserSessionStore: UserSessionStoreProtocol {
             return BipeCompanySeals(apiClient: BipeAPIClient(baseURL: apiBaseURL),
                                     serverName: serverName,
                                     sessionUserID: clientProxy.userID) { [weak clientProxy] userID in
-                guard case .success(let identity) = await clientProxy?.userIdentity(for: userID, fallBackToServer: true) else { return nil }
-                return identity?.masterKey
+                guard let clientProxy else { throw CancellationError() }
+                return try await clientProxy.userIdentity(for: userID, fallBackToServer: true).get()?.masterKey
             }
         }
     }

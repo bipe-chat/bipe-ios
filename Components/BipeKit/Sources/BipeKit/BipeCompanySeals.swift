@@ -36,7 +36,7 @@ public final class BipeCompanySeals {
     private var entries: [String: Entry] = [:]
     
     @ObservationIgnored private let apiClient: BipeAPIClient
-    @ObservationIgnored private let masterKey: @MainActor (String) async -> String?
+    @ObservationIgnored private let masterKey: @MainActor (String) async throws -> String?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let seenKey: String
     @ObservationIgnored private var seen: Set<String>
@@ -45,12 +45,13 @@ public final class BipeCompanySeals {
     private static let ttl: TimeInterval = 10 * 60
     private static let errorTTL: TimeInterval = 2 * 60
     
-    /// `masterKey` returns the account's cross-signing master key from the Matrix SDK, or `nil` when it is not known.
+    /// `masterKey` returns the account's cross-signing master key from the Matrix SDK, `nil` when the account has none.
+    /// It throws when the lookup fails: the store then treats it as a network error, not as a suspended seal.
     public init(apiClient: BipeAPIClient,
                 serverName: String,
                 sessionUserID: String,
                 defaults: UserDefaults = .standard,
-                masterKey: @escaping @MainActor (String) async -> String?) {
+                masterKey: @escaping @MainActor (String) async throws -> String?) {
         self.apiClient = apiClient
         self.serverName = serverName
         self.masterKey = masterKey
@@ -65,6 +66,10 @@ public final class BipeCompanySeals {
         let entry = entries[userID]
         if (entry?.expiry ?? .distantPast) < .now {
             fetch(userID)
+        }
+        // A badge past its exp shows no seal while the new fetch runs.
+        if case .verified(let payload) = entry?.state, Date(timeIntervalSince1970: TimeInterval(payload.exp)) <= .now {
+            return .none
         }
         return entry?.state ?? .none
     }
@@ -95,14 +100,7 @@ public final class BipeCompanySeals {
         do {
             lookup = try await apiClient.badge(userID: userID)
         } catch {
-            // Never keep a seal without a fresh answer. A notice stays.
-            let old = entries[userID]?.state ?? .none
-            let state: BipeCompanySealState = if case .verified = old {
-                .none
-            } else {
-                old
-            }
-            entries[userID] = Entry(state: state, expiry: .now.addingTimeInterval(Self.errorTTL))
+            storeFailure(for: userID)
             return
         }
         
@@ -113,7 +111,13 @@ public final class BipeCompanySeals {
         case .gone(let reason):
             store(wasSeen ? .revoked(reason) : .none, for: userID)
         case .envelope(let json):
-            let key = await masterKey(userID)
+            let key: String?
+            do {
+                key = try await masterKey(userID)
+            } catch {
+                storeFailure(for: userID)
+                return
+            }
             let verifier: BadgeVerifier
             do {
                 verifier = try BadgeVerifier.bipeTrusted()
@@ -132,6 +136,17 @@ public final class BipeCompanySeals {
                 store(wasSeen ? .suspended : .none, for: userID)
             }
         }
+    }
+    
+    /// Never keeps a seal without a fresh answer. A notice stays.
+    private func storeFailure(for userID: String) {
+        let old = entries[userID]?.state ?? .none
+        let state: BipeCompanySealState = if case .verified = old {
+            .none
+        } else {
+            old
+        }
+        entries[userID] = Entry(state: state, expiry: .now.addingTimeInterval(Self.errorTTL))
     }
     
     private func store(_ state: BipeCompanySealState, for userID: String) {
