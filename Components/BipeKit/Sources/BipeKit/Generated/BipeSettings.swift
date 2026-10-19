@@ -45,7 +45,7 @@ public enum BipeSettingsGroup: String, CaseIterable, Sendable {
         case .account: [BipeSettingsSection(key: "status", titleKey: "bipe_fallback_title", footerKey: nil, rows: [.accountWaysBackStatus]), BipeSettingsSection(key: "pin", titleKey: "bipe_account_pin_section", footerKey: "bipe_account_pin_footer", rows: [.accountChangePin, .accountBiometricUnlock]), BipeSettingsSection(key: "waysBack", titleKey: "bipe_account_ways_back", footerKey: nil, rows: [.accountEmail, .accountLinkedAccounts, .accountRecoveryKey]), BipeSettingsSection(key: "devices", titleKey: "bipe_account_devices", footerKey: nil, rows: [.accountThisDevice, .accountLinkDevice]), BipeSettingsSection(key: "company", titleKey: nil, footerKey: "bipe_company_create_footer", rows: [.accountCreateCompany]), BipeSettingsSection(key: "leave", titleKey: nil, footerKey: nil, rows: [.accountSignOut])]
         case .notifications: []
         case .chats: [BipeSettingsSection(key: "main", titleKey: nil, footerKey: nil, rows: [.chatsAppearance, .chatsLanguage, .chatsMediaQuality, .chatsShowMedia, .chatsLiveLocation])]
-        case .help: [BipeSettingsSection(key: "main", titleKey: nil, footerKey: "bipe_about_steward", rows: [.helpDocs, .helpTerms, .helpPrivacy, .helpLicenses])]
+        case .help: [BipeSettingsSection(key: "main", titleKey: nil, footerKey: "bipe_about_steward", rows: [.helpSupport, .helpReportProblem, .helpDocs, .helpTerms, .helpPrivacy, .helpLicenses])]
         }
     }
 }
@@ -100,6 +100,8 @@ public enum BipeSettingsRow: String, CaseIterable, Sendable {
     case chatsMediaQuality = "chats.mediaQuality"
     case chatsShowMedia = "chats.showMedia"
     case chatsLiveLocation = "chats.liveLocation"
+    case helpSupport = "help.support"
+    case helpReportProblem = "help.reportProblem"
     case helpDocs = "help.docs"
     case helpTerms = "help.terms"
     case helpPrivacy = "help.privacy"
@@ -136,6 +138,8 @@ public enum BipeSettingsRow: String, CaseIterable, Sendable {
         case .chatsMediaQuality: .link
         case .chatsShowMedia: .choice
         case .chatsLiveLocation: .link
+        case .helpSupport: .action
+        case .helpReportProblem: .link
         case .helpDocs: .url
         case .helpTerms: .url
         case .helpPrivacy: .url
@@ -177,6 +181,8 @@ public enum BipeSettingsRow: String, CaseIterable, Sendable {
         case .chatsMediaQuality: "bipe_chats_media_quality"
         case .chatsShowMedia: "bipe_chats_show_media"
         case .chatsLiveLocation: "bipe_chats_live_location"
+        case .helpSupport: "bipe_settings_support"
+        case .helpReportProblem: "bipe_help_report_problem"
         case .helpDocs: "bipe_help_docs"
         case .helpTerms: "bipe_help_terms"
         case .helpPrivacy: "bipe_help_privacy"
@@ -215,6 +221,8 @@ public enum BipeSettingsRow: String, CaseIterable, Sendable {
         case .chatsMediaQuality: nil
         case .chatsShowMedia: nil
         case .chatsLiveLocation: NSLocalizedString("bipe_chats_live_location_footer", tableName: "Bipe", bundle: .module, comment: "")
+        case .helpSupport: nil
+        case .helpReportProblem: nil
         case .helpDocs: nil
         case .helpTerms: nil
         case .helpPrivacy: nil
@@ -255,6 +263,8 @@ public enum BipeSettingsRow: String, CaseIterable, Sendable {
         case .chatsMediaQuality: nil
         case .chatsShowMedia: nil
         case .chatsLiveLocation: nil
+        case .helpSupport: nil
+        case .helpReportProblem: nil
         case .helpDocs: nil
         case .helpTerms: nil
         case .helpPrivacy: nil
