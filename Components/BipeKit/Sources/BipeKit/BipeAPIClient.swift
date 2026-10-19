@@ -28,6 +28,12 @@ public struct BipeAPIClient: Sendable {
         try await send(method: "GET", path: ["v1", "signup", "config"], body: Empty?.none)
     }
     
+    /// `GET /v1/banner`. No auth. The remote critical banner (ADR 0117), or `nil`.
+    public func remoteBanner() async throws(BipeAPIError) -> BipeRemoteBanner? {
+        let response: BipeRemoteBannerResponse = try await send(method: "GET", path: ["v1", "banner"], body: Empty?.none)
+        return response.banner
+    }
+    
     /// `POST /v1/signup/resume`. No auth. The answer of an earlier sign-up with this key (ADR 0094); `not_found` when none.
     public func resumeSignup(signupKey: String) async throws(BipeAPIError) -> BipeSignupResponse {
         try await send(method: "POST", path: ["v1", "signup", "resume"], body: SignupResumeRequest(signupKey: signupKey))
