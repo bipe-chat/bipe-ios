@@ -89,6 +89,7 @@ struct RoomDetailsScreen: View {
                     .padding(.top, 8)
             }
         }
+        .bipeSeal(for: context.viewState.dmRecipientInfo?.member.id)
         .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.avatar)
     }
     

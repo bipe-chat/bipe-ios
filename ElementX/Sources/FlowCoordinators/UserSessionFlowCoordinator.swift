@@ -100,7 +100,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationTabCoordinator = NavigationTabCoordinator()
         navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: navigationTabCoordinator,
-                                                                                handleResolver: flowParameters.userSession.bipeHandleResolver))
+                                                                                handleResolver: flowParameters.userSession.bipeHandleResolver,
+                                                                                companySeals: flowParameters.userSession.bipeCompanySeals))
         
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,

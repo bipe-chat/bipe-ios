@@ -24,4 +24,8 @@ final nonisolated class UserIdentityProxy: UserIdentityProxyProtocol {
         
         return .notVerified
     }
+    
+    var masterKey: String? {
+        userIdentity.masterKey()
+    }
 }
