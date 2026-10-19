@@ -1616,6 +1616,12 @@ public enum BipeStrings {
 
     public static var linkComputerNotSupported: String { NSLocalizedString("bipe_link_computer_not_supported", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static func linkComputerNeedsPin(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_link_computer_needs_pin", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var linkComputerCreatePin: String { NSLocalizedString("bipe_link_computer_create_pin", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var linkComputerDone: String { NSLocalizedString("bipe_link_computer_done", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var accountSignOut: String { NSLocalizedString("bipe_account_sign_out", tableName: "Bipe", bundle: .module, comment: "") }
@@ -1842,6 +1848,10 @@ public enum BipeStrings {
 
     public static var notificationsPromptAllow: String { NSLocalizedString("bipe_notifications_prompt_allow", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var remoteBannerUpdate: String { NSLocalizedString("bipe_remote_banner_update", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var remoteBannerDismiss: String { NSLocalizedString("bipe_remote_banner_dismiss", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var handlePromptTitle: String { NSLocalizedString("bipe_handle_prompt_title", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var handlePromptBody: String { NSLocalizedString("bipe_handle_prompt_body", tableName: "Bipe", bundle: .module, comment: "") }
@@ -1861,4 +1871,16 @@ public enum BipeStrings {
     public static var supportReportReceived: String { NSLocalizedString("bipe_support_report_received", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var supportAlreadyOpen: String { NSLocalizedString("bipe_support_already_open", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLockTitle: String { NSLocalizedString("bipe_app_lock_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func appLockBiometric(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_app_lock_biometric", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var archiveAction: String { NSLocalizedString("bipe_archive_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var unarchiveAction: String { NSLocalizedString("bipe_unarchive_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var archivedTitle: String { NSLocalizedString("bipe_archived_title", tableName: "Bipe", bundle: .module, comment: "") }
 }
