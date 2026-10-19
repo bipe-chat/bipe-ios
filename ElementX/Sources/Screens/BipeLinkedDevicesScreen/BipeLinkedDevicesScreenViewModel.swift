@@ -47,6 +47,7 @@ class BipeLinkedDevicesScreenViewModel: BipeLinkedDevicesScreenViewModelType, Bi
     }
     
     func reload() async {
+        state.needsPIN = BipeCredentialStore(accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier).password(for: clientProxy.userID) == nil
         guard let homeserver = URL(string: clientProxy.homeserver), let accessToken = clientProxy.accessToken else {
             state.isLoading = false
             return
@@ -67,6 +68,10 @@ class BipeLinkedDevicesScreenViewModel: BipeLinkedDevicesScreenViewModelType, Bi
     // MARK: - Private
     
     private func linkComputer() async {
+        guard !state.needsPIN else {
+            actionsSubject.send(.createPIN)
+            return
+        }
         state.isCheckingSupport = true
         defer { state.isCheckingSupport = false }
         
