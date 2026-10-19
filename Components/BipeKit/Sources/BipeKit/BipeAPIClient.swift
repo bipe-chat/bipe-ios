@@ -304,6 +304,15 @@ public struct BipeAPIClient: Sendable {
         }
     }
     
+    /// `GET /v1/me/business` (ADR 0042). `nil` when the account has no CNPJ claim (404).
+    public func myBusiness(accessToken: String) async throws(BipeAPIError) -> BipeBusinessClaim? {
+        do {
+            return try await send(method: "GET", path: ["v1", "me", "business"], body: Empty?.none, accessToken: accessToken)
+        } catch .server(.notFound, _, _) {
+            return nil
+        }
+    }
+    
     // MARK: - Data export (LGPD art. 18, ADR 0112, bipe#364)
     
     /// `GET /v1/me/export`. The server data of the caller as one JSON file. Messages stay on the device and are not in it.
@@ -828,6 +837,35 @@ public struct BipeMyHandle: Decodable, Sendable {
     public let handle: String?
     /// `nil` when a change is allowed now.
     public let changeableAt: Date?
+}
+
+/// Contract: `BusinessClaim` (ADR 0042). Only the parts the trust card reads.
+public struct BipeBusinessClaim: Decodable, Sendable, Equatable {
+    public enum Status: String, Decodable, Sendable {
+        case registryPending = "registry_pending"
+        case awaitingProof = "awaiting_proof"
+        case verified
+        case rejected
+        case revoked
+    }
+    
+    public struct Domain: Decodable, Sendable, Equatable {
+        public let domain: String
+        public let verifiedAt: Date?
+        
+        public init(domain: String, verifiedAt: Date?) {
+            self.domain = domain
+            self.verifiedAt = verifiedAt
+        }
+    }
+    
+    public let status: Status
+    public let domains: [Domain]
+    
+    public init(status: Status, domains: [Domain] = []) {
+        self.status = status
+        self.domains = domains
+    }
 }
 
 /// Contract: `PublicProfile`. What anyone with the exact handle sees.
