@@ -24,6 +24,7 @@ class UserSession: UserSessionProtocol {
     /// Scans media content, `nil` when no content scanner is configured for the server.
     let contentScannerService: ContentScannerServiceProtocol?
     let bipeHandleResolver: BipeHandleResolver?
+    let bipeCompanySeals: BipeCompanySeals?
     
     let callbacks = PassthroughSubject<UserSessionCallback, Never>()
     
@@ -37,7 +38,8 @@ class UserSession: UserSessionProtocol {
          mediaProvider: MediaProviderProtocol,
          voiceMessageMediaManager: VoiceMessageMediaManagerProtocol,
          liveLocationManager: LiveLocationManagerProtocol,
-         bipeHandleResolver: BipeHandleResolver? = nil) {
+         bipeHandleResolver: BipeHandleResolver? = nil,
+         bipeCompanySeals: BipeCompanySeals? = nil) {
         self.clientProxy = clientProxy
         self.userSettings = userSettings
         
@@ -45,6 +47,7 @@ class UserSession: UserSessionProtocol {
         self.voiceMessageMediaManager = voiceMessageMediaManager
         self.liveLocationManager = liveLocationManager
         self.bipeHandleResolver = bipeHandleResolver
+        self.bipeCompanySeals = bipeCompanySeals
         contentScannerService = clientProxy.contentScanner.map(ContentScannerService.init)
         
         authErrorCancellable = clientProxy.actionsPublisher

@@ -259,6 +259,24 @@ public struct BipeAPIClient: Sendable {
         try await send(method: "DELETE", path: ["v1", "me", "profile", "photo"], body: Empty?.none, accessToken: accessToken)
     }
     
+    // MARK: - Badges (ADR 0123, bipe#252)
+    
+    /// `GET /v1/badges/{userId}`. No auth. The envelope is not verified here: see ``BadgeVerifier``.
+    public func badge(userID: String) async throws(BipeAPIError) -> BipeBadgeLookup {
+        let (data, response) = try await exchange(method: "GET", path: ["v1", "badges", userID], rawBody: nil, accessToken: nil)
+        switch response.statusCode {
+        case 200:
+            return .envelope(data)
+        case 404:
+            return .none
+        case 410:
+            let gone = try? Self.decoder.decode(BipeBadgeGone.self, from: data)
+            return .gone(gone?.reason ?? .revoked)
+        default:
+            throw .unexpectedResponse(statusCode: response.statusCode)
+        }
+    }
+    
     // MARK: - Data export (LGPD art. 18, ADR 0112, bipe#364)
     
     /// `GET /v1/me/export`. The server data of the caller as one JSON file. Messages stay on the device and are not in it.
@@ -436,6 +454,25 @@ public struct BipeAPIClient: Sendable {
                          query: [URLQueryItem] = [],
                          rawBody: (data: Data, contentType: String)?,
                          accessToken: String?) async throws(BipeAPIError) -> (Data, HTTPURLResponse) {
+        let (data, httpResponse) = try await exchange(method: method, path: path, query: query, rawBody: rawBody, accessToken: accessToken)
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            if let errorBody = try? Self.decoder.decode(ErrorBody.self, from: data) {
+                let code = BipeAPIErrorCode(rawValue: errorBody.error) ?? .internal
+                // pin_wrong carries tries_left, not a reason. See BipeAPIError.pinTriesLeft.
+                let reason = code == .pinWrong ? errorBody.triesLeft.map(String.init) : errorBody.reason
+                throw .server(code, reason: reason, statusCode: httpResponse.statusCode)
+            }
+            throw .unexpectedResponse(statusCode: httpResponse.statusCode)
+        }
+        return (data, httpResponse)
+    }
+    
+    /// Sends the request and returns the answer with any status code.
+    private func exchange(method: String,
+                          path: [String],
+                          query: [URLQueryItem] = [],
+                          rawBody: (data: Data, contentType: String)?,
+                          accessToken: String?) async throws(BipeAPIError) -> (Data, HTTPURLResponse) {
         // appending(path:) percent-encodes each component, so a handle cannot add path segments.
         var url = path.reduce(baseURL) { $0.appending(path: $1, directoryHint: .notDirectory) }
         if !query.isEmpty {
@@ -463,17 +500,6 @@ public struct BipeAPIClient: Sendable {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw .unexpectedResponse(statusCode: nil)
         }
-        
-        guard (200..<300).contains(httpResponse.statusCode) else {
-            if let errorBody = try? Self.decoder.decode(ErrorBody.self, from: data) {
-                let code = BipeAPIErrorCode(rawValue: errorBody.error) ?? .internal
-                // pin_wrong carries tries_left, not a reason. See BipeAPIError.pinTriesLeft.
-                let reason = code == .pinWrong ? errorBody.triesLeft.map(String.init) : errorBody.reason
-                throw .server(code, reason: reason, statusCode: httpResponse.statusCode)
-            }
-            throw .unexpectedResponse(statusCode: httpResponse.statusCode)
-        }
-        
         return (data, httpResponse)
     }
     
@@ -800,6 +826,29 @@ public struct BipeProfileUpdate: Encodable, Sendable, Equatable {
         self.name = name
         self.bio = bio
     }
+}
+
+/// The answer of `GET /v1/badges/{userId}`.
+public enum BipeBadgeLookup: Sendable, Equatable {
+    /// The envelope JSON, not yet verified.
+    case envelope(Data)
+    /// No badge.
+    case none
+    /// The account had a badge and its claim ended. Show no seal.
+    case gone(BipeBadgeGoneReason)
+}
+
+public enum BipeBadgeGoneReason: String, Decodable, Sendable {
+    case revoked
+    /// A registry scan found the CNPJ no longer active.
+    case notActive = "not_active"
+    /// A registry scan no longer found the CNPJ.
+    case notFound = "not_found"
+    case staff
+}
+
+struct BipeBadgeGone: Decodable {
+    let reason: BipeBadgeGoneReason
 }
 
 // MARK: - Errors

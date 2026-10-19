@@ -14,6 +14,8 @@ struct RoomHeaderView: View {
     struct DMRecipientDetails {
         var statusEmoji: Character?
         var verification: UserIdentityVerificationState?
+        /// Bipe: the other person, for the company seal (bipe#252).
+        var userID: String?
     }
     
     let roomName: String
@@ -79,6 +81,9 @@ struct RoomHeaderView: View {
                         .font(.compound.bodyLG)
                         .foregroundStyle(.compound.textPrimary)
                 }
+            }
+            if let userID = dmRecipientDetails.userID {
+                BipeCompanySeal(userID: userID, size: 14)
             }
             if let verificationState = dmRecipientDetails.verification {
                 VerificationBadge(verificationState: verificationState, size: .xSmall, relativeTo: .compound.bodyMDSemibold)

@@ -293,8 +293,9 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
     }
     
     private func updateVerificationBadge() async {
-        guard roomProxy.infoPublisher.value.isDM,
-              let dmRecipient = roomProxy.membersPublisher.value.first(where: { $0.userID != roomProxy.ownUserID }),
+        let dmRecipient = roomProxy.infoPublisher.value.isDM ? roomProxy.membersPublisher.value.first { $0.userID != roomProxy.ownUserID } : nil
+        state.dmRecipientDetails.userID = dmRecipient?.userID
+        guard let dmRecipient,
               case let .success(userIdentity) = await clientProxy.userIdentity(for: dmRecipient.userID, fallBackToServer: true) else {
             state.dmRecipientDetails.verification = .notVerified
             return

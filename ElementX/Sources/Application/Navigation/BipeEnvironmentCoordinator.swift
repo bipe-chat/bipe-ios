@@ -12,6 +12,7 @@ import SwiftUI
 final class BipeEnvironmentCoordinator: CoordinatorProtocol, CustomStringConvertible {
     private let coordinator: CoordinatorProtocol
     private let handleResolver: BipeHandleResolver?
+    private let companySeals: BipeCompanySeals?
     
     /// The coordinator this one wraps, for example the home tabs.
     var wrappedCoordinator: CoordinatorProtocol {
@@ -22,9 +23,10 @@ final class BipeEnvironmentCoordinator: CoordinatorProtocol, CustomStringConvert
         "BipeEnvironmentCoordinator(\(coordinator))"
     }
     
-    init(wrapping coordinator: CoordinatorProtocol, handleResolver: BipeHandleResolver?) {
+    init(wrapping coordinator: CoordinatorProtocol, handleResolver: BipeHandleResolver?, companySeals: BipeCompanySeals? = nil) {
         self.coordinator = coordinator
         self.handleResolver = handleResolver
+        self.companySeals = companySeals
     }
     
     func start() {
@@ -37,6 +39,7 @@ final class BipeEnvironmentCoordinator: CoordinatorProtocol, CustomStringConvert
     
     func toPresentable() -> AnyView {
         AnyView(coordinator.toPresentable()
-            .environment(\.bipeHandleResolver, handleResolver))
+            .environment(\.bipeHandleResolver, handleResolver)
+            .environment(\.bipeCompanySeals, companySeals))
     }
 }

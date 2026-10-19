@@ -35,6 +35,8 @@ struct AvatarHeaderView<Footer: View>: View {
     private var onAvatarTap: ((URL) -> Void)?
     @ViewBuilder private var footer: () -> Footer
     @Environment(\.bipeHandleResolver) private var bipeHandleResolver
+    /// Bipe: the person whose company seal shows next to the title (bipe#252).
+    private var sealUserID: String?
     
     init(room: RoomDetails,
          avatarSize: Avatars.Size,
@@ -50,6 +52,7 @@ struct AvatarHeaderView<Footer: View>: View {
         } else if room.isDirect, case let .heroes(heroes) = room.avatar, heroes.count == 1 {
             subtitle = heroes[0].id
             status = heroes[0].status
+            sealUserID = heroes[0].id
         } else {
             subtitle = nil
             status = nil
@@ -81,6 +84,7 @@ struct AvatarHeaderView<Footer: View>: View {
         title = dmRecipientProfile.displayName ?? dmRecipientProfile.id
         subtitle = dmRecipientProfile.displayName == nil ? nil : dmRecipientProfile.id
         status = dmRecipientProfile.status
+        sealUserID = dmRecipientProfile.id
         
         avatarSize = .user(on: .dmDetails)
         self.mediaProvider = mediaProvider
@@ -116,6 +120,7 @@ struct AvatarHeaderView<Footer: View>: View {
         title = user.displayName ?? user.id
         status = user.status
         subtitle = user.displayName == nil ? nil : user.id
+        sealUserID = user.id
         
         self.avatarSize = avatarSize
         self.mediaProvider = mediaProvider
@@ -141,16 +146,29 @@ struct AvatarHeaderView<Footer: View>: View {
                   footer: footer)
     }
     
+    /// Bipe: shows the company seal of `userID`, e.g. the other person of a DM whose room has its own avatar.
+    func bipeSeal(for userID: String?) -> Self {
+        var view = self
+        view.sealUserID = userID ?? sealUserID
+        return view
+    }
+    
     var body: some View {
         VStack(spacing: 24) {
             avatar
             
             VStack(spacing: 12) {
-                Text(bipeHandleResolver?.displayText(for: title) ?? title)
-                    .foregroundStyle(.compound.textPrimary)
-                    .font(.compound.headingMDBold)
-                    .multilineTextAlignment(.center)
-                    .textSelection(.enabled)
+                HStack(spacing: 6) {
+                    Text(bipeHandleResolver?.displayText(for: title) ?? title)
+                        .foregroundStyle(.compound.textPrimary)
+                        .font(.compound.headingMDBold)
+                        .multilineTextAlignment(.center)
+                        .textSelection(.enabled)
+                    
+                    if let sealUserID {
+                        BipeCompanySeal(userID: sealUserID, size: 20)
+                    }
+                }
                 
                 if let displayedStatus = status?.displayed {
                     HStack(spacing: 6) {
