@@ -188,7 +188,9 @@ Not done (needs the domain, Apple team or brand):
 - **No spaces in the create-group screen:** `StartChatFlowCoordinator` passes `spaceSelectionMode: .none`, so the space picker and the "space members" access types do not show. Spaces come back only as Comunidade inside Grupos (ADR 0084).
 - **Você** is `SettingsFlowCoordinator(isInTab: true)` in a stack in the tab: no close button, title "Você". `.settings` and `.chatBackupSettings` routes select the tab. On a Mac with secondary windows, settings still open in a window.
 - **Support DM (ADR 0114):** Ajuda → "Falar com o suporte" (`help.support`) → `UserSessionFlowCoordinator.openSupportChat`: `POST /v1/me/support`, join the invite, open the room.
-- **Self-chat:** `BipeSelfChat`. Account data `chat.bipe.self_chat` = `{"room_id": "..."}` (same on Android). Created on first tap as a private encrypted room named "Anotações". The room lists hide it by a cached ID in `UserDefaults`; it opens in Conversas.
+- **Self-chat:** `BipeSelfChat`. Account data `chat.bipe.self_chat` = `{"room_id": "..."}` (same on Android). Created on first tap as a private encrypted room named "Anotações". The room lists hide it by a cached ID in `UserDefaults`; it opens in Conversas. A cache change posts `BipeSelfChat.cachedRoomIDDidChange` and the room lists filter again. **Trap:** the new room reaches the Grupos list before `createRoom` returns, and an empty room sends no later update, so without the post it stays in Grupos as an empty "Anotações" group.
+- **Archive:** the Matrix `m.lowpriority` tag (`JoinedRoomProxy.flagAsLowPriority`, `RoomSummary.isLowPriority`). The home tab providers always hide low priority rooms (`RoomSummaryProvider.hidesLowPriority`); the static provider does not, so search and pickers still find them. Swipe left on a row (`bipeSwipeAction`, a custom pan because the list is a `LazyVStack`, not a `List`) or the context menu archives. `BipeArchivedRow` ("Arquivadas", count from `staticRoomSummaryProvider`) opens the `.lowPriority` filter; there the action is "Desarquivar". The chip is hidden (`BipeRoomListScope.hiddenFilters`). Android: bipe#435.
+- **App lock screen:** `BipeAppLockPlaceholderScreen` replaces Element's logo placeholder in `AppLockFlowCoordinator.showPlaceholder`: logo, "Bipe bloqueado", and the Face ID or Touch ID icon when biometric unlock is on. The app switcher shows it too.
 - **Search:** the search tab needs iOS 26 (`globalSearchEnabled`, on by default). On iOS 18 to 25 search stays inline in the room list.
 
 ## Threads and galleries on by default, no Labs (15 Oct 2026)
@@ -259,6 +261,8 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Quiet groups "done" marker | A flag on the device (once per device) | The poll rule in the account's push rules (once per account) | Android has no per-session store in libraries/bipe; same result for the user |
 | Conferir no Bipe: close | Back to the app that shared | Back to Bipe | The iOS check runs in the share extension; Android shows it in the app (ADR 0091) |
 | Message actions | Native context menu on long press: reaction row, actions, the message as preview | Element's bottom sheet | Platform idiom |
+| Archive chats | Swipe or long press to archive (`m.lowpriority`); Arquivadas row at the top of the list | Not built | Built on iOS first (#435) **Gap** |
+| App lock screen during biometrics | Bipe logo, Bipe bloqueado and the Face ID or Touch ID prompt | Element's lock screen | Built on iOS first (#435) **Gap** |
 | Terms screen and a recovery alert due together | Terms screen first, the alert right after Continue | Recovery alert first, then the terms screen | On iOS a root alert cannot show over the full-screen terms cover; on Android the terms screen is an overlay that waits for the alert |
 | Settings: Idioma | Row that opens the iPhone Ajustes | No row | iOS sets the app language in system settings; Android follows the system language |
 

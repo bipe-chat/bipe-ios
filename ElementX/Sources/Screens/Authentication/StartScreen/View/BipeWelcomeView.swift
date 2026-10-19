@@ -21,7 +21,7 @@ struct BipeWelcomeView: View {
             Spacer()
             
             if verticalSizeClass == .regular {
-                logo
+                BipeAppLogo()
                     .padding(.bottom, 32)
             }
             
@@ -54,15 +54,6 @@ struct BipeWelcomeView: View {
         .readableFrame()
     }
     
-    private var logo: some View {
-        Image(asset: Asset.Images.appLogo)
-            .resizable()
-            .frame(width: 96, height: 96)
-            .clipShape(RoundedRectangle(cornerRadius: 24))
-            .shadow(color: .compound.bgAccentRest.opacity(0.35), radius: 24, y: 8)
-            .accessibilityHidden(true)
-    }
-    
     private func point(icon: KeyPath<CompoundIcons, Image>, text: String) -> some View {
         HStack(spacing: 16) {
             CompoundIcon(icon, size: .small, relativeTo: .compound.bodyLG)
@@ -77,6 +68,18 @@ struct BipeWelcomeView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// The Bipe app icon with the açaí glow. Start screen and app lock.
+struct BipeAppLogo: View {
+    var body: some View {
+        Image(asset: Asset.Images.appLogo)
+            .resizable()
+            .frame(width: 96, height: 96)
+            .clipShape(RoundedRectangle(cornerRadius: 24))
+            .shadow(color: .compound.bgAccentRest.opacity(0.35), radius: 24, y: 8)
+            .accessibilityHidden(true)
     }
 }
 

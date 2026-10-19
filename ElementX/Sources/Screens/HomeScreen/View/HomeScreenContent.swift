@@ -144,6 +144,12 @@ struct HomeScreenContent: View {
                     }
                 }
                 
+                if context.viewState.shouldShowBipeArchivedRow {
+                    BipeArchivedRow(count: context.viewState.bipeArchivedCount) {
+                        context.filtersState.activateFilter(.lowPriority)
+                    }
+                }
+                
                 if context.viewState.shouldShowBipeRequestsRow {
                     BipeRequestsRow(count: context.viewState.bipeRequestCount) {
                         context.filtersState.activateFilter(.invites)

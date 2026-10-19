@@ -222,7 +222,9 @@ class AppLockFlowCoordinator: CoordinatorProtocol {
     
     /// Displays the unlock flow with the app's placeholder view to hide obscure the view hierarchy in the app switcher.
     private func showPlaceholder() {
-        navigationCoordinator.setRootCoordinator(PlaceholderScreenCoordinator(hideBrandChrome: appSettings.hideBrandChrome, hideGradientBackground: false), animated: false)
+        // Bipe: a branded lock screen that says Face ID or Touch ID is running.
+        let biometryType = isBiometricUnlockAvailable ? appLockService.biometryType : nil
+        navigationCoordinator.setRootCoordinator(BipeAppLockPlaceholderScreenCoordinator(biometryType: biometryType), animated: false)
         actionsSubject.send(.lockApp)
     }
     
