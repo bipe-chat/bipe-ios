@@ -6821,6 +6821,48 @@ nonisolated class JoinedRoomProxyMock: JoinedRoomProxyProtocol, @unchecked Senda
             return flagAsFavouriteReturnValue
         }
     }
+    //MARK: - flagAsLowPriority
+
+    private let flagAsLowPriorityCallsCountLock = NSLock()
+    private nonisolated(unsafe) var flagAsLowPriorityUnderlyingCallsCount = 0
+    var flagAsLowPriorityCallsCount: Int {
+        get { flagAsLowPriorityCallsCountLock.withLock { flagAsLowPriorityUnderlyingCallsCount } }
+        set { flagAsLowPriorityCallsCountLock.withLock { flagAsLowPriorityUnderlyingCallsCount = newValue } }
+    }
+    var flagAsLowPriorityCalled: Bool {
+        return flagAsLowPriorityCallsCount > 0
+    }
+    private let flagAsLowPriorityReceivedIsLowPriorityLock = NSLock()
+    private nonisolated(unsafe) var flagAsLowPriorityUnderlyingReceivedIsLowPriority: Bool?
+    var flagAsLowPriorityReceivedIsLowPriority: Bool? {
+        get { flagAsLowPriorityReceivedIsLowPriorityLock.withLock { flagAsLowPriorityUnderlyingReceivedIsLowPriority } }
+        set { flagAsLowPriorityReceivedIsLowPriorityLock.withLock { flagAsLowPriorityUnderlyingReceivedIsLowPriority = newValue } }
+    }
+    private let flagAsLowPriorityReceivedInvocationsLock = NSLock()
+    private nonisolated(unsafe) var flagAsLowPriorityUnderlyingReceivedInvocations: [Bool] = []
+    var flagAsLowPriorityReceivedInvocations: [Bool] {
+        get { flagAsLowPriorityReceivedInvocationsLock.withLock { flagAsLowPriorityUnderlyingReceivedInvocations } }
+        set { flagAsLowPriorityReceivedInvocationsLock.withLock { flagAsLowPriorityUnderlyingReceivedInvocations = newValue } }
+    }
+
+    private let flagAsLowPriorityReturnValueLock = NSLock()
+    private nonisolated(unsafe) var flagAsLowPriorityUnderlyingReturnValue: Result<Void, RoomProxyError>!
+    var flagAsLowPriorityReturnValue: Result<Void, RoomProxyError>! {
+        get { flagAsLowPriorityReturnValueLock.withLock { flagAsLowPriorityUnderlyingReturnValue } }
+        set { flagAsLowPriorityReturnValueLock.withLock { flagAsLowPriorityUnderlyingReturnValue = newValue } }
+    }
+    nonisolated(unsafe) var flagAsLowPriorityClosure: ((Bool) async -> Result<Void, RoomProxyError>)?
+
+    @concurrent func flagAsLowPriority(_ isLowPriority: Bool) async -> Result<Void, RoomProxyError> {
+        flagAsLowPriorityCallsCountLock.withLock { flagAsLowPriorityUnderlyingCallsCount += 1 }
+        flagAsLowPriorityReceivedIsLowPriority = isLowPriority
+        flagAsLowPriorityReceivedInvocationsLock.withLock { flagAsLowPriorityUnderlyingReceivedInvocations.append(isLowPriority) }
+        if let flagAsLowPriorityClosure = flagAsLowPriorityClosure {
+            return await flagAsLowPriorityClosure(isLowPriority)
+        } else {
+            return flagAsLowPriorityReturnValue
+        }
+    }
     //MARK: - applyPowerLevelChanges
 
     private let applyPowerLevelChangesCallsCountLock = NSLock()
@@ -14410,6 +14452,7 @@ nonisolated class UserIdentityProxyMock: UserIdentityProxyProtocol, @unchecked S
         set(value) { underlyingVerificationState = value }
     }
     nonisolated(unsafe) var underlyingVerificationState: UserIdentityVerificationState!
+    nonisolated(unsafe) var masterKey: String?
 
 }
 nonisolated class UserIndicatorControllerMock: UserIndicatorControllerProtocol, @unchecked Sendable {
@@ -15099,6 +15142,7 @@ nonisolated class UserSessionMock: UserSessionProtocol, @unchecked Sendable {
     nonisolated(unsafe) var underlyingLiveLocationManager: LiveLocationManagerProtocol!
     nonisolated(unsafe) var contentScannerService: ContentScannerServiceProtocol?
     nonisolated(unsafe) var bipeHandleResolver: BipeHandleResolver?
+    nonisolated(unsafe) var bipeCompanySeals: BipeCompanySeals?
     var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> {
         get { return underlyingSessionSecurityStatePublisher }
         set(value) { underlyingSessionSecurityStatePublisher = value }

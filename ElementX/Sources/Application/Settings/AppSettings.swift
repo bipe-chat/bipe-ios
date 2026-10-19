@@ -135,10 +135,6 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference(defaultValue: true)
     var hasSeenNewSoundBanner: Bool
     
-    /// Defaults to `true` so new users never see it. Developer options arms it for now, an upgrade migration will at launch.
-    @UserPreference(defaultValue: true)
-    var hasSeenMultiAccountAnnouncement: Bool
-    
     /// The initial set of account providers shown to the user in the authentication flow.
     ///
     /// Account provider is the friendly term for the server name. It should not contain an `https` prefix and should
@@ -399,10 +395,12 @@ final nonisolated class AppSettings: @unchecked Sendable {
     // MARK: - Maps
     
     /// The locally-bundled MapTiler configuration.
-    static let bundledMapTilerConfiguration = MapTilerConfiguration(baseURL: "https://api.maptiler.com/maps",
-                                                                    apiKey: Secrets.mapLibreAPIKey,
-                                                                    lightStyleID: "9bc819c8-e627-474a-a348-ec144fe3d810",
-                                                                    darkStyleID: "dea61faf-292b-4774-9660-58fcef89a7f3")
+    /// Bipe: tiles and static maps come from our tileserver-gl in Brazil, which needs no key, so no shared
+    /// location leaves Brazil (bipe ADR 0131). The empty key turns location sharing on and sends no key.
+    static let bundledMapTilerConfiguration = MapTilerConfiguration(baseURL: "https://maps.bipe.net.br/styles",
+                                                                    apiKey: "",
+                                                                    lightStyleID: "light",
+                                                                    darkStyleID: "dark")
     
     /// The MapTiler configuration used to build map URLs, which defaults to the bundled one.
     private(set) var mapTilerConfiguration = RemotePreference(AppSettings.bundledMapTilerConfiguration)
@@ -474,9 +472,6 @@ final nonisolated class AppSettings: @unchecked Sendable {
     /// Runs calls through the native matrix-rust-rtc stack instead of the Element Call web view.
     @UserPreference(defaultValue: false)
     var nativeCallEnabled: Bool
-    
-    @UserPreference(defaultValue: false)
-    var multiAccountEnabled: Bool
     
     init(store: UserDefaultsProtocol) {
         self.store = store

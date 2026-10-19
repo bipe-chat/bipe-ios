@@ -15,4 +15,6 @@ nonisolated enum UserIdentityVerificationState {
 // sourcery: AutoMockable
 nonisolated protocol UserIdentityProxyProtocol: Sendable {
     var verificationState: UserIdentityVerificationState { get }
+    /// Bipe: the cross-signing master key (unpadded base64). Company badges bind to it (bipe#252).
+    var masterKey: String? { get }
 }

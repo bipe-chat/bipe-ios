@@ -60,7 +60,7 @@ private struct PINTextFieldStyle: TextFieldStyle {
     
     // periphery:ignore - called by SwiftUI via the TextFieldStyle protocol
     func _body(configuration: TextField<_Label>) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: size == .dots ? 14 : 8) {
             ForEach(0..<maxLength, id: \.self) { index in
                 PINDigitField(digit: digit(index), size: size)
             }
@@ -86,6 +86,8 @@ struct PINDigitField: View {
     enum Size {
         case small
         case medium
+        /// Bipe: small dots like the lock screen, so an 8-digit PIN fits a phone.
+        case dots
     }
     
     let digit: Character?
@@ -95,6 +97,7 @@ struct PINDigitField: View {
         switch size {
         case .small: return 14
         case .medium: return 8
+        case .dots: return 0
         }
     }
     
@@ -102,10 +105,21 @@ struct PINDigitField: View {
         switch size {
         case .small: return 44
         case .medium: return 48
+        case .dots: return 14
         }
     }
     
     var body: some View {
+        if size == .dots {
+            Circle()
+                .fill(digit == nil ? .compound.bgSubtlePrimary : .compound.iconPrimary)
+                .scaledFrame(size: edge)
+        } else {
+            digitBox
+        }
+    }
+    
+    private var digitBox: some View {
         ZStack {
             if let digit {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -137,6 +151,7 @@ struct PINTextField_Previews: PreviewProvider, TestablePreview {
             
             PreviewWrapper(pinCode: "123456", isSecure: false, maxLength: 6, size: .small)
             PreviewWrapper(pinCode: "12", isSecure: false, maxLength: 2, size: .small)
+            PreviewWrapper(pinCode: "123", isSecure: true, maxLength: 8, size: .dots)
         }
     }
     

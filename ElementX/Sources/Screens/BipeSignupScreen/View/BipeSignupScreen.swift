@@ -158,7 +158,7 @@ struct BipeSignupScreen: View {
             TextField(text: $context.displayName) { placeholder("") }
                 .focused($focusedField, equals: .displayName)
                 .textFieldStyle(.compound(labelText: context.viewState.isCompany ? BipeStrings.companyName : BipeStrings.signupDisplayName,
-                                          footerText: context.viewState.isCompany ? BipeStrings.companyCreateFooter : BipeStrings.signupDisplayNameFooter))
+                                          footerText: context.viewState.isCompany ? BipeStrings.accountNewCompanyBody : BipeStrings.signupDisplayNameFooter))
                 .textContentType(.name)
                 .submitLabel(.continue)
                 .onSubmit(primary)

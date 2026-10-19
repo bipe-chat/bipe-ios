@@ -19,11 +19,10 @@ enum UserSessionFlowCoordinatorAction {
     case clearCache
     /// Logout and disable App Lock without any confirmation. The user forgot their PIN.
     case forceLogout
-    /// Bipe: show another account on this phone, or add one (ADR 0086, bipe#267).
+    /// Bipe: show another account on this phone (ADR 0086, bipe#267).
     case bipeSwitchAccount(userID: String)
-    case bipeAddAccount
-    /// Bipe: "Criar conta da empresa" (ADR 0087, bipe#269).
-    case bipeCreateCompanyAccount
+    /// Bipe: the choice made in the "Nova conta" window (bipe#445, #446).
+    case bipeAddAccount(BipeNewAccountChoice)
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
@@ -100,7 +99,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationTabCoordinator = NavigationTabCoordinator()
         navigationRootCoordinator.setRootCoordinator(BipeEnvironmentCoordinator(wrapping: navigationTabCoordinator,
-                                                                                handleResolver: flowParameters.userSession.bipeHandleResolver))
+                                                                                handleResolver: flowParameters.userSession.bipeHandleResolver,
+                                                                                companySeals: flowParameters.userSession.bipeCompanySeals))
         
         let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
@@ -362,7 +362,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 case .bipeSwitchAccount(let userID):
                     actionsSubject.send(.bipeSwitchAccount(userID: userID))
                 case .bipeAddAccount:
-                    actionsSubject.send(.bipeAddAccount)
+                    presentBipeNewAccountScreen()
                 case .logout:
                     Task { await self.runLogoutFlow() }
                 }
@@ -547,12 +547,35 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             handleAppRoute(.userProfile(userID: userID), animated: true)
         case .openSelfChat:
             Task { await openSelfChat() }
-        case .bipeCreateCompanyAccount:
-            navigationTabCoordinator.setSheetCoordinator(nil) // Settings in a sheet on iPad and Mac.
-            actionsSubject.send(.bipeCreateCompanyAccount)
+        case .bipeAddAccount:
+            presentBipeNewAccountScreen() // Replaces the settings sheet on iPad and Mac.
         case .openSupportChat:
             Task { await openSupportChat() }
         }
+    }
+    
+    // MARK: - Bipe New Account
+    
+    /// "Nova conta" (bipe#445, #446), from the avatar menu and from Sua conta. The chosen flow starts after the sheet closes.
+    private func presentBipeNewAccountScreen() {
+        let stackCoordinator = NavigationStackCoordinator()
+        let coordinator = BipeNewAccountScreenCoordinator(parameters: .init(userSession: userSession,
+                                                                            signedInUserIDs: BipeSignedInAccounts.userIDs))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                guard let self else { return }
+                navigationTabCoordinator.setSheetCoordinator(nil)
+                switch action {
+                case .choose(let choice):
+                    actionsSubject.send(.bipeAddAccount(choice))
+                case .dismiss:
+                    break
+                }
+            }
+            .store(in: &cancellables)
+        
+        stackCoordinator.setRootCoordinator(coordinator)
+        navigationTabCoordinator.setSheetCoordinator(stackCoordinator)
     }
     
     // MARK: - Session Verification

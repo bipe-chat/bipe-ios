@@ -59,10 +59,6 @@ enum HomeScreenViewAction {
     case resetEncryption
     case skipRecoveryKeyConfirmation
     case dismissNewSoundBanner
-    case screenAppeared
-    case multiAccountAnnouncementAppeared
-    case dismissMultiAccountAnnouncement
-    case addAccount
     /// Bipe: a tap on the avatar with two or more accounts, and the rows of the account menu (ADR 0086, bipe#267).
     case bipeSwitchToNextAccount
     case bipeSwitchAccount(userID: String)
@@ -72,6 +68,8 @@ enum HomeScreenViewAction {
     case markRoomAsUnread(roomIdentifier: String)
     case markRoomAsRead(roomIdentifier: String)
     case markRoomAsFavourite(roomIdentifier: String, isFavourite: Bool)
+    /// Bipe: swipe to archive (the `m.lowpriority` tag).
+    case setRoomArchived(roomIdentifier: String, isArchived: Bool)
     case setRoomMuted(roomIdentifier: String, isMuted: Bool)
     
     case acceptInvite(roomIdentifier: String)
@@ -124,7 +122,7 @@ struct BipeAccountMenuItem: Identifiable, Equatable {
     let userID: String
     let label: String
     let isCurrent: Bool
-    /// ADR 0087: does not count in the cap.
+    /// ADR 0087: the top bar shows a company account's name.
     let isCompany: Bool
     
     var id: String {
@@ -137,10 +135,6 @@ struct HomeScreenViewState: BindableState {
     
     /// Bipe: every account on the phone, the current one first (ADR 0086, bipe#267).
     var bipeAccounts: [BipeAccountMenuItem] = []
-    var bipeMaxAccounts = BipeRegistries.maxPersonalAccounts
-    var bipeCanAddAccount: Bool {
-        bipeAccounts.filter { !$0.isCompany }.count < bipeMaxAccounts
-    }
     
     /// ADR 0087: the company's name in the top bar when the account on screen is a company account.
     var bipeCompanyName: String? {
@@ -160,6 +154,17 @@ struct HomeScreenViewState: BindableState {
     
     /// Bipe: the home tab this list belongs to (ADR 0053).
     var bipeScope = BipeRoomListScope.chats
+    
+    /// Bipe: joined rooms of this tab in the archive.
+    var bipeArchivedCount = 0
+    
+    var isShowingBipeArchive: Bool {
+        bindings.filtersState.isFilterActive(.lowPriority)
+    }
+    
+    var shouldShowBipeArchivedRow: Bool {
+        bipeArchivedCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && (roomListMode == .rooms || roomListMode == .empty)
+    }
     
     var shouldShowBipeRequestsRow: Bool {
         bipeRequestCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && roomListMode == .rooms
@@ -244,7 +249,6 @@ struct HomeScreenViewStateBindings {
     var leaveRoomAlertItem: LeaveRoomAlertItem?
     
     var spaceFiltersViewModel: ChatsSpaceFiltersScreenViewModel?
-    var isPresentingMultiAccountAnnouncement = false
 }
 
 enum CallBadgeType {
@@ -307,6 +311,9 @@ struct HomeScreenRoom: Identifiable, Equatable {
     let canonicalAlias: String?
     
     let isTombstoned: Bool
+    
+    /// Bipe: the other person in a DM, for the company seal (bipe#252).
+    var dmUserID: String?
     
     var displayedLastMessage: AttributedString? {
         if isTombstoned {
@@ -385,7 +392,8 @@ extension HomeScreenRoom {
                   avatar: summary.avatar,
                   statusEmoji: summary.statusEmoji,
                   canonicalAlias: summary.canonicalAlias,
-                  isTombstoned: summary.isTombstoned)
+                  isTombstoned: summary.isTombstoned,
+                  dmUserID: summary.isDirect && summary.heroes.count == 1 ? summary.heroes[0].id : nil)
     }
 }
 

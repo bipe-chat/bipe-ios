@@ -698,13 +698,6 @@ extension PreviewTests {
     }
 
     @Test
-    func multiAccountAnnouncementView() async throws {
-        for (index, preview) in MultiAccountAnnouncementView_Previews._allPreviews.enumerated() {
-            try await assertSnapshots(matching: preview, step: index)
-        }
-    }
-
-    @Test
     func noticeRoomTimelineView() async throws {
         for (index, preview) in NoticeRoomTimelineView_Previews._allPreviews.enumerated() {
             try await assertSnapshots(matching: preview, step: index)

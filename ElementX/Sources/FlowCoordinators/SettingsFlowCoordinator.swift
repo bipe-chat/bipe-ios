@@ -20,8 +20,8 @@ enum SettingsFlowCoordinatorAction {
     case openUserProfile(userID: String)
     /// Bipe: open the self-chat (ADR 0053).
     case openSelfChat
-    /// Bipe: "Criar conta da empresa" (ADR 0087, bipe#269).
-    case bipeCreateCompanyAccount
+    /// Bipe: "Nova conta" in Sua conta opens the new account window (bipe#445, #446).
+    case bipeAddAccount
     /// Bipe: the support DM (ADR 0114).
     case openSupportChat
 }
@@ -108,9 +108,6 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     presentUserDetailsEditScreen()
                 case let .userStatusEmojiPicker(continuation):
                     presentEmojiPicker(emojiPickerContinuation: continuation)
-                    
-                case .addAccount:
-                    break // Nothing to present until the add account flow exists.
                     
                 case let .manageAccount(url):
                     presentAccountManagementURL(url)
@@ -215,8 +212,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             startLinkNewDeviceFlow()
         case .accountSignOut:
             actionsSubject.send(.runLogoutFlow)
-        case .accountCreateCompany:
-            actionsSubject.send(.bipeCreateCompanyAccount)
+        case .accountAdd:
+            actionsSubject.send(.bipeAddAccount)
         case .helpReportProblem:
             presentBugReport()
         case .chatsMediaQuality:

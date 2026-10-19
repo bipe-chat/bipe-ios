@@ -78,6 +78,10 @@ struct HomeScreenRoomCell: View {
                 Text(room.name)
                     .lineLimit(1)
                 
+                if let dmUserID = room.dmUserID {
+                    BipeCompanySeal(userID: dmUserID)
+                }
+                
                 if let statusEmoji = room.statusEmoji {
                     Text(String(statusEmoji))
                 }

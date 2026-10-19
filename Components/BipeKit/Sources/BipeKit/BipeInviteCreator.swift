@@ -35,11 +35,16 @@ public struct BipeInviteCreator {
     
     /// Reads the quota, then creates an invite only when one is left. For screens that do not show the quota.
     public func createIfAvailable() async throws(BipeAPIError) -> Result {
-        let myInvites = try await BipeAPIClient.withTokenRetry(accessToken: accessToken) { [apiClient] (token: String) async throws(BipeAPIError) -> BipeMyInvites in
-            try await apiClient.myInvites(accessToken: token)
-        }
+        let myInvites = try await quota()
         guard myInvites.available > 0 else { return .noneLeft(nextAvailableAt: myInvites.nextAvailableAt) }
         return try await .created(create())
+    }
+    
+    /// The account's invites and how many are left. Creates nothing.
+    public func quota() async throws(BipeAPIError) -> BipeMyInvites {
+        try await BipeAPIClient.withTokenRetry(accessToken: accessToken) { [apiClient] (token: String) async throws(BipeAPIError) -> BipeMyInvites in
+            try await apiClient.myInvites(accessToken: token)
+        }
     }
 }
 

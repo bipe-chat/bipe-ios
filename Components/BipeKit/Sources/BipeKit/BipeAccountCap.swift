@@ -26,6 +26,12 @@ public nonisolated enum BipeAccountCap {
     public static func canAdd(personalAccounts: Int, defaults: UserDefaults = .standard) -> Bool {
         personalAccounts < maxPersonalAccounts(defaults: defaults)
     }
+    
+    /// Counts the personal accounts among `signedInUserIDs`; company accounts do not count.
+    public static func canAdd(signedInUserIDs: some Collection<String>, defaults: UserDefaults = .standard) -> Bool {
+        let personal = signedInUserIDs.filter { !BipeAccountLabels.isCompany($0, defaults: defaults) }.count
+        return canAdd(personalAccounts: personal, defaults: defaults)
+    }
 }
 
 /// The name each account on this phone showed last, so the account menu can name accounts without a live session.

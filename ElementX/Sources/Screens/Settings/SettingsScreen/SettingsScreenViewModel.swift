@@ -31,7 +31,6 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         super.init(initialViewState: .init(deviceID: userSession.clientProxy.deviceID,
                                            userProfile: userSession.clientProxy.userProfilePublisher.value,
                                            showLinkNewDeviceButton: userSettings.app.linkNewDeviceEnabled,
-                                           showAddAccountButton: userSettings.app.multiAccountEnabled,
                                            showAccountDeactivation: userSession.clientProxy.canDeactivateAccount,
                                            showDeveloperOptions: userSettings.app.developerOptionsEnabled,
                                            showBipeHandle: userSession.clientProxy.userIDServerName == userSettings.app.bipeSignupServerName,
@@ -49,10 +48,6 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         
         userSettings.app.linkNewDeviceEnabledPublisher
             .weakAssign(to: \.state.showLinkNewDeviceButton, on: self)
-            .store(in: &cancellables)
-        
-        userSettings.app.multiAccountEnabledPublisher
-            .weakAssign(to: \.state.showAddAccountButton, on: self)
             .store(in: &cancellables)
         
         userSession.clientProxy.userProfilePublisher
@@ -112,9 +107,6 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         case .userStatus(.cancel):
             state.bindings.isPresentingStatusPicker = false
             state.bindings.isShowingCustomStatusField = false
-            
-        case .addAccount:
-            actionsSubject.send(.addAccount)
             
         case let .manageAccount(url):
             actionsSubject.send(.manageAccount(url: url))

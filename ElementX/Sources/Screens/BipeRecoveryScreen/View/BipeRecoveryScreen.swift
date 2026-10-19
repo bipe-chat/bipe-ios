@@ -106,12 +106,12 @@ struct BipeRecoveryScreen: View {
         Section {
             ListRow(kind: .custom {
                 VStack(spacing: 16) {
-                    PINTextField(pinCode: $context.pin, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
+                    PINTextField(pinCode: $context.pin, isSecure: true, maxLength: BipeRegistries.pinLength, size: .dots)
                     if context.viewState.isNewPIN {
                         Text(BipeStrings.pinConfirmTitle)
                             .font(.compound.bodyMD)
                             .foregroundStyle(.compound.textSecondary)
-                        PINTextField(pinCode: $context.pinConfirmation, isSecure: true, maxLength: BipeRegistries.pinLength, size: .small)
+                        PINTextField(pinCode: $context.pinConfirmation, isSecure: true, maxLength: BipeRegistries.pinLength, size: .dots)
                     }
                 }
                 .frame(maxWidth: .infinity)

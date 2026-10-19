@@ -96,6 +96,12 @@ struct RoomScreen: View {
                     }
                 }
             }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                // Bipe: a seal that ended or no longer verifies (bipe#252).
+                if let userID = context.viewState.dmRecipientDetails.userID {
+                    BipeCompanySealNotice(userID: userID)
+                }
+            }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
                     if let inviterHandle = context.viewState.bipeInviterHandle {

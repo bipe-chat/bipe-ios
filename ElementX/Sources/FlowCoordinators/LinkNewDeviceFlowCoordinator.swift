@@ -71,6 +71,8 @@ class LinkNewDeviceFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .linkComputer:
                     presentQRCodeScreen(mode: .linkDesktop(flowParameters.userSession.clientProxy.linkNewDeviceService()))
+                case .createPIN:
+                    presentPINScreen()
                 case .signOut(let deviceID):
                     presentSignOutScreen(deviceID: deviceID)
                 case .dismiss:
@@ -81,6 +83,26 @@ class LinkNewDeviceFlowCoordinator: FlowCoordinatorProtocol {
         
         linkedDevicesCoordinator = coordinator
         navigationStackCoordinator.setRootCoordinator(coordinator)
+    }
+    
+    /// A beta account creates its PIN here. That gives this phone the hidden password, then the list checks again.
+    private func presentPINScreen() {
+        let userSession = flowParameters.userSession
+        let coordinator = BipeAccountScreenCoordinator(parameters: .init(mode: .pin,
+                                                                         apiClient: BipeAPIClient(baseURL: userSession.userSettings.app.bipeAPIBaseURL),
+                                                                         clientProxy: userSession.clientProxy,
+                                                                         appLockService: appLockService,
+                                                                         userIndicatorController: flowParameters.userIndicatorController))
+        coordinator.actionsPublisher
+            .sink { [weak self] action in
+                switch action {
+                case .done:
+                    self?.navigationStackCoordinator.pop()
+                    self?.linkedDevicesCoordinator?.reload()
+                }
+            }
+            .store(in: &cancellables)
+        navigationStackCoordinator.push(coordinator)
     }
     
     /// Ends the session of a linked device on the MAS account page, in the private web view.
