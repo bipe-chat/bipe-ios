@@ -28,6 +28,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     
     private let roomSummaryProvider: RoomSummaryProviderProtocol?
     private var bipeEmptyTabFallbackTask: Task<Void, Never>?
+    private var bipeAccountPhotoTask: Task<Void, Never>?
     
     private var actionsSubject: PassthroughSubject<HomeScreenViewModelAction, Never> = .init()
     var actions: AnyPublisher<HomeScreenViewModelAction, Never> {
@@ -753,7 +754,21 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         let others = BipeSignedInAccounts.userIDs.filter { $0 != currentUserID }.sorted().map {
             BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false, isCompany: BipeAccountLabels.isCompany($0))
         }
-        state.bipeAccounts = [current] + others
+        state.bipeAccounts = ([current] + others).map { $0.withAvatar(photo: nil) }
+        loadBipeAccountPhoto(url: profile.avatarURL, userID: currentUserID)
+    }
+    
+    /// Only the current account's session is open, so only its photo can load. The other accounts keep their initials.
+    private func loadBipeAccountPhoto(url: URL?, userID: String) {
+        bipeAccountPhotoTask?.cancel()
+        guard let url, let source = try? MediaSourceProxy(url: url, mimeType: nil) else { return }
+        
+        let size = BipeAccountMenuItem.avatarSize
+        let task = userSession.mediaProvider.loadImageRetryingOnReconnection(source, size: CGSize(width: size * 3, height: size * 3))
+        bipeAccountPhotoTask = Task { [weak self] in
+            guard let photo = try? await task.value, !Task.isCancelled, let self else { return }
+            state.bipeAccounts = state.bipeAccounts.map { $0.userID == userID ? $0.withAvatar(photo: photo) : $0 }
+        }
     }
     
     // MARK: Invites
@@ -862,5 +877,31 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         state.bindings.alertInfo = .init(id: UUID(),
                                          title: title ?? L10n.commonError,
                                          message: message ?? L10n.errorUnknown)
+    }
+}
+
+private extension BipeAccountMenuItem {
+    static let avatarSize: CGFloat = 24
+    
+    /// Draws the avatar the way `LoadableAvatarImage` does: the photo, else the initials, in the account's shape.
+    func withAvatar(photo: UIImage?) -> BipeAccountMenuItem {
+        let avatar = Group {
+            if let photo {
+                Image(uiImage: photo)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                PlaceholderAvatarImage(name: label, contentID: userID)
+            }
+        }
+        .frame(width: Self.avatarSize, height: Self.avatarSize)
+        .avatarShape(isCompany ? .roundedRect : .circle, size: Self.avatarSize)
+        
+        let renderer = ImageRenderer(content: avatar)
+        renderer.scale = 3
+        
+        var item = self
+        item.avatar = renderer.uiImage?.withRenderingMode(.alwaysOriginal)
+        return item
     }
 }
