@@ -13,6 +13,7 @@ typealias QRCodeLoginScreenViewModelType = StateStoreViewModel<QRCodeLoginScreen
 
 class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScreenViewModelProtocol {
     private let appMediator: AppMediatorProtocol
+    private let bipeWebApproval: BipeWebApprovalDependencies?
     /// The time allowed between verifying the device's owner (on the previous screen), to having
     /// scanned a QR code and established a secure channel for the `linkDesktopComputer` flow.
     ///
@@ -31,8 +32,10 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
     init(mode: QRCodeLoginScreenMode,
          canSignInManually: Bool,
          appMediator: AppMediatorProtocol,
+         bipeWebApproval: BipeWebApprovalDependencies? = nil,
          linkDesktopTimeout: Duration = .seconds(120)) {
         self.appMediator = appMediator
+        self.bipeWebApproval = bipeWebApproval
         self.linkDesktopTimeout = linkDesktopTimeout
         
         let initialViewState: QRCodeLoginState = switch mode {
@@ -196,7 +199,14 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
                     expirationTask?.cancel()
                     state.state = .displayCode(.deviceCode(checkCodeString))
                 case .waitingForAuthorisation(let verificationURL, let continuationSender):
-                    requestOAuthAuthorization(url: verificationURL, continuationSender: continuationSender)
+                    if let bipeWebApproval {
+                        // Bipe: no system browser, it has no MAS session for this account (ADR 0118).
+                        state.state = .bipeWebApproval(BipeWebApprovalModel(purpose: .approveSignIn(verificationURL: verificationURL,
+                                                                                                    continuation: continuationSender),
+                                                                            dependencies: bipeWebApproval))
+                    } else {
+                        requestOAuthAuthorization(url: verificationURL, continuationSender: continuationSender)
+                    }
                 case .syncingSecrets:
                     break // Nothing to do.
                 case .done:
@@ -317,6 +327,9 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
     
     private func handleError(_ error: QRCodeLoginError) {
         MXLog.error("Failed to scan the QR code: \(error)")
+        if case .bipeWebApproval(let model) = state.state {
+            model.end()
+        }
         switch error {
         case .invalidQRCode:
             state.state = .scan(.scanFailed(.invalid))
@@ -348,6 +361,7 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
     /// Only for mocking initial states
     fileprivate init(state: QRCodeLoginState, mode: QRCodeLoginScreenMode, canSignInManually: Bool, checkCodeInput: String) {
         appMediator = AppMediatorMock(.init())
+        bipeWebApproval = nil
         linkDesktopTimeout = .seconds(3600)
         super.init(initialViewState: .init(state: state,
                                            mode: mode,

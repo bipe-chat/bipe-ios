@@ -58,12 +58,13 @@ struct QRCodeLoginScreenViewState: BindableState {
             switch state {
             case .loginInstructions, .scan: true
             case .error: false
-            case .linkDesktopInstructions, .displayCode, .displayQR, .confirmCode: false // Unreachable states.
+            case .linkDesktopInstructions, .displayCode, .displayQR, .confirmCode, .bipeWebApproval: false // Unreachable states.
             }
         case .linkDesktop, .linkMobile:
             switch state {
             case .displayCode, .confirmCode, .scan: true
             case .linkDesktopInstructions, .displayQR, .error: false
+            case .bipeWebApproval: false // The approval screen has its own cancel button.
             case .loginInstructions: false // Unreachable state.
             }
         }
@@ -76,7 +77,7 @@ struct QRCodeLoginScreenViewState: BindableState {
         case .linkDesktop, .linkMobile:
             switch state {
             case .loginInstructions, .linkDesktopInstructions, .displayQR: true
-            case .displayCode, .confirmCode, .scan, .error: false
+            case .displayCode, .confirmCode, .scan, .error, .bipeWebApproval: false
             }
         }
     }
@@ -110,6 +111,9 @@ nonisolated enum QRCodeLoginState: Equatable {
     case displayQR(UIImage)
     /// The user needs to enter the two digit code to confirm the channel is secure
     case confirmCode(CheckCodeState)
+    
+    /// Bipe: the warning, cooldown, biometric check and private MAS web view that approve a web sign-in (ADR 0118).
+    case bipeWebApproval(BipeWebApprovalModel)
     
     /// Any full screen error state
     case error(ErrorState)

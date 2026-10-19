@@ -457,7 +457,8 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference(defaultValue: false)
     var jumpToReadMarkerEnabled: Bool
     
-    @UserPreference(defaultValue: false)
+    /// Bipe: Settings > Linked devices > Link a computer (ADR 0116). On for everyone; the new key drops an old opt-out.
+    @UserPreference(key: "bipeLinkNewDeviceEnabled", defaultValue: true)
     var linkNewDeviceEnabled: Bool
     
     @UserPreference(key: "clientPausingAndResumingEnabledV2", defaultValue: false, volatile: true)

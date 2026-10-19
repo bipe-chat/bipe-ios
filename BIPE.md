@@ -127,6 +127,15 @@ Not done (needs the domain, Apple team or brand):
 - **Password saving:** `webcredentials:bipe.chat` in the associated domains; the AASA lists both app IDs (bipe-infra).
 - Not built: guardian and CPF recovery (no API yet), QR sign-in checks from bipe#152.
 
+## Link a computer (ADR 0116, ADR 0118, bipe#391)
+
+- **Entry point:** Settings > Aparelhos > Aparelhos conectados (`BipeLinkedDevicesScreen`) is the root of `LinkNewDeviceFlowCoordinator`. It lists the other devices (`GET /_matrix/client/v3/devices`) with last use and "Desconectar", and has the only "Conectar um computador" button. Only the desktop direction: the phone scans the code that `chat.bipe.net.br` shows. `LinkNewDeviceScreen` (both directions) is not used. `linkNewDeviceEnabled` (key `bipeLinkNewDeviceEnabled`, default on) shows the button.
+- **Support check:** `ClientProxy.isLoginWithQRCodeSupported` is the Bipe check, not the FFI one (the FFI is true only for an OAuth session): `/versions` advertises `org.matrix.msc4108` and `BipeCredentialStore` holds this account's hidden password.
+- **Approval:** at `waitingForAuthorisation` the QR screen shows `BipeWebApprovalScreen` (state `.bipeWebApproval`) in place of the system browser: full-access warning with the cooldown (`BipeRegistries.webLinkCooldownSeconds`), `LAContext` check, then the hidden password is read. `WKWebView` with `WKWebsiteDataStore.nonPersistent()`, MAS issuer host only (from `auth_metadata`). The MAS login form is filled once in the `.defaultClient` script world and never shown; a second login form is an error. The consent page shows the place from `GET /v1/web-link/place` (DB-IP attribution). `confirm()` when the page leaves the consent page or the user closes it; `cancel()` before the consent page. `POST /v1/web-link/finish` when the flow ends.
+- **Sign-out of a linked device:** the MAS account page with `action=org.matrix.session_end&device_id=…` in the same private web view (Synapse with MAS refuses `DELETE /devices`).
+- **Trap:** the Synapse rendezvous session lives 60 s from the QR code. Scan, warning, cooldown, biometric check and the MAS page must fit in it.
+- Unverified (19 Oct 2026): the whole flow on a phone, the MAS consent page markup (IP in the page text, a `form` on `/device/<id>`), the MAS `session_end` page.
+
 ## Several accounts (ADR 0086, bipe#267)
 
 - **Chat list avatar** (`HomeScreen.settingsButton`): a tap with two or more accounts switches to the next one (one account: Você, as before). A long press opens a context menu: every account (`BipeAccountMenuItem`, current one checked), then "Adicionar conta" (`bipe_account_add`) up to the cap, else `bipe_account_cap_reached`. Account names come from `BipeAccountLabels` (BipeKit), because another account's session may not be live; the list comes from the session keychain (`BipeSignedInAccounts`), because `sessionsPublisher` lists live sessions only.

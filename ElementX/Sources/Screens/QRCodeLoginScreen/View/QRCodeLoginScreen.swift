@@ -49,6 +49,8 @@ struct QRCodeLoginScreen: View {
             displayQRContent
         case .confirmCode:
             confirmCodeContent
+        case .bipeWebApproval(let model):
+            BipeWebApprovalScreen(model: model)
         case .error(let errorState):
             QRCodeErrorView(errorState: errorState, canSignInManually: context.viewState.canSignInManually) { action in
                 context.send(viewAction: .errorAction(action))

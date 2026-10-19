@@ -28,7 +28,7 @@ struct LinkNewDeviceScreen: View {
             }
             .background()
             .backgroundStyle(.compound.bgSubtleSecondary)
-            .navigationTitle(BipeStrings.accountLinkDevice)
+            .navigationTitle(BipeStrings.linkedDevicesTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
         }

@@ -1542,7 +1542,61 @@ public enum BipeStrings {
 
     public static var accountThisDevice: String { NSLocalizedString("bipe_account_this_device", tableName: "Bipe", bundle: .module, comment: "") }
 
-    public static var accountLinkDevice: String { NSLocalizedString("bipe_account_link_device", tableName: "Bipe", bundle: .module, comment: "") }
+    public static var linkedDevicesTitle: String { NSLocalizedString("bipe_linked_devices_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedDevicesLinkComputer: String { NSLocalizedString("bipe_linked_devices_link_computer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedDevicesFooter: String { NSLocalizedString("bipe_linked_devices_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedDevicesEmpty: String { NSLocalizedString("bipe_linked_devices_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func linkedDevicesLastUsed(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_linked_devices_last_used", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var linkedDevicesUnknownName: String { NSLocalizedString("bipe_linked_devices_unknown_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedDevicesSignOut: String { NSLocalizedString("bipe_linked_devices_sign_out", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func linkedDevicesSignOutTitle(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_linked_devices_sign_out_title", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var linkedDevicesSignOutBody: String { NSLocalizedString("bipe_linked_devices_sign_out_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedDevicesSignOutBiometric: String { NSLocalizedString("bipe_linked_devices_sign_out_biometric", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkedDevicesError: String { NSLocalizedString("bipe_linked_devices_error", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerWarningTitle: String { NSLocalizedString("bipe_link_computer_warning_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerWarningBody: String { NSLocalizedString("bipe_link_computer_warning_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerWarningScam: String { NSLocalizedString("bipe_link_computer_warning_scam", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerContinue: String { NSLocalizedString("bipe_link_computer_continue", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerBiometric: String { NSLocalizedString("bipe_link_computer_biometric", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerLoading: String { NSLocalizedString("bipe_link_computer_loading", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func linkComputerPlace(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_link_computer_place", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var linkComputerPlaceUnknown: String { NSLocalizedString("bipe_link_computer_place_unknown", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerPlaceSource: String { NSLocalizedString("bipe_link_computer_place_source", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerConsentHint: String { NSLocalizedString("bipe_link_computer_consent_hint", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerErrorTitle: String { NSLocalizedString("bipe_link_computer_error_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerErrorSignIn: String { NSLocalizedString("bipe_link_computer_error_sign_in", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerNotSupported: String { NSLocalizedString("bipe_link_computer_not_supported", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var linkComputerDone: String { NSLocalizedString("bipe_link_computer_done", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var accountSignOut: String { NSLocalizedString("bipe_account_sign_out", tableName: "Bipe", bundle: .module, comment: "") }
 

@@ -53,16 +53,6 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             state.flags.insert("companyAccount")
         }
         
-        appSettings.linkNewDeviceEnabledPublisher
-            .sink { [weak self] enabled in
-                if enabled {
-                    self?.state.flags.insert("linkNewDevice")
-                } else {
-                    self?.state.flags.remove("linkNewDevice")
-                }
-            }
-            .store(in: &cancellables)
-        
         userSession.clientProxy.userProfilePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] profile in self?.state.displayName = profile.displayName }

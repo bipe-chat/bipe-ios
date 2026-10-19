@@ -261,6 +261,25 @@ public struct BipeAPIClient: Sendable {
         return BipeDataExport(data: data, filename: filename)
     }
     
+    // MARK: - Web sign-in (ADR 0118)
+    
+    /// `GET /v1/web-link/place`. The approximate place of the browser IP that the MAS consent page shows.
+    /// Every field is optional; all are `nil` when the server does not know the place.
+    public func webLinkPlace(ip: String, accessToken: String) async throws(BipeAPIError) -> BipeWebLinkPlace {
+        try await send(method: "GET", path: ["v1", "web-link", "place"], query: [URLQueryItem(name: "ip", value: ip)],
+                       rawBody: nil, accessToken: accessToken)
+    }
+    
+    /// `POST /v1/web-link/finish`. Ends the MAS browser sessions that the private web view made since `since`.
+    @discardableResult
+    public func finishWebLink(since: Date, accessToken: String) async throws(BipeAPIError) -> Int {
+        struct Body: Encodable { let since: String }
+        struct Response: Decodable { let finished: Int }
+        let body = Body(since: since.formatted(Date.ISO8601FormatStyle()))
+        let response: Response = try await send(method: "POST", path: ["v1", "web-link", "finish"], body: body, accessToken: accessToken)
+        return response.finished
+    }
+    
     // MARK: - Auth
     
     /// Runs `request` with the token from `accessToken`. On HTTP 401 it reads the token again and retries once,
@@ -402,10 +421,14 @@ public struct BipeAPIClient: Sendable {
     /// Sends the request and returns the body of a 2xx answer. Other answers throw the contract's error.
     private func perform(method: String,
                          path: [String],
+                         query: [URLQueryItem] = [],
                          rawBody: (data: Data, contentType: String)?,
                          accessToken: String?) async throws(BipeAPIError) -> (Data, HTTPURLResponse) {
         // appending(path:) percent-encodes each component, so a handle cannot add path segments.
-        let url = path.reduce(baseURL) { $0.appending(path: $1, directoryHint: .notDirectory) }
+        var url = path.reduce(baseURL) { $0.appending(path: $1, directoryHint: .notDirectory) }
+        if !query.isEmpty {
+            url.append(queryItems: query)
+        }
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
@@ -444,9 +467,10 @@ public struct BipeAPIClient: Sendable {
     
     private func send<Response: Decodable>(method: String,
                                            path: [String],
+                                           query: [URLQueryItem] = [],
                                            rawBody: (data: Data, contentType: String)?,
                                            accessToken: String? = nil) async throws(BipeAPIError) -> Response {
-        let (data, httpResponse) = try await perform(method: method, path: path, rawBody: rawBody, accessToken: accessToken)
+        let (data, httpResponse) = try await perform(method: method, path: path, query: query, rawBody: rawBody, accessToken: accessToken)
         
         // 204, and 202 without a body.
         if httpResponse.statusCode == 204 || data.isEmpty, let noContent = NoContent() as? Response {

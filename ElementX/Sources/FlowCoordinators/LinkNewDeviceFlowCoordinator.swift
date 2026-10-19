@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
 
@@ -36,7 +37,7 @@ class LinkNewDeviceFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     func start(animated: Bool) {
-        presentLinkNewDeviceScreen()
+        presentLinkedDevicesScreen()
     }
     
     func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
@@ -47,28 +48,53 @@ class LinkNewDeviceFlowCoordinator: FlowCoordinatorProtocol {
         fatalError()
     }
     
-    private func presentLinkNewDeviceScreen() {
-        let coordinator = LinkNewDeviceScreenCoordinator(parameters: .init(clientProxy: flowParameters.userSession.clientProxy,
-                                                                           appLockService: appLockService,
-                                                                           orientationManager: flowParameters.appMediator.windowManager))
+    // MARK: - Bipe (ADR 0116, ADR 0118)
+    
+    private var linkedDevicesCoordinator: BipeLinkedDevicesScreenCoordinator?
+    
+    private var bipeWebApprovalDependencies: BipeWebApprovalDependencies {
+        let userSession = flowParameters.userSession
+        return BipeWebApprovalDependencies(clientProxy: userSession.clientProxy,
+                                           apiClient: BipeAPIClient(baseURL: userSession.userSettings.app.bipeAPIBaseURL),
+                                           credentialStore: BipeCredentialStore(accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier))
+    }
+    
+    /// Settings > Linked devices is the root. Only the desktop direction exists: the phone scans the browser's code.
+    private func presentLinkedDevicesScreen() {
+        let userSession = flowParameters.userSession
+        let coordinator = BipeLinkedDevicesScreenCoordinator(parameters: .init(clientProxy: userSession.clientProxy,
+                                                                               showsLinkComputer: userSession.userSettings.app.linkNewDeviceEnabled))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 guard let self else { return }
                 
                 switch action {
-                case .linkMobileDevice(let progressPublisher):
-                    presentQRCodeScreen(mode: .linkMobile(progressPublisher))
-                case .linkDesktopComputer:
+                case .linkComputer:
                     presentQRCodeScreen(mode: .linkDesktop(flowParameters.userSession.clientProxy.linkNewDeviceService()))
-                case .verifyWithAppLockPIN(let continuation):
-                    presentAppLockScreen(continuation: continuation)
+                case .signOut(let deviceID):
+                    presentSignOutScreen(deviceID: deviceID)
                 case .dismiss:
                     actionsSubject.send(.dismiss)
                 }
             }
             .store(in: &cancellables)
         
+        linkedDevicesCoordinator = coordinator
         navigationStackCoordinator.setRootCoordinator(coordinator)
+    }
+    
+    /// Ends the session of a linked device on the MAS account page, in the private web view.
+    private func presentSignOutScreen(deviceID: String) {
+        let model = BipeWebApprovalModel(purpose: .signOut(deviceID: deviceID), dependencies: bipeWebApprovalDependencies)
+        model.onFinished = { [weak self] in
+            self?.navigationStackCoordinator.setSheetCoordinator(nil)
+        }
+        let stackCoordinator = NavigationStackCoordinator()
+        stackCoordinator.setRootCoordinator(BipeWebApprovalScreenCoordinator(model: model))
+        navigationStackCoordinator.setSheetCoordinator(stackCoordinator) { [weak self] in
+            model.end()
+            self?.linkedDevicesCoordinator?.reload()
+        }
     }
     
     private func presentAppLockScreen(continuation: CheckedContinuation<Bool, Never>) {
@@ -103,7 +129,8 @@ class LinkNewDeviceFlowCoordinator: FlowCoordinatorProtocol {
         let coordinator = QRCodeLoginScreenCoordinator(parameters: .init(mode: mode,
                                                                          canSignInManually: false, // No need to worry about this when linking a device.
                                                                          orientationManager: flowParameters.appMediator.windowManager,
-                                                                         appMediator: flowParameters.appMediator))
+                                                                         appMediator: flowParameters.appMediator,
+                                                                         bipeWebApproval: bipeWebApprovalDependencies))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 guard let self else { return }
@@ -111,14 +138,14 @@ class LinkNewDeviceFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .signInManually, .signedIn:
                     fatalError("QR linking shouldn't send sign-in actions.")
-                case .startOver:
-                    navigationStackCoordinator.pop() // Pops back to the LinkNewDeviceScreen.
+                case .startOver, .cancel:
+                    navigationStackCoordinator.popToRoot() // Back to Linked devices.
                 case .requestOAuthAuthorisation(let url, let continuation):
                     actionsSubject.send(.requestOAuthAuthorisation(url, continuation))
                 case .linkedDevice:
-                    actionsSubject.send(.dismiss)
-                case .cancel:
-                    actionsSubject.send(.dismiss)
+                    navigationStackCoordinator.popToRoot()
+                    linkedDevicesCoordinator?.reload()
+                    flowParameters.userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.linkComputerDone, icon: \.checkCircle))
                 }
             }
             .store(in: &cancellables)
