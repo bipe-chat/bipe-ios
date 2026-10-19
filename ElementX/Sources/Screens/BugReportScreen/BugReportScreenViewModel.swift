@@ -34,7 +34,8 @@ class BugReportScreenViewModel: BugReportScreenViewModelType, BugReportScreenVie
         self.logFiles = logFiles
         
         let canSendLogFiles = Self.validate(logFiles)
-        let bindings = BugReportScreenViewStateBindings(reportText: "", sendingLogsEnabled: canSendLogFiles, canContact: false)
+        // Bipe: logs are off until the person turns them on (bipe#367).
+        let bindings = BugReportScreenViewStateBindings(reportText: "", sendingLogsEnabled: false, canContact: false)
         super.init(initialViewState: BugReportScreenViewState(canSendLogFiles: canSendLogFiles,
                                                               screenshot: screenshot,
                                                               bindings: bindings,
@@ -106,7 +107,8 @@ class BugReportScreenViewModel: BugReportScreenViewModelType, BugReportScreenVie
                                         logFiles: context.sendingLogsEnabled ? logFiles : nil,
                                         canContact: context.canContact,
                                         githubLabels: [],
-                                        files: files)
+                                        files: files,
+                                        accessToken: clientProxy?.accessToken)
         
         switch await bugReportService.submitBugReport(bugReport,
                                                       progressListener: progressSubject) {
