@@ -27,10 +27,12 @@ struct DateTests {
         #expect(today.formattedMinimal() == today.formatted(date: .omitted, time: .shortened))
         
         let yesterday = try #require(calendar.date(byAdding: .hour, value: 1, to: startOfYesterday))
-        #expect(yesterday.formattedMinimal() == yesterday.formatted(Date.RelativeFormatStyle(presentation: .named, capitalizationContext: .beginningOfSentence)))
+        // Compare with a literal: RelativeFormatStyle measures from now, so late in the
+        // day a time early yesterday formats as "2 days ago" and the test would flake.
+        #expect(yesterday.formattedMinimal() == "Yesterday")
         
         let nearYesterday = try #require(calendar.date(byAdding: DateComponents(hour: -10), to: today))
-        #expect(nearYesterday.formattedMinimal() == yesterday.formatted(Date.RelativeFormatStyle(presentation: .named, capitalizationContext: .beginningOfSentence)))
+        #expect(nearYesterday.formattedMinimal() == "Yesterday")
         
         let threeDaysAgo = try #require(calendar.date(byAdding: .day, value: -3, to: startOfToday))
         #expect(threeDaysAgo.formattedMinimal() == threeDaysAgo.formatted(.dateTime.weekday(.wide)))
@@ -70,7 +72,7 @@ struct DateTests {
         #expect(yesterday.formattedDateSeparator() == "Yesterday")
         
         let nearYesterday = try #require(calendar.date(byAdding: DateComponents(hour: -10), to: today))
-        #expect(nearYesterday.formattedDateSeparator() == yesterday.formatted(Date.RelativeFormatStyle(presentation: .named, capitalizationContext: .beginningOfSentence)))
+        #expect(nearYesterday.formattedDateSeparator() == "Yesterday")
         
         let threeDaysAgo = try #require(calendar.date(byAdding: .day, value: -3, to: startOfToday))
         #expect(threeDaysAgo.formattedDateSeparator() == threeDaysAgo.formatted(.dateTime.weekday(.wide)))

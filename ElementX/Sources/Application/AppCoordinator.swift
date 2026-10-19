@@ -140,7 +140,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         analyticsService.startIfEnabled()
         
         windowManager.delegate = self
-        (bugReportService as? BugReportService)?.bipeAccessToken = { [weak self] in self?.userSession?.clientProxy.accessToken }
         
         notificationManager.delegate = self
         notificationManager.start()

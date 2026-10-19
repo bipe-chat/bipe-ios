@@ -26,9 +26,6 @@ class BugReportService: NSObject, BugReportServiceProtocol {
     
     let lastCrashEventIDSubject = CurrentValueSubject<String?, Never>(nil)
     
-    /// Bipe: the Bipe API takes reports only with the session's access token (ADR 0114).
-    var bipeAccessToken: (@MainActor () -> String?)?
-    
     init(rageshakeURLPublisher: CurrentValuePublisher<RageshakeConfiguration, Never>,
          applicationID: String,
          sdkGitSHA: String,
@@ -121,8 +118,9 @@ class BugReportService: NSObject, BugReportServiceProtocol {
         
         var request = URLRequest(url: rageshakeURL)
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        if let token = await bipeAccessToken?() {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        // Bipe: the Bipe API takes reports from signed-in users only (bipe#367).
+        if let accessToken = bugReport.accessToken {
+            request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
         
         request.httpMethod = "POST"
@@ -229,7 +227,7 @@ class BugReportService: NSObject, BugReportServiceProtocol {
         let fileHandle = try FileHandle(forReadingFrom: url)
         
         while let data = try fileHandle.readToEnd() {
-            // Bipe: no GZIP package. Bug reports are off (rageshake URL nil), so logs go uncompressed.
+            // Bipe: no GZIP package, so logs go uncompressed. The Bipe API keeps them as sent (bipe#367).
             let zippedURL = URL.temporaryDirectory.appending(path: url.lastPathComponent)
             
             // Remove old zipped file if exists

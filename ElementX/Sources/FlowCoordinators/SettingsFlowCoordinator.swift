@@ -123,7 +123,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 case .moderationAndSafety:
                     presentModerationAndSafetySettings()
                 case .bugReport:
-                    startBugReportFlow()
+                    presentBugReport()
                     
                 case .logout:
                     actionsSubject.send(.runLogoutFlow)
@@ -217,20 +217,21 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             actionsSubject.send(.runLogoutFlow)
         case .accountCreateCompany:
             actionsSubject.send(.bipeCreateCompanyAccount)
+        case .helpReportProblem:
+            presentBugReport()
         case .chatsMediaQuality:
             presentMediaUploadQualitySettings()
         case .chatsLiveLocation:
             presentLocationSharingSettings()
         case .helpSupport:
             actionsSubject.send(.openSupportChat)
-        case .helpReportProblem:
-            startBugReportFlow()
         default:
             MXLog.error("Bipe settings row without a screen: \(row.rawValue)")
         }
     }
     
-    private func startBugReportFlow() {
+    /// "Avisar sobre um problema" (bipe#367): the report goes to the Bipe API.
+    private func presentBugReport() {
         bugReportFlowCoordinator = BugReportFlowCoordinator(parameters: .init(presentationMode: .push(navigationStackCoordinator),
                                                                               userIndicatorController: flowParameters.userIndicatorController,
                                                                               bugReportService: flowParameters.bugReportService,
