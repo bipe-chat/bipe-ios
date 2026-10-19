@@ -81,7 +81,7 @@ struct BipeCompanySealSheet: View {
     let payload: BadgePayload
     
     var body: some View {
-        NavigationStack {
+        ElementNavigationStack {
             Form {
                 Section {
                     HStack(spacing: 12) {
