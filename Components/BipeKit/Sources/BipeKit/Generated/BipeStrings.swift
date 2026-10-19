@@ -1865,4 +1865,16 @@ public enum BipeStrings {
     public static var supportReportReceived: String { NSLocalizedString("bipe_support_report_received", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var supportAlreadyOpen: String { NSLocalizedString("bipe_support_already_open", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLockTitle: String { NSLocalizedString("bipe_app_lock_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func appLockBiometric(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_app_lock_biometric", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var archiveAction: String { NSLocalizedString("bipe_archive_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var unarchiveAction: String { NSLocalizedString("bipe_unarchive_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var archivedTitle: String { NSLocalizedString("bipe_archived_title", tableName: "Bipe", bundle: .module, comment: "") }
 }
