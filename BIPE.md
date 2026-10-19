@@ -159,6 +159,7 @@ Not done (needs the domain, Apple team or brand):
 - **Contacts screen:** the invite buttons on top (`BipeInviteButtonsSection`, shared with `BipeInvitesScreen`), then people who joined with the user's invite (`GET /v1/me/invites`, status `used`), then address-book matches, then a "Convites ainda não usados" row with the count that opens `BipeInvitesScreen`. The counts reload on each appear, so they are current after a return from the invites screen.
 - **Start chat "Convidar pessoas":** creates a personal invite and opens the share sheet (`BipeInviteCreator.createIfAvailable`). Element shared a matrix.to profile link, which is a dead end for an invite-only sign-up.
 - `BipeInviteCreator` (BipeKit) is the one place that creates an invite and stores its link. `BipeInviteQuota` writes the quota text.
+- **Invite names** ("Para quem é?") live on the server: `PUT /v1/me/invites/{id}`, returned as `name` in `GET /v1/me/invites`. Builds before 19 Oct 2026 kept them only in UserDefaults, and pruned them whenever one list reply missed an ID, so most were lost. `BipeInvitesScreenViewModel.uploadLocalNames` uploads what is left once, then removes the local copy. Links stay on the device (the server keeps only a hash).
 
 ## Handle change lines (ADR 0066, bipe#166)
 

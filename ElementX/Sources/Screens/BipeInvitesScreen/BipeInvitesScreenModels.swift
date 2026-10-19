@@ -19,7 +19,7 @@ struct BipeInvitesScreenViewState: BindableState {
     var invites: [BipeInvite] = []
     /// Links for pending invites created on this device (kept in the keychain). The server keeps only a hash of each code.
     var shareURLs: [String: URL] = [:]
-    /// Names the person gave their invites on this device, by invite ID.
+    /// Names the person gave their invites, by invite ID. The server keeps them.
     var names: [String: String] = [:]
     
     var bindings = BipeInvitesScreenViewStateBindings()
