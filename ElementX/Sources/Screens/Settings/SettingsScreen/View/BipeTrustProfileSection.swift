@@ -72,14 +72,14 @@ struct BipeTrustProfileSection: View {
     
     private func stepRow(_ step: BipeTrustProfile.Step) -> some View {
         ListRow(label: .default(title: step.title,
-                                description: step.description,
+                                description: step.description(isCompany: profile.isCompany),
                                 icon: statusIcon(step.status)),
                 details: step.status == .comingSoon ? .icon(comingSoonTag) : nil,
                 kind: .label)
     }
     
     private func missingItemRow(_ item: BipeTrustProfile.ProfileItem) -> some View {
-        ListRow(label: .default(title: item.actionTitle, icon: \.plus),
+        ListRow(label: .default(title: item.actionTitle(isCompany: profile.isCompany), icon: \.plus),
                 kind: .navigationLink {
                     switch item {
                     case .displayName, .avatar: send(.userDetails)
@@ -121,26 +121,32 @@ private extension BipeTrustProfile.Step {
         case .email: BipeStrings.trustStepEmail
         case .pix: BipeStrings.trustStepPix
         case .govbr: BipeStrings.trustStepGovbr
+        case .cnpj: BipeStrings.trustStepCnpj
+        case .proof: BipeStrings.trustStepProof
+        case .domain: BipeStrings.trustStepDomain
         }
     }
     
-    var description: String {
+    func description(isCompany: Bool) -> String {
         switch id {
         case .account: BipeStrings.trustStepAccountBody
-        case .profile: BipeStrings.trustStepProfileBody
+        case .profile: isCompany ? BipeStrings.trustStepCompanyProfileBody : BipeStrings.trustStepProfileBody
         case .email: BipeStrings.trustStepEmailBody
         case .pix: BipeStrings.trustStepPixBody
         case .govbr: BipeStrings.trustStepGovbrBody
+        case .cnpj: BipeStrings.trustStepCnpjBody
+        case .proof: BipeStrings.trustStepProofBody
+        case .domain: BipeStrings.trustStepDomainBody
         }
     }
 }
 
 private extension BipeTrustProfile.ProfileItem {
-    var actionTitle: String {
+    func actionTitle(isCompany: Bool) -> String {
         switch self {
-        case .displayName: BipeStrings.trustStepProfileAddName
+        case .displayName: isCompany ? BipeStrings.trustStepProfileAddCompanyName : BipeStrings.trustStepProfileAddName
         case .handle: BipeStrings.trustStepProfileAddHandle
-        case .avatar: BipeStrings.trustStepProfileAddPhoto
+        case .avatar: isCompany ? BipeStrings.trustStepProfileAddLogo : BipeStrings.trustStepProfileAddPhoto
         }
     }
 }

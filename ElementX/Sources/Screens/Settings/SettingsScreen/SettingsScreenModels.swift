@@ -67,12 +67,19 @@ struct SettingsScreenViewState: BindableState {
     /// Bipe: notifications on this phone, the subtitle of "Notificações". `nil` until loaded.
     var bipeNotificationsOn: Bool?
     
+    /// Bipe: `account_type` from `GET /v1/me/account`. The label stored at sign-up until it loads.
+    var bipeAccountType = BipeAccountType.personal
+    /// Bipe: `GET /v1/me/business` for a company account. `nil` without a claim or until it loads.
+    var bipeBusiness: BipeBusinessClaim?
+    
     /// Bipe: the "Perfil de confiança" card. Same visibility as the username row.
     var bipeTrustProfile: BipeTrustProfile? {
         guard showBipeHandle else { return nil }
         return BipeTrustProfile(displayName: userProfile.displayName,
                                 hasAvatar: userProfile.avatarURL != nil,
-                                handle: bipeHandle)
+                                handle: bipeHandle,
+                                accountType: bipeAccountType,
+                                business: bipeBusiness)
     }
     
     var securitySectionMode = SettingsScreenSecuritySectionMode.none

@@ -446,6 +446,24 @@ public enum BipeStrings {
 
     public static var trustComingSoon: String { NSLocalizedString("bipe_trust_coming_soon", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var trustStepCompanyProfileBody: String { NSLocalizedString("bipe_trust_step_company_profile_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepProfileAddCompanyName: String { NSLocalizedString("bipe_trust_step_profile_add_company_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepProfileAddLogo: String { NSLocalizedString("bipe_trust_step_profile_add_logo", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepCnpj: String { NSLocalizedString("bipe_trust_step_cnpj", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepCnpjBody: String { NSLocalizedString("bipe_trust_step_cnpj_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepProof: String { NSLocalizedString("bipe_trust_step_proof", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepProofBody: String { NSLocalizedString("bipe_trust_step_proof_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepDomain: String { NSLocalizedString("bipe_trust_step_domain", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepDomainBody: String { NSLocalizedString("bipe_trust_step_domain_body", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static func invitesNext(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_invites_next", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }

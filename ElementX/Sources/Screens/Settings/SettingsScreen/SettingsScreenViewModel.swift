@@ -41,6 +41,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
                    mediaProvider: userSession.mediaProvider)
         
         state.bipeIsInTab = bipeIsInTab
+        state.bipeAccountType = BipeAccountLabels.isCompany(userSession.clientProxy.userID) ? .company : .personal
         
         userSettings.app.developerOptionsEnabledPublisher
             .weakAssign(to: \.state.showDeveloperOptions, on: self)
@@ -201,7 +202,24 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             return
         }
         let apiClient = BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL)
-        state.bipeWaysBack = await BipeWaysBackReader.load(apiClient: apiClient, clientProxy: clientProxy).waysBack
+        let (status, waysBack) = await BipeWaysBackReader.load(apiClient: apiClient, clientProxy: clientProxy)
+        state.bipeWaysBack = waysBack
+        if let status {
+            state.bipeAccountType = status.accountType ?? .personal
+        }
+        if state.bipeAccountType == .company {
+            await loadBipeBusiness(apiClient: apiClient)
+        }
+    }
+    
+    private func loadBipeBusiness(apiClient: BipeAPIClient) async {
+        do {
+            state.bipeBusiness = try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { (token: String) async throws(BipeAPIError) -> BipeBusinessClaim? in
+                try await apiClient.myBusiness(accessToken: token)
+            }
+        } catch {
+            MXLog.error("Bipe business claim load failed: \(error)")
+        }
     }
     
     /// On when the app setting is on and iOS allows notifications.
