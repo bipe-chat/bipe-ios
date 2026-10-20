@@ -27,7 +27,7 @@ struct StartChatScreenViewState: BindableState {
     /// Bipe: the handle in the query when nobody holds it.
     var bipeHandleNotFound: String?
     /// Bipe ADR 0111: the inviter while the user has not messaged them yet.
-    var bipeInviter: (userID: String, handle: String)?
+    var bipeInviter: (profile: UserProfile, handle: String)?
     
     var isSearching: Bool {
         !bindings.searchQuery.isEmpty

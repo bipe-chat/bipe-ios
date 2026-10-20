@@ -223,10 +223,16 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
     /// Bipe ADR 0111: empty search results offer the chat with the inviter until the user messages them.
     private func loadBipeInviter() {
         guard let greeting = userSession.clientProxy.bipeInviterGreeting else { return }
-        state.bipeInviter = (greeting.userID, greeting.handle ?? String(greeting.userID.trimmingPrefix("@")))
+        state.bipeInviter = (UserProfile(userID: greeting.userID), greeting.handle ?? String(greeting.userID.trimmingPrefix("@")))
         Task {
-            guard let handle = await greeting.displayHandle(resolver: userSession.bipeHandleResolver) else { return }
-            state.bipeInviter = (greeting.userID, handle)
+            guard let handle = await greeting.displayHandle(resolver: userSession.bipeHandleResolver),
+                  let inviter = state.bipeInviter else { return }
+            state.bipeInviter = (inviter.profile, handle)
+        }
+        Task {
+            guard case let .success(profile) = await userSession.clientProxy.profile(for: greeting.userID),
+                  let inviter = state.bipeInviter else { return }
+            state.bipeInviter = (profile, inviter.handle)
         }
     }
     

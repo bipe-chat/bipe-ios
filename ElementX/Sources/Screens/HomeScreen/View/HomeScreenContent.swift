@@ -132,8 +132,9 @@ struct HomeScreenContent: View {
                 // recovery key, inviter row (ADR 0111), "Escolha seu @" (bipe#415). A task leaves when it is done. No news cards here.
                 if case let .show(state) = context.viewState.securityBannerMode {
                     HomeScreenRecoveryKeyConfirmationBanner(state: state, context: context)
-                } else if context.viewState.shouldShowBipeInviterRow, let inviterHandle = context.viewState.bipeInviterHandle {
-                    BipeInviterRow(inviterHandle: inviterHandle) {
+                } else if context.viewState.shouldShowBipeInviterRow, let inviterHandle = context.viewState.bipeInviterHandle,
+                          let inviter = context.viewState.bipeInviterProfile {
+                    BipeInviterRow(inviterHandle: inviterHandle, inviter: inviter, mediaProvider: context.mediaProvider) {
                         context.send(viewAction: .openBipeInviterChat)
                     }
                 } else if context.viewState.shouldShowBipeHandlePrompt {

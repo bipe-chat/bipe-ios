@@ -149,11 +149,15 @@ struct StartChatScreen: View {
         
         if let inviter = context.viewState.bipeInviter {
             Section {
-                ListRow(label: .default(title: BipeStrings.inviterCardTitle(inviter.handle),
-                                        description: BipeStrings.inviterCardBody,
-                                        icon: \.chat),
+                ListRow(label: .avatar(title: BipeStrings.inviterCardTitle(inviter.handle),
+                                       description: BipeStrings.inviterCardBody,
+                                       icon: LoadableAvatarImage(url: inviter.profile.avatarURL,
+                                                                 name: inviter.profile.displayName ?? inviter.handle,
+                                                                 contentID: inviter.profile.id,
+                                                                 avatarSize: .user(on: .startChat),
+                                                                 mediaProvider: context.mediaProvider)),
                         kind: .navigationLink {
-                            context.send(viewAction: .selectUser(UserProfile(userID: inviter.userID)))
+                            context.send(viewAction: .selectUser(inviter.profile))
                         })
             }
         }

@@ -172,6 +172,8 @@ struct HomeScreenViewState: BindableState {
     
     /// Bipe ADR 0034: the inviter's handle (without "@") until the user sends them a first message.
     var bipeInviterHandle: String?
+    /// The inviter's profile for the row's avatar. It starts with the user ID only and fills in from the server.
+    var bipeInviterProfile: UserProfile?
     
     var shouldShowBipeInviterRow: Bool {
         bipeInviterHandle != nil && bipeScope == .chats && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering
