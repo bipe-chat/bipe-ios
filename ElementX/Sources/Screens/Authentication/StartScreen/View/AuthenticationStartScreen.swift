@@ -103,6 +103,10 @@ struct AuthenticationStartScreen: View {
     /// Bipe: one filled button and its text buttons, from bipe-shared `registries/onboarding.json` (bipe#415).
     @ViewBuilder
     private func bipeButtons(_ start: BipeOnboardingStart) -> some View {
+        if start != .invited, context.viewState.bipeOffersPasteInvite {
+            bipePasteInvite
+        }
+        
         Button(start.primary.title) { context.send(viewAction: .bipe(start.primary.target)) }
             .buttonStyle(.compound(.primary))
             .accessibilityIdentifier(A11yIdentifiers.authenticationStartScreen.signIn)
@@ -111,6 +115,23 @@ struct AuthenticationStartScreen: View {
             Button(button.title) { context.send(viewAction: .bipe(button.target)) }
                 .buttonStyle(.compound(.tertiary))
         }
+    }
+    
+    /// bipe#197: the invite page copied the invite link before the install. PasteButton reads it without the paste alert.
+    private var bipePasteInvite: some View {
+        VStack(spacing: 8) {
+            Text(context.viewState.bipePastedNoInvite ? BipeStrings.onboardingPasteInviteNone : BipeStrings.onboardingPasteInviteHint)
+                .font(.compound.bodyMD)
+                .foregroundStyle(context.viewState.bipePastedNoInvite ? .compound.textCriticalPrimary : .compound.textSecondary)
+                .multilineTextAlignment(.center)
+            
+            PasteButton(payloadType: String.self) { strings in
+                context.send(viewAction: .bipePaste(strings))
+            }
+            .labelStyle(.titleAndIcon)
+            .buttonBorderShape(.capsule)
+        }
+        .padding(.bottom, 8)
     }
     
     @ViewBuilder

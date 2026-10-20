@@ -14,6 +14,8 @@ enum AuthenticationStartScreenViewModelAction: Equatable {
     case login
     case register
     case bipeSignup(startsWithInviteCode: Bool)
+    /// Bipe: an invite code from the pasteboard (bipe#197).
+    case bipeInvitePasted(BipeInviteCode)
     
     case loginDirectlyWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
     case loginDirectlyWithPassword(loginHint: String?)
@@ -43,6 +45,10 @@ struct AuthenticationStartScreenViewState: BindableState {
     var bipeStart: BipeOnboardingStart?
     /// Bipe: the inviter's handle from the invite preview, without @.
     var bipeInviterHandle: String?
+    /// Bipe: the pasteboard holds a URL, so the start screen offers the system paste button (bipe#197).
+    var bipeOffersPasteInvite = false
+    /// Bipe: what was pasted holds no invite code.
+    var bipePastedNoInvite = false
     
     var loginButtonTitle: String {
         if let bipeLoginButtonTitle {
@@ -77,6 +83,8 @@ enum AuthenticationStartScreenViewAction {
     case register
     /// Bipe: a start screen button, by its target in the registry.
     case bipe(BipeOnboardingTarget)
+    /// Bipe: the strings from the system paste button.
+    case bipePaste([String])
     
     case continueWithClassic(ClassicAppAccount)
     case otherOptions(ClassicAppAccount)

@@ -364,6 +364,10 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 case .bipeSignup(let startsWithInviteCode):
                     bipeSignupStartsWithInviteCode = startsWithInviteCode
                     stateMachine.tryEvent(.bipeSignup)
+                case .bipeInvitePasted(let code):
+                    // bipe#197: the same start screen as an invite link.
+                    pendingInviteCode = code
+                    showStartScreen(fromState: .startScreen)
                     
                 case .loginDirectlyWithOAuth(let oAuthData, let window):
                     showOAuthAuthentication(oAuthData: oAuthData, presentationAnchor: window)
