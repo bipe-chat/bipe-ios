@@ -110,14 +110,21 @@ struct HomeScreen: View {
     }
     
     /// Bipe: a long press on the avatar picks the account, then "Nova conta" opens the new account window (ADR 0086,
-    /// bipe#267, #446). The inline picker lets iOS draw its own checkmark on the current account.
+    /// bipe#267, #446). The inline picker lets iOS draw its own checkmark on the current account. Each row shows the
+    /// account's avatar in its shape (ADR 0132).
     @ViewBuilder
     private var bipeAccountMenu: some View {
         if !context.viewState.bipeAccounts.isEmpty {
             Picker(BipeStrings.accountOnDevice, selection: bipeCurrentAccount) {
                 ForEach(context.viewState.bipeAccounts) { account in
-                    Text(account.label)
-                        .tag(account.userID)
+                    Label {
+                        Text(account.label)
+                    } icon: {
+                        if let avatar = account.avatar {
+                            Image(uiImage: avatar)
+                        }
+                    }
+                    .tag(account.userID)
                 }
             }
             .pickerStyle(.inline)

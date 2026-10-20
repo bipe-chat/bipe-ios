@@ -124,6 +124,8 @@ struct BipeAccountMenuItem: Identifiable, Equatable {
     let isCurrent: Bool
     /// ADR 0087: the top bar shows a company account's name.
     let isCompany: Bool
+    /// The avatar drawn into an image, a rounded square for a company (ADR 0132). Menus only render images.
+    var avatar: UIImage?
     
     var id: String {
         userID
