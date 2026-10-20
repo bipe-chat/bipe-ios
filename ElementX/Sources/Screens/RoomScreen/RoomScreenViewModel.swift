@@ -22,6 +22,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
     private let analyticsService: AnalyticsServiceProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let bipeHandleResolver: BipeHandleResolver?
+    private var bipeInviterTimelineCancellable: AnyCancellable?
     
     private var initialSelectedPinnedEventID: String?
     private let pinnedEventStringBuilder: RoomEventStringBuilder
@@ -89,11 +90,6 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
                 guard let self else { return }
                 updateBipeInviterHint(roomProxy.infoPublisher.value)
             }
-            .store(in: &cancellables)
-        
-        roomProxy.timeline.timelineItemProvider.updatePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] items, _ in self?.updateBipeInviterKnows(items) }
             .store(in: &cancellables)
         
         Task {
@@ -375,7 +371,12 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
         }
         guard state.bipeInviterHandle == nil else { return }
         state.bipeInviterHandle = greeting.handle ?? String(greeting.userID.trimmingPrefix("@"))
-        updateBipeInviterKnows(roomProxy.timeline.timelineItemProvider.itemProxies)
+        // Only the chat with the inviter reads the timeline here (ADR 0136).
+        let timelineItemProvider = roomProxy.timeline.timelineItemProvider
+        updateBipeInviterKnows(timelineItemProvider.itemProxies)
+        bipeInviterTimelineCancellable = timelineItemProvider.updatePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] items, _ in self?.updateBipeInviterKnows(items) }
         Task { [weak self] in
             guard let self, let handle = await greeting.displayHandle(resolver: bipeHandleResolver),
                   state.bipeInviterHandle != nil else { return }
