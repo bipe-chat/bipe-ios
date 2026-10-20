@@ -570,12 +570,14 @@ public enum BipeRegistries {
         "mz",
         "bipe",
         "suporte",
+        "bipechat",
     ]
 
     /// Full Matrix user IDs of official Bipe accounts. Match exactly; names and handles are not proof.
     public static let officialAccountIDs: Set<String> = [
         "@suporte:bipe.net.br",
         "@bipe:bipe.net.br",
+        "@r2vrihsgkqd5:bipe.net.br",
     ]
 
     /// Public profile rules (ADR 0041). Lengths count Unicode scalars. The server is the authority.
