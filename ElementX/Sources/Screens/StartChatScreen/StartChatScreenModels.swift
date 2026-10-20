@@ -50,6 +50,8 @@ struct StartChatScreenViewStateBindings {
     var selectedUserToInvite: UserToInvite?
     var isJoinRoomByAddressSheetPresented = false
     var bipeInviteShareLink: BipeInviteShareLink?
+    var bipeInviteNoteDestination: BipeInviteDestination?
+    var bipeInviteNoteDraft = ""
 }
 
 enum StartChatScreenViewAction {
@@ -60,6 +62,7 @@ enum StartChatScreenViewAction {
     case joinRoomByAddress
     case openRoomDirectorySearch
     case bipeInviteToApp
+    case bipeCreateInvite
 }
 
 enum JoinByAddressState: Equatable {

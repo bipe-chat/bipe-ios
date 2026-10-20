@@ -524,6 +524,18 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_invites_joined", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static var inviteNoteTitle: String { NSLocalizedString("bipe_invite_note_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviteNoteFooter: String { NSLocalizedString("bipe_invite_note_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviteNotePlaceholder: String { NSLocalizedString("bipe_invite_note_placeholder", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var inviteNoteDefault: String { NSLocalizedString("bipe_invite_note_default", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func inviterKnowsYouJoined(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_inviter_knows_you_joined", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
     public static var stickersImportAction: String { NSLocalizedString("bipe_stickers_import_action", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var stickersImportHelp: String { NSLocalizedString("bipe_stickers_import_help", tableName: "Bipe", bundle: .module, comment: "") }

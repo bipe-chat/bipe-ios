@@ -105,7 +105,7 @@ struct RoomScreen: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
                     if let inviterHandle = context.viewState.bipeInviterHandle {
-                        BipeInviterHint(inviterHandle: inviterHandle) {
+                        BipeInviterHint(inviterHandle: inviterHandle, inviterKnowsName: context.viewState.bipeInviterKnowsName) {
                             context.send(viewAction: .sayHiToBipeInviter)
                         }
                     }

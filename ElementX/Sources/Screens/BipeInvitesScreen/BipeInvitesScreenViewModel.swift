@@ -41,14 +41,17 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
     override func process(viewAction: BipeInvitesScreenViewAction) {
         switch viewAction {
         case .inviteByLink:
-            Task {
-                guard let link = await create() else { return }
-                state.bindings.shareSheetLink = link
-            }
+            askForNote(destination: .shareSheet)
         case .inviteInPerson:
+            askForNote(destination: .qrCode)
+        case .createInvite(let destination):
+            let note = state.bindings.noteDraft
             Task {
-                guard let link = await create() else { return }
-                state.bindings.qrCodeLink = link
+                guard let link = await create(note: note) else { return }
+                switch destination {
+                case .shareSheet: state.bindings.shareSheetLink = link
+                case .qrCode: state.bindings.qrCodeLink = link
+                }
             }
         case .share(let inviteID):
             state.bindings.shareSheetLink = link(for: inviteID)
@@ -70,6 +73,12 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
     }
     
     // MARK: - Private
+    
+    private func askForNote(destination: BipeInviteDestination) {
+        guard state.canCreate else { return }
+        state.bindings.noteDraft = BipeStrings.inviteNoteDefault
+        state.bindings.noteDestination = destination
+    }
     
     private func load() async {
         defer { state.isLoading = false }
@@ -127,14 +136,14 @@ class BipeInvitesScreenViewModel: BipeInvitesScreenViewModelType, BipeInvitesScr
     }
     
     /// Creates an invite and returns its link, so the caller can open the share sheet or the QR code at once.
-    private func create() async -> BipeInviteShareLink? {
+    private func create(note: String) async -> BipeInviteShareLink? {
         guard state.canCreate else { return nil }
         
         startLoading()
         defer { stopLoading() }
         
         do {
-            let created = try await creator.create()
+            let created = try await creator.create(note: note)
             MXLog.info("Bipe invite created \(created)")
             BipeHaptics.play(.success)
             state.shareURLs[created.id] = created.url

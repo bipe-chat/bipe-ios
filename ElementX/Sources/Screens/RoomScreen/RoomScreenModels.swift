@@ -103,6 +103,8 @@ struct RoomScreenViewState: BindableState {
     
     /// Bipe ADR 0034: the inviter's handle while this is the chat with the inviter and the user has not messaged them yet.
     var bipeInviterHandle: String?
+    /// Bipe ADR 0136: the inviter's name for "já sabe que você chegou", while the loaded timeline has no message from them.
+    var bipeInviterKnowsName: String?
     
     var bindings = RoomScreenViewStateBindings()
 }

@@ -50,6 +50,7 @@ struct BipeContactsScreen: View {
         .navigationTitle(BipeStrings.contactsTitle)
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
+        .bipeInviteNoteAlert(destination: $context.noteDestination, note: $context.noteDraft) { context.send(viewAction: .createInvite($0)) }
         .bipeInviteSheets(shareSheetLink: $context.shareSheetLink, qrCodeLink: $context.qrCodeLink)
         .onAppear { context.send(viewAction: .appeared) }
         .onChange(of: context.discoverableByPhone) { context.send(viewAction: .discoverableChanged) }

@@ -22,6 +22,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
     private let analyticsService: AnalyticsServiceProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let bipeHandleResolver: BipeHandleResolver?
+    private var bipeInviterTimelineCancellable: AnyCancellable?
     
     private var initialSelectedPinnedEventID: String?
     private let pinnedEventStringBuilder: RoomEventStringBuilder
@@ -370,11 +371,36 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
         }
         guard state.bipeInviterHandle == nil else { return }
         state.bipeInviterHandle = greeting.handle ?? String(greeting.userID.trimmingPrefix("@"))
+        // Only the chat with the inviter reads the timeline here (ADR 0136).
+        let timelineItemProvider = roomProxy.timeline.timelineItemProvider
+        updateBipeInviterKnows(timelineItemProvider.itemProxies)
+        bipeInviterTimelineCancellable = timelineItemProvider.updatePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] items, _ in self?.updateBipeInviterKnows(items) }
         Task { [weak self] in
             guard let self, let handle = await greeting.displayHandle(resolver: bipeHandleResolver),
                   state.bipeInviterHandle != nil else { return }
             state.bipeInviterHandle = handle
         }
+    }
+    
+    /// Bipe ADR 0136: the inviter's phone sends their note when it learns of the join. Until a message from them is here,
+    /// the chat says that they know. The user's own message ends the whole hint.
+    private func updateBipeInviterKnows(_ items: [TimelineItemProxy]) {
+        guard let handle = state.bipeInviterHandle, let greeting = clientProxy.bipeInviterGreeting else {
+            state.bipeInviterKnowsName = nil
+            return
+        }
+        let inviterWrote = items.contains { item in
+            guard case .event(let event) = item, case .msgLike = event.content else { return false }
+            return event.sender.id == greeting.userID
+        }
+        guard !inviterWrote else {
+            state.bipeInviterKnowsName = nil
+            return
+        }
+        let hero = roomProxy.infoPublisher.value.heroes.first { $0.userId == greeting.userID }
+        state.bipeInviterKnowsName = hero?.displayName ?? "@\(handle)"
     }
     
     private func sayHiToBipeInviter() async {

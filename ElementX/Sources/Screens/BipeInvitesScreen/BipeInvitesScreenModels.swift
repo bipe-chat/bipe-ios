@@ -48,11 +48,19 @@ struct BipeInvitesScreenViewStateBindings {
     var qrCodeLink: BipeInviteShareLink?
     var namingInviteID: String?
     var nameDraft = ""
+    var noteDestination: BipeInviteDestination?
+    var noteDraft = ""
 }
 
 struct BipeInviteShareLink: Identifiable {
     let id: String
     let url: URL
+}
+
+/// Where a new invite opens after its note alert (ADR 0136).
+enum BipeInviteDestination {
+    case shareSheet
+    case qrCode
 }
 
 enum BipeInvitesScreenAlertType: Hashable {
@@ -62,6 +70,7 @@ enum BipeInvitesScreenAlertType: Hashable {
 enum BipeInvitesScreenViewAction {
     case inviteByLink
     case inviteInPerson
+    case createInvite(BipeInviteDestination)
     case share(inviteID: String)
     case showQRCode(inviteID: String)
     case revoke(inviteID: String)
