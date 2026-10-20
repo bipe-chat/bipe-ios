@@ -87,12 +87,16 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
         case .openRoomDirectorySearch:
             actionsSubject.send(.openRoomDirectorySearch)
         case .bipeInviteToApp:
-            Task { await bipeInviteToApp() }
+            state.bindings.bipeInviteNoteDraft = BipeStrings.inviteNoteDefault
+            state.bindings.bipeInviteNoteDestination = .shareSheet
+        case .bipeCreateInvite:
+            let note = state.bindings.bipeInviteNoteDraft
+            Task { await bipeInviteToApp(note: note) }
         }
     }
     
     /// Bipe: sign-up needs a personal invite, so "invite people" shares one instead of a profile link.
-    private func bipeInviteToApp() async {
+    private func bipeInviteToApp(note: String) async {
         let clientProxy = userSession.clientProxy
         let creator = BipeInviteCreator(apiClient: BipeAPIClient(baseURL: userSession.userSettings.app.bipeAPIBaseURL),
                                         userID: clientProxy.userID) { clientProxy.accessToken }
@@ -100,7 +104,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
         defer { hideLoadingIndicator() }
         
         do {
-            switch try await creator.createIfAvailable() {
+            switch try await creator.createIfAvailable(note: note) {
             case .created(let created):
                 MXLog.info("Bipe invite created \(created)")
                 BipeHaptics.play(.success)

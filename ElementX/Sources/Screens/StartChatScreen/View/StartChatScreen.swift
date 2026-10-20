@@ -33,6 +33,9 @@ struct StartChatScreen: View {
                           disablesInteractiveDismiss: true)
         .compoundSearchField()
         .alert(item: $context.alertInfo)
+        .bipeInviteNoteAlert(destination: $context.bipeInviteNoteDestination, note: $context.bipeInviteNoteDraft) { _ in
+            context.send(viewAction: .bipeCreateInvite)
+        }
         .bipeInviteSheets(shareSheetLink: $context.bipeInviteShareLink, qrCodeLink: .constant(nil))
         .sheet(item: $context.selectedUserToInvite) { userToInvite in
             SendInviteConfirmationView(userToInvite: userToInvite,

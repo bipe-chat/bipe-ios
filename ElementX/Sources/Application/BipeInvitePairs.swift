@@ -58,11 +58,14 @@ final class BipeInvitePairs {
         }
     }
     
-    /// Joins a direct-chat invite from an invite pair, once per room.
+    /// Joins a direct-chat invite from an invite pair, once per room. Then a waiting invite note can go (ADR 0136).
     func autoAccept(roomID: String) {
         guard attemptedRoomIDs.insert(roomID).inserted else { return }
-        Task {
-            if case .failure(let error) = await clientProxy.joinRoom(roomID, via: []) {
+        Task { [apiClient, clientProxy] in
+            switch await clientProxy.joinRoom(roomID, via: []) {
+            case .success:
+                await BipeInviteNoteSender(apiClient: apiClient, clientProxy: clientProxy).run(joinedRoomID: roomID)
+            case .failure(let error):
                 MXLog.error("Bipe auto-accept of invite-pair chat \(roomID) failed: \(error)")
             }
         }

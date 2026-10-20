@@ -30,6 +30,7 @@ struct BipeInvitesScreen: View {
         } message: {
             Text(BipeStrings.invitesNameFooter)
         }
+        .bipeInviteNoteAlert(destination: $context.noteDestination, note: $context.noteDraft) { context.send(viewAction: .createInvite($0)) }
         .bipeInviteSheets(shareSheetLink: $context.shareSheetLink, qrCodeLink: $context.qrCodeLink)
     }
     
@@ -173,6 +174,24 @@ struct BipeInviteButtonsSection: View {
 }
 
 extension View {
+    /// Bipe ADR 0136: asks for the note before a new invite is made. The share text never carries the note.
+    func bipeInviteNoteAlert(destination: Binding<BipeInviteDestination?>,
+                             note: Binding<String>,
+                             create: @escaping (BipeInviteDestination) -> Void) -> some View {
+        let isPresented = Binding { destination.wrappedValue != nil } set: {
+            if !$0 {
+                destination.wrappedValue = nil
+            }
+        }
+        return alert(BipeStrings.inviteNoteTitle, isPresented: isPresented, presenting: destination.wrappedValue) { presented in
+            TextField(BipeStrings.inviteNotePlaceholder, text: note, axis: .vertical)
+            Button(L10n.actionCancel, role: .cancel) { }
+            Button(L10n.actionContinue) { create(presented) }
+        } message: { _ in
+            Text(BipeStrings.inviteNoteFooter)
+        }
+    }
+    
     /// The share sheet and the QR code sheet for a new or pending invite link.
     func bipeInviteSheets(shareSheetLink: Binding<BipeInviteShareLink?>, qrCodeLink: Binding<BipeInviteShareLink?>) -> some View {
         sheet(item: shareSheetLink) { link in

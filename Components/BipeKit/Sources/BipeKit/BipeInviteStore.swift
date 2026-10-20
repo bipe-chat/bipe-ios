@@ -12,11 +12,14 @@ import Security
 ///   Links are bearer secrets and live in the keychain.
 /// - Names: on the server. Older builds kept them here; see `localNames()`.
 /// - Seen joins: the invite IDs whose join the user was already told about. Not secret; UserDefaults.
+/// - Notes (ADR 0136): the first message for the person who joins with an invite. Personal text, so in the keychain,
+///   this device only. The server never receives a note.
 public nonisolated struct BipeInviteStore {
     private let userID: String
     private let defaults: UserDefaults
     
-    private static let keychainService = "chat.bipe.invites"
+    private static let linksKeychainService = "chat.bipe.invites"
+    private static let notesKeychainService = "chat.bipe.invites.notes"
     
     public init(userID: String, defaults: UserDefaults = .standard) {
         self.userID = userID
@@ -27,7 +30,7 @@ public nonisolated struct BipeInviteStore {
     
     /// Links of invites created on this device, by invite ID.
     public func links() -> [String: URL] {
-        guard let data = readKeychain(),
+        guard let data = readKeychain(service: Self.linksKeychainService),
               let strings = try? JSONDecoder().decode([String: String].self, from: data) else { return [:] }
         return strings.compactMapValues(URL.init(string:))
     }
@@ -45,6 +48,29 @@ public nonisolated struct BipeInviteStore {
         if kept.count != current.count {
             writeLinks(kept)
         }
+    }
+    
+    // MARK: - Notes
+    
+    /// Notes of invites created on this device, by invite ID.
+    public func notes() -> [String: String] {
+        guard let data = readKeychain(service: Self.notesKeychainService) else { return [:] }
+        return (try? JSONDecoder().decode([String: String].self, from: data)) ?? [:]
+    }
+    
+    /// Stores the note for an invite. Text with only spaces is no note.
+    public func saveNote(_ note: String, forInviteID id: String) {
+        let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        var current = notes()
+        current[id] = trimmed
+        writeNotes(current)
+    }
+    
+    public func removeNote(forInviteID id: String) {
+        var current = notes()
+        guard current.removeValue(forKey: id) != nil else { return }
+        writeNotes(current)
     }
     
     // MARK: - Names
@@ -122,17 +148,22 @@ public nonisolated struct BipeInviteStore {
     
     private func writeLinks(_ links: [String: URL]) {
         guard let data = try? JSONEncoder().encode(links.mapValues(\.absoluteString)) else { return }
-        writeKeychain(data)
+        writeKeychain(data, service: Self.linksKeychainService)
     }
     
-    private var keychainQuery: [String: Any] {
+    private func writeNotes(_ notes: [String: String]) {
+        guard let data = try? JSONEncoder().encode(notes) else { return }
+        writeKeychain(data, service: Self.notesKeychainService)
+    }
+    
+    private func keychainQuery(service: String) -> [String: Any] {
         [kSecClass as String: kSecClassGenericPassword,
-         kSecAttrService as String: Self.keychainService,
+         kSecAttrService as String: service,
          kSecAttrAccount as String: userID]
     }
     
-    private func readKeychain() -> Data? {
-        var query = keychainQuery
+    private func readKeychain(service: String) -> Data? {
+        var query = keychainQuery(service: service)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -140,11 +171,12 @@ public nonisolated struct BipeInviteStore {
         return result as? Data
     }
     
-    private func writeKeychain(_ data: Data) {
+    private func writeKeychain(_ data: Data, service: String) {
+        let query = keychainQuery(service: service)
         let attributes: [String: Any] = [kSecValueData as String: data,
                                          kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
-        if SecItemUpdate(keychainQuery as CFDictionary, attributes as CFDictionary) == errSecItemNotFound {
-            SecItemAdd(keychainQuery.merging(attributes) { $1 } as CFDictionary, nil)
+        if SecItemUpdate(query as CFDictionary, attributes as CFDictionary) == errSecItemNotFound {
+            SecItemAdd(query.merging(attributes) { $1 } as CFDictionary, nil)
         }
     }
 }

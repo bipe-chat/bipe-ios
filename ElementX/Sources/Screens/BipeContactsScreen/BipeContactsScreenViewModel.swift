@@ -56,14 +56,17 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
         case .openInvites:
             actionsSubject.send(.openInvites)
         case .inviteByLink:
-            Task {
-                guard let link = await createInvite() else { return }
-                state.bindings.shareSheetLink = link
-            }
+            askForNote(destination: .shareSheet)
         case .inviteInPerson:
+            askForNote(destination: .qrCode)
+        case .createInvite(let destination):
+            let note = state.bindings.noteDraft
             Task {
-                guard let link = await createInvite() else { return }
-                state.bindings.qrCodeLink = link
+                guard let link = await createInvite(note: note) else { return }
+                switch destination {
+                case .shareSheet: state.bindings.shareSheetLink = link
+                case .qrCode: state.bindings.qrCodeLink = link
+                }
             }
         }
     }
@@ -153,14 +156,20 @@ class BipeContactsScreenViewModel: BipeContactsScreenViewModelType, BipeContacts
         }
     }
     
-    private func createInvite() async -> BipeInviteShareLink? {
+    private func askForNote(destination: BipeInviteDestination) {
+        guard state.canCreateInvite else { return }
+        state.bindings.noteDraft = BipeStrings.inviteNoteDefault
+        state.bindings.noteDestination = destination
+    }
+    
+    private func createInvite(note: String) async -> BipeInviteShareLink? {
         guard state.canCreateInvite else { return nil }
         
         userIndicatorController.submitIndicator(UserIndicator(id: loadingIndicatorID, type: .modal, title: L10n.commonLoading, persistent: true))
         defer { userIndicatorController.retractIndicatorWithId(loadingIndicatorID) }
         
         do {
-            let created = try await inviteCreator.create()
+            let created = try await inviteCreator.create(note: note)
             MXLog.info("Bipe invite created \(created)")
             BipeHaptics.play(.success)
             await loadInvites()

@@ -78,6 +78,8 @@ struct BipeContactsScreenViewStateBindings {
     var alertInfo: AlertInfo<BipeContactsScreenAlertType>?
     var shareSheetLink: BipeInviteShareLink?
     var qrCodeLink: BipeInviteShareLink?
+    var noteDestination: BipeInviteDestination?
+    var noteDraft = ""
 }
 
 enum BipeContactsScreenAlertType: Hashable {
@@ -92,4 +94,5 @@ enum BipeContactsScreenViewAction {
     case openInvites
     case inviteByLink
     case inviteInPerson
+    case createInvite(BipeInviteDestination)
 }

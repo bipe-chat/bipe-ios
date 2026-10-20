@@ -24,20 +24,23 @@ public struct BipeInviteCreator {
         store = BipeInviteStore(userID: userID)
     }
     
-    /// Creates an invite and stores its link. The caller checks the quota first.
-    public func create() async throws(BipeAPIError) -> BipeCreatedInvite {
+    /// Creates an invite and stores its link, and its note when there is one (ADR 0136). The caller checks the quota first.
+    public func create(note: String? = nil) async throws(BipeAPIError) -> BipeCreatedInvite {
         let created = try await BipeAPIClient.withTokenRetry(accessToken: accessToken) { [apiClient] (token: String) async throws(BipeAPIError) -> BipeCreatedInvite in
             try await apiClient.createInvite(accessToken: token)
         }
         store.saveLink(created.url, forInviteID: created.id)
+        if let note {
+            store.saveNote(note, forInviteID: created.id)
+        }
         return created
     }
     
     /// Reads the quota, then creates an invite only when one is left. For screens that do not show the quota.
-    public func createIfAvailable() async throws(BipeAPIError) -> Result {
+    public func createIfAvailable(note: String? = nil) async throws(BipeAPIError) -> Result {
         let myInvites = try await quota()
         guard myInvites.available > 0 else { return .noneLeft(nextAvailableAt: myInvites.nextAvailableAt) }
-        return try await .created(create())
+        return try await .created(create(note: note))
     }
     
     /// The account's invites and how many are left. Creates nothing.
