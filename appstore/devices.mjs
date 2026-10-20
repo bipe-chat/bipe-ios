@@ -1,0 +1,32 @@
+// The App Store screenshot sets Bipe ships (bipe-chat/bipe#454). The one source for their sizes:
+// appstore/capture.sh checks each capture against it, and the store image builder in bipe-web
+// (scripts/store-images.mjs, bipe-chat/bipe#455) imports it for the panel size.
+// Rules from App Store Connect: PNG, RGB with no alpha, exact pixels, 1 to 10 images per set.
+// ASC scales the smaller iPhone and iPad sets from these two.
+
+export const DEVICES = {
+  iphone69: {
+    label: 'iPhone 6.9"',
+    ascDeviceType: "IPHONE_69",
+    simulator: "iPhone 17 Pro Max",
+    kind: "phone",
+    width: 1320,
+    height: 2868,
+  },
+  ipad13: {
+    label: 'iPad 13"',
+    ascDeviceType: "IPAD_PRO_3GEN_129",
+    simulator: "iPad Pro 13-inch (M5)",
+    kind: "tablet",
+    width: 2064,
+    height: 2752,
+  },
+};
+
+export const DEVICE_KEYS = Object.keys(DEVICES);
+
+export function device(key) {
+  const found = DEVICES[key];
+  if (!found) throw new Error(`Unknown device "${key}". Known: ${DEVICE_KEYS.join(", ")}`);
+  return { key, ...found };
+}
