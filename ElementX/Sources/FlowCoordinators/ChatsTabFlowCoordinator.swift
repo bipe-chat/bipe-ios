@@ -19,9 +19,6 @@ enum ChatsTabFlowCoordinatorAction {
     case sessionVerification(SessionVerificationScreenFlow)
     case showCallScreen(roomProxy: JoinedRoomProxyProtocol, isVoiceCall: Bool)
     case hideCallScreenOverlay
-    /// Bipe: the account menu on the avatar (ADR 0086, bipe#267).
-    case bipeSwitchAccount(userID: String)
-    case bipeAddAccount
     case logout
 }
 
@@ -432,10 +429,6 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
                 case .presentCreateGroupScreen:
                     startChatEntryPoint = .createRoom
                     stateMachine.processEvent(.startStartChatFlow)
-                case .bipeSwitchAccount(let userID):
-                    actionsSubject.send(.bipeSwitchAccount(userID: userID))
-                case .bipeAddAccount:
-                    actionsSubject.send(.bipeAddAccount)
                 case .logout:
                     actionsSubject.send(.logout)
                 case .presentDeclineAndBlock(let userID, let roomID):
