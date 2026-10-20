@@ -14,17 +14,13 @@ struct HomeScreenRoomList: View {
     
     @ObservedObject var context: HomeScreenViewModel.Context
     
-    /// Bipe: the list shows only archived rooms while the archive is open, so the action there is unarchive.
-    private var isShowingArchive: Bool {
-        context.viewState.isShowingBipeArchive
+    /// Bipe: the row's own tag picks the action, so an archived chat found by search also unarchives.
+    private func archiveTitle(_ room: HomeScreenRoom) -> String {
+        room.isLowPriority ? BipeStrings.unarchiveAction : BipeStrings.archiveAction
     }
     
-    private var archiveTitle: String {
-        isShowingArchive ? BipeStrings.unarchiveAction : BipeStrings.archiveAction
-    }
-    
-    private var archiveSymbol: String {
-        isShowingArchive ? "tray.and.arrow.up" : "archivebox"
+    private func archiveSymbol(_ room: HomeScreenRoom) -> String {
+        room.isLowPriority ? "tray.and.arrow.up" : "archivebox"
     }
     
     var body: some View {
@@ -56,21 +52,21 @@ struct HomeScreenRoomList: View {
                     .simultaneousGesture(TapGesture(count: 2).onEnded {
                         context.send(viewAction: .detachRoom(roomIdentifier: room.id))
                     })
-                    .bipeSwipeAction(title: archiveTitle, systemImage: archiveSymbol) {
-                        context.send(viewAction: .setRoomArchived(roomIdentifier: room.id, isArchived: !isShowingArchive))
+                    .bipeSwipeAction(title: archiveTitle(room), systemImage: archiveSymbol(room)) {
+                        context.send(viewAction: .setRoomArchived(roomIdentifier: room.id, isArchived: !room.isLowPriority))
                     }
                     .contextMenu {
                         if room.badges.isDotShown {
                             Button {
                                 context.send(viewAction: .markRoomAsRead(roomIdentifier: room.id))
                             } label: {
-                                Label(L10n.screenRoomlistMarkAsRead, icon: \.markAsRead)
+                                Label(L10n.screenRoomlistMarkAsRead, systemImage: "envelope.open")
                             }
                         } else {
                             Button {
                                 context.send(viewAction: .markRoomAsUnread(roomIdentifier: room.id))
                             } label: {
-                                Label(L10n.screenRoomlistMarkAsUnread, icon: \.markAsUnread)
+                                Label(L10n.screenRoomlistMarkAsUnread, systemImage: "envelope.badge")
                             }
                         }
                         
@@ -78,7 +74,7 @@ struct HomeScreenRoomList: View {
                             Button {
                                 context.send(viewAction: .detachRoom(roomIdentifier: room.id))
                             } label: {
-                                Label("Open in new window", icon: \.spotlight)
+                                Label("Open in new window", systemImage: "macwindow.badge.plus")
                             }
                         }
                         
@@ -86,50 +82,50 @@ struct HomeScreenRoomList: View {
                             Button {
                                 context.send(viewAction: .markRoomAsFavourite(roomIdentifier: room.id, isFavourite: false))
                             } label: {
-                                Label(L10n.commonFavourited, icon: \.favouriteSolid)
+                                Label(L10n.commonFavourited, systemImage: "star.fill")
                             }
                         } else {
                             Button {
                                 context.send(viewAction: .markRoomAsFavourite(roomIdentifier: room.id, isFavourite: true))
                             } label: {
-                                Label(L10n.commonFavourite, icon: \.favourite)
+                                Label(L10n.commonFavourite, systemImage: "star")
                             }
                         }
                         
                         Button {
-                            context.send(viewAction: .setRoomArchived(roomIdentifier: room.id, isArchived: !isShowingArchive))
+                            context.send(viewAction: .setRoomArchived(roomIdentifier: room.id, isArchived: !room.isLowPriority))
                         } label: {
-                            Label(archiveTitle, systemImage: archiveSymbol)
+                            Label(archiveTitle(room), systemImage: archiveSymbol(room))
                         }
                         
                         Button {
                             context.send(viewAction: .setRoomMuted(roomIdentifier: room.id, isMuted: !room.badges.isMuteShown))
                         } label: {
                             if room.badges.isMuteShown {
-                                Label(L10n.commonUnmute, icon: \.notifications)
+                                Label(L10n.commonUnmute, systemImage: "bell")
                             } else {
-                                Label(L10n.commonMute, icon: \.notificationsOff)
+                                Label(L10n.commonMute, systemImage: "bell.slash")
                             }
                         }
                         
                         Button {
                             context.send(viewAction: .showRoomDetails(roomIdentifier: room.id))
                         } label: {
-                            Label(L10n.commonSettings, icon: \.settings)
+                            Label(L10n.commonSettings, systemImage: "gearshape")
                         }
                         
                         if context.viewState.reportRoomEnabled {
                             Button(role: .destructive) {
                                 context.send(viewAction: .reportRoom(roomIdentifier: room.id))
                             } label: {
-                                Label(L10n.actionReportRoom, icon: \.chatProblem)
+                                Label(L10n.actionReportRoom, systemImage: "exclamationmark.bubble")
                             }
                         }
                         
                         Button(role: .destructive) {
                             context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
                         } label: {
-                            Label(room.isDirect ? L10n.actionLeaveConversation : L10n.actionLeaveRoom, icon: \.leave) // Bipe: a DM is a conversation
+                            Label(room.isDirect ? L10n.actionLeaveConversation : L10n.actionLeaveRoom, systemImage: "rectangle.portrait.and.arrow.right") // Bipe: a DM is a conversation
                         }
                     }
             }

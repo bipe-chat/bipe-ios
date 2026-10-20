@@ -133,10 +133,6 @@ struct HomeScreenViewState: BindableState {
     /// Bipe: joined rooms of this tab in the archive.
     var bipeArchivedCount = 0
     
-    var isShowingBipeArchive: Bool {
-        bindings.filtersState.isFilterActive(.lowPriority)
-    }
-    
     var shouldShowBipeArchivedRow: Bool {
         bipeArchivedCount > 0 && !bindings.isSearchFieldFocused && !bindings.filtersState.isFiltering && (roomListMode == .rooms || roomListMode == .empty)
     }
@@ -292,6 +288,9 @@ struct HomeScreenRoom: Identifiable, Equatable {
     /// Bipe: the other person in a DM, for the company seal (bipe#252).
     var dmUserID: String?
     
+    /// Bipe: archived (the `m.lowpriority` tag). The row's own state picks archive or unarchive, not the open filter.
+    var isLowPriority = false
+    
     var displayedLastMessage: AttributedString? {
         if isTombstoned {
             AttributedString(L10n.screenRoomlistTombstonedRoomDescription)
@@ -370,7 +369,8 @@ extension HomeScreenRoom {
                   statusEmoji: summary.statusEmoji,
                   canonicalAlias: summary.canonicalAlias,
                   isTombstoned: summary.isTombstoned,
-                  dmUserID: summary.isDirect && summary.heroes.count == 1 ? summary.heroes[0].id : nil)
+                  dmUserID: summary.isDirect && summary.heroes.count == 1 ? summary.heroes[0].id : nil,
+                  isLowPriority: summary.isLowPriority)
     }
 }
 
