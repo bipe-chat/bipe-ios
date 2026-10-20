@@ -529,13 +529,22 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     private func updateBipeInviterGreeting() {
         guard let greeting = userSession.clientProxy.bipeInviterGreeting else {
             state.bipeInviterHandle = nil
+            state.bipeInviterProfile = nil
             return
         }
         state.bipeInviterHandle = greeting.handle ?? String(greeting.userID.trimmingPrefix("@"))
+        if state.bipeInviterProfile?.id != greeting.userID {
+            state.bipeInviterProfile = UserProfile(userID: greeting.userID)
+        }
         Task { [weak self] in
             guard let self, let handle = await greeting.displayHandle(resolver: userSession.bipeHandleResolver),
                   userSession.clientProxy.bipeInviterGreeting != nil else { return }
             state.bipeInviterHandle = handle
+        }
+        Task { [weak self] in
+            guard let self, case let .success(profile) = await userSession.clientProxy.profile(for: greeting.userID),
+                  userSession.clientProxy.bipeInviterGreeting?.userID == greeting.userID else { return }
+            state.bipeInviterProfile = profile
         }
     }
     
