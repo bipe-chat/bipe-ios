@@ -23,7 +23,6 @@ struct BipeLinkedDevicesScreenViewState: BindableState {
     var needsPIN = false
     /// The other devices of the account, newest use first. This phone is not in it.
     var devices: [BipeMatrixDevice] = []
-    let showsLinkComputer: Bool
     
     var bindings = BipeLinkedDevicesScreenViewStateBindings()
 }
