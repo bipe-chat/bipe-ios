@@ -56,6 +56,7 @@ enum UITestsScreenIdentifier: String {
     case bipeStorePedidos
     case bipeStoreSeuArroba
     case bipeStoreConferirPix
+    case bipeStoreConferirPixAlterado
     case bipeStoreGrupos
     case bipeStoreSeloCnpj
     case bipeStoreStickers

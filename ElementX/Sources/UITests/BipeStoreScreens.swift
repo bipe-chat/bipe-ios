@@ -12,9 +12,10 @@ import MatrixRustSDKMocks
 import SwiftUI
 
 /// Store screenshot mode (bipe#454): one screen per store panel, built from the existing Bipe views on mock proxies.
-/// People come from the sample cast (`BipeCast`, bipe-shared/product/cast.json). Text is pt-BR from the site scenes
-/// (bipe-web src/sim/scenes.ts). Photos come from the folder in `BIPE_CAST_PHOTOS` (bipe-web src/cast/photos),
-/// which `appstore/capture.sh` passes through the test runner. No server, no phone numbers.
+/// People come from the sample cast (`BipeCast`, bipe-shared/product/cast.json). Content and text per locale come
+/// from `BipeStoreFixtures` (bipe-shared/product/store-fixtures.json, bipe#462). Photos come from the folder in
+/// `BIPE_CAST_PHOTOS` (bipe-web src/cast/photos), which `appstore/capture.sh` passes through the test runner.
+/// No server, no phone numbers.
 @MainActor
 final class BipeStoreScreens {
     private let windowManager: SecureWindowManagerProtocol
@@ -35,64 +36,60 @@ final class BipeStoreScreens {
         appSettings.bipeDisableAPIForScreenshots()
     }
     
-    // swiftlint:disable:next cyclomatic_complexity
     func coordinator(for id: UITestsScreenIdentifier) -> CoordinatorProtocol? {
         switch id {
         case .bipeStoreAvisoGolpe:
-            return chat(with: "golpista", lines: [
-                .text(from: "golpista", "Oi filha, troquei de número. Essa é minha conta nova aqui"),
-                .text(from: Self.me, "Mãe? O que houve com o outro?"),
-                .text(from: "golpista", "Caiu na água. Preciso pagar um boleto hoje ainda, me faz um Pix que amanhã te devolvo")
-            ])
+            return chat(Self.screen("aviso-golpe"))
         case .bipeStorePedidos:
-            startSession(rooms: [
-                Self.request(from: "golpista", minute: 12),
-                Self.request(from: "camila", minute: 3),
-                Self.request(from: "suporte", minute: 1),
-                Self.dm(with: "joana", preview: "Chego sábado de manhã. Me busca?", minute: 24, unread: 2),
-                Self.dm(with: "rafa", preview: "Pix recebido, valeu", minute: 10),
-                Self.dm(with: "fernanda", preview: "Ligo sim, 2 min", minute: 5)
-            ])
+            startSession(rooms: (Self.screen("pedidos").requests ?? []).map(Self.request))
             return nil
         case .bipeStoreSeuArroba:
-            let gabi = BipeCast.entry(Self.me)
-            let profile = UserProfile(userID: Self.userID(gabi.id), displayName: gabi.name, avatarURL: Self.photoURL(gabi))
-            return BipeStoreViewCoordinator(BipeStoreProfileScreen(profile: profile, handle: gabi.handle ?? "", mediaProvider: Self.mediaProvider))
+            let me = BipeCast.entry(Self.me)
+            let profile = UserProfile(userID: Self.userID(me.id), displayName: me.name, avatarURL: Self.photoURL(me))
+            return BipeStoreViewCoordinator(BipeStoreProfileScreen(profile: profile, handle: me.handle ?? "", mediaProvider: Self.mediaProvider))
         case .bipeStoreConferirPix:
-            // The site scene's code is tampered (rafa.blkes, bad CRC). The store panel shows a valid one: bipe-shared buildBrCode.
-            let code = "00020126440014br.gov.bcb.pix0122rafa.bikes@example.com5204000053039865406850.005802BR5915RAFAEL OLIVEIRA6014BELO HORIZONTE62070503***63047466"
-            return BipeStoreViewCoordinator(BipePixCheckView(check: .check(code), close: { }, sendToChat: { }))
+            return pixCheck(Self.screen("conferir-pix"))
+        case .bipeStoreConferirPixAlterado:
+            return pixCheck(Self.screen("conferir-pix-alterado"))
         case .bipeStoreGrupos:
-            startSession(rooms: [
-                Self.group("familia", preview: "Vô Antônio: Domingo tem almoço aqui em casa", minute: 58, unread: 5, mentions: 1),
-                Self.group("avisos", preview: L10n.commonPollSummary("Cor da fachada"), minute: 41, unread: 1),
-                Self.group("faculdade", preview: "Bia: Sexta tem churrasco lá em casa", minute: 30, unread: 12),
-                Self.group("igreja", preview: "Pastora Débora: Irmãos, agora o grupo aceita só quem tem selo verificado", minute: 15)
-            ])
+            startSession(rooms: (Self.screen("grupos").groups ?? []).map(Self.group))
             return nil
         case .bipeStoreSeloCnpj:
-            let clinic = BipeCast.entry("clinica")
-            companySeals.storeFixture(Self.badge(for: clinic))
-            return chat(with: "clinica", lines: [
-                .text(from: "clinica", "Sua consulta é amanhã, às 14h, com a Dra. Ana. Responda 1 para confirmar ou 2 para remarcar."),
-                .text(from: Self.me, "1"),
-                .text(from: "clinica", "Consulta confirmada. Até amanhã.")
-            ])
+            let screen = Self.screen("selo-cnpj")
+            if let id = screen.chat {
+                companySeals.storeFixture(Self.badge(for: BipeCast.entry(id)))
+            }
+            return chat(screen)
         case .bipeStoreStickers:
-            return chat(with: "faculdade", lines: [
-                .text(from: "bia", "Sexta tem churrasco lá em casa"),
-                .sticker(from: "leo", photo: "rafa"),
-                .sticker(from: Self.me, photo: "caramelo")
-            ])
+            return chat(Self.screen("stickers"))
         default:
             fatalError("Not a store screen: \(id)")
         }
     }
     
+    /// The screen's sample content (bipe-shared/product/store-fixtures.json).
+    private static func screen(_ slug: String) -> BipeStoreScreen {
+        guard let screen = BipeStoreFixtures.screens[slug] else { fatalError("No store fixture for \(slug)") }
+        return screen
+    }
+    
+    /// `capture.sh --locale` passes it; the app language comes from `-AppleLanguages`.
+    private static let locale = ProcessInfo.processInfo.environment["BIPE_STORE_LOCALE"] ?? "pt-BR"
+    
+    private static func text(_ text: BipeStoreText) -> String {
+        text[locale] ?? text["pt-BR"] ?? ""
+    }
+    
     // MARK: - Screens
     
-    /// A room screen with the cast entry `id` (a person or a company: a DM; a group: a group chat).
-    private func chat(with id: String, lines: [Line]) -> CoordinatorProtocol {
+    private func pixCheck(_ screen: BipeStoreScreen) -> CoordinatorProtocol {
+        BipeStoreViewCoordinator(BipePixCheckView(check: .check(screen.code ?? ""), close: { }, sendToChat: { }))
+    }
+    
+    /// A room screen with the screen's `chat` cast entry (a person or a company: a DM; a group: a group chat).
+    private func chat(_ screen: BipeStoreScreen) -> CoordinatorProtocol {
+        guard let id = screen.chat else { fatalError("Store chat without a chat id") }
+        let lines = (screen.lines ?? []).map(Line.init)
         let other = BipeCast.entry(id)
         let isDirect = other.kind != .group
         let speakers = Set(lines.map(\.speaker)).subtracting([Self.me]).sorted()
@@ -207,7 +204,7 @@ final class BipeStoreScreens {
     
     // MARK: - Cast
     
-    private static let me = "gabi"
+    private static let me = BipeStoreFixtures.me
     private static let serverName = "bipe.net.br"
     
     private static func userID(_ id: String) -> String {
@@ -240,26 +237,21 @@ final class BipeStoreScreens {
         Calendar.current.date(bySettingHour: 10, minute: minute, second: 0, of: .now) ?? .now
     }
     
-    private static func dm(with id: String, preview: String, minute: Int, unread: UInt = 0) -> RoomSummary {
-        let entry = BipeCast.entry(id)
-        return summary(id: id, name: entry.short ?? entry.name ?? id, isDirect: true, avatarURL: nil,
-                       heroes: [UserProfile(userID: userID(id), displayName: entry.short, avatarURL: photoURL(entry))],
-                       preview: preview, minute: minute, unread: unread, mentions: 0, mode: .allMessages, inviter: nil)
-    }
-    
     /// A first message from someone you do not know: a DM invite, listed under Pedidos.
-    private static func request(from id: String, minute: Int) -> RoomSummary {
-        let entry = BipeCast.entry(id)
-        return summary(id: id, name: entry.name ?? id, isDirect: true, avatarURL: nil,
-                       heroes: [UserProfile(userID: userID(id), displayName: entry.name, avatarURL: photoURL(entry))],
-                       preview: nil, minute: minute, unread: 0, mentions: 0, mode: nil, inviter: member(id))
+    private static func request(_ request: BipeStoreRequest) -> RoomSummary {
+        let entry = BipeCast.entry(request.from)
+        return summary(id: entry.id, name: entry.name ?? entry.id, isDirect: true, avatarURL: nil,
+                       heroes: [UserProfile(userID: userID(entry.id), displayName: entry.name, avatarURL: photoURL(entry))],
+                       preview: nil, minute: request.minute, unread: 0, mentions: 0, mode: nil, inviter: member(entry.id))
     }
     
     /// Groups are quiet by default (bipe/docs/groups.md): mentions and keywords only.
-    private static func group(_ id: String, preview: String, minute: Int, unread: UInt = 0, mentions: UInt = 0) -> RoomSummary {
-        let entry = BipeCast.entry(id)
-        return summary(id: id, name: entry.name ?? id, isDirect: false, avatarURL: photoURL(entry), heroes: [],
-                       preview: preview, minute: minute, unread: unread, mentions: mentions, mode: .mentionsAndKeywordsOnly, inviter: nil)
+    private static func group(_ group: BipeStoreGroup) -> RoomSummary {
+        let entry = BipeCast.entry(group.id)
+        let preview = group.poll.map { L10n.commonPollSummary(text($0)) } ?? group.preview.map(text)
+        return summary(id: entry.id, name: entry.name ?? entry.id, isDirect: false, avatarURL: photoURL(entry), heroes: [],
+                       preview: preview, minute: group.minute, unread: UInt(group.unread ?? 0), mentions: UInt(group.mentions ?? 0),
+                       mode: .mentionsAndKeywordsOnly, inviter: nil)
     }
     
     // swiftlint:disable:next function_parameter_count
@@ -308,8 +300,17 @@ final class BipeStoreScreens {
     // MARK: - Lines
     
     private enum Line {
-        case text(from: String, String)
+        case text(from: String, BipeStoreText)
         case sticker(from: String, photo: String)
+        
+        init(_ line: BipeStoreLine) {
+            let from = line.from == "me" ? BipeStoreScreens.me : line.from
+            if let sticker = line.sticker {
+                self = .sticker(from: from, photo: sticker)
+            } else {
+                self = .text(from: from, line.text ?? [:])
+            }
+        }
         
         var speaker: String {
             switch self {
@@ -326,10 +327,11 @@ final class BipeStoreScreens {
                                             avatarURL: BipeStoreScreens.photoURL(entry))
             let timestamp = BipeStoreScreens.time(minute: 20 + index)
             switch self {
-            case .text(_, let body):
-                var content = TextRoomTimelineItemContent(body: body)
+            case .text(_, let text):
+                var content = TextRoomTimelineItemContent(body: BipeStoreScreens.text(text))
+                // The scam registry is pt-BR, so the warning comes from the pt-BR line in every locale.
                 if !isOutgoing {
-                    content.bipeScamWarning = ScamDetector.warningKind(for: body, eventID: "$store.\(index)")
+                    content.bipeScamWarning = ScamDetector.warningKind(for: text["pt-BR"] ?? "", eventID: "$store.\(index)")
                 }
                 return TextRoomTimelineItem(id: id, timestamp: timestamp, isOutgoing: isOutgoing, isEditable: false,
                                             canBeRepliedTo: true, sender: sender, content: content)
@@ -398,6 +400,8 @@ private struct BipeStoreProfileScreen: View {
         .sheet(isPresented: .constant(true)) {
             BipeProfileQRCodeSheet(handle: handle)
                 .presentationDetents([.medium, .large])
+                // No grey dim over the profile behind the sheet (bipe#462).
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
         }
     }
 }

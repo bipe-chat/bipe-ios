@@ -229,15 +229,15 @@ Not done (needs the domain, Apple team or brand):
 
 ## Store screenshots (bipe#454)
 
-- One command captures the raw App Store screenshots on the installed `iPhone 17 Pro Max` simulator, in pt-BR with the status bar at 9:41:
+- One command per locale captures the raw App Store screenshots on the installed `iPhone 17 Pro Max` simulator, with the status bar at 9:41 (`--locale en-US` for the English set):
 
 ```bash
 ./appstore/capture.sh iphone69
 ```
 
-- Output: `appstore/raw/<device>/<appearance>/<slug>.png` (git-ignored), one per panel slug in `bipe-shared/product/appstore.md`. `appstore/capture.sh iphone69 dark` gives the dark set; `ipad13` waits for the iPhone-only decision (bipe#419 step 4). The bipe-web image builder (bipe#455) makes the store panels from these files.
+- Output: `appstore/raw/<device>/<appearance>/<locale>/<slug>.png` (git-ignored), one per panel slug in `bipe-shared/product/appstore.md`, plus `conferir-pix-alterado` (bipe#462). `appstore/capture.sh iphone69 dark` gives the dark set; `ipad13` waits for the iPhone-only decision (bipe#419 step 4). The bipe-web image builder (bipe#455) makes the store panels from these files.
 - Sizes and simulators: `appstore/devices.mjs`. The script fails when a capture has another size, and when the simulator is missing (it never downloads one).
-- Screens: `BipeStoreScreens` (`ElementX/Sources/UITests`, DEBUG only), one `UITestsScreenIdentifier.bipeStore*` case per slug, built from the existing Bipe views on mock proxies. People come from `BipeCast` (generated from `bipe-shared/product/cast.json`); photos from `../bipe-web/src/cast/photos`, passed to the app in `BIPE_CAST_PHOTOS`. `AppSettings.bipeDisableAPIForScreenshots` and `BipeCompanySeals.storeFixture` (both DEBUG only) keep the real API out.
+- Screens: `BipeStoreScreens` (`ElementX/Sources/UITests`, DEBUG only), one `UITestsScreenIdentifier.bipeStore*` case per slug, built from the existing Bipe views on mock proxies. People come from `BipeCast` (generated from `bipe-shared/product/cast.json`); chats, requests, groups and Pix codes per locale from `BipeStoreFixtures` (generated from `bipe-shared/product/store-fixtures.json`: change the text there); photos from `../bipe-web/src/cast/photos`, passed to the app in `BIPE_CAST_PHOTOS`. `AppSettings.bipeDisableAPIForScreenshots` and `BipeCompanySeals.storeFixture` (both DEBUG only) keep the real API out.
 - Test: `UITests/Sources/StoreScreenshotTests.swift`, one test per slug. It attaches the screen as `<slug>` and does not compare snapshots.
 
 ## Troubleshooting
