@@ -185,7 +185,7 @@ Not done (needs the domain, Apple team or brand):
 
 ## "Conferir no Bipe" (bipe ADR 0091, bipe#294)
 
-- **Share target:** the existing share extension. `ShareExtensionViewController.bipePixCheck(for:)` reads shared text, or the QR codes in shared images (`PixCheck.qrPayloads`, Core Image). When it finds a Pix code or key it shows `BipePixCheckView` in the extension and does not open the app. "Enviar para uma conversa" continues to Element's share flow. No account and no network needed.
+- **Share target:** the existing share extension. `ShareExtensionViewController.bipePixCheck(for:)` reads shared text, or the QR codes in shared images (`PixCheck.qrPayloads`, Core Image). When it finds a Pix code or key it shows `BipePixCheckView` (`ElementX/Sources/ShareExtension`, compiled into the app too for the store screenshots) in the extension and does not open the app. "Enviar para uma conversa" continues to Element's share flow. No account and no network needed.
 - **Logic:** `PixCheck` in BipeKit (BR Code TLV, CRC-16, key types, keys in the text, the rule 9 warning without `pixCode` and `pixKey`). Cases: `bipe-shared/test-vectors/pix-check.json`.
 
 ## Tab bar (bipe ADR 0053)
@@ -226,6 +226,19 @@ Not done (needs the domain, Apple team or brand):
 - **App Review demo account:** `Tools/Bipe/review-details.mjs` writes the demo account and review notes to the Beta App Review details and to the App Store version in preparation. Account `app-review@bipe.chat` (email and password in MAS, no PIN, signs in through "Entrar com e-mail e senha"); password in the login Keychain `bipe-review-demo`, invite for a second account in `bipe-review-invite`. Run it again after either changes.
 - **App Store:** plan and open decisions in `docs/app-store-plan.md` (bipe-chat/bipe#419).
 - **Version and build number (ADR 0088):** one build number for iOS and Android, set in `bipe-shared/product/version.json`. Before each upload: `node tools/bump-build.mjs` in bipe-shared (`--version YY.MM.N` for a new version), then commit and push bipe-shared, this repo and bipe-android. `Tools/Bipe/version.env` (read by `testflight.sh`) and `Tools/Bipe/Version.xcconfig` (the project config file for Debug and Release, `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`) are generated. Do not set either value in `project.yml`: it overrides the xcconfig, and the bipe-shared drift check fails when it differs.
+
+## Store screenshots (bipe#454)
+
+- One command captures the raw App Store screenshots on the installed `iPhone 17 Pro Max` simulator, in pt-BR with the status bar at 9:41:
+
+```bash
+./appstore/capture.sh iphone69
+```
+
+- Output: `appstore/raw/<device>/<appearance>/<slug>.png` (git-ignored), one per panel slug in `bipe-shared/product/appstore.md`. `appstore/capture.sh iphone69 dark` gives the dark set; `ipad13` waits for the iPhone-only decision (bipe#419 step 4). The bipe-web image builder (bipe#455) makes the store panels from these files.
+- Sizes and simulators: `appstore/devices.mjs`. The script fails when a capture has another size, and when the simulator is missing (it never downloads one).
+- Screens: `BipeStoreScreens` (`ElementX/Sources/UITests`, DEBUG only), one `UITestsScreenIdentifier.bipeStore*` case per slug, built from the existing Bipe views on mock proxies. People come from `BipeCast` (generated from `bipe-shared/product/cast.json`); photos from `../bipe-web/src/cast/photos`, passed to the app in `BIPE_CAST_PHOTOS`. `AppSettings.bipeDisableAPIForScreenshots` and `BipeCompanySeals.storeFixture` (both DEBUG only) keep the real API out.
+- Test: `UITests/Sources/StoreScreenshotTests.swift`, one test per slug. It attaches the screen as `<slug>` and does not compare snapshots.
 
 ## Troubleshooting
 

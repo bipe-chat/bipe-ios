@@ -40,3 +40,6 @@ Components/Secrets/vendor/*
 # Local SDK development override
 matrix-rust-components-swift
 build/
+
+# Raw App Store captures from appstore/capture.sh (bipe#454)
+appstore/raw/
