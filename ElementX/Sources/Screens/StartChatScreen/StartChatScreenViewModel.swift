@@ -103,6 +103,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             switch try await creator.createIfAvailable() {
             case .created(let created):
                 MXLog.info("Bipe invite created \(created)")
+                BipeHaptics.play(.success)
                 state.bindings.bipeInviteShareLink = BipeInviteShareLink(id: created.id, url: created.url)
             case .noneLeft(let nextAvailableAt):
                 state.bindings.alertInfo = AlertInfo(id: .bipeInvite, title: BipeStrings.invitesTitle, message: BipeInviteQuota.noneLeft(nextAvailableAt: nextAvailableAt))

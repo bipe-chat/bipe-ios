@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -94,6 +95,7 @@ struct FormattedBodyText: View {
                         .contextMenu {
                             Button(L10n.actionCopy) {
                                 UIPasteboard.general.string = component.attributedString.string
+                                BipeHaptics.play(.tap)
                             }
                         }
                 case .details(let summary):

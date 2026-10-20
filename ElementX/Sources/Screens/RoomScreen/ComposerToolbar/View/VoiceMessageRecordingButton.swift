@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -21,8 +22,6 @@ struct VoiceMessageRecordingButton: View {
     var startRecording: (() -> Void)?
     var stopRecording: (() -> Void)?
     
-    private let impactFeedbackGenerator = UIImpactFeedbackGenerator()
-    
     private var recordIconColour: Color {
         guard isEnabled else { return .compound.iconDisabled }
         return Compound.supportsGlass ? .compound.iconPrimary : .compound.iconSecondary
@@ -30,11 +29,12 @@ struct VoiceMessageRecordingButton: View {
     
     var body: some View {
         Button {
-            impactFeedbackGenerator.impactOccurred()
             switch mode {
             case .idle:
+                BipeHaptics.play(.hold)
                 startRecording?()
             case .recording:
+                BipeHaptics.play(.tap)
                 stopRecording?()
             }
         } label: {

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -139,6 +140,7 @@ class SessionVerificationScreenViewModel: SessionVerificationViewModelType, Sess
             case (_, .cancel, .cancelling):
                 cancelVerification()
             case (_, _, .verified):
+                BipeHaptics.play(.success)
                 actionsSubject.send(.finished)
             case (.initial, _, .cancelled):
                 switch flow {

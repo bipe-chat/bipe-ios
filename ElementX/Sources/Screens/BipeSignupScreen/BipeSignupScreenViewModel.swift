@@ -115,6 +115,7 @@ class BipeSignupScreenViewModel: BipeSignupScreenViewModelType, BipeSignupScreen
             state.step = .pin
         case .pin:
             guard state.isPINValid else { return }
+            BipeHaptics.play(.success)
             if state.isAccountCreated {
                 Task { await submit() }
             } else {

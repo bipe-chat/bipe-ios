@@ -166,6 +166,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         case .bipeCopyDeviceID:
             guard let deviceID = state.deviceID else { return }
             UIPasteboard.general.string = deviceID
+            BipeHaptics.play(.tap)
             userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.helpDeviceIdCopied, icon: \.check))
         }
     }

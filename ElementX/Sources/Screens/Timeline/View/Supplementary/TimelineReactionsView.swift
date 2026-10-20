@@ -6,11 +6,11 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
 struct TimelineReactionsView: View {
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
     @Environment(\.layoutDirection) private var layoutDirection: LayoutDirection
     
     let context: TimelineViewModel.Context
@@ -45,7 +45,7 @@ struct TimelineReactionsView: View {
         layout {
             ForEach(reactions) { reaction in
                 TimelineReactionButton(reaction: reaction) { key in
-                    feedbackGenerator.impactOccurred()
+                    BipeHaptics.play(.tick)
                     context.send(viewAction: .toggleReaction(key: key, itemID: itemID))
                 } showReactionSummary: { key in
                     context.send(viewAction: .displayReactionSummary(itemID: itemID, key: key))

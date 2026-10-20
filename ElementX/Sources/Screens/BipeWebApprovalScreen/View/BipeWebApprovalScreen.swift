@@ -72,6 +72,7 @@ struct BipeWebApprovalScreen: View {
         }
         .background()
         .backgroundStyle(.compound.bgSubtleSecondary)
+        .onAppear { BipeHaptics.play(.warning) }
     }
     
     private var failed: some View {

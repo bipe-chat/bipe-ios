@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -60,9 +61,11 @@ class AppLockScreenViewModel: AppLockScreenViewModelType, AppLockScreenViewModel
     
     private func submit(_ pinCode: String) {
         guard appLockService.unlock(with: pinCode) else {
+            BipeHaptics.play(.error)
             handleInvalidPIN()
             return
         }
+        BipeHaptics.play(.success)
         actionsSubject.send(.appUnlocked)
     }
     

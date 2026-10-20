@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -17,8 +18,6 @@ struct EmojiPickerScreen: View {
     
     @ScaledMetric(relativeTo: .title) var minimumWidth: Double = 64
     
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
-    
     var body: some View {
         ElementNavigationStack {
             ScrollView {
@@ -27,7 +26,7 @@ struct EmojiPickerScreen: View {
                         Section {
                             ForEach(category.emojis) { emoji in
                                 Button {
-                                    feedbackGenerator.impactOccurred()
+                                    BipeHaptics.play(.tick)
                                     context.send(viewAction: .emojiTapped(emoji: emoji))
                                 } label: {
                                     Text(emoji.value)

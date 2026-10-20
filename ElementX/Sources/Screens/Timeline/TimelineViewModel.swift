@@ -183,6 +183,7 @@ class TimelineViewModel: TimelineViewModelType, TimelineViewModelProtocol {
         case .paginateForwards:
             paginateForwards()
         case .scrollToBottom:
+            BipeHaptics.play(.tap)
             scrollToBottom()
         case .scrollToFirstItemForCurrentDate:
             state.timelineState.scrollToFirstItemForDatePublisher.send()

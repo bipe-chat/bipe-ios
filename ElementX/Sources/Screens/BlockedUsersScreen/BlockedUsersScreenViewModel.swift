@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -53,6 +54,7 @@ class BlockedUsersScreenViewModel: BlockedUsersScreenViewModelType, BlockedUsers
                                              secondaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil))
         case .copyUserID(let user):
             UIPasteboard.general.string = user.id
+            BipeHaptics.play(.tap)
             userIndicatorController.submitIndicator(UserIndicator(id: Self.copiedIndicatorIdentifier,
                                                                   type: .toast,
                                                                   title: L10n.commonCopiedToClipboard,

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -22,6 +23,7 @@ private struct BipeSwipeActionModifier: ViewModifier {
     
     @State private var offset: CGFloat = 0
     @State private var restingOffset: CGFloat = 0
+    @State private var isPastFullSwipe = false
     
     private let buttonWidth: CGFloat = 88
     private let fullSwipeWidth: CGFloat = 200
@@ -54,9 +56,15 @@ private struct BipeSwipeActionModifier: ViewModifier {
     
     private func change(_ translation: CGFloat) {
         offset = min(0, restingOffset + translation)
+        
+        let isPast = offset < -fullSwipeWidth
+        guard isPast != isPastFullSwipe else { return }
+        isPastFullSwipe = isPast
+        BipeHaptics.play(isPast ? .threshold : .release)
     }
     
     private func end(_ translation: CGFloat, _ velocity: CGFloat) {
+        isPastFullSwipe = false
         let target = restingOffset + translation
         if target < -fullSwipeWidth {
             run()
@@ -96,6 +104,8 @@ private struct BipeHorizontalPanGesture: UIGestureRecognizerRepresentable {
     func handleUIGestureRecognizerAction(_ recognizer: UIPanGestureRecognizer, context: Context) {
         let translation = recognizer.translation(in: recognizer.view).x
         switch recognizer.state {
+        case .began:
+            BipeHaptics.prepare(.threshold)
         case .changed:
             onChange(translation)
         case .ended, .cancelled:

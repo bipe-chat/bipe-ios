@@ -49,6 +49,11 @@ struct BipePixCheckView: View {
                 }
             }
         }
+        .onAppear {
+            if check.warning != nil {
+                BipeHaptics.play(.warning)
+            }
+        }
     }
     
     private func codeSection(_ code: PixCheck.Code) -> some View {

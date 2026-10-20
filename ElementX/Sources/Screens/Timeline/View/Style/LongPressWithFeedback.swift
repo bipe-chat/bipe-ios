@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 struct LongPressWithFeedback: ViewModifier {
@@ -14,7 +15,6 @@ struct LongPressWithFeedback: ViewModifier {
     
     @State private var triggerTask: Task<Void, Never>?
     @State private var isLongPressing = false
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
     
     func body(content: Content) -> some View {
         mainContent(content: content)
@@ -42,7 +42,7 @@ struct LongPressWithFeedback: ViewModifier {
             return
         }
         
-        feedbackGenerator.prepare()
+        BipeHaptics.prepare(.hold)
         
         triggerTask = Task {
             // The wait time needs to be at least 0.5 seconds or the long press gesture will take precedence over long pressing links.
@@ -53,7 +53,7 @@ struct LongPressWithFeedback: ViewModifier {
             }
             
             action()
-            feedbackGenerator.impactOccurred()
+            BipeHaptics.play(.hold)
         }
     }
     

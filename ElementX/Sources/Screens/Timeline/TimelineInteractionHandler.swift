@@ -150,12 +150,14 @@ class TimelineInteractionHandler {
         case .copy:
             guard let messageTimelineItem = timelineItem as? EventBasedMessageTimelineItemProtocol else { return }
             UIPasteboard.general.string = messageTimelineItem.body
+            BipeHaptics.play(.tap)
         case .copyCaption:
             guard let messageTimelineItem = timelineItem as? EventBasedMessageTimelineItemProtocol,
                   let caption = messageTimelineItem.mediaCaption else {
                 return
             }
             UIPasteboard.general.string = caption
+            BipeHaptics.play(.tap)
         case .edit, .addCaption, .editCaption, .editPoll:
             switch timelineItem {
             case let messageTimelineItem as EventBasedMessageTimelineItemProtocol:
@@ -188,6 +190,7 @@ class TimelineInteractionHandler {
                 }
                 
                 UIPasteboard.general.url = permalinkURL
+                BipeHaptics.play(.tap)
             }
         case .redact:
             break // Handled above, before the timeline item is looked up.

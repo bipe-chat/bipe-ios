@@ -137,6 +137,7 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             }
             appLockService.bipeUseAccountPIN(pin)
             closePINForm()
+            BipeHaptics.play(.success)
             userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.pinChanged, icon: \.checkCircle))
             actionsSubject.send(.done)
         } catch {
