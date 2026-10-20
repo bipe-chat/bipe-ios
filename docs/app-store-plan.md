@@ -68,7 +68,7 @@ If the app launches as `chat.bipe.app.dev`, the public app keeps that ID permane
 
 - **1.2 user-generated content:** report content, block users, terms the user accepts, action on reports within 24 hours. Element has report and ignore. Missing: a moderation channel on the server and terms accepted at sign-up.
 - **5.1.1(v) account deletion in the app:** Element deactivation exists. The Bipe flow is bipe-chat/bipe#363.
-- **Reviewer access:** invite code in the review notes (Keychain `bipe-review-invite`).
+- **Reviewer access:** demo account `app-review@bipe.chat` in the review details (Keychain `bipe-review-demo`), set with `Tools/Bipe/review-details.mjs`, plus an invite code in the notes for a second account (Keychain `bipe-review-invite`).
 - **4.3 copycat risk:** a reviewer can flag a fork of Element X. Name the Bipe features (handles, Pedidos, trust card) in the review notes.
 
 ### Legal
