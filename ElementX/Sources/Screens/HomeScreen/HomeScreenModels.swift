@@ -30,9 +30,6 @@ enum HomeScreenViewModelAction {
     case presentCreateGroupScreen
     /// Bipe (bipe#200, bipe#415): the "Escolha seu @" card opens the username screen.
     case presentBipeHandleScreen
-    /// Bipe: the account menu on the avatar (ADR 0086, bipe#267).
-    case bipeSwitchAccount(userID: String)
-    case bipeAddAccount
     case logout
 }
 
@@ -59,10 +56,6 @@ enum HomeScreenViewAction {
     case resetEncryption
     case skipRecoveryKeyConfirmation
     case dismissNewSoundBanner
-    /// Bipe: a tap on the avatar with two or more accounts, and the rows of the account menu (ADR 0086, bipe#267).
-    case bipeSwitchToNextAccount
-    case bipeSwitchAccount(userID: String)
-    case bipeAddAccount
     case updateVisibleItemRange(Range<Int>)
     case spaceFilters
     case markRoomAsUnread(roomIdentifier: String)
@@ -117,31 +110,11 @@ enum HomeScreenSecurityBannerMode: Equatable {
     }
 }
 
-/// Bipe: one row of the account menu on the avatar (ADR 0086, bipe#267).
-struct BipeAccountMenuItem: Identifiable, Equatable {
-    let userID: String
-    let label: String
-    let isCurrent: Bool
-    /// ADR 0087: the top bar shows a company account's name.
-    let isCompany: Bool
-    /// The avatar drawn into an image, a rounded square for a company (ADR 0132). Menus only render images.
-    var avatar: UIImage?
-    
-    var id: String {
-        userID
-    }
-}
-
 struct HomeScreenViewState: BindableState {
     var userProfile: UserProfile
     
-    /// Bipe: every account on the phone, the current one first (ADR 0086, bipe#267).
-    var bipeAccounts: [BipeAccountMenuItem] = []
-    
     /// ADR 0087: the company's name in the top bar when the account on screen is a company account.
-    var bipeCompanyName: String? {
-        bipeAccounts.first { $0.isCurrent && $0.isCompany }?.label
-    }
+    var bipeCompanyName: String?
     
     var securityBannerMode = HomeScreenSecurityBannerMode.none
     var shouldShowNewSoundBanner = false

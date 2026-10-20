@@ -99,48 +99,13 @@ struct HomeScreen: View {
     }
     
     private var settingsButton: some View {
+        // Bipe ADR 0135: a tap opens Você. The switch and the account menu are on the Você tab.
         AvatarSettingsButton(userProfile: context.viewState.userProfile,
                              mediaProvider: context.mediaProvider) {
-            // Bipe: with two or more accounts a tap switches to the next one (ADR 0086, bipe#267).
-            context.send(viewAction: context.viewState.bipeAccounts.count > 1 ? .bipeSwitchToNextAccount : .showSettings)
+            context.send(viewAction: .showSettings)
         }
-        .contextMenu { bipeAccountMenu }
         .accessibilityLabel(L10n.commonSettings)
         .accessibilityIdentifier(A11yIdentifiers.homeScreen.userAvatar)
-    }
-    
-    /// Bipe: a long press on the avatar picks the account, then "Nova conta" opens the new account window (ADR 0086,
-    /// bipe#267, #446). The inline picker lets iOS draw its own checkmark on the current account. Each row shows the
-    /// account's avatar in its shape (ADR 0132).
-    @ViewBuilder
-    private var bipeAccountMenu: some View {
-        if !context.viewState.bipeAccounts.isEmpty {
-            Picker(BipeStrings.accountOnDevice, selection: bipeCurrentAccount) {
-                ForEach(context.viewState.bipeAccounts) { account in
-                    Label {
-                        Text(account.label)
-                    } icon: {
-                        if let avatar = account.avatar {
-                            Image(uiImage: avatar)
-                        }
-                    }
-                    .tag(account.userID)
-                }
-            }
-            .pickerStyle(.inline)
-            
-            Divider()
-        }
-        Button {
-            context.send(viewAction: .bipeAddAccount)
-        } label: {
-            Label(BipeStrings.accountAdd, icon: \.plus)
-        }
-    }
-    
-    private var bipeCurrentAccount: Binding<String> {
-        Binding(get: { context.viewState.bipeAccounts.first(where: \.isCurrent)?.userID ?? "" },
-                set: { context.send(viewAction: .bipeSwitchAccount(userID: $0)) })
     }
     
     @ViewBuilder

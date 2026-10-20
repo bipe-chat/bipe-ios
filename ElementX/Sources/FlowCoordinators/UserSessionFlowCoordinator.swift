@@ -48,6 +48,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     private let groupsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     private let youTabFlowCoordinator: SettingsFlowCoordinator
     private let youTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
+    private let bipeAccountSwitcher: BipeAccountSwitcher
     private let bipeSelfChat: BipeSelfChat
     
     private let searchScreenCoordinator: SearchScreenCoordinator?
@@ -122,6 +123,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                                                         navigationStackCoordinator: youStackCoordinator,
                                                         flowParameters: flowParameters)
         youTabDetails = NavigationTabCoordinator<HomeTab>.TabDetails(tag: HomeTab.you, title: BipeStrings.tabYou, icon: \.userProfile, selectedIcon: \.userProfileSolid)
+        bipeAccountSwitcher = BipeAccountSwitcher(userSession: flowParameters.userSession)
+        youTabDetails.bipeAccountSwitcher = bipeAccountSwitcher
         bipeSelfChat = BipeSelfChat(clientProxy: flowParameters.userSession.clientProxy)
         
         if flowParameters.userSession.userSettings.app.globalSearchEnabled, #available(iOS 26.0, *) {
@@ -333,6 +336,13 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         observeRoomListFlow(chatsTabFlowCoordinator, tab: .chats)
         observeRoomListFlow(groupsTabFlowCoordinator, tab: .groups)
         
+        // Bipe ADR 0135: the switch and "Nova conta" from the Você tab.
+        bipeAccountSwitcher.onSwitch = { [weak self] userID in
+            guard let self, userID != userSession.clientProxy.userID else { return }
+            actionsSubject.send(.bipeSwitchAccount(userID: userID))
+        }
+        bipeAccountSwitcher.onAddAccount = { [weak self] in self?.presentBipeNewAccountScreen() }
+        
         youTabFlowCoordinator.actions
             .sink { [weak self] action in
                 self?.handleSettingsFlowAction(action)
@@ -359,10 +369,6 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                     presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
                 case .hideCallScreenOverlay:
                     hideCallScreenOverlay()
-                case .bipeSwitchAccount(let userID):
-                    actionsSubject.send(.bipeSwitchAccount(userID: userID))
-                case .bipeAddAccount:
-                    presentBipeNewAccountScreen()
                 case .logout:
                     Task { await self.runLogoutFlow() }
                 }
@@ -556,7 +562,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     
     // MARK: - Bipe New Account
     
-    /// "Nova conta" (bipe#445, #446), from the avatar menu and from Sua conta. The chosen flow starts after the sheet closes.
+    /// "Nova conta" (bipe#445, #446), from the Você tab menu and from Sua conta. The chosen flow starts after the sheet closes.
     private func presentBipeNewAccountScreen() {
         let stackCoordinator = NavigationStackCoordinator()
         let coordinator = BipeNewAccountScreenCoordinator(parameters: .init(userSession: userSession,

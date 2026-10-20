@@ -30,6 +30,8 @@ import SwiftUI
         var badgeCount = 0
         /// Bipe: a warning mark instead of a count (ADR 0112, the Você tab).
         var bipeWarning = false
+        /// Bipe: the Você tab's double tap and long press menu (ADR 0135).
+        var bipeAccountSwitcher: BipeAccountSwitcher?
         
         /// Bipe: the count, else the warning mark, else no badge.
         var badgeText: Text? {
@@ -327,6 +329,7 @@ private struct NavigationTabCoordinatorView<Tag: Hashable>: View {
     @State private var window: UIWindow?
     @State private var isFullScreen = true
     @State private var railBackgroundColor: Color = .compound.bgCanvasDefault
+    @State private var bipeAccountGestures = BipeAccountGestures()
     
     var body: some View {
         tabView
@@ -446,6 +449,18 @@ private struct NavigationTabCoordinatorView<Tag: Hashable>: View {
         for item in tabBarController.tabBar.items ?? [] {
             item.badgeColor = item.badgeValue == "!" ? .compound.iconCriticalPrimary : nil
         }
+        configureBipeAccountGestures(on: tabBarController.tabBar)
+    }
+    
+    /// Bipe ADR 0135: SwiftUI `Tab` has no gesture API, so the Você item's double tap and long press live on the `UITabBar`.
+    private func configureBipeAccountGestures(on tabBar: UITabBar) {
+        let modules = navigationTabCoordinator.tabModules
+        guard let index = modules.firstIndex(where: { $0.details.bipeAccountSwitcher != nil }) else { return }
+        // iOS 26 moves a search tab out of the row of items, so the row may have one view fewer than there are tabs.
+        let rowTabs = modules.count(where: { !$0.details.isSearch })
+        bipeAccountGestures.switcher = modules[index].details.bipeAccountSwitcher
+        bipeAccountGestures.itemFrame = BipeAccountGestures.tabBarItemFrame(index: index, tabCount: rowTabs...modules.count)
+        bipeAccountGestures.install(on: tabBar)
     }
 }
 
@@ -473,6 +488,11 @@ struct TabRailView<Tag: Hashable>: View {
                         }
                     }
                     .buttonStyle(TabButtonStyle(isSelected: isSelected))
+                    .overlay {
+                        if let switcher = module.details.bipeAccountSwitcher {
+                            BipeAccountGestureOverlay(switcher: switcher) { navigationTabCoordinator.selectedTab = module.details.tag }
+                        }
+                    }
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
                     .overlay(alignment: .topTrailing) {
                         if module.details.badgeCount > 0 {
