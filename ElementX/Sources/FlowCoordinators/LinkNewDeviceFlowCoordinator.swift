@@ -62,8 +62,7 @@ class LinkNewDeviceFlowCoordinator: FlowCoordinatorProtocol {
     /// Settings > Linked devices is the root. Only the desktop direction exists: the phone scans the browser's code.
     private func presentLinkedDevicesScreen() {
         let userSession = flowParameters.userSession
-        let coordinator = BipeLinkedDevicesScreenCoordinator(parameters: .init(clientProxy: userSession.clientProxy,
-                                                                               showsLinkComputer: userSession.userSettings.app.linkNewDeviceEnabled))
+        let coordinator = BipeLinkedDevicesScreenCoordinator(parameters: .init(clientProxy: userSession.clientProxy))
         coordinator.actionsPublisher
             .sink { [weak self] action in
                 guard let self else { return }

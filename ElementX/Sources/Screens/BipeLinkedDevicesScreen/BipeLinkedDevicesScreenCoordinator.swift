@@ -9,7 +9,6 @@ import SwiftUI
 
 struct BipeLinkedDevicesScreenCoordinatorParameters {
     let clientProxy: ClientProxyProtocol
-    let showsLinkComputer: Bool
 }
 
 final class BipeLinkedDevicesScreenCoordinator: CoordinatorProtocol {
@@ -20,8 +19,7 @@ final class BipeLinkedDevicesScreenCoordinator: CoordinatorProtocol {
     }
     
     init(parameters: BipeLinkedDevicesScreenCoordinatorParameters) {
-        viewModel = BipeLinkedDevicesScreenViewModel(clientProxy: parameters.clientProxy,
-                                                     showsLinkComputer: parameters.showsLinkComputer)
+        viewModel = BipeLinkedDevicesScreenViewModel(clientProxy: parameters.clientProxy)
     }
     
     func reload() {

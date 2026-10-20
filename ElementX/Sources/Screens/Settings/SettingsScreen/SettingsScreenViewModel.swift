@@ -30,7 +30,6 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         
         super.init(initialViewState: .init(deviceID: userSession.clientProxy.deviceID,
                                            userProfile: userSession.clientProxy.userProfilePublisher.value,
-                                           showLinkNewDeviceButton: userSettings.app.linkNewDeviceEnabled,
                                            showAccountDeactivation: userSession.clientProxy.canDeactivateAccount,
                                            showDeveloperOptions: userSettings.app.developerOptionsEnabled,
                                            showBipeHandle: userSession.clientProxy.userIDServerName == userSettings.app.bipeSignupServerName,
@@ -45,10 +44,6 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         
         userSettings.app.developerOptionsEnabledPublisher
             .weakAssign(to: \.state.showDeveloperOptions, on: self)
-            .store(in: &cancellables)
-        
-        userSettings.app.linkNewDeviceEnabledPublisher
-            .weakAssign(to: \.state.showLinkNewDeviceButton, on: self)
             .store(in: &cancellables)
         
         userSession.clientProxy.userProfilePublisher

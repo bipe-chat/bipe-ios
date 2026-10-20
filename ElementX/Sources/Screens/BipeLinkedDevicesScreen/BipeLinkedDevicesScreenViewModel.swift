@@ -20,10 +20,10 @@ class BipeLinkedDevicesScreenViewModel: BipeLinkedDevicesScreenViewModelType, Bi
         actionsSubject.eraseToAnyPublisher()
     }
     
-    init(clientProxy: ClientProxyProtocol, showsLinkComputer: Bool) {
+    init(clientProxy: ClientProxyProtocol) {
         self.clientProxy = clientProxy
         
-        super.init(initialViewState: BipeLinkedDevicesScreenViewState(showsLinkComputer: showsLinkComputer))
+        super.init(initialViewState: BipeLinkedDevicesScreenViewState())
         
         Task { await reload() }
     }

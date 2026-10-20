@@ -13,17 +13,15 @@ struct BipeLinkedDevicesScreen: View {
     
     var body: some View {
         Form {
-            if context.viewState.showsLinkComputer {
-                Section {
-                    ListRow(label: .default(title: context.viewState.needsPIN ? BipeStrings.linkComputerCreatePin : BipeStrings.linkedDevicesLinkComputer,
-                                            icon: context.viewState.needsPIN ? \.lock : \.computer),
-                            details: .isWaiting(context.viewState.isCheckingSupport),
-                            kind: .button { context.send(viewAction: .linkComputer) })
-                        .disabled(context.viewState.isCheckingSupport)
-                } footer: {
-                    Text(context.viewState.needsPIN ? BipeStrings.linkComputerNeedsPin(String(BipeRegistries.pinLength)) : BipeStrings.linkedDevicesFooter)
-                        .compoundListSectionFooter()
-                }
+            Section {
+                ListRow(label: .default(title: context.viewState.needsPIN ? BipeStrings.linkComputerCreatePin : BipeStrings.linkedDevicesLinkComputer,
+                                        icon: context.viewState.needsPIN ? \.lock : \.computer),
+                        details: .isWaiting(context.viewState.isCheckingSupport),
+                        kind: .button { context.send(viewAction: .linkComputer) })
+                    .disabled(context.viewState.isCheckingSupport)
+            } footer: {
+                Text(context.viewState.needsPIN ? BipeStrings.linkComputerNeedsPin(String(BipeRegistries.pinLength)) : BipeStrings.linkedDevicesFooter)
+                    .compoundListSectionFooter()
             }
             
             if context.viewState.isLoading {
@@ -72,8 +70,7 @@ struct BipeLinkedDevicesScreen: View {
 // MARK: - Previews
 
 struct BipeLinkedDevicesScreen_Previews: PreviewProvider {
-    static let viewModel = BipeLinkedDevicesScreenViewModel(clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")),
-                                                            showsLinkComputer: true)
+    static let viewModel = BipeLinkedDevicesScreenViewModel(clientProxy: ClientProxyMock(.init(userID: "@alice:example.com")))
     
     static var previews: some View {
         ElementNavigationStack {

@@ -145,7 +145,6 @@ struct SettingsScreen_Previews: PreviewProvider, TestablePreview {
     
     static func makeViewModel(isBugReportServiceEnabled: Bool = true) -> SettingsScreenViewModel {
         let userSettings = UserSettings.mock()
-        userSettings.app.linkNewDeviceEnabled = true
         let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "@alice:example.com",
                                                                                    deviceID: "AAAAAAAAAAA",
                                                                                    displayName: "Alice Liddell",
