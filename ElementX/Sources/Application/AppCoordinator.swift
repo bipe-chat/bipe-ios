@@ -787,12 +787,12 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                 await openChatWithInviter(inviterUserID, handle: inviterHandle, userSession: userSession, flowCoordinator: userSessionFlowCoordinator)
             }
         }
-
+        
         // A greeting stored before bipe#445 can name another account on this phone. Drop it.
         if let greeting = userSession.clientProxy.bipeInviterGreeting, userSessionManager.userIDs.contains(greeting.userID) {
             BipeInviteStore(userID: userSession.clientProxy.userID).setInviterGreeting(nil)
         }
-
+        
         if userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName {
             Task {
                 await BipeInviteJoinNotifier(apiBaseURL: appSettings.bipeAPIBaseURL,
