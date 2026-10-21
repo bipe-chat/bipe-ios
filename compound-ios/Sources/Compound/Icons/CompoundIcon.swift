@@ -38,6 +38,8 @@ public struct CompoundIcon: View {
     }
     
     private var image: Image
+    /// Bipe: the SF Symbol that replaces the Compound image (`BipeSystemSymbols`).
+    private var systemName: String?
     private var size: Size
     private var font: Font
     
@@ -52,6 +54,7 @@ public struct CompoundIcon: View {
     ///   - icon: The icon to show.
     public init(_ icon: KeyPath<CompoundIcons, Image>) {
         image = .compound[keyPath: icon]
+        systemName = BipeSystemSymbols.name(for: icon)
         size = .medium
         font = .compound.bodyLG
     }
@@ -64,6 +67,7 @@ public struct CompoundIcon: View {
     ///   - font: The font that should be used for scaling with Dynamic Type.
     public init(_ icon: KeyPath<CompoundIcons, Image>, size: Size, relativeTo font: Font) {
         image = .compound[keyPath: icon]
+        systemName = BipeSystemSymbols.name(for: icon)
         self.size = size
         self.font = font
     }
@@ -98,9 +102,18 @@ public struct CompoundIcon: View {
     }
     
     public var body: some View {
-        image
-            .resizable()
-            .modifier(CompoundIconFrame(fontSize: size.value, textStyle: fontSize.style))
+        if let systemName {
+            // Compound glyphs leave a margin in their square; SF Symbols fill it, so scale down to match.
+            Image(systemName: systemName)
+                .resizable()
+                .scaledToFit()
+                .scaleEffect(0.83)
+                .modifier(CompoundIconFrame(fontSize: size.value, textStyle: fontSize.style))
+        } else {
+            image
+                .resizable()
+                .modifier(CompoundIconFrame(fontSize: size.value, textStyle: fontSize.style))
+        }
     }
 }
 
