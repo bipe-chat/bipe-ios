@@ -26,6 +26,11 @@ import SwiftUI
         accounts.count > 1
     }
     
+    /// The Você tab icon: the photo, else the initials, in the account's shape. `nil` until the profile loads.
+    var currentAvatar: UIImage? {
+        accounts.first(where: \.isCurrent)?.avatar
+    }
+    
     init(userSession: UserSessionProtocol) {
         self.userSession = userSession
         
@@ -204,18 +209,21 @@ final class BipeAccountGestures: NSObject, UIContextMenuInteractionDelegate, UIG
         switcher.switchToNextAccount()
     }
     
-    /// A snapshot of the Você item only. A preview of the host view itself would hide the whole tab bar while the menu shows.
+    /// An empty view on the Você item: it anchors the menu and draws nothing. A preview of the host view would hide the whole
+    /// tab bar while the menu shows. A snapshot catches the iOS 26 glass lens mid-press and floats a lifted copy of the item.
     private func preview(_ interaction: UIContextMenuInteraction, identifier: any NSCopying) -> UITargetedPreview? {
-        guard let view = interaction.view, let window = view.window,
+        guard let view = interaction.view,
               let location = (identifier as? NSValue)?.cgPointValue,
-              let frame = itemFrame(location, view),
-              let snapshot = window.resizableSnapshotView(from: view.convert(frame, to: window), afterScreenUpdates: false, withCapInsets: .zero) else {
+              let frame = itemFrame(location, view) else {
             return nil
         }
+        let anchor = UIView(frame: CGRect(origin: .zero, size: frame.size))
+        anchor.backgroundColor = .clear
         let parameters = UIPreviewParameters()
-        parameters.visiblePath = UIBezierPath(roundedRect: snapshot.bounds, cornerRadius: snapshot.bounds.height / 2)
+        parameters.visiblePath = UIBezierPath(rect: anchor.bounds)
+        parameters.shadowPath = UIBezierPath()
         parameters.backgroundColor = .clear
-        return UITargetedPreview(view: snapshot, parameters: parameters, target: UIPreviewTarget(container: view, center: CGPoint(x: frame.midX, y: frame.midY)))
+        return UITargetedPreview(view: anchor, parameters: parameters, target: UIPreviewTarget(container: view, center: CGPoint(x: frame.midX, y: frame.midY)))
     }
 }
 
