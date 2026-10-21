@@ -151,12 +151,12 @@ struct RoomDetailsScreen: View {
                         isTopicExpanded.toggle()
                     }
                 } else {
-                    ListRow(label: .plain(title: L10n.screenRoomDetailsAddTopicTitle),
+                    ListRow(label: .plain(title: BipeStrings.groupScreenRoomDetailsAddTopicTitle), // Bipe: "descrição", because "tópico" is a thread (bipe#527)
                             kind: .button { context.send(viewAction: .processTapAddTopic) })
                         .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.addTopic)
                 }
             } header: {
-                Text(L10n.commonTopic)
+                Text(BipeStrings.groupCommonTopic) // Bipe: "descrição", because "tópico" is a thread (bipe#527)
                     .compoundListSectionHeader()
             }
         }

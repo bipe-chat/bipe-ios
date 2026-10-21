@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 
 enum RoomDetailsEditScreenViewModelAction {
@@ -41,7 +42,7 @@ struct RoomDetailsEditScreenViewState: BindableState {
     
     /// The string shown for the room's topic when it can't be edited.
     var topicRowTitle: String {
-        bindings.topic.isEmpty ? L10n.commonTopic : bindings.topic
+        bindings.topic.isEmpty ? BipeStrings.groupCommonTopic : bindings.topic // Bipe: "descrição", because "tópico" is a thread (bipe#527)
     }
     
     var topicDidChange: Bool {

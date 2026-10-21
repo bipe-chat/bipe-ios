@@ -109,7 +109,7 @@ struct RoomDetailsEditScreen: View {
                 })
             }
         } header: {
-            Text(L10n.commonTopic)
+            Text(BipeStrings.groupCommonTopic) // Bipe: "descrição", because "tópico" is a thread (bipe#527)
                 .compoundListSectionHeader()
         }
     }

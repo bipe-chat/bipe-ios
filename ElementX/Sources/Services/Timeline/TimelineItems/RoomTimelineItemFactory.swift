@@ -61,6 +61,10 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             if isDM, case .roomEncryption = content {
                 return nil
             }
+            // Bipe: a DM has no topic, so no line about one (bipe#527).
+            if isDM, case .roomTopic = content {
+                return nil
+            }
             return buildStateTimelineItem(for: eventItemProxy, state: content, isOutgoing: isOutgoing, isDM: isDM)
         case .roomMembership(userId: let userID, let displayName, change: let change, let reason):
             if isDM, change == .joined, userID == self.userID {

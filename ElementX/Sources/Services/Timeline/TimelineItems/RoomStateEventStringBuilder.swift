@@ -166,6 +166,11 @@ nonisolated struct RoomStateEventStringBuilder {
     func buildString(for state: OtherState, sender: TimelineItemSender, isOutgoing: Bool, isDM: Bool = false) -> String? {
         let displayName = sender.disambiguatedDisplayName ?? sender.id
         
+        // Bipe: a DM has no topic, so it has no line about one (bipe#527).
+        if isDM, case .roomTopic = state {
+            return nil
+        }
+        
         // Bipe: a DM says "conversa", never "sala" (bipe#507).
         if isDM, let text = buildDMString(for: state, displayName: displayName, isOutgoing: isOutgoing) {
             return text
@@ -213,14 +218,14 @@ nonisolated struct RoomStateEventStringBuilder {
             } else {
                 return BipeStrings.groupStateEventRoomThirdPartyInvite(displayName, displayName)
             }
-        case .roomTopic(let topic):
+        case .roomTopic(let topic): // Bipe: "descrição", because "tópico" is a thread (bipe#527)
             switch (topic, isOutgoing) {
             case (.some(let topic), false) where !topic.isBlank:
-                return L10n.stateEventRoomTopicChanged(displayName, topic)
+                return BipeStrings.groupStateEventRoomTopicChanged(displayName, topic)
             case (_, false):
                 return BipeStrings.groupStateEventRoomTopicRemoved(displayName)
             case (.some(let topic), true) where !topic.isBlank:
-                return L10n.stateEventRoomTopicChangedByYou(topic)
+                return BipeStrings.groupStateEventRoomTopicChangedByYou(topic)
             case (_, true):
                 return BipeStrings.groupStateEventRoomTopicRemovedByYou
             }
@@ -273,11 +278,6 @@ nonisolated struct RoomStateEventStringBuilder {
         case .roomThirdPartyInvite(let invitee):
             guard let invitee else { return nil }
             return isOutgoing ? BipeStrings.dmThirdPartyInviteByYou(invitee) : BipeStrings.dmThirdPartyInvite(displayName, invitee)
-        case .roomTopic(let topic):
-            if let topic, !topic.isBlank {
-                return nil
-            }
-            return isOutgoing ? BipeStrings.dmTopicRemovedByYou : BipeStrings.dmTopicRemoved(displayName)
         default:
             return nil
         }
