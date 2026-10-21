@@ -37,6 +37,9 @@ protocol SecureWindowManagerProtocol: WindowManagerProtocol {
     /// Shows the alternate window, hiding the main and overlay combo.
     func switchToAlternate()
     
+    /// Bipe: shows the alternate window above the main and overlay combo, which stay visible underneath.
+    func bipeCoverMain()
+    
     // MARK: - Secondary window support
     
     /// Used by the Application to retrieve the root view for an secondary window

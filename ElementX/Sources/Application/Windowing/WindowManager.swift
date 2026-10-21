@@ -78,6 +78,7 @@ class WindowManager: SecureWindowManagerProtocol {
         
         alternateWindow = UIWindow(windowScene: scene)
         alternateWindow.tintColor = .compound.textActionPrimary
+        alternateWindow.windowLevel = .normal + 1 // Bipe: above the main and overlay windows for bipeCoverMain.
         
         delegate?.windowManagerDidConfigureWindows(self)
     }
@@ -138,6 +139,13 @@ class WindowManager: SecureWindowManagerProtocol {
             mainWindow.isHidden = true
             overlayWindow.isHidden = true
         }
+    }
+    
+    /// Bipe: a short resign (system UI, Control Center) only covers the main window. Hiding it while iOS shows
+    /// system UI inside it left the window black after the app became active again, until a trip to the background.
+    func bipeCoverMain() {
+        switchTask = nil // A pending switchToMain must not hide the cover.
+        alternateWindow.isHidden = false
     }
     
     // MARK: - OrientationManager
