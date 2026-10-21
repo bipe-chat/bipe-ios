@@ -97,7 +97,8 @@ struct LocationSharingSettingsScreen_Previews: PreviewProvider, TestablePreview 
 private extension TimelineMediaVisibility {
     static var items: [(title: String, tag: TimelineMediaVisibility)] {
         [(title: L10n.screenAdvancedSettingsShowMediaTimelineAlwaysHide, tag: .never),
-         (title: L10n.screenAdvancedSettingsShowMediaTimelinePrivateRooms, tag: .privateOnly),
+         // Bipe: grupo, not sala (bipe#508)
+         (title: BipeStrings.groupScreenAdvancedSettingsShowMediaTimelinePrivateRooms, tag: .privateOnly),
          (title: L10n.screenAdvancedSettingsShowMediaTimelineAlwaysShow, tag: .always)]
     }
 }

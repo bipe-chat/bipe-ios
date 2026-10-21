@@ -5,6 +5,8 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
+
 enum LeaveSpaceViewAction {
     case confirmLeaveSpace
     case deselectAll
@@ -29,9 +31,10 @@ struct LeaveSpaceViewState: BindableState {
     }
     
     var subtitle: String? {
+        // Bipe: grupo, not sala (bipe#508)
         switch leaveHandle.mode {
-        case .manyRooms: L10n.screenLeaveSpaceSubtitle
-        case .roomsNeedNewOwner: L10n.screenLeaveSpaceSubtitleOnlyLastAdmin
+        case .manyRooms: BipeStrings.groupScreenLeaveSpaceSubtitle
+        case .roomsNeedNewOwner: BipeStrings.groupScreenLeaveSpaceSubtitleOnlyLastAdmin
         case .noRooms: nil
         case .spaceNeedsNewOwner(let useTransferOwnershipFlow):
             useTransferOwnershipFlow ? L10n.screenLeaveSpaceSubtitleLastOwner(spaceName) : L10n.screenLeaveSpaceSubtitleLastAdmin
@@ -40,7 +43,8 @@ struct LeaveSpaceViewState: BindableState {
     
     var confirmationTitle: String {
         let selectedCount = leaveHandle.selectedCount
-        return selectedCount > 0 ? L10n.screenLeaveSpaceSubmit(selectedCount) : L10n.actionLeaveSpace
+        // Bipe: grupo, not sala (bipe#508)
+        return selectedCount > 0 ? BipeStrings.groupScreenLeaveSpaceSubmit(String(selectedCount)) : L10n.actionLeaveSpace
     }
 }
 

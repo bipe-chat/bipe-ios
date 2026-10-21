@@ -31,10 +31,17 @@ nonisolated struct RoomStateEventStringBuilder {
         let senderDisplayName = sender.disambiguatedDisplayName ?? sender.id
         
         switch change {
+        // Bipe: a DM says "conversa", a group says "grupo", never "sala" (bipe#507, bipe#508).
         case .joined:
-            return memberIsYou ? L10n.stateEventRoomJoinByYou : L10n.stateEventRoomJoin(senderDisplayName)
+            if isDM {
+                return memberIsYou ? BipeStrings.dmJoinedByYou : BipeStrings.dmJoined(senderDisplayName)
+            }
+            return memberIsYou ? BipeStrings.groupStateEventRoomJoinByYou : BipeStrings.groupStateEventRoomJoin(senderDisplayName)
         case .left:
-            return memberIsYou ? L10n.stateEventRoomLeaveByYou : L10n.stateEventRoomLeave(member)
+            if isDM {
+                return memberIsYou ? BipeStrings.dmLeftByYou : BipeStrings.dmLeft(member)
+            }
+            return memberIsYou ? BipeStrings.groupStateEventRoomLeaveByYou : BipeStrings.groupStateEventRoomLeave(member)
         case .banned, .kickedAndBanned:
             return switch (senderIsYou, reason) {
             case (true, .some(let reason)): L10n.stateEventRoomBanByYouWithReason(member, reason)
@@ -68,7 +75,8 @@ nonisolated struct RoomStateEventStringBuilder {
             if isDM {
                 return senderIsYou ? BipeStrings.dmThirdPartyRevokedInviteByYou(member) : BipeStrings.dmThirdPartyRevokedInvite(senderDisplayName, member)
             }
-            return senderIsYou ? L10n.stateEventRoomThirdPartyRevokedInviteByYou(member) : L10n.stateEventRoomThirdPartyRevokedInvite(senderDisplayName, member)
+            // Bipe: grupo, not sala (bipe#508)
+            return senderIsYou ? BipeStrings.groupStateEventRoomThirdPartyRevokedInviteByYou(member) : BipeStrings.groupStateEventRoomThirdPartyRevokedInvite(senderDisplayName, member)
         case .knocked:
             return memberIsYou ? L10n.stateEventRoomKnockByYou : L10n.stateEventRoomKnock(member)
         case .knockAccepted:
@@ -163,32 +171,36 @@ nonisolated struct RoomStateEventStringBuilder {
             return text
         }
         
+        // Bipe: grupo, not sala (bipe#508)
         switch state {
         case .roomAvatar(let url):
             switch (url, isOutgoing) {
             case (.some, false):
-                return L10n.stateEventRoomAvatarChanged(displayName)
+                return BipeStrings.groupStateEventRoomAvatarChanged(displayName)
             case (nil, false):
-                return L10n.stateEventRoomAvatarRemoved(displayName)
+                return BipeStrings.groupStateEventRoomAvatarRemoved(displayName)
             case (.some, true):
-                return L10n.stateEventRoomAvatarChangedByYou
+                return BipeStrings.groupStateEventRoomAvatarChangedByYou
             case (nil, true):
-                return L10n.stateEventRoomAvatarRemovedByYou
+                return BipeStrings.groupStateEventRoomAvatarRemovedByYou
             }
         case .roomCreate:
-            return isOutgoing ? L10n.stateEventRoomCreatedByYou : L10n.stateEventRoomCreated(displayName)
+            if isDM { // Bipe: a DM says "conversa" (bipe#508)
+                return isOutgoing ? BipeStrings.dmCreatedByYou : BipeStrings.dmCreated(displayName)
+            }
+            return isOutgoing ? BipeStrings.groupStateEventRoomCreatedByYou : BipeStrings.groupStateEventRoomCreated(displayName)
         case .roomEncryption:
             return L10n.commonEncryptionEnabled
         case .roomName(let name):
             switch (name, isOutgoing) {
             case (.some(let name), false):
-                return L10n.stateEventRoomNameChanged(displayName, name)
+                return BipeStrings.groupStateEventRoomNameChanged(displayName, name)
             case (nil, false):
-                return L10n.stateEventRoomNameRemoved(displayName)
+                return BipeStrings.groupStateEventRoomNameRemoved(displayName)
             case (.some(let name), true):
-                return L10n.stateEventRoomNameChangedByYou(name)
+                return BipeStrings.groupStateEventRoomNameChangedByYou(name)
             case (nil, true):
-                return L10n.stateEventRoomNameRemovedByYou
+                return BipeStrings.groupStateEventRoomNameRemovedByYou
             }
         case .roomThirdPartyInvite(let displayName):
             guard let displayName else {
@@ -197,20 +209,20 @@ nonisolated struct RoomStateEventStringBuilder {
             }
             
             if isOutgoing {
-                return L10n.stateEventRoomThirdPartyInviteByYou(displayName)
+                return BipeStrings.groupStateEventRoomThirdPartyInviteByYou(displayName)
             } else {
-                return L10n.stateEventRoomThirdPartyInvite(displayName, displayName)
+                return BipeStrings.groupStateEventRoomThirdPartyInvite(displayName, displayName)
             }
         case .roomTopic(let topic):
             switch (topic, isOutgoing) {
             case (.some(let topic), false) where !topic.isBlank:
                 return L10n.stateEventRoomTopicChanged(displayName, topic)
             case (_, false):
-                return L10n.stateEventRoomTopicRemoved(displayName)
+                return BipeStrings.groupStateEventRoomTopicRemoved(displayName)
             case (.some(let topic), true) where !topic.isBlank:
                 return L10n.stateEventRoomTopicChangedByYou(topic)
             case (_, true):
-                return L10n.stateEventRoomTopicRemovedByYou
+                return BipeStrings.groupStateEventRoomTopicRemovedByYou
             }
         case .roomPinnedEvents(let change):
             switch change {

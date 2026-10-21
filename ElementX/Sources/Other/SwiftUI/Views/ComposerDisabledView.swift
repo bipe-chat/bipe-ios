@@ -15,7 +15,8 @@ struct ComposerDisabledView: View {
     var isDM = false
     
     var body: some View {
-        Text(isDM ? BipeStrings.dmNoPermissionToPost : L10n.screenRoomTimelineNoPermissionToPost)
+        // Bipe: grupo, not sala (bipe#508)
+        Text(isDM ? BipeStrings.dmNoPermissionToPost : BipeStrings.groupScreenRoomTimelineNoPermissionToPost)
             .font(.compound.bodyLG)
             .foregroundStyle(.compound.textDisabled)
             .multilineTextAlignment(.center)

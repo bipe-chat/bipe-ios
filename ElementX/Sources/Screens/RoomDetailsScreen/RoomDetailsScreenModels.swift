@@ -216,7 +216,8 @@ struct LeaveRoomAlertItem: AlertProtocol {
     let cancelTitle = L10n.actionCancel
     
     var title: String {
-        isDM ? L10n.actionLeaveConversation : L10n.actionLeaveRoom
+        // Bipe: grupo, not sala (bipe#508)
+        isDM ? L10n.actionLeaveConversation : BipeStrings.groupActionLeaveRoom
     }
     
     var subtitle: String {
@@ -225,9 +226,10 @@ struct LeaveRoomAlertItem: AlertProtocol {
             return BipeStrings.dmLeaveBody
         }
         switch state {
-        case .empty: return L10n.leaveRoomAlertEmptySubtitle
-        case .private: return isDM ? L10n.leaveConversationAlertSubtitle : L10n.leaveRoomAlertPrivateSubtitle
-        case .public: return L10n.leaveRoomAlertSubtitle
+        // Bipe: grupo, not sala (bipe#508)
+        case .empty: return BipeStrings.groupLeaveRoomAlertEmptySubtitle
+        case .private: return isDM ? L10n.leaveConversationAlertSubtitle : BipeStrings.groupLeaveRoomAlertPrivateSubtitle
+        case .public: return BipeStrings.groupLeaveRoomAlertSubtitle
         }
     }
 }

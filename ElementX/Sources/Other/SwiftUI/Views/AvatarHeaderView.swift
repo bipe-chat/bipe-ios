@@ -253,7 +253,8 @@ struct AvatarHeaderView<Footer: View>: View {
                                icon: \.lockOff,
                                style: .info)
                 case .public:
-                    BadgeLabel(title: L10n.screenRoomDetailsBadgePublic,
+                    // Bipe: grupo, not sala (bipe#508)
+                    BadgeLabel(title: BipeStrings.groupScreenRoomDetailsBadgePublic,
                                icon: \.public,
                                style: .info)
                 case .verified:

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -45,7 +46,8 @@ struct RoomDirectorySearchScreen: View {
             .compoundList(.plain)
             .isSearching($context.isSearching)
             .searchable(text: $context.searchString, placement: .navigationBarDrawer(displayMode: .always))
-            .navigationTitle(L10n.screenRoomDirectorySearchTitle)
+            // Bipe: grupo, not sala (bipe#508)
+            .navigationTitle(BipeStrings.groupScreenRoomDirectorySearchTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

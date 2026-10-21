@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -55,7 +56,8 @@ class KnockRequestsListScreenViewModel: KnockRequestsListScreenViewModelType, Kn
             
             state.bindings.alertInfo = .init(id: .declineRequest,
                                              title: L10n.screenKnockRequestsListDeclineAlertTitle,
-                                             message: L10n.screenKnockRequestsListDeclineAlertDescription(request.userID),
+                                             // Bipe: grupo, not sala (bipe#508)
+                                             message: BipeStrings.groupScreenKnockRequestsListDeclineAlertDescription(request.userID),
                                              primaryButton: .init(title: L10n.screenKnockRequestsListDeclineAlertConfirmButtonTitle,
                                                                   role: .destructive) { [weak self] in self?.decline(request: request) },
                                              secondaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil))

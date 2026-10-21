@@ -68,11 +68,11 @@ nonisolated struct RoomEventStringBuilder {
             return prefix(L10n.commonUnsupportedEvent, with: displayName, isOutgoing: isOutgoing, shouldPrefixSender: shouldPrefixSender)
         case .state(_, let state):
             return stateEventStringBuilder
-                .buildString(for: state, sender: sender, isOutgoing: isOutgoing)
+                .buildString(for: state, sender: sender, isOutgoing: isOutgoing, isDM: isDM) // Bipe: bipe#508
                 .map(AttributedString.init)
         case .roomMembership(let userID, let displayName, let change, let reason):
             return stateEventStringBuilder
-                .buildString(for: change, reason: reason, memberUserID: userID, memberDisplayName: displayName, sender: sender, isOutgoing: isOutgoing)
+                .buildString(for: change, reason: reason, memberUserID: userID, memberDisplayName: displayName, sender: sender, isOutgoing: isOutgoing, isDM: isDM) // Bipe: bipe#508
                 .map(AttributedString.init)
         case .profileChange(let displayName, let prevDisplayName, let avatarUrl, let prevAvatarUrl):
             return stateEventStringBuilder

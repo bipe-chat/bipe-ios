@@ -35,17 +35,20 @@ struct DeclineAndBlockScreen: View {
                     kind: .toggle($context.shouldBlockUser))
         } footer: {
             // Bipe: a DM invite says "conversa", never "sala" (bipe#507).
-            Text(context.viewState.isDM ? BipeStrings.dmDeclineBlockDescription : L10n.screenDeclineAndBlockBlockUserOptionDescription)
+            // Bipe: grupo, not sala (bipe#508)
+            Text(context.viewState.isDM ? BipeStrings.dmDeclineBlockDescription : BipeStrings.groupScreenDeclineAndBlockBlockUserOptionDescription)
                 .compoundListSectionFooter()
         }
     }
     
     private var reportSection: some View {
         Section {
-            ListRow(label: .plain(title: context.viewState.isDM ? BipeStrings.dmReport : L10n.actionReportRoom),
+            // Bipe: grupo, not sala (bipe#508)
+            ListRow(label: .plain(title: context.viewState.isDM ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom),
                     kind: .toggle($context.shouldReport))
         } footer: {
-            Text(context.viewState.isDM ? BipeStrings.dmDeclineReportDescription : L10n.screenDeclineAndBlockReportUserOptionDescription)
+            // Bipe: grupo, not sala (bipe#508)
+            Text(context.viewState.isDM ? BipeStrings.dmDeclineReportDescription : BipeStrings.groupScreenDeclineAndBlockReportUserOptionDescription)
                 .compoundListSectionFooter()
         }
     }

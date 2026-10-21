@@ -83,7 +83,8 @@ private struct SingleKnockRequestBannerContent: View {
                                 avatarSize: .user(on: .knockingUserBanner), mediaProvider: mediaProvider)
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 0) {
-                    Text(L10n.screenRoomSingleKnockRequestTitle(request.displayName ?? displayedUserID))
+                    // Bipe: grupo, not sala (bipe#508)
+                    Text(BipeStrings.groupScreenRoomSingleKnockRequestTitle(request.displayName ?? displayedUserID))
                         .lineLimit(2)
                         .font(.compound.bodyMDSemibold)
                         .foregroundStyle(.compound.textPrimary)
