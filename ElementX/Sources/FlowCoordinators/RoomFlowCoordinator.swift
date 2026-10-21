@@ -621,7 +621,7 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
         // Flag the room as read on entering, the timeline will take care of the read receipts
         Task { await roomProxy.flagAsUnread(false) }
         
-        flowParameters.analytics.trackViewRoom(isDM: roomProxy.infoPublisher.value.isDirect, isSpace: roomProxy.infoPublisher.value.isSpace)
+        flowParameters.analytics.trackViewRoom(isDM: roomProxy.infoPublisher.value.isDM, isSpace: roomProxy.infoPublisher.value.isSpace) // Bipe: one DM test (bipe#524)
         
         let coordinator = makeRoomScreenCoordinator(presentationAction: presentationAction, animated: animated)
         roomScreenCoordinator = coordinator
@@ -876,7 +876,7 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
                             await storeAndSubscribeToRoomProxy(roomProxy)
                             stateMachine.tryEvent(.presentRoom(presentationAction: nil), userInfo: EventUserInfo(animated: animated))
                             
-                            flowParameters.analytics.trackJoinedRoom(isDM: roomProxy.infoPublisher.value.isDirect,
+                            flowParameters.analytics.trackJoinedRoom(isDM: roomProxy.infoPublisher.value.isDM, // Bipe: bipe#524
                                                                      isSpace: roomProxy.infoPublisher.value.isSpace,
                                                                      activeMemberCount: UInt(roomProxy.infoPublisher.value.activeMembersCount))
                         } else {

@@ -254,6 +254,7 @@ Not done (needs the domain, Apple team or brand):
 
 ## DMs are DMs (16 Oct 2026)
 
+- One DM test: the SDK isDm decides on every screen (bipe#524).
 - A DM never turns into a group. DM details: no topic (`hasTopicSection`), no polls history, no "Convidar" to the DM. "Convidar para um grupo" opens `BipeInviteToGroupSheet` with your joined groups from `staticRoomSummaryProvider` (not DMs, spaces, replaced rooms or the self-chat) and invites the other person to the one you pick. The group's invite permission is checked at pick time.
 - The composer "+" menu has no poll in a DM (`ComposerToolbarViewState.isDM`).
 - A DM has no room leave in the UI. "Apagar conversa" (`bipe_dm_delete_action`) replaces it in the room list menu and in DM details. Groups keep "Sair do grupo".

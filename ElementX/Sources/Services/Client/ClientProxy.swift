@@ -1060,7 +1060,7 @@ class ClientProxy: ClientProxyProtocol {
         
         for roomID in roomIdentifiers {
             guard case let .joined(roomProxy) = await roomForIdentifier(roomID),
-                  roomProxy.infoPublisher.value.isDirect,
+                  roomProxy.infoPublisher.value.isDM, // Bipe: one DM test (bipe#524)
                   let members = await roomProxy.members() else {
                 continue
             }

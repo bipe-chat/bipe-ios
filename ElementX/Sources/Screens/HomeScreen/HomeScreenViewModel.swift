@@ -507,7 +507,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                 continue
             }
             
-            if summary.isDirect, case .invite(let inviter) = summary.joinRequestType {
+            if summary.isDM, case .invite(let inviter) = summary.joinRequestType { // Bipe: one DM test (bipe#524)
                 // Bipe ADR 0034: a chat from an invite pair skips Pedidos and is accepted without a tap.
                 if bipeInvitePairs.contains(inviter?.userID) {
                     bipeInvitePairs.autoAccept(roomID: summary.id)
@@ -743,9 +743,9 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         defer {
             userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)
         }
-        let isDirect = state.rooms.first { $0.roomID == roomID }?.isDirect == true // Bipe: a DM is a conversation
+        let isDM = state.rooms.first { $0.roomID == roomID }?.isDM == true // Bipe: a DM is a conversation (bipe#524: SDK isDm)
         // Bipe: grupo, not sala (bipe#508)
-        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDirect ? BipeStrings.dmLeaving : BipeStrings.groupCommonLeavingRoom, persistent: true))
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDM ? BipeStrings.dmLeaving : BipeStrings.groupCommonLeavingRoom, persistent: true))
         
         guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID),
               case .success = await roomProxy.leaveRoom() else {
@@ -756,7 +756,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         userIndicatorController.submitIndicator(UserIndicator(id: UUID().uuidString,
                                                               type: .toast,
                                                               // Bipe: grupo, not sala (bipe#508)
-                                                              title: isDirect ? BipeStrings.dmLeftByYou : BipeStrings.groupCommonCurrentUserLeftRoom,
+                                                              title: isDM ? BipeStrings.dmLeftByYou : BipeStrings.groupCommonCurrentUserLeftRoom,
                                                               icon: \.check))
         actionsSubject.send(.roomLeft(roomIdentifier: roomID))
     }
@@ -813,7 +813,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             case .invalidInvite:
                 // Bipe: a DM invite says "conversa", never "sala" (bipe#507).
                 // Bipe: grupo, not sala (bipe#508)
-                displayError(title: L10n.dialogTitleError, message: roomProxy.info.isDirect ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite)
+                displayError(title: L10n.dialogTitleError, message: roomProxy.info.isDM ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite)
             default:
                 displayError()
             }
@@ -836,7 +836,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             actionsSubject.send(.presentRoom(roomIdentifier: roomProxy.id))
         }
         
-        analyticsService.trackJoinedRoom(isDM: roomProxy.info.isDirect,
+        analyticsService.trackJoinedRoom(isDM: roomProxy.info.isDM, // Bipe: bipe#524
                                          isSpace: roomProxy.info.isSpace,
                                          activeMemberCount: UInt(roomProxy.info.activeMembersCount))
         userSettings.app.seenInvites.remove(roomProxy.id)
@@ -848,9 +848,10 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             return
         }
         
-        let roomPlaceholder = room.isDirect ? (room.inviter?.displayName ?? room.name) : room.name
-        let title = room.isDirect ? L10n.screenInvitesDeclineDirectChatTitle : L10n.screenInvitesDeclineChatTitle
-        let message = room.isDirect ? L10n.screenInvitesDeclineDirectChatMessage(roomPlaceholder) : L10n.screenInvitesDeclineChatMessage(roomPlaceholder)
+        // Bipe: one DM test, the SDK isDm (bipe#524).
+        let roomPlaceholder = room.isDM ? (room.inviter?.displayName ?? room.name) : room.name
+        let title = room.isDM ? L10n.screenInvitesDeclineDirectChatTitle : L10n.screenInvitesDeclineChatTitle
+        let message = room.isDM ? L10n.screenInvitesDeclineDirectChatMessage(roomPlaceholder) : L10n.screenInvitesDeclineChatMessage(roomPlaceholder)
         
         if await userSession.clientProxy.isReportRoomSupported, let userID = room.inviter?.id {
             state.bindings.alertInfo = .init(id: UUID(),

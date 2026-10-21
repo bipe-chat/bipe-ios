@@ -49,7 +49,7 @@ class SpaceAddRoomsScreenViewModel: SpaceAddRoomsScreenViewModelType, SpaceAddRo
             let existingRooms = spaceRoomListProxy.spaceRoomsPublisher.value
             suggestedRooms = await userSession.clientProxy
                 .recentlyVisitedRooms { @MainActor roomProxy in
-                    !roomProxy.infoPublisher.value.isDirect
+                    !roomProxy.infoPublisher.value.isDM // Bipe: one DM test (bipe#524)
                         && !roomProxy.infoPublisher.value.isSpace
                         && roomProxy.infoPublisher.value.membership == .joined
                         && !existingRooms.contains { $0.id == roomProxy.id }
@@ -99,7 +99,7 @@ class SpaceAddRoomsScreenViewModel: SpaceAddRoomsScreenViewModelType, SpaceAddRo
         let rooms = roomSummaryProvider.roomListPublisher.value
             .lazy
             .filter { [addedRoomIDs] summary in
-                !summary.isDirect && !existingRooms.contains { $0.id == summary.id } && !addedRoomIDs.contains(summary.id)
+                !summary.isDM && !existingRooms.contains { $0.id == summary.id } && !addedRoomIDs.contains(summary.id)
             }
             .map(SpaceAddRoomsScreenRoom.init)
         

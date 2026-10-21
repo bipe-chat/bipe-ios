@@ -120,12 +120,13 @@ struct HomeScreenRoomList: View {
                             } label: {
                                 // Bipe: a DM says "conversa", never "sala" (bipe#507).
                                 // Bipe: grupo, not sala (bipe#508)
-                                Label(room.isDirect ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom, systemImage: "exclamationmark.bubble")
+                                Label(room.isDM ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom, systemImage: "exclamationmark.bubble")
                             }
                         }
                         
                         // Bipe (bipe#464): a DM has no room leave. "Apagar conversa" hides it and keeps you in it.
-                        if room.isDirect {
+                        // Bipe (bipe#524): the SDK isDm decides, as on every other screen.
+                        if room.isDM {
                             Button(role: .destructive) {
                                 context.send(viewAction: .bipeDeleteChat(roomIdentifier: room.id))
                             } label: {

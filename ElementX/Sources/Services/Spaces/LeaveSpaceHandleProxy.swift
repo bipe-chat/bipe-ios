@@ -47,7 +47,7 @@ final class LeaveSpaceHandleProxy {
         self.rooms = rooms
             .compactMap { room in
                 guard room.spaceRoom.state == .joined, // The SDK is going to do this but not yet.
-                      room.spaceRoom.isDirect != true,
+                      room.spaceRoom.isDm != true, // Bipe: one DM test (bipe#524)
                       room.spaceRoom.roomId != spaceID else {
                     return nil
                 }

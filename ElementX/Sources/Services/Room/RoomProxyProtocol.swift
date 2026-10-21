@@ -206,7 +206,7 @@ extension JoinedRoomProxyProtocol {
                            canonicalAlias: infoPublisher.value.canonicalAlias,
                            isEncrypted: infoPublisher.value.isEncrypted,
                            isPublic: !(infoPublisher.value.isPrivate ?? false),
-                           isDirect: infoPublisher.value.isDirect,
+                           isDM: infoPublisher.value.isDM, // Bipe: bipe#524
                            historySharingState: historySharingState)
     }
     

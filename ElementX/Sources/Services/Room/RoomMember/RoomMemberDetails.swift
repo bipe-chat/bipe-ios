@@ -45,4 +45,20 @@ nonisolated extension RoomMemberDetails {
         role = proxy.role
         powerLevel = proxy.powerLevel
     }
+    
+    /// Bipe (bipe#524): the other person in a DM when the member list has no entry for them, e.g. after they left.
+    init(withHero hero: RoomHero, isIgnored: Bool) {
+        let profile = UserProfile(rustRoomHero: hero)
+        id = profile.id
+        name = profile.displayName
+        avatarURL = profile.avatarURL
+        status = profile.status
+        permalink = try? URL(string: matrixToUserPermalink(userId: profile.id))
+        isActive = false
+        isInvited = false
+        self.isIgnored = isIgnored
+        isBanned = false
+        role = .user
+        powerLevel = .value(0)
+    }
 }

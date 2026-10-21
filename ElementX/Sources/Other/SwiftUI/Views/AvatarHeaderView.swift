@@ -49,7 +49,7 @@ struct AvatarHeaderView<Footer: View>: View {
         if let roomAlias = room.canonicalAlias {
             subtitle = roomAlias
             status = nil
-        } else if room.isDirect, case let .heroes(heroes) = room.avatar, heroes.count == 1 {
+        } else if room.isDM, case let .heroes(heroes) = room.avatar, heroes.count == 1 {
             subtitle = heroes[0].id
             status = heroes[0].status
             sealUserID = heroes[0].id
@@ -290,7 +290,7 @@ struct AvatarHeaderView_Previews: PreviewProvider, TestablePreview {
                                          canonicalAlias: "#test:matrix.org",
                                          isEncrypted: true,
                                          isPublic: true,
-                                         isDirect: false,
+                                         isDM: false,
                                          historySharingState: nil),
                              avatarSize: .room(on: .details),
                              mediaProvider: MediaProviderMock(.init())) {
@@ -361,7 +361,7 @@ struct AvatarHeaderView_Previews: PreviewProvider, TestablePreview {
                                          canonicalAlias: "#test:matrix.org",
                                          isEncrypted: true,
                                          isPublic: true,
-                                         isDirect: false,
+                                         isDM: false,
                                          historySharingState: state),
                              avatarSize: .room(on: .details),
                              mediaProvider: MediaProviderMock(.init())) {

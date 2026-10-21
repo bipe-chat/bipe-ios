@@ -388,6 +388,7 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
                            isJoined: roomInfo.membership == .joined,
                            name: roomInfo.displayName ?? roomInfo.id,
                            isDirect: roomInfo.isDirect,
+                           isDM: roomInfo.isDm, // Bipe: one DM test (bipe#524)
                            isSpace: roomInfo.isSpace,
                            avatarURL: roomInfo.avatarUrl.flatMap(URL.init(string:)),
                            heroes: roomInfo.heroes.map(UserProfile.init),

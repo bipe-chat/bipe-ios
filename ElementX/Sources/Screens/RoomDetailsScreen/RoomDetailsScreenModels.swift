@@ -57,7 +57,8 @@ struct RoomDetailsScreenViewState: BindableState {
     var details: RoomDetails
     
     var isEncrypted: Bool
-    var isDirect: Bool
+    /// Bipe: the SDK `isDm`, the one DM test (bipe#524).
+    var isDM: Bool
     var permalink: URL?
     
     var topic: AttributedString?
@@ -95,7 +96,7 @@ struct RoomDetailsScreenViewState: BindableState {
     }
     
     var canEditBaseInfo: Bool {
-        !isDirect && (canEditRoomName || canEditRoomTopic || canEditRoomAvatar)
+        !isDM && (canEditRoomName || canEditRoomTopic || canEditRoomAvatar)
     }
     
     var hasTopicSection: Bool {
@@ -111,7 +112,7 @@ struct RoomDetailsScreenViewState: BindableState {
     var shortcuts: [RoomDetailsScreenViewShortcut] {
         var shortcuts: [RoomDetailsScreenViewShortcut] = [.mute]
         if !ProcessInfo.processInfo.isiOSAppOnMac || isNativeCallingEnabled, isCallingEnabled, canJoinCall {
-            if isDirect {
+            if isDM { // Bipe: one DM test (bipe#524)
                 shortcuts.append(.voiceCall)
             }
             shortcuts.append(.videoCall)

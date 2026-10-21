@@ -34,12 +34,13 @@ final class NativeCallRoomContext: ElementCallRoomContextProtocol {
             .eraseToAnyPublisher()
     }
     
+    /// Bipe (bipe#524): the call package's DM flag is the SDK `isDm`, the one DM test.
     var isDirect: Bool {
-        roomProxy.infoPublisher.value.isDirect
+        roomProxy.infoPublisher.value.isDM
     }
     
     var isDirectPublisher: AnyPublisher<Bool, Never> {
-        roomProxy.infoPublisher.map(\.isDirect).removeDuplicates().eraseToAnyPublisher()
+        roomProxy.infoPublisher.map(\.isDM).removeDuplicates().eraseToAnyPublisher()
     }
     
     var memberProfiles: [String: ElementCallMemberProfile] {

@@ -329,7 +329,7 @@ struct RoomDetailsScreen: View {
             if context.viewState.reportRoomEnabled {
                 // Bipe: a DM says "conversa", never "sala" (bipe#507).
                 // Bipe: grupo, not sala (bipe#508)
-                ListRow(label: .action(title: context.viewState.isDirect ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom,
+                ListRow(label: .action(title: context.viewState.isDM ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom,
                                        icon: \.chatProblem,
                                        role: .destructive),
                         kind: .button { context.send(viewAction: .processTapReport) })

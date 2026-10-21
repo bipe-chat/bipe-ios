@@ -18,6 +18,8 @@ nonisolated protocol BaseRoomInfoProxyProtocol: Sendable {
     var activeMembersCount: Int { get }
     var joinedMembersCount: Int { get }
     var isDirect: Bool { get }
+    /// Bipe: the one DM test. The SDK `isDm` (`m.direct` and at most 2 active members) decides on every screen (bipe#524).
+    var isDM: Bool { get }
     var isSpace: Bool { get }
     
     var successor: SuccessorRoom? { get }
@@ -81,14 +83,14 @@ extension BaseRoomInfoProxyProtocol {
     /// The room's avatar info for use in a ``RoomAvatarImage``.
     var avatar: RoomAvatar {
         guard successor == nil else {
-            return .tombstoned(isDM: isDirect) // Bipe: bipe#507
+            return .tombstoned(isDM: isDM) // Bipe: bipe#507, bipe#524
         }
         
         if isSpace {
             return .space(id: id, name: displayName, avatarURL: avatarURL)
         }
         
-        if isDirect, avatarURL == nil, heroes.count == 1 {
+        if isDM, avatarURL == nil, heroes.count == 1 { // Bipe: one DM test (bipe#524)
             return .heroes(heroes.map(UserProfile.init))
         }
         

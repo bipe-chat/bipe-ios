@@ -45,7 +45,8 @@ struct JoinRoomScreenRoomDetails {
     let memberCount: Int?
     let heroes: [UserProfile]
     let inviter: RoomInviterDetails?
-    let isDirect: Bool?
+    /// Bipe: the SDK `isDm`, the one DM test (bipe#524).
+    let isDM: Bool?
     
     let isSpace: Bool?
     // periphery:ignore - might be useful to have

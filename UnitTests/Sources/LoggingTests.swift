@@ -76,6 +76,7 @@ final class LoggingTests {
                                       isJoined: true,
                                       name: roomName,
                                       isDirect: true,
+                                      isDM: true,
                                       isSpace: false,
                                       avatarURL: nil,
                                       heroes: [.init(userID: "", displayName: heroName)],

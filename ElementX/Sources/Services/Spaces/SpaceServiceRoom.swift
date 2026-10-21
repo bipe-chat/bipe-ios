@@ -44,7 +44,7 @@ struct SpaceServiceRoom {
     var avatar: RoomAvatar {
         if isSpace {
             .space(id: id, name: name, avatarURL: avatarURL)
-        } else if isDirect == true, avatarURL == nil, heroes.count == 1 {
+        } else if isDM == true, avatarURL == nil, heroes.count == 1 { // Bipe: one DM test (bipe#524)
             .heroes(heroes)
         } else {
             .room(id: id, name: name, avatarURL: avatarURL)
