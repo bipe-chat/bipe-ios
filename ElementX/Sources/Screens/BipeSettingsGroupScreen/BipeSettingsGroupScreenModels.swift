@@ -10,6 +10,10 @@ import SwiftUI
 enum BipeSettingsGroupScreenViewModelAction {
     /// A row that opens another screen or flow.
     case open(BipeSettingsRow)
+    /// "Bloquear o app" switched on: create the app lock PIN (ADR 0137).
+    case turnOnAppLock
+    /// "Bloquear o app" switched off on a phone with no passcode: Element's PIN check, then "Remove PIN".
+    case turnOffAppLockWithPIN
 }
 
 struct BipeSettingsGroupScreenViewState: BindableState {
@@ -39,6 +43,8 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     var accountStatus: BipeAccountStatus?
     var waysBack: BipeWaysBack?
     var recoveryKeySet = false
+    /// "Bloquear o app": off by default (ADR 0137).
+    var appLockEnabled = false
     /// "Desbloquear com Face ID / Touch ID": shown when the phone has biometrics and the app lock is on.
     var biometryName: String?
     
@@ -73,6 +79,7 @@ struct BipeSettingsGroupScreenViewStateBindings {
     /// "Baixar meus dados": the file to share.
     var exportFileURL: URL?
     var biometricUnlock = false
+    var appLock = false
     
     /// "Online e digitando": Element's share-presence setting.
     var sharePresence: Bool {
@@ -102,6 +109,7 @@ enum BipeSettingsGroupScreenViewAction {
     case discoverableChanged
     case export
     case exportClosed
+    case appLockChanged
     case biometricUnlockChanged
     case updateTimelineMediaVisibility(TimelineMediaVisibility)
 }

@@ -1550,6 +1550,10 @@ public enum BipeStrings {
 
     public static var accountPinSection: String { NSLocalizedString("bipe_account_pin_section", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var accountAppLock: String { NSLocalizedString("bipe_account_app_lock", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var accountAppLockOffReason: String { NSLocalizedString("bipe_account_app_lock_off_reason", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static func accountBiometricUnlock(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_account_biometric_unlock", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
@@ -1861,6 +1865,12 @@ public enum BipeStrings {
     public static var onboardingHaveInvite: String { NSLocalizedString("bipe_onboarding_have_invite", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var onboardingHaveAccount: String { NSLocalizedString("bipe_onboarding_have_account", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInviteHint: String { NSLocalizedString("bipe_onboarding_paste_invite_hint", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInvite: String { NSLocalizedString("bipe_onboarding_paste_invite", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInviteNone: String { NSLocalizedString("bipe_onboarding_paste_invite_none", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var inviteCodeTitle: String { NSLocalizedString("bipe_invite_code_title", tableName: "Bipe", bundle: .module, comment: "") }
 

@@ -108,6 +108,10 @@ struct BipeSettingsGroupScreen: View {
             
         case .accountWaysBackStatus:
             waysBackCard
+        case .accountAppLock:
+            ListRow(label: .plain(title: row.title),
+                    kind: .toggle($context.appLock))
+                .onChange(of: context.appLock) { context.send(viewAction: .appLockChanged) }
         case .accountBiometricUnlock:
             if let biometryName = context.viewState.biometryName {
                 ListRow(label: .plain(title: BipeStrings.accountBiometricUnlock(biometryName)),

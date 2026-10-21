@@ -95,16 +95,13 @@ enum BipeDevicePIN {
 }
 
 extension AppLockServiceProtocol {
-    /// Bipe: an account PIN the user just typed or set becomes the device PIN (ADR 0057) while it follows the account PIN,
-    /// or when no app lock is set yet (ADR 0086). Biometric unlock stays on when the device supports it.
+    /// Bipe: the app lock is off by default (ADR 0137). When the user turned it on, an account PIN the user just typed or
+    /// set becomes the device PIN while it follows the account PIN (ADR 0057, ADR 0086). Biometric unlock keeps its setting.
     func bipeUseAccountPIN(_ pin: String) {
-        guard BipeDevicePIN.followsAccountPIN || !isEnabled else { return }
+        guard isEnabled, BipeDevicePIN.followsAccountPIN else { return }
         guard case .success = setupPINCode(pin) else {
             MXLog.error("Bipe: could not use the account PIN for the app lock")
             return
-        }
-        if biometryType != .none {
-            _ = enableBiometricUnlock()
         }
     }
 }
