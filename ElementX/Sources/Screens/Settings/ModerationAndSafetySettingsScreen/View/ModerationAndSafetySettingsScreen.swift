@@ -44,7 +44,8 @@ struct ModerationAndSafetySettingsScreen: View {
         })
         
         Section {
-            ListRow(label: .plain(title: L10n.screenAdvancedSettingsHideInviteAvatarsToggleTitle),
+            // Bipe: grupo, not sala (bipe#508)
+            ListRow(label: .plain(title: BipeStrings.groupScreenAdvancedSettingsHideInviteAvatarsToggleTitle),
                     details: context.viewState.isWaitingHideInviteAvatars ? .isWaiting(true) : nil,
                     kind: .toggle(binding))
                 .disabled(context.viewState.isWaitingHideInviteAvatars)
@@ -108,7 +109,8 @@ struct ModerationAndSafetySettingsScreen_Previews: PreviewProvider, TestablePrev
 private extension TimelineMediaVisibility {
     static var items: [(title: String, tag: TimelineMediaVisibility)] {
         [(title: L10n.screenAdvancedSettingsShowMediaTimelineAlwaysHide, tag: .never),
-         (title: L10n.screenAdvancedSettingsShowMediaTimelinePrivateRooms, tag: .privateOnly),
+         // Bipe: grupo, not sala (bipe#508)
+         (title: BipeStrings.groupScreenAdvancedSettingsShowMediaTimelinePrivateRooms, tag: .privateOnly),
          (title: L10n.screenAdvancedSettingsShowMediaTimelineAlwaysShow, tag: .always)]
     }
 }

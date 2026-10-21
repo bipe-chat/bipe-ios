@@ -34,7 +34,8 @@ struct TimelineStartRoomTimelineView: View {
     private var upgradeDialogue: some View {
         VStack(spacing: 16) {
             // Bipe: a DM says "conversa", never "sala" (bipe#507).
-            Text(context?.viewState.isDM == true ? BipeStrings.dmUpgradedMessage : L10n.screenRoomTimelineUpgradedRoomMessage)
+            // Bipe: grupo, not sala (bipe#508)
+            Text(context?.viewState.isDM == true ? BipeStrings.dmUpgradedMessage : BipeStrings.groupScreenRoomTimelineUpgradedRoomMessage)
                 .font(.compound.bodyMD)
                 .foregroundColor(.compound.textPrimary)
             Button {

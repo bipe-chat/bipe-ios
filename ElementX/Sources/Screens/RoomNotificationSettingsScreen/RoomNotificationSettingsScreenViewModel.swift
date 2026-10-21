@@ -30,7 +30,8 @@ class RoomNotificationSettingsScreenViewModel: RoomNotificationSettingsScreenVie
         let navigationTitle = displayAsUserDefinedRoomSettings ? roomProxy.infoPublisher.value.displayName : L10n.screenRoomDetailsNotificationTitle
         // Bipe: a DM says "conversa", never "sala" (bipe#507).
         let isDM = roomProxy.infoPublisher.value.isDM
-        let roomCustomSettingsTitle = isDM ? BipeStrings.dmNotificationsCustomTitle : L10n.screenRoomNotificationSettingsRoomCustomSettingsTitle
+        // Bipe: grupo, not sala (bipe#508)
+        let roomCustomSettingsTitle = isDM ? BipeStrings.dmNotificationsCustomTitle : BipeStrings.groupScreenRoomNotificationSettingsRoomCustomSettingsTitle
         let customSettingsSectionHeader = displayAsUserDefinedRoomSettings ? roomCustomSettingsTitle : L10n.screenRoomNotificationSettingsCustomSettingsTitle
         super.init(initialViewState: RoomNotificationSettingsScreenViewState(bindings: bindings,
                                                                              displayAsUserDefinedRoomSettings: displayAsUserDefinedRoomSettings,

@@ -39,10 +39,11 @@ nonisolated struct TimelineItemKeyForwarder: Identifiable, Hashable {
             }
         }
         
+        // Bipe: grupo, not sala (bipe#508)
         return if let displayName {
-            L10n.cryptoEventKeyForwardedKnownProfileDialogContent(displayName, id)
+            BipeStrings.groupCryptoEventKeyForwardedKnownProfileDialogContent(displayName, id)
         } else {
-            L10n.cryptoEventKeyForwardedUnknownProfileDialogContent(id)
+            BipeStrings.groupCryptoEventKeyForwardedUnknownProfileDialogContent(id)
         }
     }
 }

@@ -274,14 +274,16 @@ struct RoomScreen: View {
     private var tombstonedDialogue: some View {
         VStack(spacing: 16) {
             // Bipe: a DM says "conversa", never "sala" (bipe#507).
-            Text(context.viewState.isDM ? BipeStrings.dmTombstonedMessage : L10n.screenRoomTimelineTombstonedRoomMessage)
+            // Bipe: grupo, not sala (bipe#508)
+            Text(context.viewState.isDM ? BipeStrings.dmTombstonedMessage : BipeStrings.groupScreenRoomTimelineTombstonedRoomMessage)
                 .font(.compound.bodyMD)
                 .foregroundStyle(.compound.textPrimary)
             
             Button {
                 context.send(viewAction: .displaySuccessorRoom)
             } label: {
-                Text(context.viewState.isDM ? BipeStrings.dmTombstonedAction : L10n.screenRoomTimelineTombstonedRoomAction)
+                // Bipe: grupo, not sala (bipe#508)
+                Text(context.viewState.isDM ? BipeStrings.dmTombstonedAction : BipeStrings.groupScreenRoomTimelineTombstonedRoomAction)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.compound(.primary, size: .medium))

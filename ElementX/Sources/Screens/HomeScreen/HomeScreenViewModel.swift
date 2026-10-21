@@ -683,7 +683,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                                              title: L10n.commonError,
                                              message: roomProxy.infoPublisher.value.isDM // Bipe: a DM is a conversation
                                                  ? (isMuted ? BipeStrings.dmErrorMuting : BipeStrings.dmErrorUnmuting)
-                                                 : (isMuted ? L10n.screenRoomDetailsErrorMuting : L10n.screenRoomDetailsErrorUnmuting))
+                                                 // Bipe: grupo, not sala (bipe#508)
+                                                 : (isMuted ? BipeStrings.groupScreenRoomDetailsErrorMuting : BipeStrings.groupScreenRoomDetailsErrorUnmuting))
         }
     }
     
@@ -723,7 +724,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                     if isLastOwner {
                         state.bindings.alertInfo = .init(id: UUID(),
                                                          title: L10n.leaveRoomAlertSelectNewOwnerTitle,
-                                                         message: L10n.leaveRoomAlertSelectNewOwnerSubtitle,
+                                                         // Bipe: grupo, not sala (bipe#508)
+                                                         message: BipeStrings.groupLeaveRoomAlertSelectNewOwnerSubtitle,
                                                          primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
                                                          secondaryButton: .init(title: L10n.leaveRoomAlertSelectNewOwnerAction, role: .destructive) { [weak self] in
                                                              self?.actionsSubject.send(.transferOwnership(roomIdentifier: roomID))
@@ -742,7 +744,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)
         }
         let isDirect = state.rooms.first { $0.roomID == roomID }?.isDirect == true // Bipe: a DM is a conversation
-        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDirect ? BipeStrings.dmLeaving : L10n.commonLeavingRoom, persistent: true))
+        // Bipe: grupo, not sala (bipe#508)
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDirect ? BipeStrings.dmLeaving : BipeStrings.groupCommonLeavingRoom, persistent: true))
         
         guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID),
               case .success = await roomProxy.leaveRoom() else {
@@ -752,7 +755,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         userIndicatorController.submitIndicator(UserIndicator(id: UUID().uuidString,
                                                               type: .toast,
-                                                              title: isDirect ? BipeStrings.dmLeftByYou : L10n.commonCurrentUserLeftRoom,
+                                                              // Bipe: grupo, not sala (bipe#508)
+                                                              title: isDirect ? BipeStrings.dmLeftByYou : BipeStrings.groupCommonCurrentUserLeftRoom,
                                                               icon: \.check))
         actionsSubject.send(.roomLeft(roomIdentifier: roomID))
     }
@@ -808,7 +812,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             switch error {
             case .invalidInvite:
                 // Bipe: a DM invite says "conversa", never "sala" (bipe#507).
-                displayError(title: L10n.dialogTitleError, message: roomProxy.info.isDirect ? BipeStrings.dmInviteInvalid : L10n.errorInvalidInvite)
+                // Bipe: grupo, not sala (bipe#508)
+                displayError(title: L10n.dialogTitleError, message: roomProxy.info.isDirect ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite)
             default:
                 displayError()
             }

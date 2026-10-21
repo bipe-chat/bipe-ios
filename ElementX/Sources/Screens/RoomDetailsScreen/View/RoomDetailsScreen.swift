@@ -70,7 +70,8 @@ struct RoomDetailsScreen: View {
                 }
             }
         }
-        .navigationTitle(context.viewState.dmRecipientInfo != nil ? BipeStrings.dmDetailsTitle : L10n.screenRoomDetailsTitle) // Bipe: a DM is a conversation
+        // Bipe: grupo, not sala (bipe#508)
+        .navigationTitle(context.viewState.dmRecipientInfo != nil ? BipeStrings.dmDetailsTitle : BipeStrings.groupScreenRoomDetailsTitle) // Bipe: a DM is a conversation
         .navigationBarTitleDisplayMode(.inline)
         .track(screen: .RoomDetails)
         .interactiveQuickLook(item: $context.mediaPreviewItem, allowEditing: false)
@@ -327,7 +328,8 @@ struct RoomDetailsScreen: View {
         Section {
             if context.viewState.reportRoomEnabled {
                 // Bipe: a DM says "conversa", never "sala" (bipe#507).
-                ListRow(label: .action(title: context.viewState.isDirect ? BipeStrings.dmReport : L10n.actionReportRoom,
+                // Bipe: grupo, not sala (bipe#508)
+                ListRow(label: .action(title: context.viewState.isDirect ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom,
                                        icon: \.chatProblem,
                                        role: .destructive),
                         kind: .button { context.send(viewAction: .processTapReport) })
@@ -344,7 +346,8 @@ struct RoomDetailsScreen: View {
                                        role: .destructive),
                         kind: .button { context.send(viewAction: .processTapLeave) })
             } else {
-                ListRow(label: .action(title: L10n.screenRoomDetailsLeaveRoomTitle,
+                // Bipe: grupo, not sala (bipe#508)
+                ListRow(label: .action(title: BipeStrings.groupScreenRoomDetailsLeaveRoomTitle,
                                        icon: \.leave,
                                        role: .destructive),
                         kind: .button { context.send(viewAction: .processTapLeave) })

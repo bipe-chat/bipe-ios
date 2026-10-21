@@ -30,7 +30,8 @@ struct TombstonedAvatarImage: View {
                     .font(.system(size: geometry.size.width * 0.5625, weight: .semibold))
                     .minimumScaleFactor(0.001)
                     .frame(alignment: .center)
-                    .accessibilityLabel(isDM ? BipeStrings.dmTombstonedA11y : L10n.a11yTombstonedRoom)
+                    // Bipe: grupo, not sala (bipe#508)
+                    .accessibilityLabel(isDM ? BipeStrings.dmTombstonedA11y : BipeStrings.groupA11yTombstonedRoom)
             }
         }
         .aspectRatio(1, contentMode: .fill)
