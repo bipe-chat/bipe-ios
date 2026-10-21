@@ -1107,42 +1107,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
     }
     
-    private func processInlineReply(roomID: String, replyText: String, receiverID: String?) async {
-        guard let userSession else {
-            fatalError("User session not setup")
-        }
-        
-        // Bipe (ADR 0138 rules 2 and 5, bipe#510): reply from the account the push was for, never from the one on screen.
-        // Fail closed when that account has no live session.
-        let replySession: UserSessionProtocol? = if let receiverID, receiverID != userSession.clientProxy.userID {
-            userSessionManager.session(for: receiverID)
-        } else {
-            userSession
-        }
-        guard let replySession else {
-            MXLog.error("No live session for the account of an inline reply, not sending")
-            await notificationManager.showLocalNotification(with: "⚠️ " + L10n.commonError,
-                                                            subtitle: L10n.errorSomeMessagesHaveNotBeenSent)
-            return
-        }
-        
-        guard case let .joined(roomProxy) = await replySession.clientProxy.roomForIdentifier(roomID) else {
-            MXLog.error("Tried to reply in an unjoined room: \(roomID)")
-            return
-        }
-        
-        switch await roomProxy.timeline.sendMessage(replyText,
-                                                    html: nil,
-                                                    inReplyToEventID: nil,
-                                                    intentionalMentions: .empty) {
-        case .success:
-            break
-        default:
-            await notificationManager.showLocalNotification(with: "⚠️ " + L10n.commonError,
-                                                            subtitle: L10n.errorSomeMessagesHaveNotBeenSent)
-        }
-    }
-    
     // MARK: Toasts and loading indicators
     
     private static let loadingIndicatorIdentifier = "\(AppCoordinator.self)-Loading"
@@ -1403,6 +1367,46 @@ extension AppCoordinator {
             BipeCredentialStore.bipeApp.deletePassword(for: userID)
         } else {
             BipeCredentialStore.bipeApp.deleteAllPasswords()
+        }
+    }
+}
+
+// MARK: Inline replies
+
+private extension AppCoordinator {
+    func processInlineReply(roomID: String, replyText: String, receiverID: String?) async {
+        guard let userSession else {
+            fatalError("User session not setup")
+        }
+        
+        // Bipe (ADR 0138 rules 2 and 5, bipe#510): reply from the account the push was for, never from the one on screen.
+        // Fail closed when that account has no live session.
+        let replySession: UserSessionProtocol? = if let receiverID, receiverID != userSession.clientProxy.userID {
+            userSessionManager.session(for: receiverID)
+        } else {
+            userSession
+        }
+        guard let replySession else {
+            MXLog.error("No live session for the account of an inline reply, not sending")
+            await notificationManager.showLocalNotification(with: "⚠️ " + L10n.commonError,
+                                                            subtitle: L10n.errorSomeMessagesHaveNotBeenSent)
+            return
+        }
+        
+        guard case let .joined(roomProxy) = await replySession.clientProxy.roomForIdentifier(roomID) else {
+            MXLog.error("Tried to reply in an unjoined room: \(roomID)")
+            return
+        }
+        
+        switch await roomProxy.timeline.sendMessage(replyText,
+                                                    html: nil,
+                                                    inReplyToEventID: nil,
+                                                    intentionalMentions: .empty) {
+        case .success:
+            break
+        default:
+            await notificationManager.showLocalNotification(with: "⚠️ " + L10n.commonError,
+                                                            subtitle: L10n.errorSomeMessagesHaveNotBeenSent)
         }
     }
 }
