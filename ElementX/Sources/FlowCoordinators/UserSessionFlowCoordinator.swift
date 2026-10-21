@@ -769,18 +769,12 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         groupsTabDetails.badgeCount = groupsCount
     }
     
-    /// Bipe ADR 0112: the Você tab shows a warning when the account has one way back or none,
-    /// the same count as the badge on the "Sua conta" row.
+    /// Bipe ADR 0112: the ways-back warning shows only on the "Sua conta" row, not on the Você tab icon, so the tab has one
+    /// kind of mark (the other-account dot).
     private func setupBipeWaysBackObserver() {
         let clientProxy = userSession.clientProxy
         let appSettings = userSession.userSettings.app
         guard clientProxy.userIDServerName == appSettings.bipeSignupServerName else { return }
-        
-        BipeWaysBackReader.counted
-            .filter { $0.userID == clientProxy.userID }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.youTabDetails.bipeWarning = $0.waysBack.needsWarning }
-            .store(in: &cancellables)
         
         // A new recovery key changes the count. The first value also does the first count.
         clientProxy.secureBackupController.recoveryState
