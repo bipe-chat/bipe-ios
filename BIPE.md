@@ -240,6 +240,13 @@ Not done (needs the domain, Apple team or brand):
 - Screens: `BipeStoreScreens` (`ElementX/Sources/UITests`, DEBUG only), one `UITestsScreenIdentifier.bipeStore*` case per slug, built from the existing Bipe views on mock proxies. People come from `BipeCast` (generated from `bipe-shared/product/cast.json`); photos from `../bipe-web/src/cast/photos`, passed to the app in `BIPE_CAST_PHOTOS`. `AppSettings.bipeDisableAPIForScreenshots` and `BipeCompanySeals.storeFixture` (both DEBUG only) keep the real API out.
 - Test: `UITests/Sources/StoreScreenshotTests.swift`, one test per slug. It attaches the screen as `<slug>` and does not compare snapshots.
 
+## App Store listing upload (bipe#456)
+
+- `node Tools/Bipe/appstore-publish.mjs <metadata|screenshots|all> --dry-run` reads App Store Connect and prints every change; without `--dry-run` it sends them. Text: the iOS block of `bipe-shared/product/appstore.md` (it stops when `check-appstore` fails). Panels: `appstore/screenshots/<device>/<locale>/` from the bipe-web image builder (`--screenshots <dir>` for another folder). A second run changes nothing: it compares texts and screenshot MD5s first.
+- It renames a version in preparation to `BIPE_VERSION` (the web UI makes "1.0"), leaves out `whatsNew` until a version is live, and sets the categories. App Review details stay in `Tools/Bipe/review-details.mjs`.
+- All three tools share `Tools/Bipe/asc.mjs` (JWT and requests, `APP_ID`). The 6.9" set is the API type `APP_IPHONE_67` (`ascScreenshotType` in `appstore/devices.mjs`).
+- The record is still "Bipe Chat" `6822454419` (`chat.bipe.app.dev`). Run it for real only after bipe#419 decides the account and bundle ID.
+
 ## Troubleshooting
 
 - **Login stuck on "loading" after choosing a server:** check the app log for `TimedOut` on `/.well-known/matrix/client`. On 11 October 2026 the cause was the phone's Tailscale routing, not the app. Logs: `xcrun devicectl device copy from --device <UDID> --domain-type appGroupDataContainer --domain-identifier group.chat.bipe.dev --source Library/Logs/chat.bipe.app.dev/<file> --destination <local file>`.
