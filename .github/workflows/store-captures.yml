@@ -51,6 +51,18 @@ jobs:
       - name: Setup environment
         run: source ci_scripts/ci_common.sh && setup_github_actions_environment
 
+      # The runner image may lack the simulator that appstore/devices.mjs names. Create it from the newest
+      # iOS runtime already on the runner; nothing is downloaded.
+      - name: Create the simulator
+        run: |
+          name=$(node --input-type=module -e 'import { device } from "./appstore/devices.mjs"; console.log(device("iphone69").simulator);')
+          if ! xcrun simctl list devices available | grep -q "$name ("; then
+            runtime=$(xcrun simctl list runtimes available -j | python3 -c 'import json, sys; r = [x for x in json.load(sys.stdin)["runtimes"] if x["platform"] == "iOS"]; print(sorted(r, key=lambda x: x["version"])[-1]["identifier"] if r else "")')
+            type=$(xcrun simctl list devicetypes -j | python3 -c 'import json, sys; n = sys.argv[1]; print(next((t["identifier"] for t in json.load(sys.stdin)["devicetypes"] if t["name"] == n), ""))' "$name")
+            echo "creating $name ($type) on $runtime"
+            xcrun simctl create "$name" "$type" "$runtime"
+          fi
+
       - name: Capture
         env:
           BIPE_CAST_PHOTOS: ${{ github.workspace }}/bipe-web/src/cast/photos
