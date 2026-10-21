@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -162,7 +163,8 @@ struct SecurityAndPrivacyScreen: View {
             Text(L10n.screenSecurityAndPrivacyRoomVisibilitySectionHeader)
                 .compoundListSectionHeader()
         } footer: {
-            Text(L10n.screenSecurityAndPrivacyRoomVisibilitySectionFooter)
+            // Bipe: grupo, not sala (bipe#508)
+            Text(BipeStrings.groupScreenSecurityAndPrivacyRoomVisibilitySectionFooter)
                 .compoundListSectionFooter()
         }
     }

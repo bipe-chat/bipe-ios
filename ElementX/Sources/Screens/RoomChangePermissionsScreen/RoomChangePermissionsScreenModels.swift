@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 import MatrixRustSDK
 
@@ -75,15 +76,18 @@ extension RoomChangePermissionsScreenViewState {
             switch group {
             case .roomDetails:
                 settings[group] = [
-                    RoomPermissionsSetting(title: L10n.screenRoomChangePermissionsRoomName,
+                    // Bipe: grupo, not sala (bipe#508)
+                    RoomPermissionsSetting(title: BipeStrings.groupScreenRoomChangePermissionsRoomName,
                                            value: currentPermissions.roomName,
                                            ownPowerLevel: ownPowerLevel,
                                            keyPath: \.roomName),
-                    RoomPermissionsSetting(title: L10n.screenRoomChangePermissionsRoomAvatar,
+                    // Bipe: grupo, not sala (bipe#508)
+                    RoomPermissionsSetting(title: BipeStrings.groupScreenRoomChangePermissionsRoomAvatar,
                                            value: currentPermissions.roomAvatar,
                                            ownPowerLevel: ownPowerLevel,
                                            keyPath: \.roomAvatar),
-                    RoomPermissionsSetting(title: L10n.screenRoomChangePermissionsRoomTopic,
+                    // Bipe: grupo, not sala (bipe#508)
+                    RoomPermissionsSetting(title: BipeStrings.groupScreenRoomChangePermissionsRoomTopic,
                                            value: currentPermissions.roomTopic,
                                            ownPowerLevel: ownPowerLevel,
                                            keyPath: \.roomTopic)
@@ -124,7 +128,8 @@ extension RoomChangePermissionsScreenViewState {
             case .manageSpace:
                 if isSpace {
                     settings[group] = [
-                        RoomPermissionsSetting(title: L10n.screenRoomChangePermissionsManageSpaceRooms,
+                        // Bipe: grupo, not sala (bipe#508)
+                        RoomPermissionsSetting(title: BipeStrings.groupScreenRoomChangePermissionsManageSpaceRooms,
                                                value: currentPermissions.spaceChild,
                                                ownPowerLevel: ownPowerLevel,
                                                keyPath: \.spaceChild)

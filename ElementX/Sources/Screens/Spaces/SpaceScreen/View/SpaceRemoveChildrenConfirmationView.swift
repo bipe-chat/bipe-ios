@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -21,8 +22,9 @@ struct SpaceRemoveChildrenConfirmationView: View {
     
     var body: some View {
         ScrollView {
-            TitleAndIcon(title: L10n.screenSpaceRemoveRoomsConfirmationTitleIos(spaceName),
-                         subtitle: L10n.screenSpaceRemoveRoomsConfirmationContent,
+            // Bipe: grupo, not sala (bipe#508)
+            TitleAndIcon(title: BipeStrings.groupScreenSpaceRemoveRoomsConfirmationTitleIos(spaceName),
+                         subtitle: BipeStrings.groupScreenSpaceRemoveRoomsConfirmationContent,
                          icon: \.errorSolid,
                          iconStyle: .alertSolid)
                 .padding(24)

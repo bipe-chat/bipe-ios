@@ -63,7 +63,8 @@ struct RoomNotificationSettingsScreenViewState: BindableState {
               shouldDisplayMentionsOnlyDisclaimer else {
             return nil
         }
-        return isDM ? BipeStrings.dmNotificationsMentionsDisclaimer : L10n.screenRoomNotificationSettingsMentionsOnlyDisclaimer
+        // Bipe: grupo, not sala (bipe#508)
+        return isDM ? BipeStrings.dmNotificationsMentionsDisclaimer : BipeStrings.groupScreenRoomNotificationSettingsMentionsOnlyDisclaimer
     }
     
     func isSelected(mode: RoomNotificationModeProxy) -> Bool {

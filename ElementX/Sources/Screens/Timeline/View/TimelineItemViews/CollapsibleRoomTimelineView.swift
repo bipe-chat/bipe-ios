@@ -41,8 +41,8 @@ struct CollapsibleRoomTimelineView: View {
                 }
             } label: {
                 HStack(alignment: .center, spacing: 4) {
-                    // Bipe: a DM says "conversa", never "sala" (bipe#507).
-                    Text(context?.viewState.isDM == true ? BipeStrings.dmStateChanges(String(timelineItem.items.count)) : L10n.screenRoomTimelineStateChanges(timelineItem.items.count))
+                    // Bipe: a DM says "conversa", a group says "grupo", never "sala" (bipe#507, bipe#508).
+                    Text(context?.viewState.isDM == true ? BipeStrings.dmStateChanges(String(timelineItem.items.count)) : BipeStrings.groupScreenRoomTimelineStateChanges(String(timelineItem.items.count)))
                         .font(.compound.bodySM)
                     CompoundIcon(\.chevronRight, size: .small, relativeTo: .compound.bodySM)
                         .accessibilityLabel(isExpanded ? L10n.screenRoomGroupedStateEventsReduce : L10n.screenRoomGroupedStateEventsExpand)

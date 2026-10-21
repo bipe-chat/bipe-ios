@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -38,7 +39,8 @@ struct SpacesScreen: View {
     
     private var emptyState: some View {
         FullscreenDialog(horizontalPadding: 24) {
-            TitleAndIcon(title: L10n.screenSpaceListEmptyStateTitle,
+            // Bipe: grupo, not sala (bipe#508)
+            TitleAndIcon(title: BipeStrings.groupScreenSpaceListEmptyStateTitle,
                          icon: \.spaceSolid,
                          iconStyle: .defaultSolid)
         } bottomContent: {

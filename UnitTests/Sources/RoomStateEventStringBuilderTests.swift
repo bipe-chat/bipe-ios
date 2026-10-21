@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 @testable import ElementX
 import MatrixRustSDK
 import Testing
@@ -104,14 +105,14 @@ struct RoomStateEventStringBuilderTests {
         
         let emptyTopic = ""
         string = stringBuilder.buildString(for: .roomTopic(topic: emptyTopic), sender: you, isOutgoing: true)
-        #expect(string == L10n.stateEventRoomTopicRemovedByYou)
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemovedByYou)
         string = stringBuilder.buildString(for: .roomTopic(topic: emptyTopic), sender: other, isOutgoing: false)
-        #expect(string == L10n.stateEventRoomTopicRemoved(other.displayName ?? ""))
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemoved(other.displayName ?? ""))
         
         string = stringBuilder.buildString(for: .roomTopic(topic: nil), sender: you, isOutgoing: true)
-        #expect(string == L10n.stateEventRoomTopicRemovedByYou)
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemovedByYou)
         string = stringBuilder.buildString(for: .roomTopic(topic: nil), sender: other, isOutgoing: false)
-        #expect(string == L10n.stateEventRoomTopicRemoved(other.displayName ?? ""))
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemoved(other.displayName ?? ""))
     }
     
     // MARK: - Room Membership

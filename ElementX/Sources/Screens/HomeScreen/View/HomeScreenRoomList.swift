@@ -119,7 +119,8 @@ struct HomeScreenRoomList: View {
                                 context.send(viewAction: .reportRoom(roomIdentifier: room.id))
                             } label: {
                                 // Bipe: a DM says "conversa", never "sala" (bipe#507).
-                                Label(room.isDirect ? BipeStrings.dmReport : L10n.actionReportRoom, systemImage: "exclamationmark.bubble")
+                                // Bipe: grupo, not sala (bipe#508)
+                                Label(room.isDirect ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom, systemImage: "exclamationmark.bubble")
                             }
                         }
                         
@@ -134,7 +135,8 @@ struct HomeScreenRoomList: View {
                             Button(role: .destructive) {
                                 context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
                             } label: {
-                                Label(L10n.actionLeaveRoom, systemImage: "rectangle.portrait.and.arrow.right")
+                                // Bipe: grupo, not sala (bipe#508)
+                                Label(BipeStrings.groupActionLeaveRoom, systemImage: "rectangle.portrait.and.arrow.right")
                             }
                         }
                     }

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -131,7 +132,8 @@ class RoomDetailsEditScreenViewModel: RoomDetailsEditScreenViewModelType, RoomDe
         }
         userIndicatorController.submitIndicator(UserIndicator(id: userIndicatorID,
                                                               type: .modal(progress: .indeterminate, interactiveDismissDisabled: true, allowsInteraction: false),
-                                                              title: L10n.screenRoomDetailsUpdatingRoom,
+                                                              // Bipe: grupo, not sala (bipe#508)
+                                                              title: BipeStrings.groupScreenRoomDetailsUpdatingRoom,
                                                               persistent: true))
         
         do {
@@ -160,7 +162,8 @@ class RoomDetailsEditScreenViewModel: RoomDetailsEditScreenViewModelType, RoomDe
             actionsSubject.send(.saveFinished)
         } catch {
             state.bindings.alertInfo = .init(id: .saveError,
-                                             title: L10n.screenRoomDetailsEditionErrorTitle,
+                                             // Bipe: grupo, not sala (bipe#508)
+                                             title: BipeStrings.groupScreenRoomDetailsEditionErrorTitle,
                                              message: L10n.screenRoomDetailsEditionError)
         }
     }
