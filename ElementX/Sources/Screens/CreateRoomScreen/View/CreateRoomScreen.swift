@@ -170,7 +170,7 @@ struct CreateRoomScreen: View {
                 .focused($focus, equals: .topic)
                 .accessibilityIdentifier(A11yIdentifiers.createRoomScreen.roomTopic)
         } header: {
-            Text(L10n.screenCreateRoomTopicLabel)
+            Text(BipeStrings.groupScreenCreateRoomTopicLabel) // Bipe: "descrição", because "tópico" is a thread (bipe#527)
                 .compoundListSectionHeader()
                 .accessibilityRemoveTraits(.isHeader)
         }

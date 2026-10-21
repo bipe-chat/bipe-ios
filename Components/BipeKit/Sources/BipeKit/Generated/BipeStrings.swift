@@ -1580,12 +1580,6 @@ public enum BipeStrings {
 
     public static var dmNameRemovedByYou: String { NSLocalizedString("bipe_dm_name_removed_by_you", tableName: "Bipe", bundle: .module, comment: "") }
 
-    public static func dmTopicRemoved(_ p1: String) -> String {
-        String(format: NSLocalizedString("bipe_dm_topic_removed", tableName: "Bipe", bundle: .module, comment: ""), p1)
-    }
-
-    public static var dmTopicRemovedByYou: String { NSLocalizedString("bipe_dm_topic_removed_by_you", tableName: "Bipe", bundle: .module, comment: "") }
-
     public static func dmThirdPartyInvite(_ p1: String, _ p2: String) -> String {
         String(format: NSLocalizedString("bipe_dm_third_party_invite", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
     }
@@ -2098,6 +2092,8 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_group_common_rooms", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static var groupCommonTopic: String { NSLocalizedString("bipe_group_common_topic", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var groupCommonTopicPlaceholder: String { NSLocalizedString("bipe_group_common_topic_placeholder", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static func groupCryptoHistoryVisible(_ p1: String) -> String {
@@ -2143,6 +2139,8 @@ public enum BipeStrings {
     public static var groupScreenCreateRoomPublicOptionDescription: String { NSLocalizedString("bipe_group_screen_create_room_public_option_description", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var groupScreenCreateRoomRoomVisibilitySectionTitle: String { NSLocalizedString("bipe_group_screen_create_room_room_visibility_section_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var groupScreenCreateRoomTopicLabel: String { NSLocalizedString("bipe_group_screen_create_room_topic_label", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var groupScreenDeactivateAccountListItem2: String { NSLocalizedString("bipe_group_screen_deactivate_account_list_item_2", tableName: "Bipe", bundle: .module, comment: "") }
 
@@ -2193,6 +2191,8 @@ public enum BipeStrings {
     public static var groupScreenRoomChangeRoleConfirmChangeOwnersDescription: String { NSLocalizedString("bipe_group_screen_room_change_role_confirm_change_owners_description", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var groupScreenRoomChangeRoleConfirmDemoteSelfDescription: String { NSLocalizedString("bipe_group_screen_room_change_role_confirm_demote_self_description", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var groupScreenRoomDetailsAddTopicTitle: String { NSLocalizedString("bipe_group_screen_room_details_add_topic_title", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var groupScreenRoomDetailsBadgePublic: String { NSLocalizedString("bipe_group_screen_room_details_badge_public", tableName: "Bipe", bundle: .module, comment: "") }
 
@@ -2418,6 +2418,14 @@ public enum BipeStrings {
 
     public static func groupStateEventRoomThirdPartyRevokedInviteByYou(_ p1: String) -> String {
         String(format: NSLocalizedString("bipe_group_state_event_room_third_party_revoked_invite_by_you", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func groupStateEventRoomTopicChanged(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_group_state_event_room_topic_changed", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static func groupStateEventRoomTopicChangedByYou(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_group_state_event_room_topic_changed_by_you", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
     public static func groupStateEventRoomTopicRemoved(_ p1: String) -> String {
