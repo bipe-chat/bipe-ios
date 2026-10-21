@@ -1,0 +1,70 @@
+name: Store Captures
+
+# Bipe: runs appstore/capture.sh for the iPhone 6.9" set on a GitHub runner, so no capture runs on a laptop.
+# The artifact holds appstore/raw/iphone69/light/pt-BR: the captures and their element lists. Commit it
+# there; the bipe-web build makes the store panels and their callouts from it (bipe-chat/bipe#463).
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    paths:
+      - appstore/**
+      - UITests/Sources/StoreScreenshotTests.swift
+      - ElementX/Sources/UITests/BipeStoreScreens.swift
+      - .github/workflows/store-captures.yml
+
+permissions: {}
+
+jobs:
+  capture:
+    name: Capture
+    runs-on: xcode-27
+    timeout-minutes: 90
+    if: ${{ github.repository != 'element-hq/element-x-ios' }}
+    permissions:
+      contents: read
+
+    concurrency:
+      group: ${{ format('store-captures-{0}', github.ref) }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Fetch development media from Element LFS
+        run: |
+          git config lfs.url https://github.com/element-hq/element-x-ios.git/info/lfs
+          git lfs pull --include "Components/DevelopmentAssets/Media/**"
+
+      - name: Checkout the cast photos
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: bipe-chat/bipe-web
+          path: bipe-web
+          sparse-checkout: src/cast/photos
+          persist-credentials: false
+
+      - name: Setup environment
+        run: source ci_scripts/ci_common.sh && setup_github_actions_environment
+
+      - name: Capture
+        env:
+          BIPE_CAST_PHOTOS: ${{ github.workspace }}/bipe-web/src/cast/photos
+          DERIVED_DATA_PATH: ${{ runner.temp }}/DerivedData
+        run: |
+          appstore/capture.sh iphone69 light
+          mkdir -p "$RUNNER_TEMP/pt-BR"
+          mv appstore/raw/iphone69/light/*.png appstore/raw/iphone69/light/*.json "$RUNNER_TEMP/pt-BR/"
+
+      - name: Upload the captures
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: store-captures-iphone69-light-pt-BR
+          path: ${{ runner.temp }}/pt-BR
+          retention-days: 14
+          if-no-files-found: error

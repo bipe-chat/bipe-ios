@@ -7,7 +7,8 @@
 import XCTest
 
 /// Store screenshots (bipe#454). One test per panel slug in bipe-shared/product/appstore.md. Each test opens a mock
-/// screen from `BipeStoreScreens`, waits for text that every layout shows and attaches the screen as `<slug>`.
+/// screen from `BipeStoreScreens`, waits for text that every layout shows and attaches the screen as `<slug>` and
+/// its elements as `<slug>.elements`.
 /// Run with `appstore/capture.sh`, which sets the simulator and exports the attachments. Not a snapshot test:
 /// it compares nothing and runs on any simulator.
 @MainActor
@@ -81,6 +82,7 @@ final class StoreScreenshotTests: XCTestCase {
     }
     
     /// Attaches the screen even when the text is missing, so a failed run still shows what was on screen.
+    /// Also attaches the elements on the screen as `<slug>.elements` (JSON).
     private func capture(_ slug: String, app: XCUIApplication, after text: String) async throws {
         let found = element(containing: text, in: app).waitForExistence(timeout: 30)
         // Photos load and sheets settle after the text shows.
@@ -89,6 +91,29 @@ final class StoreScreenshotTests: XCTestCase {
         attachment.name = slug
         attachment.lifetime = .keepAlways
         add(attachment)
+        let elements = try XCTAttachment(data: elements(of: app), uniformTypeIdentifier: "public.json")
+        elements.name = "\(slug).elements"
+        elements.lifetime = .keepAlways
+        add(elements)
         XCTAssertTrue(found, "No \"\(text)\" on the \(slug) screen")
+    }
+    
+    /// Every element with a label or an identifier, with its frame in points: `{ width, height, elements: [{ type,
+    /// label, id, frame: [x, y, w, h] }] }`, in tree order. The store image builder in bipe-web places the callouts
+    /// of the panels with it (scripts/lib/callouts.mjs), so a changed screen moves the callout with it.
+    private func elements(of app: XCUIApplication) throws -> Data {
+        let root = try app.snapshot()
+        var rows = [[String: Any]]()
+        func walk(_ node: XCUIElementSnapshot) {
+            let frame = node.frame
+            if !frame.isEmpty, !node.label.isEmpty || !node.identifier.isEmpty {
+                rows.append(["type": node.elementType.rawValue, "label": node.label, "id": node.identifier,
+                             "frame": [frame.minX, frame.minY, frame.width, frame.height]])
+            }
+            node.children.forEach(walk)
+        }
+        walk(root)
+        return try JSONSerialization.data(withJSONObject: ["width": root.frame.width, "height": root.frame.height, "elements": rows],
+                                          options: [.prettyPrinted, .sortedKeys])
     }
 }
