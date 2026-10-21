@@ -73,7 +73,9 @@ final class StoreScreenshotTests: XCTestCase {
         var environment = ["UI_TESTS_SCREEN": screen.rawValue, "BIPE_STORE_LOCALE": locale]
         environment["BIPE_CAST_PHOTOS"] = ProcessInfo.processInfo.environment["BIPE_CAST_PHOTOS"]
         app.launchEnvironment = environment
-        app.launchArguments = ["-AppleLanguages", "(\(locale))", "-AppleLocale", locale.replacingOccurrences(of: "-", with: "_")]
+        // One Dynamic Type step above the default (Large), so the text reads at App Store thumbnail size (bipe#462).
+        app.launchArguments = ["-AppleLanguages", "(\(locale))", "-AppleLocale", locale.replacingOccurrences(of: "-", with: "_"),
+                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXL"]
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 120), "\(screen.rawValue) did not start")
         return app

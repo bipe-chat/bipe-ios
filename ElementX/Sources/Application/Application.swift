@@ -124,7 +124,8 @@ struct Application: App {
     
     /// Hide the status bar so it doesn't interfere with the screenshot tests
     private var shouldHideStatusBar: Bool {
-        ProcessInfo.isRunningUITests
+        // Bipe: the store screenshots keep the status bar that capture.sh sets to 9:41 (bipe#462).
+        ProcessInfo.isRunningUITests && ProcessInfo.testScreenID?.rawValue.hasPrefix("bipeStore") != true
     }
     
     /// https://github.com/element-hq/element-x-ios/issues/1824
