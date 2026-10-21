@@ -155,7 +155,7 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
     /// `detectPatterns` does not read the pasteboard, so iOS shows no paste alert. Only the system paste button reads it.
     private func detectBipePastedInvite() async {
         guard bipePendingInviteCode == nil else { return }
-        let patterns = try? await UIPasteboard.general.detectPatterns(for: [\UIPasteboard.DetectedValues.probableWebURL])
+        let patterns = try? await UIPasteboard.general.detectedPatterns(for: [\UIPasteboard.DetectedValues.probableWebURL])
         state.bipeOffersPasteInvite = patterns?.contains(\UIPasteboard.DetectedValues.probableWebURL) == true
     }
     
