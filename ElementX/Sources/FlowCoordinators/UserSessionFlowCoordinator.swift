@@ -337,11 +337,12 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         observeRoomListFlow(chatsTabFlowCoordinator, tab: .chats)
         observeRoomListFlow(groupsTabFlowCoordinator, tab: .groups)
         
-        // Bipe ADR 0135: the switch from the Você tab.
+        // Bipe ADR 0135: the switch and "Nova conta" from the Você tab.
         bipeAccountSwitcher.onSwitch = { [weak self] userID in
             guard let self, userID != userSession.clientProxy.userID else { return }
             actionsSubject.send(.bipeSwitchAccount(userID: userID))
         }
+        bipeAccountSwitcher.onAddAccount = { [weak self] in self?.presentBipeNewAccountScreen() }
         
         youTabFlowCoordinator.actions
             .sink { [weak self] action in
@@ -562,7 +563,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     
     // MARK: - Bipe New Account
     
-    /// "Nova conta" (bipe#445, #446), from Sua conta. The chosen flow starts after the sheet closes.
+    /// "Nova conta" (bipe#445, #446), from the Você tab menu and from Sua conta. The chosen flow starts after the sheet closes.
     private func presentBipeNewAccountScreen() {
         let stackCoordinator = NavigationStackCoordinator()
         let coordinator = BipeNewAccountScreenCoordinator(parameters: .init(userSession: userSession,

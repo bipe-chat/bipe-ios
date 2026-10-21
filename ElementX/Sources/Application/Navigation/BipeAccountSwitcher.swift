@@ -19,6 +19,7 @@ import UserNotifications
     private(set) var currentAvatar: UIImage?
     
     @ObservationIgnored var onSwitch: ((String) -> Void)?
+    @ObservationIgnored var onAddAccount: (() -> Void)?
     
     @ObservationIgnored private let userSession: UserSessionProtocol
     @ObservationIgnored private var photoTasks: [String: Task<Void, Never>] = [:]
@@ -62,7 +63,8 @@ import UserNotifications
         onSwitch?(next.userID)
     }
     
-    /// The accounts with a check on the current one. "Nova conta" lives in Sua conta.
+    /// The accounts with a check on the current one. "Nova conta" shows only while the phone has one account; with more,
+    /// it is in Sua conta.
     func makeMenu() -> UIMenu {
         let accountActions = accounts.map { account in
             UIAction(title: account.label, image: account.avatar, state: account.isCurrent ? .on : .off) { [weak self] _ in
@@ -70,7 +72,15 @@ import UserNotifications
                 self?.onSwitch?(account.userID)
             }
         }
-        return UIMenu(title: BipeStrings.accountOnDevice, children: accountActions)
+        var children: [UIMenuElement] = [UIMenu(options: .displayInline, children: accountActions)]
+        
+        if accounts.count == 1, BipeAccountCap.canAdd(signedInUserIDs: accounts.map(\.userID)) {
+            let addAction = UIAction(title: BipeStrings.accountAdd, image: UIImage(systemName: "plus")) { [weak self] _ in
+                self?.onAddAccount?()
+            }
+            children.append(UIMenu(options: .displayInline, children: [addAction]))
+        }
+        return UIMenu(children: children)
     }
     
     // MARK: - Private
