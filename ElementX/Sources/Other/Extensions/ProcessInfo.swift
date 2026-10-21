@@ -27,6 +27,11 @@ nonisolated extension ProcessInfo {
         #endif
     }
     
+    /// UI tests hide the status bar for stable snapshots. Bipe: the store screenshots keep it (9:41 from capture.sh, bipe#462).
+    static var shouldHideStatusBarForUITests: Bool {
+        isRunningUITests && testScreenID?.rawValue.hasPrefix("bipeStore") != true
+    }
+    
     static var isRunningIntegrationTests: Bool {
         #if DEBUG
         processInfo.environment["IS_RUNNING_INTEGRATION_TESTS"] == "1"
