@@ -69,6 +69,7 @@ targets:
 
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: 1 # Bipe: iPhone only (MZ, 20 Oct 2026, bipe#419 step 4)
         PRODUCT_NAME: NSE
         PRODUCT_DISPLAY_NAME: $(APP_DISPLAY_NAME)
         PRODUCT_BUNDLE_IDENTIFIER: ${BASE_BUNDLE_IDENTIFIER}.nse
