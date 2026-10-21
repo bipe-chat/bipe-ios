@@ -26,13 +26,14 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
                 return
             }
             
-            state.pinnedEventsActionState = .loaded(numberOfItems: pinnedEventsTimelineItemProvider.itemProxies.filter(\.isEvent).count)
+            state.pinnedEventsActionState = .loaded(numberOfItems: bipeKeptPinnedEvents(pinnedEventsTimelineItemProvider.itemProxies).count)
             
             pinnedEventsTimelineItemProvider.updatePublisher
                 // When pinning or unpinning an item, the timeline might return empty for a short while, so we need to debounce it to prevent weird UI behaviours like the banner disappearing
                 .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
                 .sink { [weak self] updatedItems, _ in
-                    self?.state.pinnedEventsActionState = .loaded(numberOfItems: updatedItems.filter(\.isEvent).count)
+                    guard let self else { return }
+                    state.pinnedEventsActionState = .loaded(numberOfItems: bipeKeptPinnedEvents(updatedItems).count)
                 }
                 .store(in: &cancellables)
         }
@@ -568,6 +569,11 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             
             state.bindings.mediaPreviewItem = await MediaPreviewItem.load(from: url, title: roomProxy.infoPublisher.value.displayName, using: userSession.mediaProvider)
         }
+    }
+    
+    /// Bipe (bipe#479): a cleared DM does not count the pinned events at or before its marker.
+    private func bipeKeptPinnedEvents(_ itemProxies: [TimelineItemProxy]) -> [TimelineItemProxy] {
+        BipeClearedChatsStore.keptEvents(itemProxies, roomID: roomProxy.id, userID: roomProxy.ownUserID).filter(\.isEvent)
     }
     
     private func setupPinnedEventsTimelineItemProviderIfNeeded() {

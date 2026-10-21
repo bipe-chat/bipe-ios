@@ -6,6 +6,7 @@
 
 import BipeKit
 import Combine
+import Intents
 import MatrixRustSDK
 import SwiftUI
 
@@ -82,6 +83,11 @@ final class BipeClearedChatsStore {
         ClearedChats.keepsEvent(marker: marker(for: roomID), eventTs: date.bipeMilliseconds)
     }
     
+    /// `BipeClearedTimeline.keptEvents` with the marker of `roomID`, for screens that read a pinned events timeline.
+    static func keptEvents(_ itemProxies: [TimelineItemProxy], roomID: String, userID: String) -> [TimelineItemProxy] {
+        BipeClearedTimeline.keptEvents(itemProxies, marker: existingStore(userID: userID)?.marker(for: roomID))
+    }
+    
     func refresh() {
         guard !isRefreshing, clientProxy != nil else { return }
         isRefreshing = true
@@ -119,9 +125,12 @@ final class BipeClearedChatsStore {
     private func writeMarker(roomID: String, latestTs: UInt64) async -> Bool {
         guard let clientProxy else { return false }
         
-        // The local copy of the event can lag behind a write that has not come back through sync yet,
-        // so the markers this store knows go in as well. A marker never moves back, so that is safe.
-        var json = await clientProxy.bipeAccountData(eventType: ClearedChats.eventType)
+        // The SDK's copy waits for the next sync, so a marker that another device wrote a moment ago can be missing
+        // from it. Read the server's copy. Fail closed: no write without it, so no marker is lost (bipe#479).
+        guard case var .success(json) = await serverAccountData(clientProxy: clientProxy) else {
+            return false
+        }
+        // The markers this store knows go in as well. A marker never moves back, so that is safe.
         for (knownRoomID, knownTs) in clearedChats.markers {
             json = ClearedChats.json(clearing: json, roomID: knownRoomID, at: knownTs)
         }
@@ -136,7 +145,28 @@ final class BipeClearedChatsStore {
         }
         
         apply(ClearedChats(json: content))
+        // The share sheet stops suggesting the DM. A message sent later donates it again.
+        try? await INInteraction.delete(with: roomID)
         return true
+    }
+    
+    /// The event over HTTP. `.success(nil)` when the server has none (404).
+    private func serverAccountData(clientProxy: ClientProxyProtocol) async -> Result<String?, BipeAPIError> {
+        guard let homeserverURL = URL(string: clientProxy.homeserver) else {
+            MXLog.error("Bipe: invalid homeserver URL for the cleared chats")
+            return .failure(.unexpectedResponse(statusCode: nil))
+        }
+        let client = StickerPackClient(homeserverURL: homeserverURL)
+        let userID = clientProxy.userID
+        do {
+            let data = try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { token throws(BipeAPIError) in
+                try await client.accountData(userID: userID, eventType: ClearedChats.eventType, accessToken: token)
+            }
+            return .success(data.map { String(decoding: $0, as: UTF8.self) })
+        } catch {
+            MXLog.error("Bipe: reading the cleared chats from the server failed: \(error)")
+            return .failure(error)
+        }
     }
     
     // MARK: - Private
@@ -178,6 +208,12 @@ nonisolated enum BipeClearedTimeline {
             items.insert(divider, at: 0)
         }
         return (items, true)
+    }
+    
+    /// Drops the events at or before the marker and keeps the rest as they are. For the pinned events (banner, room details count).
+    static func keptEvents(_ itemProxies: [TimelineItemProxy], marker: UInt64?) -> [TimelineItemProxy] {
+        guard let marker else { return itemProxies }
+        return itemProxies.filter { !isDropped($0, marker: marker) }
     }
     
     private static func isDropped(_ itemProxy: TimelineItemProxy, marker: UInt64) -> Bool {

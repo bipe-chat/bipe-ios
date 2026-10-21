@@ -13,6 +13,7 @@ typealias RoomSelectionScreenViewModelType = StateStoreViewModel<RoomSelectionSc
 
 class RoomSelectionScreenViewModel: RoomSelectionScreenViewModelType, RoomSelectionScreenViewModelProtocol {
     private let roomSummaryProvider: RoomSummaryProviderProtocol
+    private let bipeClearedChats: BipeClearedChatsStore
     
     private var actionsSubject: PassthroughSubject<RoomSelectionScreenViewModelAction, Never> = .init()
     
@@ -23,10 +24,19 @@ class RoomSelectionScreenViewModel: RoomSelectionScreenViewModelType, RoomSelect
     init(userSession: UserSessionProtocol,
          roomSummaryProvider: RoomSummaryProviderProtocol) {
         self.roomSummaryProvider = roomSummaryProvider
+        bipeClearedChats = BipeClearedChatsStore.store(for: userSession.clientProxy)
         
         super.init(initialViewState: RoomSelectionScreenViewState(), mediaProvider: userSession.mediaProvider)
         
         roomSummaryProvider.roomListPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateRooms()
+            }
+            .store(in: &cancellables)
+        
+        bipeClearedChats.publisher
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateRooms()
@@ -77,7 +87,8 @@ class RoomSelectionScreenViewModel: RoomSelectionScreenViewModelType, RoomSelect
     private func updateRooms() {
         var rooms = [RoomSelectionRoom]()
         
-        for summary in roomSummaryProvider.roomListPublisher.value where !summary.isTombstoned {
+        // Bipe (bipe#479): a cleared DM stays out until a newer event arrives, as in the room list.
+        for summary in roomSummaryProvider.roomListPublisher.value where !summary.isTombstoned && !bipeClearedChats.isHidden(summary) {
             rooms.append(.init(id: summary.id,
                                title: summary.name,
                                description: summary.roomListDescription,
