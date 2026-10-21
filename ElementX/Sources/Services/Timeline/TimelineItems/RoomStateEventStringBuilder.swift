@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import MatrixRustSDK
 import UIKit
 
@@ -17,7 +18,8 @@ nonisolated struct RoomStateEventStringBuilder {
                      memberUserID: String,
                      memberDisplayName: String?,
                      sender: TimelineItemSender,
-                     isOutgoing: Bool) -> String? {
+                     isOutgoing: Bool,
+                     isDM: Bool = false) -> String? {
         guard let change else {
             MXLog.verbose("Filtering timeline item for membership change that is nil")
             return nil
@@ -62,6 +64,10 @@ nonisolated struct RoomStateEventStringBuilder {
         case .invitationRejected:
             return memberIsYou ? L10n.stateEventRoomRejectByYou : L10n.stateEventRoomReject(senderDisplayName)
         case .invitationRevoked:
+            // Bipe: a DM says "conversa", never "sala" (bipe#507).
+            if isDM {
+                return senderIsYou ? BipeStrings.dmThirdPartyRevokedInviteByYou(member) : BipeStrings.dmThirdPartyRevokedInvite(senderDisplayName, member)
+            }
             return senderIsYou ? L10n.stateEventRoomThirdPartyRevokedInviteByYou(member) : L10n.stateEventRoomThirdPartyRevokedInvite(senderDisplayName, member)
         case .knocked:
             return memberIsYou ? L10n.stateEventRoomKnockByYou : L10n.stateEventRoomKnock(member)
@@ -149,8 +155,13 @@ nonisolated struct RoomStateEventStringBuilder {
         }
     }
     
-    func buildString(for state: OtherState, sender: TimelineItemSender, isOutgoing: Bool) -> String? {
+    func buildString(for state: OtherState, sender: TimelineItemSender, isOutgoing: Bool, isDM: Bool = false) -> String? {
         let displayName = sender.disambiguatedDisplayName ?? sender.id
+        
+        // Bipe: a DM says "conversa", never "sala" (bipe#507).
+        if isDM, let text = buildDMString(for: state, displayName: displayName, isOutgoing: isOutgoing) {
+            return text
+        }
         
         switch state {
         case .roomAvatar(let url):
@@ -232,5 +243,31 @@ nonisolated struct RoomStateEventStringBuilder {
         
         MXLog.verbose("Filtering timeline item for state: \(state)")
         return nil
+    }
+    
+    /// Bipe: the DM variants of the state lines that say "sala" upstream (bipe#507). `nil` means use the upstream line.
+    private func buildDMString(for state: OtherState, displayName: String, isOutgoing: Bool) -> String? {
+        switch state {
+        case .roomAvatar(let url):
+            if url != nil {
+                return isOutgoing ? BipeStrings.dmAvatarChangedByYou : BipeStrings.dmAvatarChanged(displayName)
+            }
+            return isOutgoing ? BipeStrings.dmAvatarRemovedByYou : BipeStrings.dmAvatarRemoved(displayName)
+        case .roomName(let name):
+            if let name {
+                return isOutgoing ? BipeStrings.dmNameChangedByYou(name) : BipeStrings.dmNameChanged(displayName, name)
+            }
+            return isOutgoing ? BipeStrings.dmNameRemovedByYou : BipeStrings.dmNameRemoved(displayName)
+        case .roomThirdPartyInvite(let invitee):
+            guard let invitee else { return nil }
+            return isOutgoing ? BipeStrings.dmThirdPartyInviteByYou(invitee) : BipeStrings.dmThirdPartyInvite(displayName, invitee)
+        case .roomTopic(let topic):
+            if let topic, !topic.isBlank {
+                return nil
+            }
+            return isOutgoing ? BipeStrings.dmTopicRemovedByYou : BipeStrings.dmTopicRemoved(displayName)
+        default:
+            return nil
+        }
     }
 }

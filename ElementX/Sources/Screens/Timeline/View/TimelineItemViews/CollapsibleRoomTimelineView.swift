@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -14,6 +15,8 @@ struct CollapsibleRoomTimelineView: View {
         case disclosure
         case events
     }
+    
+    @Environment(\.timelineContext) private var context
     
     private let timelineItem: CollapsibleTimelineItem
     private let groupedViewStates: [RoomTimelineItemViewState]
@@ -38,7 +41,8 @@ struct CollapsibleRoomTimelineView: View {
                 }
             } label: {
                 HStack(alignment: .center, spacing: 4) {
-                    Text(L10n.screenRoomTimelineStateChanges(timelineItem.items.count))
+                    // Bipe: a DM says "conversa", never "sala" (bipe#507).
+                    Text(context?.viewState.isDM == true ? BipeStrings.dmStateChanges(String(timelineItem.items.count)) : L10n.screenRoomTimelineStateChanges(timelineItem.items.count))
                         .font(.compound.bodySM)
                     CompoundIcon(\.chevronRight, size: .small, relativeTo: .compound.bodySM)
                         .accessibilityLabel(isExpanded ? L10n.screenRoomGroupedStateEventsReduce : L10n.screenRoomGroupedStateEventsExpand)

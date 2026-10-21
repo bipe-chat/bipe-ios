@@ -295,7 +295,7 @@ struct HomeScreenRoom: Identifiable, Equatable {
     
     var displayedLastMessage: AttributedString? {
         if isTombstoned {
-            AttributedString(L10n.screenRoomlistTombstonedRoomDescription)
+            AttributedString(isDirect ? BipeStrings.dmTombstonedRow : L10n.screenRoomlistTombstonedRoomDescription) // Bipe: bipe#507
         } else if lastMessageState == .failed {
             AttributedString(L10n.commonMessageFailedToSend)
         } else {

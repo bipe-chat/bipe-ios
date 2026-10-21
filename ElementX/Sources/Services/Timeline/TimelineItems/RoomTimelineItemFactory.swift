@@ -61,7 +61,7 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             if isDM, case .roomEncryption = content {
                 return nil
             }
-            return buildStateTimelineItem(for: eventItemProxy, state: content, isOutgoing: isOutgoing)
+            return buildStateTimelineItem(for: eventItemProxy, state: content, isOutgoing: isOutgoing, isDM: isDM)
         case .roomMembership(userId: let userID, let displayName, change: let change, let reason):
             if isDM, change == .joined, userID == self.userID {
                 return nil
@@ -74,7 +74,7 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                 let text = userID == self.userID ? BipeStrings.dmLeftByYou : BipeStrings.dmLeft(displayName ?? userID)
                 return buildStateTimelineItem(for: eventItemProxy, text: text, isOutgoing: isOutgoing)
             }
-            return buildStateMembershipChangeTimelineItem(for: eventItemProxy, memberUserID: userID, memberDisplayName: displayName, membershipChange: change, reason: reason, isOutgoing: isOutgoing)
+            return buildStateMembershipChangeTimelineItem(for: eventItemProxy, memberUserID: userID, memberDisplayName: displayName, membershipChange: change, reason: reason, isOutgoing: isOutgoing, isDM: isDM)
         case .profileChange(let displayName, let prevDisplayName, let avatarUrl, let prevAvatarUrl):
             return buildStateProfileChangeTimelineItem(for: eventItemProxy,
                                                        displayName: displayName,
@@ -948,8 +948,9 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
     
     private func buildStateTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                         state: OtherState,
-                                        isOutgoing: Bool) -> RoomTimelineItemProtocol? {
-        guard let text = stateEventStringBuilder.buildString(for: state, sender: eventItemProxy.sender, isOutgoing: isOutgoing) else { return nil }
+                                        isOutgoing: Bool,
+                                        isDM: Bool) -> RoomTimelineItemProtocol? {
+        guard let text = stateEventStringBuilder.buildString(for: state, sender: eventItemProxy.sender, isOutgoing: isOutgoing, isDM: isDM) else { return nil }
         return buildStateTimelineItem(for: eventItemProxy, text: text, isOutgoing: isOutgoing)
     }
     
@@ -958,13 +959,15 @@ nonisolated struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                         memberDisplayName: String?,
                                                         membershipChange: MembershipChange?,
                                                         reason: String?,
-                                                        isOutgoing: Bool) -> RoomTimelineItemProtocol? {
+                                                        isOutgoing: Bool,
+                                                        isDM: Bool) -> RoomTimelineItemProtocol? {
         guard let text = stateEventStringBuilder.buildString(for: membershipChange,
                                                              reason: reason,
                                                              memberUserID: memberUserID,
                                                              memberDisplayName: memberDisplayName,
                                                              sender: eventItemProxy.sender,
-                                                             isOutgoing: isOutgoing) else {
+                                                             isOutgoing: isOutgoing,
+                                                             isDM: isDM) else {
             return nil
         }
         

@@ -52,6 +52,7 @@ class TimelineMediaPreviewViewModel: TimelineMediaPreviewViewModelType {
                                                                                      allowedGalleryItemTypes: timelineViewModel.context.viewState.allowedGalleryItemTypes)),
                    mediaProvider: mediaProvider)
         
+        state.isDM = timelineViewModel.context.viewState.isDM // Bipe: bipe#507
         rebuildCurrentItemActions()
         
         let canRedactSelfPublisher = timelineViewModel.context.$viewState.map(\.canCurrentUserRedactSelf)
@@ -100,6 +101,7 @@ class TimelineMediaPreviewViewModel: TimelineMediaPreviewViewModelType {
                                                                                      initialIndex: initialIndex)),
                    mediaProvider: mediaProvider)
         
+        state.isDM = timelineViewModel.context.viewState.isDM // Bipe: bipe#507
         rebuildCurrentItemActions()
         
         timelineViewModel.context.$viewState.map(\.canCurrentUserRedactSelf)

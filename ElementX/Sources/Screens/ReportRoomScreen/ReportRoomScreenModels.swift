@@ -14,6 +14,8 @@ enum ReportRoomScreenViewModelAction: Equatable {
 
 struct ReportRoomScreenViewState: BindableState {
     var bindings = ReportRoomScreenViewStateBindings()
+    /// Bipe: a DM says "conversa", never "sala" (bipe#507).
+    var isDM = false
     
     var canReport: Bool {
         !bindings.reason.isEmpty

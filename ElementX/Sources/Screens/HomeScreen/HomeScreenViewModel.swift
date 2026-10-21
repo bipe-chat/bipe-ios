@@ -807,7 +807,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         case .failure(let error):
             switch error {
             case .invalidInvite:
-                displayError(title: L10n.dialogTitleError, message: L10n.errorInvalidInvite)
+                // Bipe: a DM invite says "conversa", never "sala" (bipe#507).
+                displayError(title: L10n.dialogTitleError, message: roomProxy.info.isDirect ? BipeStrings.dmInviteInvalid : L10n.errorInvalidInvite)
             default:
                 displayError()
             }

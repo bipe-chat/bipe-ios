@@ -180,7 +180,7 @@ nonisolated extension RoomSummary {
     /// This doesn't have to work properly for DM invites, the heroes are always empty
     var avatar: RoomAvatar {
         guard !isTombstoned else {
-            return .tombstoned
+            return .tombstoned(isDM: isDirect) // Bipe: bipe#507
         }
         
         if isSpace {

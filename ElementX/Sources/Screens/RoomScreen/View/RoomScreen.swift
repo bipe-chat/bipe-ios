@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Compound
 import SwiftUI
@@ -266,20 +267,21 @@ struct RoomScreen: View {
             // We are not sure why but when wrapped in the room screen the composer toolbar breaks the accessibility tests
             composerToolbar
         } else {
-            ComposerDisabledView()
+            ComposerDisabledView(isDM: context.viewState.isDM) // Bipe: bipe#507
         }
     }
     
     private var tombstonedDialogue: some View {
         VStack(spacing: 16) {
-            Text(L10n.screenRoomTimelineTombstonedRoomMessage)
+            // Bipe: a DM says "conversa", never "sala" (bipe#507).
+            Text(context.viewState.isDM ? BipeStrings.dmTombstonedMessage : L10n.screenRoomTimelineTombstonedRoomMessage)
                 .font(.compound.bodyMD)
                 .foregroundStyle(.compound.textPrimary)
             
             Button {
                 context.send(viewAction: .displaySuccessorRoom)
             } label: {
-                Text(L10n.screenRoomTimelineTombstonedRoomAction)
+                Text(context.viewState.isDM ? BipeStrings.dmTombstonedAction : L10n.screenRoomTimelineTombstonedRoomAction)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.compound(.primary, size: .medium))

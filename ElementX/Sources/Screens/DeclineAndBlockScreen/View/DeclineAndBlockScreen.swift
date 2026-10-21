@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -33,17 +34,18 @@ struct DeclineAndBlockScreen: View {
             ListRow(label: .plain(title: L10n.screenDeclineAndBlockBlockUserOptionTitle),
                     kind: .toggle($context.shouldBlockUser))
         } footer: {
-            Text(L10n.screenDeclineAndBlockBlockUserOptionDescription)
+            // Bipe: a DM invite says "conversa", never "sala" (bipe#507).
+            Text(context.viewState.isDM ? BipeStrings.dmDeclineBlockDescription : L10n.screenDeclineAndBlockBlockUserOptionDescription)
                 .compoundListSectionFooter()
         }
     }
     
     private var reportSection: some View {
         Section {
-            ListRow(label: .plain(title: L10n.actionReportRoom),
+            ListRow(label: .plain(title: context.viewState.isDM ? BipeStrings.dmReport : L10n.actionReportRoom),
                     kind: .toggle($context.shouldReport))
         } footer: {
-            Text(L10n.screenDeclineAndBlockReportUserOptionDescription)
+            Text(context.viewState.isDM ? BipeStrings.dmDeclineReportDescription : L10n.screenDeclineAndBlockReportUserOptionDescription)
                 .compoundListSectionFooter()
         }
     }

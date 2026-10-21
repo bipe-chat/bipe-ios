@@ -70,7 +70,7 @@ struct ThreadTimelineScreen: View {
         if context.viewState.canSendMessage {
             composerToolbar
         } else {
-            ComposerDisabledView()
+            ComposerDisabledView(isDM: timelineContext.viewState.isDM) // Bipe: bipe#507
         }
     }
     

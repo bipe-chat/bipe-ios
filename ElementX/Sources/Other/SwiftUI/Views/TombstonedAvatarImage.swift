@@ -6,14 +6,18 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
 struct TombstonedAvatarImage: View {
     @ScaledMetric private var frameSize: CGFloat
+    /// Bipe: a DM says "conversa", never "sala" (bipe#507).
+    private let isDM: Bool
     
-    init(avatarSize: Avatars.Size) {
+    init(avatarSize: Avatars.Size, isDM: Bool = false) {
         _frameSize = ScaledMetric(wrappedValue: avatarSize.value)
+        self.isDM = isDM
     }
     
     var body: some View {
@@ -26,7 +30,7 @@ struct TombstonedAvatarImage: View {
                     .font(.system(size: geometry.size.width * 0.5625, weight: .semibold))
                     .minimumScaleFactor(0.001)
                     .frame(alignment: .center)
-                    .accessibilityLabel(L10n.a11yTombstonedRoom)
+                    .accessibilityLabel(isDM ? BipeStrings.dmTombstonedA11y : L10n.a11yTombstonedRoom)
             }
         }
         .aspectRatio(1, contentMode: .fill)
