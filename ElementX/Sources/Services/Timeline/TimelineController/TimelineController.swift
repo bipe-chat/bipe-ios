@@ -835,6 +835,8 @@ class TimelineController: TimelineControllerProtocol {
         }
         
         let interaction = INInteraction(intent: sendMessageIntent, response: nil)
+        // Bipe (bipe#479): "Apagar conversa" deletes the room's donations by this ID.
+        interaction.groupIdentifier = roomProxy.id
         
         do {
             try await interaction.donate()

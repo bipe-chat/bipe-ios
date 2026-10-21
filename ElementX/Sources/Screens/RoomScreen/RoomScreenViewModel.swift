@@ -338,7 +338,8 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
     private func buildPinnedEventContents(timelineItems: [TimelineItemProxy]) {
         var pinnedEventContents = OrderedDictionary<String, AttributedString>()
         
-        for item in timelineItems {
+        // Bipe (bipe#479): the banner of a cleared DM leaves out the pinned events at or before its marker.
+        for item in BipeClearedChatsStore.keptEvents(timelineItems, roomID: roomProxy.id, userID: roomProxy.ownUserID) {
             // Only remote events are pinned
             if case let .event(event) = item,
                let eventID = event.id.eventID {

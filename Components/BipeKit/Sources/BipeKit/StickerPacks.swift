@@ -157,6 +157,12 @@ public struct StickerPackClient: Sendable {
         return packs
     }
     
+    /// A global account data event as the server has it now: the content JSON, nil when the event does not exist.
+    /// The SDK's copy waits for the next sync, so a read-merge-write uses this one (cleared chats, bipe#479).
+    public func accountData(userID: String, eventType: String, accessToken: String) async throws(BipeAPIError) -> Data? {
+        try await get(["user", userID, "account_data", eventType], accessToken: accessToken)
+    }
+    
     // MARK: - Private
     
     private func roomPacks(roomID: String, accessToken: String) async throws(BipeAPIError) -> [StickerPack] {
