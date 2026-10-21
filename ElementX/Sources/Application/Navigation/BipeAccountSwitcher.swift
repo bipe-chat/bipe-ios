@@ -7,28 +7,31 @@
 import BipeKit
 import Combine
 import SwiftUI
+import UserNotifications
 
 /// Bipe: the account switcher on the Você tab (ADR 0135, bipe#446). A double tap switches to the next account, a long press
 /// opens the account menu. The tab bar and the iPad rail both use this one menu.
 @Observable final class BipeAccountSwitcher {
     /// Every account on the phone, the current one first.
     private(set) var accounts: [BipeAccountMenuItem] = []
+    /// The Você tab icon: the photo, else the initials, in the account's shape, with a red dot while another account
+    /// has notifications. `nil` until the profile loads.
+    private(set) var currentAvatar: UIImage?
     
     @ObservationIgnored var onSwitch: ((String) -> Void)?
     @ObservationIgnored var onAddAccount: (() -> Void)?
     
     @ObservationIgnored private let userSession: UserSessionProtocol
     @ObservationIgnored private var photoTask: Task<Void, Never>?
+    @ObservationIgnored private var currentPhoto: UIImage?
+    /// The other accounts with a notification in Notification Center. Their sessions are closed, so the NSE's notifications
+    /// are the only sign of new messages for them.
+    @ObservationIgnored private var notifiedUserIDs: Set<String> = []
     @ObservationIgnored private var cancellables = Set<AnyCancellable>()
     
     /// With one account a double tap is a tap.
     var canSwitch: Bool {
         accounts.count > 1
-    }
-    
-    /// The Você tab icon: the photo, else the initials, in the account's shape. `nil` until the profile loads.
-    var currentAvatar: UIImage? {
-        accounts.first(where: \.isCurrent)?.avatar
     }
     
     init(userSession: UserSessionProtocol) {
@@ -39,6 +42,20 @@ import SwiftUI
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.updateAccounts(profile: $0) }
             .store(in: &cancellables)
+        
+        NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshNotifications() }
+            .store(in: &cancellables)
+        NotificationCenter.default.publisher(for: .bipeOtherAccountNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                guard let self, let userID = $0.object as? String, userID != userSession.clientProxy.userID else { return }
+                notifiedUserIDs.insert(userID)
+                redrawAvatars()
+            }
+            .store(in: &cancellables)
+        refreshNotifications()
     }
     
     func switchToNextAccount() {
@@ -76,12 +93,36 @@ import SwiftUI
         let others = BipeSignedInAccounts.userIDs.filter { $0 != currentUserID }.sorted().map {
             BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false, isCompany: BipeAccountLabels.isCompany($0))
         }
-        accounts = ([current] + others).map { $0.withAvatar(photo: nil) }
-        loadPhoto(url: profile.avatarURL, userID: currentUserID)
+        accounts = [current] + others
+        currentPhoto = nil
+        redrawAvatars()
+        loadPhoto(url: profile.avatarURL)
+    }
+    
+    /// Notifications that the user cleared, or that the other account read on this phone, remove the dot.
+    private func refreshNotifications() {
+        Task { [weak self] in
+            let receiverIDs = await UNUserNotificationCenter.current().deliveredNotifications().compactMap(\.request.content.receiverID)
+            guard let self else { return }
+            let currentUserID = userSession.clientProxy.userID
+            let notified = Set(receiverIDs.filter { $0 != currentUserID })
+            guard notified != notifiedUserIDs else { return }
+            notifiedUserIDs = notified
+            redrawAvatars()
+        }
+    }
+    
+    /// The current account shows the dot for the others; another account's row shows its own.
+    private func redrawAvatars() {
+        let othersNotified = accounts.contains { !$0.isCurrent && notifiedUserIDs.contains($0.userID) }
+        accounts = accounts.map { account in
+            account.withAvatar(photo: account.isCurrent ? currentPhoto : nil, showsDot: !account.isCurrent && notifiedUserIDs.contains(account.userID))
+        }
+        currentAvatar = accounts.first(where: \.isCurrent)?.drawAvatar(photo: currentPhoto, showsDot: othersNotified)
     }
     
     /// Only the current account's session is open, so only its photo can load. The other accounts keep their initials.
-    private func loadPhoto(url: URL?, userID: String) {
+    private func loadPhoto(url: URL?) {
         photoTask?.cancel()
         guard let url, let source = try? MediaSourceProxy(url: url, mimeType: nil) else { return }
         
@@ -89,7 +130,8 @@ import SwiftUI
         let task = userSession.mediaProvider.loadImageRetryingOnReconnection(source, size: CGSize(width: size * 3, height: size * 3))
         photoTask = Task { [weak self] in
             guard let photo = try? await task.value, !Task.isCancelled, let self else { return }
-            accounts = accounts.map { $0.userID == userID ? $0.withAvatar(photo: photo) : $0 }
+            currentPhoto = photo
+            redrawAvatars()
         }
     }
 }
@@ -97,6 +139,9 @@ import SwiftUI
 /// Bipe: one row of the account menu (ADR 0086, bipe#267).
 struct BipeAccountMenuItem: Identifiable, Equatable {
     static let avatarSize: CGFloat = 24
+    /// The notification dot sits on the lower right, cut out of the avatar by a clear ring so it reads on any background.
+    private static let dotSize: CGFloat = 8
+    private static let dotRing: CGFloat = 1.5
     
     let userID: String
     let label: String
@@ -109,8 +154,15 @@ struct BipeAccountMenuItem: Identifiable, Equatable {
         userID
     }
     
+    func withAvatar(photo: UIImage?, showsDot: Bool) -> BipeAccountMenuItem {
+        var item = self
+        item.avatar = drawAvatar(photo: photo, showsDot: showsDot)
+        return item
+    }
+    
     /// Draws the avatar the way `LoadableAvatarImage` does: the photo, else the initials, in the account's shape.
-    func withAvatar(photo: UIImage?) -> BipeAccountMenuItem {
+    func drawAvatar(photo: UIImage?, showsDot: Bool) -> UIImage? {
+        let cutout = Self.dotSize + Self.dotRing * 2
         let avatar = Group {
             if let photo {
                 Image(uiImage: photo)
@@ -122,14 +174,35 @@ struct BipeAccountMenuItem: Identifiable, Equatable {
         }
         .frame(width: Self.avatarSize, height: Self.avatarSize)
         .avatarShape(isCompany ? .roundedRect : .circle, size: Self.avatarSize)
+        .mask {
+            Rectangle()
+                .overlay(alignment: .bottomTrailing) {
+                    if showsDot {
+                        Circle()
+                            .frame(width: cutout, height: cutout)
+                            .offset(x: Self.dotRing, y: Self.dotRing)
+                            .blendMode(.destinationOut)
+                    }
+                }
+                .compositingGroup()
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if showsDot {
+                Circle()
+                    .fill(Color.compound.iconCriticalPrimary)
+                    .frame(width: Self.dotSize, height: Self.dotSize)
+            }
+        }
         
         let renderer = ImageRenderer(content: avatar)
         renderer.scale = 3
-        
-        var item = self
-        item.avatar = renderer.uiImage?.withRenderingMode(.alwaysOriginal)
-        return item
+        return renderer.uiImage?.withRenderingMode(.alwaysOriginal)
     }
+}
+
+extension Notification.Name {
+    /// Posted with another account's Matrix ID when its notification shows while the app is open.
+    static let bipeOtherAccountNotification = Notification.Name("BipeOtherAccountNotification")
 }
 
 // MARK: - Gestures
