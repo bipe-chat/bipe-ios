@@ -181,6 +181,10 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                 switch action {
                 case .open(let row):
                     self?.openBipeSettingsRow(row)
+                case .turnOnAppLock:
+                    self?.presentAppLockSetupFlow(.bipeTurnOn)
+                case .turnOffAppLockWithPIN:
+                    self?.presentAppLockSetupFlow(.settings)
                 }
             }
             .store(in: &cancellables)
@@ -452,8 +456,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         navigationStackCoordinator.push(coordinator)
     }
     
-    private func presentAppLockSetupFlow() {
-        let coordinator = AppLockSetupFlowCoordinator(presentingFlow: .settings,
+    private func presentAppLockSetupFlow(_ presentingFlow: AppLockSetupFlowCoordinator.PresentationFlow = .settings) {
+        let coordinator = AppLockSetupFlowCoordinator(presentingFlow: presentingFlow,
                                                       appLockService: appLockService,
                                                       navigationStackCoordinator: navigationStackCoordinator)
         coordinator.actions.sink { [weak self] action in

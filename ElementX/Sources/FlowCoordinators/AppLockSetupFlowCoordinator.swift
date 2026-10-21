@@ -30,6 +30,8 @@ class AppLockSetupFlowCoordinator: FlowCoordinatorProtocol {
         case onboarding
         /// The flow is shown from the Settings screen.
         case settings
+        /// Bipe: the "Bloquear o app" switch turns the lock on. Create the PIN, offer biometrics, then close.
+        case bipeTurnOn
     }
     
     /// States the flow can find itself in
@@ -117,6 +119,8 @@ class AppLockSetupFlowCoordinator: FlowCoordinatorProtocol {
                 return .loggingOut
             case (.createPIN(let replacingExitingPIN), .pinEntered):
                 if presentingFlow == .onboarding {
+                    return appLockService.biometryType != .none ? .biometricsPrompt : .complete
+                } else if presentingFlow == .bipeTurnOn {
                     return appLockService.biometryType != .none ? .biometricsPrompt : .complete
                 } else if !replacingExitingPIN {
                     return appLockService.biometricUnlockEnabled || appLockService.biometryType == .none ? .settings : .biometricsPrompt

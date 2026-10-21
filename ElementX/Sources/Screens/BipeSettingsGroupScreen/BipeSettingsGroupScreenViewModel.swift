@@ -54,8 +54,11 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             .store(in: &cancellables)
         
         if group == .account {
-            state.biometryName = appLockService.isEnabled && appLockService.biometryType != .none ? appLockService.biometryType.localizedString : nil
-            state.bindings.biometricUnlock = appLockService.biometricUnlockEnabled
+            updateAppLockState()
+            appLockService.isEnabledPublisher
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in self?.updateAppLockState() }
+                .store(in: &cancellables)
             
             userSession.clientProxy.secureBackupController.recoveryState
                 .receive(on: DispatchQueue.main)
@@ -104,6 +107,8 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
             Task { await exportData() }
         case .exportClosed:
             removeExportFile()
+        case .appLockChanged:
+            Task { await updateAppLock(state.bindings.appLock) }
         case .biometricUnlockChanged:
             Task { await updateBiometricUnlock(state.bindings.biometricUnlock) }
         case .updateTimelineMediaVisibility(let value):
@@ -153,6 +158,32 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
         let result = await BipeWaysBackReader.load(apiClient: apiClient, clientProxy: clientProxy)
         state.accountStatus = result.status
         state.waysBack = result.waysBack
+    }
+    
+    private func updateAppLockState() {
+        state.bindings.appLock = appLockService.isEnabled
+        state.biometryName = appLockService.isEnabled && appLockService.biometryType != .none ? appLockService.biometryType.localizedString : nil
+        state.bindings.biometricUnlock = appLockService.biometricUnlockEnabled
+    }
+    
+    /// "Bloquear o app" (ADR 0137). On: the setup flow creates the PIN. Off: the device owner confirms first.
+    /// The switch shows the lock state again when the flow ends or the check fails.
+    private func updateAppLock(_ enabled: Bool) async {
+        guard enabled != appLockService.isEnabled else { return }
+        if enabled {
+            actionsSubject.send(.turnOnAppLock)
+            state.bindings.appLock = false
+            return
+        }
+        switch await appLockService.verifyDeviceOwner(reason: BipeStrings.accountAppLockOffReason) {
+        case .verified:
+            appLockService.disable()
+        case .unavailable, .appLockPINRequired:
+            actionsSubject.send(.turnOffAppLockWithPIN)
+        case .unverified, .cancelled, .error:
+            break
+        }
+        updateAppLockState()
     }
     
     /// Same steps as Element's app lock settings: Face ID needs one unlock to confirm.
