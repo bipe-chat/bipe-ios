@@ -204,7 +204,8 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             if isLastOwner {
                 state.bindings.alertInfo = .init(id: .lastOwner,
                                                  title: L10n.leaveRoomAlertSelectNewOwnerTitle,
-                                                 message: L10n.leaveRoomAlertSelectNewOwnerSubtitle,
+                                                 // Bipe: grupo, not sala (bipe#508)
+                                                 message: BipeStrings.groupLeaveRoomAlertSelectNewOwnerSubtitle,
                                                  primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
                                                  secondaryButton: .init(title: L10n.leaveRoomAlertSelectNewOwnerAction, role: .destructive) { [weak self] in
                                                      self?.actionsSubject.send(.transferOwnership)
@@ -410,7 +411,8 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             } catch {
                 state.bindings.alertInfo = AlertInfo(id: .alert,
                                                      title: L10n.commonError,
-                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorUnmuting : L10n.screenRoomDetailsErrorUnmuting) // Bipe
+                                                     // Bipe: grupo, not sala (bipe#508)
+                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorUnmuting : BipeStrings.groupScreenRoomDetailsErrorUnmuting) // Bipe
             }
         default:
             do {
@@ -418,7 +420,8 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             } catch {
                 state.bindings.alertInfo = AlertInfo(id: .alert,
                                                      title: L10n.commonError,
-                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorMuting : L10n.screenRoomDetailsErrorMuting) // Bipe
+                                                     // Bipe: grupo, not sala (bipe#508)
+                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorMuting : BipeStrings.groupScreenRoomDetailsErrorMuting) // Bipe
             }
         }
         state.isProcessingMuteToggleAction = false
@@ -503,7 +506,8 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
     private static let leaveRoomLoadingID = "LeaveRoomLoading"
     
     private func leaveRoom() async {
-        let leavingTitle = state.dmRecipientInfo != nil ? BipeStrings.dmLeaving : L10n.commonLeavingRoom // Bipe
+        // Bipe: grupo, not sala (bipe#508)
+        let leavingTitle = state.dmRecipientInfo != nil ? BipeStrings.dmLeaving : BipeStrings.groupCommonLeavingRoom // Bipe
         userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: leavingTitle, persistent: true))
         let result = await roomProxy.leaveRoom()
         userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)

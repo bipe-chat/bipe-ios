@@ -20,7 +20,8 @@ struct ReportRoomScreen: View {
         }
         .compoundList()
         // Bipe: a DM says "conversa", never "sala" (bipe#507).
-        .navigationTitle(context.viewState.isDM ? BipeStrings.dmReport : L10n.screenReportRoomTitle)
+        // Bipe: grupo, not sala (bipe#508)
+        .navigationTitle(context.viewState.isDM ? BipeStrings.dmReport : BipeStrings.groupScreenReportRoomTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
         .alert(item: $context.alert)
@@ -32,14 +33,16 @@ struct ReportRoomScreen: View {
                     kind: .textField(text: $context.reason, axis: .vertical))
                 .lineLimit(4, reservesSpace: true)
         } footer: {
-            Text(context.viewState.isDM ? BipeStrings.dmReportFooter : L10n.screenReportRoomReasonFooter)
+            // Bipe: grupo, not sala (bipe#508)
+            Text(context.viewState.isDM ? BipeStrings.dmReportFooter : BipeStrings.groupScreenReportRoomReasonFooter)
                 .compoundListSectionFooter()
         }
     }
     
     private var leaveRoomSection: some View {
         Section {
-            ListRow(label: .plain(title: context.viewState.isDM ? BipeStrings.dmReportLeave : L10n.actionLeaveRoom),
+            // Bipe: grupo, not sala (bipe#508)
+            ListRow(label: .plain(title: context.viewState.isDM ? BipeStrings.dmReportLeave : BipeStrings.groupActionLeaveRoom),
                     kind: .toggle($context.shouldLeaveRoom))
         }
     }

@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -36,7 +37,8 @@ struct ManageAuthorizedSpacesScreen: View {
             VStack(spacing: 16) {
                 BigIcon(icon: \.spaceSolid, style: .default)
                     .accessibilityHidden(true)
-                Text(L10n.screenManageAuthorizedSpacesHeader)
+                // Bipe: grupo, not sala (bipe#508)
+                Text(BipeStrings.groupScreenManageAuthorizedSpacesHeader)
                     .multilineTextAlignment(.center)
                     .font(.compound.headingMDBold)
                     .foregroundStyle(.compound.textPrimary)

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -18,7 +19,8 @@ struct KnockRequestsListEmptyStateView: View {
                     .multilineTextAlignment(.center)
                     .font(.compound.headingMDBold)
                     .foregroundStyle(.compound.textPrimary)
-                Text(L10n.screenKnockRequestsListEmptyStateDescription)
+                // Bipe: grupo, not sala (bipe#508)
+                Text(BipeStrings.groupScreenKnockRequestsListEmptyStateDescription)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.compound.textSecondary)
                     .font(.compound.bodyMD)

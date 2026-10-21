@@ -7,6 +7,7 @@
 //
 
 import AsyncAlgorithms
+import BipeKit
 import Combine
 @testable import ElementX
 import MatrixRustSDK
@@ -54,7 +55,7 @@ struct RoomDetailsScreenViewModelTests {
         try await deferred.fulfill()
         
         #expect(context.viewState.bindings.leaveRoomAlertItem?.state == .public)
-        #expect(context.viewState.bindings.leaveRoomAlertItem?.subtitle == L10n.leaveRoomAlertSubtitle)
+        #expect(context.viewState.bindings.leaveRoomAlertItem?.subtitle == BipeStrings.groupLeaveRoomAlertSubtitle)
     }
     
     @Test
@@ -75,7 +76,7 @@ struct RoomDetailsScreenViewModelTests {
         try await deferred.fulfill()
         
         #expect(context.viewState.bindings.leaveRoomAlertItem?.state == .private)
-        #expect(context.viewState.bindings.leaveRoomAlertItem?.subtitle == L10n.leaveRoomAlertPrivateSubtitle)
+        #expect(context.viewState.bindings.leaveRoomAlertItem?.subtitle == BipeStrings.groupLeaveRoomAlertPrivateSubtitle)
     }
     
     @Test
@@ -92,7 +93,7 @@ struct RoomDetailsScreenViewModelTests {
         
         context.send(viewAction: .processTapLeave)
         #expect(context.leaveRoomAlertItem?.state == .empty)
-        #expect(context.leaveRoomAlertItem?.subtitle == L10n.leaveRoomAlertEmptySubtitle)
+        #expect(context.leaveRoomAlertItem?.subtitle == BipeStrings.groupLeaveRoomAlertEmptySubtitle)
     }
     
     @Test
@@ -580,7 +581,7 @@ struct RoomDetailsScreenViewModelTests {
         
         let expectedAlertInfo = AlertInfo(id: RoomDetailsScreenErrorType.alert,
                                           title: L10n.commonError,
-                                          message: L10n.screenRoomDetailsErrorUnmuting)
+                                          message: BipeStrings.groupScreenRoomDetailsErrorUnmuting)
         
         #expect(context.viewState.bindings.alertInfo?.id == expectedAlertInfo.id)
         #expect(context.viewState.bindings.alertInfo?.title == expectedAlertInfo.title)
@@ -609,7 +610,7 @@ struct RoomDetailsScreenViewModelTests {
         
         let expectedAlertInfo = AlertInfo(id: RoomDetailsScreenErrorType.alert,
                                           title: L10n.commonError,
-                                          message: L10n.screenRoomDetailsErrorMuting)
+                                          message: BipeStrings.groupScreenRoomDetailsErrorMuting)
         
         #expect(context.viewState.bindings.alertInfo?.id == expectedAlertInfo.id)
         #expect(context.viewState.bindings.alertInfo?.title == expectedAlertInfo.title)

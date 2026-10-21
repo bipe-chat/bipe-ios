@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -17,13 +18,14 @@ struct JoinRoomByAddressView: View {
     private let topPadding: CGFloat = 22
     
     private var footerText: String {
+        // Bipe: grupo, not sala (bipe#508)
         switch context.viewState.joinByAddressState {
         case .example:
-            L10n.screenStartChatJoinRoomByAddressSupportingText
+            BipeStrings.groupScreenStartChatJoinRoomByAddressSupportingText
         case .addressNotFound:
-            L10n.screenStartChatJoinRoomByAddressRoomNotFound
+            BipeStrings.groupScreenStartChatJoinRoomByAddressRoomNotFound
         case .addressFound:
-            L10n.screenStartChatJoinRoomByAddressRoomFound
+            BipeStrings.groupScreenStartChatJoinRoomByAddressRoomFound
         case .invalidAddress:
             L10n.screenStartChatJoinRoomByAddressInvalidAddress
         }
@@ -45,7 +47,8 @@ struct JoinRoomByAddressView: View {
             VStack(spacing: 24) {
                 TextField(L10n.screenStartChatJoinRoomByAddressPlaceholder,
                           text: $context.roomAddress)
-                    .textFieldStyle(.compound(labelText: L10n.screenStartChatJoinRoomByAddressAction,
+                    // Bipe: grupo, not sala (bipe#508)
+                    .textFieldStyle(.compound(labelText: BipeStrings.groupScreenStartChatJoinRoomByAddressAction,
                                               footerText: footerText,
                                               state: textFieldState))
                     .textInputAutocapitalization(.never)

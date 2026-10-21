@@ -28,28 +28,27 @@ import SwiftUI
         /// into the trailing search button in the tab bar.
         let isSearch: Bool
         var badgeCount = 0
-        /// Bipe: a warning mark instead of a count (ADR 0112, the Você tab).
-        var bipeWarning = false
         /// Bipe: the Você tab's double tap and long press menu (ADR 0135).
         var bipeAccountSwitcher: BipeAccountSwitcher?
+        /// Bipe: a brand glyph in place of the Compound icon (the b mark on Conversas).
+        var bipeImages: (normal: ImageAsset, selected: ImageAsset)?
         
-        /// Bipe: the account's avatar on the Você tab (rounded square for a company), else the Compound icon.
+        /// Bipe: the account's avatar on the Você tab (rounded square for a company), else the brand glyph, else the Compound icon.
         @ViewBuilder
         func bipeIcon(isSelected: Bool) -> some View {
             if let avatar = bipeAccountSwitcher?.currentAvatar {
                 Image(uiImage: avatar)
                     .renderingMode(.original)
+            } else if let bipeImages {
+                Image(asset: isSelected ? bipeImages.selected : bipeImages.normal)
+                    .renderingMode(.template)
             } else {
                 CompoundIcon(isSelected ? selectedIcon : icon)
             }
         }
         
-        /// Bipe: the count, else the warning mark, else no badge.
         var badgeText: Text? {
-            if badgeCount > 0 {
-                return Text(badgeCount, format: .number)
-            }
-            return bipeWarning ? Text(verbatim: "!") : nil
+            badgeCount > 0 ? Text(badgeCount, format: .number) : nil
         }
         
         /// Provide the tab's split coordinator in here to have the tab bar automatically hidden
@@ -456,10 +455,6 @@ private struct NavigationTabCoordinatorView<Tag: Hashable>: View {
         standardAppearance.compactInlineLayoutAppearance.normal.badgeBackgroundColor = .compound.iconAccentPrimary // iPhone Landscape
         standardAppearance.inlineLayoutAppearance.normal.badgeBackgroundColor = .compound.iconAccentPrimary // iPadOS 17 (doesn't work for 18+)
         tabBarController.tabBar.standardAppearance = standardAppearance
-        // Bipe: the warning mark is red, like the dot on the "Sua conta" row.
-        for item in tabBarController.tabBar.items ?? [] {
-            item.badgeColor = item.badgeValue == "!" ? .compound.iconCriticalPrimary : nil
-        }
         configureBipeAccountGestures(on: tabBarController.tabBar)
     }
     
@@ -508,9 +503,6 @@ struct TabRailView<Tag: Hashable>: View {
                     .overlay(alignment: .topTrailing) {
                         if module.details.badgeCount > 0 {
                             NotificationCountBadge(count: module.details.badgeCount, size: .small)
-                                .allowsHitTesting(false)
-                        } else if module.details.bipeWarning {
-                            BadgeView(size: 10)
                                 .allowsHitTesting(false)
                         }
                     }

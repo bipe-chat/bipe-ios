@@ -49,7 +49,8 @@ class ReportRoomScreenViewModel: ReportRoomScreenViewModelType, ReportRoomScreen
                 await leaveRoom(showLoading: false)
             } else {
                 hideLoadingIndicator()
-                userIndicatorController.submitIndicator(.init(title: state.isDM ? BipeStrings.dmReported : L10n.dialogRoomReported, icon: \.check))
+                // Bipe: grupo, not sala (bipe#508)
+                userIndicatorController.submitIndicator(.init(title: state.isDM ? BipeStrings.dmReported : BipeStrings.groupDialogRoomReported, icon: \.check))
                 actionsSubject.send(.dismiss(shouldLeaveRoom: false))
             }
         case .failure:
@@ -72,12 +73,14 @@ class ReportRoomScreenViewModel: ReportRoomScreenViewModelType, ReportRoomScreen
         
         switch result {
         case .success:
-            userIndicatorController.submitIndicator(.init(title: state.isDM ? BipeStrings.dmReportedAndLeft : L10n.dialogRoomReportedAndLeft, icon: \.check))
+            // Bipe: grupo, not sala (bipe#508)
+            userIndicatorController.submitIndicator(.init(title: state.isDM ? BipeStrings.dmReportedAndLeft : BipeStrings.groupDialogRoomReportedAndLeft, icon: \.check))
             actionsSubject.send(.dismiss(shouldLeaveRoom: true))
         case .failure:
             state.bindings.alert = .init(id: .leaveRoomFailed,
-                                         title: state.isDM ? BipeStrings.dmReportLeaveFailedTitle : L10n.screenReportRoomLeaveFailedAlertTitle,
-                                         message: state.isDM ? BipeStrings.dmReportLeaveFailedBody : L10n.screenReportRoomLeaveFailedAlertMessage,
+                                         // Bipe: grupo, not sala (bipe#508)
+                                         title: state.isDM ? BipeStrings.dmReportLeaveFailedTitle : BipeStrings.groupScreenReportRoomLeaveFailedAlertTitle,
+                                         message: state.isDM ? BipeStrings.dmReportLeaveFailedBody : BipeStrings.groupScreenReportRoomLeaveFailedAlertMessage,
                                          primaryButton: .init(title: L10n.actionDismiss, role: .cancel) { [weak self] in self?.actionsSubject.send(.dismiss(shouldLeaveRoom: false)) },
                                          secondaryButton: .init(title: L10n.actionTryAgain) { [weak self] in Task { await self?.leaveRoom(showLoading: true) } })
         }

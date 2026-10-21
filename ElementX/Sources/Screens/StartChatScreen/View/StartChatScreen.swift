@@ -64,7 +64,8 @@ struct StartChatScreen: View {
     
     private var joinRoomByAddressSection: some View {
         Section {
-            ListRow(label: .default(title: L10n.screenStartChatJoinRoomByAddressAction,
+            // Bipe: grupo, not sala (bipe#508)
+            ListRow(label: .default(title: BipeStrings.groupScreenStartChatJoinRoomByAddressAction,
                                     icon: \.room),
                     kind: .button {
                         context.isJoinRoomByAddressSheetPresented = true
@@ -74,7 +75,8 @@ struct StartChatScreen: View {
     
     private var roomDirectorySearch: some View {
         Section {
-            ListRow(label: .default(title: L10n.screenRoomDirectorySearchTitle,
+            // Bipe: grupo, not sala (bipe#508)
+            ListRow(label: .default(title: BipeStrings.groupScreenRoomDirectorySearchTitle,
                                     icon: \.listBulleted),
                     kind: .navigationLink {
                         context.send(viewAction: .openRoomDirectorySearch)
@@ -94,7 +96,8 @@ struct StartChatScreen: View {
     
     private var createRoomSection: some View {
         Section {
-            ListRow(label: .default(title: L10n.screenCreateRoomActionCreateRoom,
+            // Bipe: grupo, not sala (bipe#508)
+            ListRow(label: .default(title: BipeStrings.groupScreenCreateRoomActionCreateRoom,
                                     icon: \.plus),
                     kind: .navigationLink { context.send(viewAction: .createRoom) })
                 .accessibilityIdentifier(A11yIdentifiers.startChatScreen.createRoom)

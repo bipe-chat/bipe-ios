@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 enum CreateRoomScreenErrorType: Error {
@@ -125,7 +126,8 @@ enum CreateRoomScreenAliasErrorState {
 extension Set<CreateRoomScreenAliasErrorState> {
     var errorDescription: String? {
         if contains(.alreadyExists) {
-            return L10n.errorRoomAddressAlreadyExists
+            // Bipe: grupo, not sala (bipe#508)
+            return BipeStrings.groupErrorRoomAddressAlreadyExists
         } else if contains(.invalidSymbols) {
             return L10n.errorRoomAddressInvalidSymbols
         }
