@@ -3,8 +3,8 @@
 #
 #   appstore/capture.sh <iphone69|ipad13> [light|dark]
 #
-# Writes appstore/raw/<device>/<appearance>/<slug>.png (git-ignored). The bipe-web image builder (bipe#455)
-# makes the store panels from them. The screens are mock screens with the sample cast (bipe-shared/product/cast.json)
+# Writes appstore/raw/<device>/<appearance>/<slug>.png. Commit them under <locale>/: the bipe-web build (bipe#455, #466)
+# makes the store panels on bipe.chat/sobre/marca/ from them. The screens are mock screens with the sample cast (bipe-shared/product/cast.json)
 # and pt-BR text, so two runs give the same images.
 #
 # Needs the simulator named in appstore/devices.mjs and the cast photos in ../bipe-web/src/cast/photos
