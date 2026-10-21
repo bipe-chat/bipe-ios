@@ -8392,18 +8392,18 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C0C687DE1D270F9895FEE186 /* AccessibilityTests */,
 				C0FAEB81CFD9776CD78CE489 /* ElementX */,
+				FEB53A5BC378C913769656D8 /* NSE */,
+				19F0C845D67E9BEA4BE7133E /* ShareExtension */,
+				32C23C8D224D46EFE62AFAD0 /* UnitTests */,
+				7A17BE29BAC81ADBAC6349D9 /* PreviewTests */,
+				0E28CD62691FDBC63147D5E3 /* UITests */,
 				D3DB351B7FBE0F49649171FC /* IntegrationTests */,
+				C0C687DE1D270F9895FEE186 /* AccessibilityTests */,
 				96435A765678A64A956EE59C /* MapLibreInterface */,
 				392E7AA23D7BA2CEEB25CF73 /* MapLibreShim */,
 				676A87694F0F247B2AF1A142 /* MatrixRustSDKMocks */,
-				FEB53A5BC378C913769656D8 /* NSE */,
 				F8E276FD6DC43EADB85241BC /* Periphery */,
-				7A17BE29BAC81ADBAC6349D9 /* PreviewTests */,
-				19F0C845D67E9BEA4BE7133E /* ShareExtension */,
-				0E28CD62691FDBC63147D5E3 /* UITests */,
-				32C23C8D224D46EFE62AFAD0 /* UnitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -10561,7 +10561,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "GeneratedInterface-Swift.h";
 				SWIFT_VERSION = 6;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -10638,7 +10638,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "ElementX/SupportingFiles/ElementX-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "GeneratedInterface-Swift.h";
 				SWIFT_VERSION = 6;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -10673,7 +10673,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "ElementX/SupportingFiles/ElementX-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "GeneratedInterface-Swift.h";
 				SWIFT_VERSION = 6;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -10743,7 +10743,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_VERSION = 6;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -11020,7 +11020,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "GeneratedInterface-Swift.h";
 				SWIFT_VERSION = 6;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -11094,7 +11094,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_VERSION = 6;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
