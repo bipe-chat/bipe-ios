@@ -1502,6 +1502,12 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_dm_left", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static func dmJoined(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_joined", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmJoinedByYou: String { NSLocalizedString("bipe_dm_joined_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var dmLeftByYou: String { NSLocalizedString("bipe_dm_left_by_you", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var dmLeaving: String { NSLocalizedString("bipe_dm_leaving", tableName: "Bipe", bundle: .module, comment: "") }
@@ -1515,6 +1521,112 @@ public enum BipeStrings {
     public static var dmDeleteConfirm: String { NSLocalizedString("bipe_dm_delete_confirm", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var dmDeleteError: String { NSLocalizedString("bipe_dm_delete_error", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmReport: String { NSLocalizedString("bipe_dm_report", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmReportFooter: String { NSLocalizedString("bipe_dm_report_footer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmReportLeave: String { NSLocalizedString("bipe_dm_report_leave", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmReported: String { NSLocalizedString("bipe_dm_reported", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmReportedAndLeft: String { NSLocalizedString("bipe_dm_reported_and_left", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmReportLeaveFailedTitle: String { NSLocalizedString("bipe_dm_report_leave_failed_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmReportLeaveFailedBody: String { NSLocalizedString("bipe_dm_report_leave_failed_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeclineBlockDescription: String { NSLocalizedString("bipe_dm_decline_block_description", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeclineReportDescription: String { NSLocalizedString("bipe_dm_decline_report_description", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInviteInvalid: String { NSLocalizedString("bipe_dm_invite_invalid", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmPreviewFailed: String { NSLocalizedString("bipe_dm_preview_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func dmAvatarChanged(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_avatar_changed", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmAvatarChangedByYou: String { NSLocalizedString("bipe_dm_avatar_changed_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func dmAvatarRemoved(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_avatar_removed", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmAvatarRemovedByYou: String { NSLocalizedString("bipe_dm_avatar_removed_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func dmNameChanged(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_name_changed", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static func dmNameChangedByYou(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_name_changed_by_you", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func dmNameRemoved(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_name_removed", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmNameRemovedByYou: String { NSLocalizedString("bipe_dm_name_removed_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func dmTopicRemoved(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_topic_removed", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmTopicRemovedByYou: String { NSLocalizedString("bipe_dm_topic_removed_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func dmThirdPartyInvite(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_third_party_invite", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static func dmThirdPartyInviteByYou(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_third_party_invite_by_you", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func dmThirdPartyRevokedInvite(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_third_party_revoked_invite", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static func dmThirdPartyRevokedInviteByYou(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_third_party_revoked_invite_by_you", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func dmStateChanges(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_state_changes", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static func dmKeyForwardedKnown(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_key_forwarded_known", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static func dmKeyForwardedUnknown(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_dm_key_forwarded_unknown", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var dmNoPermissionToPost: String { NSLocalizedString("bipe_dm_no_permission_to_post", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmTombstonedMessage: String { NSLocalizedString("bipe_dm_tombstoned_message", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmTombstonedAction: String { NSLocalizedString("bipe_dm_tombstoned_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmUpgradedMessage: String { NSLocalizedString("bipe_dm_upgraded_message", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmTombstonedRow: String { NSLocalizedString("bipe_dm_tombstoned_row", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmTombstonedA11y: String { NSLocalizedString("bipe_dm_tombstoned_a11y", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmMediaDeleteBody: String { NSLocalizedString("bipe_dm_media_delete_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmNotificationsCustomTitle: String { NSLocalizedString("bipe_dm_notifications_custom_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmNotificationsMentionsDisclaimer: String { NSLocalizedString("bipe_dm_notifications_mentions_disclaimer", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmPermalinkSame: String { NSLocalizedString("bipe_dm_permalink_same", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmNoName: String { NSLocalizedString("bipe_dm_no_name", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmInlineReplyFailed: String { NSLocalizedString("bipe_dm_inline_reply_failed", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var dmErrorMuting: String { NSLocalizedString("bipe_dm_error_muting", tableName: "Bipe", bundle: .module, comment: "") }
 

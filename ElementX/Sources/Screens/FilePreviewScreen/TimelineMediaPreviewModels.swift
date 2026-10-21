@@ -80,6 +80,9 @@ struct TimelineMediaPreviewViewState: BindableState {
     let previewControllerDriver = PassthroughSubject<TimelineMediaPreviewDriverAction, Never>()
     
     var bindings = TimelineMediaPreviewViewStateBindings()
+    
+    /// Bipe: a DM says "conversa", never "sala" (bipe#507).
+    var isDM = false
 }
 
 struct TimelineMediaPreviewViewStateBindings {

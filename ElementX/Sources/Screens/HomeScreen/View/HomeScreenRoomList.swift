@@ -118,7 +118,8 @@ struct HomeScreenRoomList: View {
                             Button(role: .destructive) {
                                 context.send(viewAction: .reportRoom(roomIdentifier: room.id))
                             } label: {
-                                Label(L10n.actionReportRoom, systemImage: "exclamationmark.bubble")
+                                // Bipe: a DM says "conversa", never "sala" (bipe#507).
+                                Label(room.isDirect ? BipeStrings.dmReport : L10n.actionReportRoom, systemImage: "exclamationmark.bubble")
                             }
                         }
                         

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -23,7 +24,8 @@ class ReportRoomScreenViewModel: ReportRoomScreenViewModelType, ReportRoomScreen
     init(roomProxy: JoinedRoomProxyProtocol, userIndicatorController: UserIndicatorControllerProtocol) {
         self.roomProxy = roomProxy
         self.userIndicatorController = userIndicatorController
-        super.init(initialViewState: ReportRoomScreenViewState())
+        // Bipe: a DM says "conversa", never "sala" (bipe#507).
+        super.init(initialViewState: ReportRoomScreenViewState(isDM: roomProxy.infoPublisher.value.isDM))
     }
     
     // MARK: - Public
@@ -47,7 +49,7 @@ class ReportRoomScreenViewModel: ReportRoomScreenViewModelType, ReportRoomScreen
                 await leaveRoom(showLoading: false)
             } else {
                 hideLoadingIndicator()
-                userIndicatorController.submitIndicator(.init(title: L10n.dialogRoomReported, icon: \.check))
+                userIndicatorController.submitIndicator(.init(title: state.isDM ? BipeStrings.dmReported : L10n.dialogRoomReported, icon: \.check))
                 actionsSubject.send(.dismiss(shouldLeaveRoom: false))
             }
         case .failure:
@@ -70,12 +72,12 @@ class ReportRoomScreenViewModel: ReportRoomScreenViewModelType, ReportRoomScreen
         
         switch result {
         case .success:
-            userIndicatorController.submitIndicator(.init(title: L10n.dialogRoomReportedAndLeft, icon: \.check))
+            userIndicatorController.submitIndicator(.init(title: state.isDM ? BipeStrings.dmReportedAndLeft : L10n.dialogRoomReportedAndLeft, icon: \.check))
             actionsSubject.send(.dismiss(shouldLeaveRoom: true))
         case .failure:
             state.bindings.alert = .init(id: .leaveRoomFailed,
-                                         title: L10n.screenReportRoomLeaveFailedAlertTitle,
-                                         message: L10n.screenReportRoomLeaveFailedAlertMessage,
+                                         title: state.isDM ? BipeStrings.dmReportLeaveFailedTitle : L10n.screenReportRoomLeaveFailedAlertTitle,
+                                         message: state.isDM ? BipeStrings.dmReportLeaveFailedBody : L10n.screenReportRoomLeaveFailedAlertMessage,
                                          primaryButton: .init(title: L10n.actionDismiss, role: .cancel) { [weak self] in self?.actionsSubject.send(.dismiss(shouldLeaveRoom: false)) },
                                          secondaryButton: .init(title: L10n.actionTryAgain) { [weak self] in Task { await self?.leaveRoom(showLoading: true) } })
         }

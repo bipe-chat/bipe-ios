@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import MatrixRustSDK
 import SwiftUI
@@ -316,7 +317,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                     state.mode = .forbidden
                 case .invalidInvite:
                     MXLog.error("Failed joining room alias: \(alias) invalid invite")
-                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: L10n.errorInvalidInvite)
+                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDirect == true ? BipeStrings.dmInviteInvalid : L10n.errorInvalidInvite) // Bipe: bipe#507
                 default:
                     MXLog.error("Failed joining room alias: \(alias) with error: \(error)")
                     userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
@@ -334,7 +335,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                     state.mode = .forbidden
                 case .invalidInvite:
                     MXLog.error("Failed joining room id: \(roomID) invalid invite")
-                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: L10n.errorInvalidInvite)
+                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDirect == true ? BipeStrings.dmInviteInvalid : L10n.errorInvalidInvite) // Bipe: bipe#507
                 default:
                     MXLog.error("Failed joining room id: \(roomID) with error: \(error)")
                     userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))

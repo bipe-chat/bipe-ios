@@ -326,7 +326,8 @@ struct RoomDetailsScreen: View {
     private var reportRoomSection: some View {
         Section {
             if context.viewState.reportRoomEnabled {
-                ListRow(label: .action(title: L10n.actionReportRoom,
+                // Bipe: a DM says "conversa", never "sala" (bipe#507).
+                ListRow(label: .action(title: context.viewState.isDirect ? BipeStrings.dmReport : L10n.actionReportRoom,
                                        icon: \.chatProblem,
                                        role: .destructive),
                         kind: .button { context.send(viewAction: .processTapReport) })

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -32,7 +33,8 @@ struct TimelineStartRoomTimelineView: View {
     
     private var upgradeDialogue: some View {
         VStack(spacing: 16) {
-            Text(L10n.screenRoomTimelineUpgradedRoomMessage)
+            // Bipe: a DM says "conversa", never "sala" (bipe#507).
+            Text(context?.viewState.isDM == true ? BipeStrings.dmUpgradedMessage : L10n.screenRoomTimelineUpgradedRoomMessage)
                 .font(.compound.bodyMD)
                 .foregroundColor(.compound.textPrimary)
             Button {
