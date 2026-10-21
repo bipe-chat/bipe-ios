@@ -162,9 +162,9 @@ public struct StickerPackClient: Sendable {
     public func accountData(userID: String, eventType: String, accessToken: String) async throws(BipeAPIError) -> Data? {
         try await get(["user", userID, "account_data", eventType], accessToken: accessToken)
     }
-
+    
     // MARK: - Private
-
+    
     private func roomPacks(roomID: String, accessToken: String) async throws(BipeAPIError) -> [StickerPack] {
         guard let data = try await get(["rooms", roomID, "state"], accessToken: accessToken),
               let events = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
