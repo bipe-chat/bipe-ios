@@ -33,6 +33,17 @@ import SwiftUI
         /// Bipe: the Você tab's double tap and long press menu (ADR 0135).
         var bipeAccountSwitcher: BipeAccountSwitcher?
         
+        /// Bipe: the account's avatar on the Você tab (rounded square for a company), else the Compound icon.
+        @ViewBuilder
+        func bipeIcon(isSelected: Bool) -> some View {
+            if let avatar = bipeAccountSwitcher?.currentAvatar {
+                Image(uiImage: avatar)
+                    .renderingMode(.original)
+            } else {
+                CompoundIcon(isSelected ? selectedIcon : icon)
+            }
+        }
+        
         /// Bipe: the count, else the warning mark, else no badge.
         var badgeText: Text? {
             if badgeCount > 0 {
@@ -428,7 +439,7 @@ private struct NavigationTabCoordinatorView<Tag: Hashable>: View {
                     Label {
                         Text(module.details.title)
                     } icon: {
-                        CompoundIcon(module.details.tag == navigationTabCoordinator.selectedTab ? module.details.selectedIcon : module.details.icon)
+                        module.details.bipeIcon(isSelected: module.details.tag == navigationTabCoordinator.selectedTab)
                     }
                 }
                 .badge(module.details.badgeText)
@@ -484,7 +495,7 @@ struct TabRailView<Tag: Hashable>: View {
                         Label {
                             Text(module.details.title)
                         } icon: {
-                            CompoundIcon(isSelected ? module.details.selectedIcon : module.details.icon)
+                            module.details.bipeIcon(isSelected: isSelected)
                         }
                     }
                     .buttonStyle(TabButtonStyle(isSelected: isSelected))

@@ -26,6 +26,11 @@ import SwiftUI
         accounts.count > 1
     }
     
+    /// The Você tab icon: the photo, else the initials, in the account's shape. `nil` until the profile loads.
+    var currentAvatar: UIImage? {
+        accounts.first(where: \.isCurrent)?.avatar
+    }
+    
     init(userSession: UserSessionProtocol) {
         self.userSession = userSession
         
