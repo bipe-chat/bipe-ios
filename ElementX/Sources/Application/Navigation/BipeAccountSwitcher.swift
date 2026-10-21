@@ -19,11 +19,10 @@ import UserNotifications
     private(set) var currentAvatar: UIImage?
     
     @ObservationIgnored var onSwitch: ((String) -> Void)?
-    @ObservationIgnored var onAddAccount: (() -> Void)?
     
     @ObservationIgnored private let userSession: UserSessionProtocol
-    @ObservationIgnored private var photoTask: Task<Void, Never>?
-    @ObservationIgnored private var currentPhoto: UIImage?
+    @ObservationIgnored private var photoTasks: [String: Task<Void, Never>] = [:]
+    @ObservationIgnored private var photos: [String: UIImage] = [:]
     /// The other accounts with a notification in Notification Center. Their sessions are closed, so the NSE's notifications
     /// are the only sign of new messages for them.
     @ObservationIgnored private var notifiedUserIDs: Set<String> = []
@@ -63,7 +62,7 @@ import UserNotifications
         onSwitch?(next.userID)
     }
     
-    /// The accounts with a check on the current one, then "Nova conta" while the cap allows one more.
+    /// The accounts with a check on the current one. "Nova conta" lives in Sua conta.
     func makeMenu() -> UIMenu {
         let accountActions = accounts.map { account in
             UIAction(title: account.label, image: account.avatar, state: account.isCurrent ? .on : .off) { [weak self] _ in
@@ -71,15 +70,7 @@ import UserNotifications
                 self?.onSwitch?(account.userID)
             }
         }
-        var children: [UIMenuElement] = [UIMenu(title: BipeStrings.accountOnDevice, options: .displayInline, children: accountActions)]
-        
-        if BipeAccountCap.canAdd(signedInUserIDs: accounts.map(\.userID)) {
-            let addAction = UIAction(title: BipeStrings.accountAdd, image: UIImage(systemName: "plus")) { [weak self] _ in
-                self?.onAddAccount?()
-            }
-            children.append(UIMenu(options: .displayInline, children: [addAction]))
-        }
-        return UIMenu(children: children)
+        return UIMenu(title: BipeStrings.accountOnDevice, children: accountActions)
     }
     
     // MARK: - Private
@@ -94,9 +85,11 @@ import UserNotifications
             BipeAccountMenuItem(userID: $0, label: BipeAccountLabels.label(for: $0), isCurrent: false, isCompany: BipeAccountLabels.isCompany($0))
         }
         accounts = [current] + others
-        currentPhoto = nil
         redrawAvatars()
-        loadPhoto(url: profile.avatarURL)
+        loadPhoto(url: profile.avatarURL, userID: currentUserID)
+        for account in others {
+            loadOtherAccountPhoto(userID: account.userID)
+        }
     }
     
     /// Notifications that the user cleared, or that the other account read on this phone, remove the dot.
@@ -116,21 +109,32 @@ import UserNotifications
     private func redrawAvatars() {
         let othersNotified = accounts.contains { !$0.isCurrent && notifiedUserIDs.contains($0.userID) }
         accounts = accounts.map { account in
-            account.withAvatar(photo: account.isCurrent ? currentPhoto : nil, showsDot: !account.isCurrent && notifiedUserIDs.contains(account.userID))
+            account.withAvatar(photo: photos[account.userID], showsDot: !account.isCurrent && notifiedUserIDs.contains(account.userID))
         }
-        currentAvatar = accounts.first(where: \.isCurrent)?.drawAvatar(photo: currentPhoto, showsDot: othersNotified)
+        currentAvatar = accounts.first(where: \.isCurrent).flatMap { $0.drawAvatar(photo: photos[$0.userID], showsDot: othersNotified) }
     }
     
-    /// Only the current account's session is open, so only its photo can load. The other accounts keep their initials.
-    private func loadPhoto(url: URL?) {
-        photoTask?.cancel()
-        guard let url, let source = try? MediaSourceProxy(url: url, mimeType: nil) else { return }
+    /// The other accounts' sessions are closed, so the open session reads their public profile from the same server.
+    private func loadOtherAccountPhoto(userID: String) {
+        Task { [weak self] in
+            guard let self, case let .success(profile) = await userSession.clientProxy.profile(for: userID) else { return }
+            loadPhoto(url: profile.avatarURL, userID: userID)
+        }
+    }
+    
+    /// Until a photo loads, or without one, the account shows its initials.
+    private func loadPhoto(url: URL?, userID: String) {
+        photoTasks[userID]?.cancel()
+        guard let url, let source = try? MediaSourceProxy(url: url, mimeType: nil) else {
+            photos[userID] = nil
+            return
+        }
         
         let size = BipeAccountMenuItem.avatarSize
         let task = userSession.mediaProvider.loadImageRetryingOnReconnection(source, size: CGSize(width: size * 3, height: size * 3))
-        photoTask = Task { [weak self] in
+        photoTasks[userID] = Task { [weak self] in
             guard let photo = try? await task.value, !Task.isCancelled, let self else { return }
-            currentPhoto = photo
+            photos[userID] = photo
             redrawAvatars()
         }
     }
@@ -290,13 +294,15 @@ final class BipeAccountGestures: NSObject, UIContextMenuInteractionDelegate, UIG
               let frame = itemFrame(location, view) else {
             return nil
         }
-        let anchor = UIView(frame: CGRect(origin: .zero, size: frame.size))
+        // A one-point line on the item's top edge: UIKit puts the menu right above the preview, so a preview the size of the
+        // item left the menu floating a finger above the tab bar.
+        let anchor = UIView(frame: CGRect(x: 0, y: 0, width: frame.width, height: 1))
         anchor.backgroundColor = .clear
         let parameters = UIPreviewParameters()
         parameters.visiblePath = UIBezierPath(rect: anchor.bounds)
         parameters.shadowPath = UIBezierPath()
         parameters.backgroundColor = .clear
-        return UITargetedPreview(view: anchor, parameters: parameters, target: UIPreviewTarget(container: view, center: CGPoint(x: frame.midX, y: frame.midY)))
+        return UITargetedPreview(view: anchor, parameters: parameters, target: UIPreviewTarget(container: view, center: CGPoint(x: frame.midX, y: frame.minY)))
     }
 }
 
