@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -21,7 +22,8 @@ struct SpaceAddRoomsScreen: View {
                 EmptyView()
             } header: {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text(L10n.screenSpaceAddRoomsRoomAccessDescription)
+                    // Bipe: grupo, not sala (bipe#508)
+                    Text(BipeStrings.groupScreenSpaceAddRoomsRoomAccessDescription)
                         .font(.compound.bodySM)
                         .foregroundStyle(.compound.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -42,7 +44,8 @@ struct SpaceAddRoomsScreen: View {
             }
         }
         .compoundList()
-        .navigationTitle(L10n.actionAddExistingRooms)
+        // Bipe: grupo, not sala (bipe#508)
+        .navigationTitle(BipeStrings.groupActionAddExistingRooms)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
         .searchController(query: $context.searchQuery, showsCancelButton: false)

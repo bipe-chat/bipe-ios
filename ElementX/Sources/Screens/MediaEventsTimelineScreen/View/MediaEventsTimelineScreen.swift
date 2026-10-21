@@ -195,7 +195,8 @@ struct MediaEventsTimelineScreen: View {
             .font(.compound.headingMDBold)
             .multilineTextAlignment(.center)
         
-        Text(context.viewState.activeTimelineContext.viewState.isDM ? BipeStrings.dmMediaEmpty : L10n.screenMediaBrowserMediaEmptyStateSubtitle) // Bipe: a DM is a conversation
+        // Bipe: grupo, not sala (bipe#508)
+        Text(context.viewState.activeTimelineContext.viewState.isDM ? BipeStrings.dmMediaEmpty : BipeStrings.groupScreenMediaBrowserMediaEmptyStateSubtitle) // Bipe: a DM is a conversation
             .foregroundColor(.compound.textSecondary)
             .font(.compound.bodyMD)
             .multilineTextAlignment(.center)
@@ -210,7 +211,8 @@ struct MediaEventsTimelineScreen: View {
             .font(.compound.headingMDBold)
             .multilineTextAlignment(.center)
         
-        Text(context.viewState.activeTimelineContext.viewState.isDM ? BipeStrings.dmFilesEmpty : L10n.screenMediaBrowserFilesEmptyStateSubtitle) // Bipe: a DM is a conversation
+        // Bipe: grupo, not sala (bipe#508)
+        Text(context.viewState.activeTimelineContext.viewState.isDM ? BipeStrings.dmFilesEmpty : BipeStrings.groupScreenMediaBrowserFilesEmptyStateSubtitle) // Bipe: a DM is a conversation
             .foregroundColor(.compound.textSecondary)
             .font(.compound.bodyMD)
             .multilineTextAlignment(.center)

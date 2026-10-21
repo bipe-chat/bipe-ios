@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -55,7 +56,8 @@ struct ManageRoomMemberSheetView: View {
                 
                 if context.viewState.permissions.canBan {
                     if !context.viewState.isMemberBanned {
-                        ListRow(label: .default(title: L10n.screenBottomSheetManageRoomMemberBan,
+                        // Bipe: grupo, not sala (bipe#508)
+                        ListRow(label: .default(title: BipeStrings.groupScreenBottomSheetManageRoomMemberBan,
                                                 icon: \.block,
                                                 role: .destructive),
                                 kind: .button {
@@ -64,7 +66,8 @@ struct ManageRoomMemberSheetView: View {
                                 .disabled(context.viewState.isBanUnbanDisabled)
                         // Kick permission is also needed to unban
                     } else if context.viewState.permissions.canKick {
-                        ListRow(label: .default(title: L10n.screenBottomSheetManageRoomMemberUnban,
+                        // Bipe: grupo, not sala (bipe#508)
+                        ListRow(label: .default(title: BipeStrings.groupScreenBottomSheetManageRoomMemberUnban,
                                                 icon: \.restart,
                                                 role: .destructive),
                                 kind: .button {

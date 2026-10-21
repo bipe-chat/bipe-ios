@@ -6,6 +6,7 @@
 // Please see LICENSE in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -87,7 +88,8 @@ enum EditRoomAddressErrorState {
 extension Set<EditRoomAddressErrorState> {
     var errorDescription: String? {
         if contains(.alreadyExists) {
-            return L10n.errorRoomAddressAlreadyExists
+            // Bipe: grupo, not sala (bipe#508)
+            return BipeStrings.groupErrorRoomAddressAlreadyExists
         } else if contains(.invalidSymbols) {
             return L10n.errorRoomAddressInvalidSymbols
         }

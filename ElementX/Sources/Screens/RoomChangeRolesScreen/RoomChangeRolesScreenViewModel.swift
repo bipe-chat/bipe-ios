@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -146,7 +147,8 @@ class RoomChangeRolesScreenViewModel: RoomChangeRolesScreenViewModelType, RoomCh
     private func showTransferOwnershipWarning() {
         context.alertInfo = AlertInfo(id: .transferOwnershipWarning,
                                       title: L10n.screenRoomChangeRoleConfirmChangeOwnersTitle,
-                                      message: L10n.screenRoomChangeRoleConfirmChangeOwnersDescription,
+                                      // Bipe: grupo, not sala (bipe#508)
+                                      message: BipeStrings.groupScreenRoomChangeRoleConfirmChangeOwnersDescription,
                                       primaryButton: .init(title: L10n.actionContinue, role: .destructive) {
                                           Task { await self.save() }
                                       },

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -50,7 +51,8 @@ struct CreateRoomScreen: View {
         .compoundList()
         .track(screen: .CreateRoom)
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle(context.viewState.isSpace ? L10n.screenCreateRoomNewSpaceTitle : L10n.screenCreateRoomNewRoomTitle)
+        // Bipe: grupo, not sala (bipe#508)
+        .navigationTitle(context.viewState.isSpace ? L10n.screenCreateRoomNewSpaceTitle : BipeStrings.groupScreenCreateRoomNewRoomTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
         .alert(item: $context.alertInfo)

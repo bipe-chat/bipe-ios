@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import SwiftUI
 
@@ -60,7 +61,8 @@ class RoomRolesAndPermissionsScreenViewModel: RoomRolesAndPermissionsScreenViewM
         case .editOwnUserRole:
             state.bindings.alertInfo = AlertInfo(id: .editOwnRole,
                                                  title: L10n.screenRoomRolesAndPermissionsChangeMyRole,
-                                                 message: L10n.screenRoomChangeRoleConfirmDemoteSelfDescription,
+                                                 // Bipe: grupo, not sala (bipe#508)
+                                                 message: BipeStrings.groupScreenRoomChangeRoleConfirmDemoteSelfDescription,
                                                  primaryButton: .init(title: L10n.actionCancel, role: .cancel) { },
                                                  verticalButtons: [
                                                      .init(title: L10n.screenRoomRolesAndPermissionsChangeRoleDemoteToModerator, role: .destructive) {

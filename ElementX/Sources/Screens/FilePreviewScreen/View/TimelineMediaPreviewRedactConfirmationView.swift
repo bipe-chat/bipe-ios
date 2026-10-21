@@ -54,7 +54,8 @@ struct TimelineMediaPreviewRedactConfirmationView: View {
                     .multilineTextAlignment(.center)
                 
                 // Bipe: a DM says "conversa", never "sala" (bipe#507).
-                Text(context.viewState.isDM ? BipeStrings.dmMediaDeleteBody : L10n.screenMediaBrowserDeleteConfirmationSubtitle)
+                // Bipe: grupo, not sala (bipe#508)
+                Text(context.viewState.isDM ? BipeStrings.dmMediaDeleteBody : BipeStrings.groupScreenMediaBrowserDeleteConfirmationSubtitle)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textSecondary)
                     .multilineTextAlignment(.center)

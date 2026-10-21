@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 
 enum NotificationSettingsEditScreenViewModelAction {
@@ -35,7 +36,8 @@ struct NotificationSettingsEditScreenViewState: BindableState {
               !canPushEncryptedEvents else {
             return nil
         }
-        return L10n.screenNotificationSettingsMentionsOnlyDisclaimer
+        // Bipe: grupo, not sala (bipe#508)
+        return BipeStrings.groupScreenNotificationSettingsMentionsOnlyDisclaimer
     }
     
     var displayRoomsWithCustomSettings: Bool {

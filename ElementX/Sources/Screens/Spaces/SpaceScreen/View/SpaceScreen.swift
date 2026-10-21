@@ -68,14 +68,16 @@ struct SpaceScreen: View {
     
     var emptyState: some View {
         VStack(spacing: 24) {
-            TitleAndIcon(title: L10n.screenSpaceEmptyStateTitle,
+            // Bipe: grupo, not sala (bipe#508)
+            TitleAndIcon(title: BipeStrings.groupScreenSpaceEmptyStateTitle,
                          icon: \.room,
                          iconStyle: .defaultSolid)
                 .padding(.horizontal, 24)
             
             VStack(spacing: 16) {
                 Button { context.send(viewAction: .addExistingRooms) } label: {
-                    Label(L10n.actionAddExistingRooms, icon: \.plus)
+                    // Bipe: grupo, not sala (bipe#508)
+                    Label(BipeStrings.groupActionAddExistingRooms, icon: \.plus)
                 }
                 .buttonStyle(.compound(.primary))
                 
@@ -132,12 +134,14 @@ struct SpaceScreen: View {
                             }
                             
                             Button { context.send(viewAction: .addExistingRooms) } label: {
-                                Label(L10n.actionAddExistingRooms, icon: \.room)
+                                // Bipe: grupo, not sala (bipe#508)
+                                Label(BipeStrings.groupActionAddExistingRooms, icon: \.room)
                             }
                             
                             if !context.viewState.rooms.isEmpty {
                                 Button { context.send(viewAction: .manageChildren) } label: {
-                                    Label(L10n.actionManageRooms, icon: \.edit)
+                                    // Bipe: grupo, not sala (bipe#508)
+                                    Label(BipeStrings.groupActionManageRooms, icon: \.edit)
                                 }
                             }
                         }

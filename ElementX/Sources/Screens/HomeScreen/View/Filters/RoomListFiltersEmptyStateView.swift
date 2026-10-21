@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import SwiftUI
 
 struct RoomListFiltersEmptyStateView: View {
@@ -21,7 +22,8 @@ struct RoomListFiltersEmptyStateView: View {
             case .people:
                 return L10n.screenRoomlistFilterPeopleEmptyStateTitle
             case .rooms:
-                return L10n.screenRoomlistFilterRoomsEmptyStateTitle
+                // Bipe: grupo, not sala (bipe#508)
+                return BipeStrings.groupScreenRoomlistFilterRoomsEmptyStateTitle
             case .favourites:
                 return L10n.screenRoomlistFilterFavouritesEmptyStateTitle
             case .invites:
