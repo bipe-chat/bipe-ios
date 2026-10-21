@@ -322,10 +322,12 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
         var attributedLastMessage: AttributedString?
         var lastMessageDate: Date?
         var lastMessageState: RoomSummary.LastMessageState?
+        var bipeLatestEventTimestamp: UInt64?
         
         if let latestRoomMessage = roomDetails.latestEvent {
             switch latestRoomMessage {
             case .local(let timestamp, let senderID, let profile, let content, let state):
+                bipeLatestEventTimestamp = timestamp
                 let sender = TimelineItemSender(senderID: senderID, senderProfile: profile)
                 attributedLastMessage = eventStringBuilder.buildAttributedString(for: content, sender: sender, isOutgoing: true, isDM: roomInfo.isDm)
                 lastMessageDate = Date(timeIntervalSince1970: TimeInterval(timestamp / 1000))
@@ -339,10 +341,12 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
                     lastMessageState = nil
                 }
             case .remote(let timestamp, let senderID, let isOwn, let profile, let content):
+                bipeLatestEventTimestamp = timestamp
                 let sender = TimelineItemSender(senderID: senderID, senderProfile: profile)
                 attributedLastMessage = eventStringBuilder.buildAttributedString(for: content, sender: sender, isOutgoing: isOwn, isDM: roomInfo.isDm)
                 lastMessageDate = Date(timeIntervalSince1970: TimeInterval(timestamp / 1000))
             case .remoteInvite(let timestamp, let senderID, let profile):
+                bipeLatestEventTimestamp = timestamp
                 lastMessageDate = Date(timeIntervalSince1970: TimeInterval(timestamp / 1000))
                 
                 if let senderID {
@@ -402,7 +406,8 @@ class RoomSummaryProvider: RoomSummaryProviderProtocol {
                            isMarkedUnread: roomInfo.isMarkedUnread,
                            isFavourite: roomInfo.isFavourite,
                            isTombstoned: roomInfo.successorRoom != nil,
-                           isLowPriority: roomInfo.isLowPriority)
+                           isLowPriority: roomInfo.isLowPriority,
+                           bipeLatestEventTimestamp: bipeLatestEventTimestamp)
     }
     
     private nonisolated static func buildDiff(from diff: RoomListEntriesUpdate, on rooms: [RoomSummary], eventStringBuilder: RoomEventStringBuilder) async -> CollectionDifference<RoomSummary>? {

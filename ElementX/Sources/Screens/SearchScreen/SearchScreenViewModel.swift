@@ -20,6 +20,8 @@ class SearchScreenViewModel: SearchScreenViewModelType, SearchScreenViewModelPro
     private let searchService: SearchServiceProxyProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let userSettings: UserSettings
+    /// Bipe (bipe#464): search leaves out cleared DMs and their messages up to the marker.
+    private let bipeClearedChats: BipeClearedChatsStore
     private var searchQueryObservationTask: Task<Void, Never>?
     private var searchModeObservationTask: Task<Void, Never>?
     private var loadingObservationTask: Task<Void, Never>?
@@ -42,6 +44,7 @@ class SearchScreenViewModel: SearchScreenViewModelType, SearchScreenViewModelPro
         searchService = userSession.clientProxy.searchService
         self.userIndicatorController = userIndicatorController
         userSettings = userSession.userSettings
+        bipeClearedChats = BipeClearedChatsStore.store(for: userSession.clientProxy)
         
         super.init(initialViewState: SearchScreenViewState(bindings: .init(searchQuery: initialSearchQuery, searchMode: initialSearchMode)),
                    mediaProvider: userSession.mediaProvider)
@@ -62,7 +65,7 @@ class SearchScreenViewModel: SearchScreenViewModelType, SearchScreenViewModelPro
                     state.messages = []
                     return
                 }
-                state.messages = results.map { result in
+                state.messages = results.filter { bipeClearedChats.keepsEvent(roomID: $0.roomID, at: $0.timestamp) }.map { result in
                     SearchScreenMessage(result,
                                         roomSummary: clientProxy.roomSummaryForIdentifier(result.roomID),
                                         isOutgoing: result.sender.id == clientProxy.userID)
@@ -213,7 +216,7 @@ class SearchScreenViewModel: SearchScreenViewModelType, SearchScreenViewModelPro
                 return .query(query)
             case .room(let roomID):
                 // Drop rooms the user has since left or is only invited to, we've got nothing to show for them.
-                guard let summary = clientProxy.roomSummaryForIdentifier(roomID), summary.isJoined else { return nil }
+                guard let summary = clientProxy.roomSummaryForIdentifier(roomID), summary.isJoined, !bipeClearedChats.isHidden(summary) else { return nil }
                 return .room(SearchScreenRoom(summary))
             }
         }
@@ -248,7 +251,7 @@ class SearchScreenViewModel: SearchScreenViewModelType, SearchScreenViewModelPro
     private func updateRooms(with summaries: [RoomSummary]) {
         // The list has caught up with the current filter, so we're no longer waiting on results.
         state.isLoadingRooms = false
-        state.rooms = summaries.map(SearchScreenRoom.init)
+        state.rooms = summaries.filter { !bipeClearedChats.isHidden($0) }.map(SearchScreenRoom.init)
     }
     
     /// The actual range values don't matter as long as they contain the lower

@@ -1506,6 +1506,16 @@ public enum BipeStrings {
 
     public static var dmLeaving: String { NSLocalizedString("bipe_dm_leaving", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var dmDeleteAction: String { NSLocalizedString("bipe_dm_delete_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteTitle: String { NSLocalizedString("bipe_dm_delete_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteBody: String { NSLocalizedString("bipe_dm_delete_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteConfirm: String { NSLocalizedString("bipe_dm_delete_confirm", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteError: String { NSLocalizedString("bipe_dm_delete_error", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var dmErrorMuting: String { NSLocalizedString("bipe_dm_error_muting", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var dmErrorUnmuting: String { NSLocalizedString("bipe_dm_error_unmuting", tableName: "Bipe", bundle: .module, comment: "") }

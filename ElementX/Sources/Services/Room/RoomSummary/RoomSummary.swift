@@ -58,6 +58,8 @@ nonisolated struct RoomSummary {
     let isTombstoned: Bool
     /// Bipe: archived. The Matrix `m.lowpriority` tag, so other clients see the same state.
     var isLowPriority = false
+    /// Bipe: `origin_server_ts` (ms) of the latest event, for cleared DMs (bipe#464). `lastMessageDate` has whole seconds only.
+    var bipeLatestEventTimestamp: UInt64?
     
     var hasUnreadMessages: Bool {
         unreadMessagesCount > 0

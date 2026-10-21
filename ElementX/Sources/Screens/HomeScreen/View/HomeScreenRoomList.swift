@@ -122,10 +122,19 @@ struct HomeScreenRoomList: View {
                             }
                         }
                         
-                        Button(role: .destructive) {
-                            context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
-                        } label: {
-                            Label(room.isDirect ? L10n.actionLeaveConversation : L10n.actionLeaveRoom, systemImage: "rectangle.portrait.and.arrow.right") // Bipe: a DM is a conversation
+                        // Bipe (bipe#464): a DM has no room leave. "Apagar conversa" hides it and keeps you in it.
+                        if room.isDirect {
+                            Button(role: .destructive) {
+                                context.send(viewAction: .bipeDeleteChat(roomIdentifier: room.id))
+                            } label: {
+                                Label(BipeStrings.dmDeleteAction, systemImage: "trash")
+                            }
+                        } else {
+                            Button(role: .destructive) {
+                                context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
+                            } label: {
+                                Label(L10n.actionLeaveRoom, systemImage: "rectangle.portrait.and.arrow.right")
+                            }
                         }
                     }
             }
