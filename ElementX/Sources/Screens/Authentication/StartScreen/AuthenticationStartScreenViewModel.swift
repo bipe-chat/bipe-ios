@@ -88,11 +88,15 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
         
         if appSettings.usesBipeSignup {
             Task { await loadBipeSignupMode() }
+            Task { await detectBipePastedInvite() }
         }
         
         notificationCenter.publisher(for: UIApplication.didBecomeActiveNotification)
             .sink { [weak self] _ in
                 self?.reloadClassicAppAccount()
+                if appSettings.usesBipeSignup {
+                    Task { await self?.detectBipePastedInvite() }
+                }
             }
             .store(in: &cancellables)
     }
@@ -126,6 +130,12 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
             default:
                 MXLog.error("Unexpected start screen target: \(target)")
             }
+        case .bipePaste(let strings):
+            if let code = strings.lazy.compactMap(BipeInviteCode.init).first {
+                actionsSubject.send(.bipeInvitePasted(code))
+            } else {
+                state.bipePastedNoInvite = true
+            }
             
         case .continueWithClassic(let account):
             Task { await login(classicAppAccount: account) }
@@ -140,6 +150,14 @@ class AuthenticationStartScreenViewModel: AuthenticationStartScreenViewModelType
     }
     
     // MARK: - Private
+    
+    /// bipe#197: the invite page copies the invite link before it opens the App Store or TestFlight.
+    /// `detectPatterns` does not read the pasteboard, so iOS shows no paste alert. Only the system paste button reads it.
+    private func detectBipePastedInvite() async {
+        guard bipePendingInviteCode == nil else { return }
+        let patterns = try? await UIPasteboard.general.detectedPatterns(for: [\UIPasteboard.DetectedValues.probableWebURL])
+        state.bipeOffersPasteInvite = patterns?.contains(\UIPasteboard.DetectedValues.probableWebURL) == true
+    }
     
     /// The start screen variant follows the server's sign-up mode (ADR 0072) and shows who invited.
     /// A failed read keeps the invite-first variant.

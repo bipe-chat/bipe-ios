@@ -1862,6 +1862,12 @@ public enum BipeStrings {
 
     public static var onboardingHaveAccount: String { NSLocalizedString("bipe_onboarding_have_account", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var onboardingPasteInviteHint: String { NSLocalizedString("bipe_onboarding_paste_invite_hint", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInvite: String { NSLocalizedString("bipe_onboarding_paste_invite", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInviteNone: String { NSLocalizedString("bipe_onboarding_paste_invite_none", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var inviteCodeTitle: String { NSLocalizedString("bipe_invite_code_title", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var inviteCodeBody: String { NSLocalizedString("bipe_invite_code_body", tableName: "Bipe", bundle: .module, comment: "") }

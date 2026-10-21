@@ -29,6 +29,8 @@ enum AuthenticationStartScreenCoordinatorAction {
     case register
     /// Bipe: the start screen's sign-up button. `startsWithInviteCode` is false when the code is known or not needed.
     case bipeSignup(startsWithInviteCode: Bool)
+    /// Bipe: an invite code from the pasteboard (bipe#197).
+    case bipeInvitePasted(BipeInviteCode)
     
     case loginDirectlyWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
     case loginDirectlyWithPassword(loginHint: String?)
@@ -74,6 +76,8 @@ final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.register)
                 case .bipeSignup(let startsWithInviteCode):
                     actionsSubject.send(.bipeSignup(startsWithInviteCode: startsWithInviteCode))
+                case .bipeInvitePasted(let code):
+                    actionsSubject.send(.bipeInvitePasted(code))
                     
                 case .loginDirectlyWithOAuth(let data, let window):
                     actionsSubject.send(.loginDirectlyWithOAuth(data: data, window: window))

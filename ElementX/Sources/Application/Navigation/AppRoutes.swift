@@ -70,6 +70,16 @@ enum AppRoute: Hashable {
         case .accountProvisioningLink: true
         case .oAuthCallback: true
         case .bipeRecoveryLink: true
+        // Bipe: an invite link that cold-starts the app arrives before the authentication flow exists (bipe#197).
+        case .bipeInvite: true
+        default: false
+        }
+    }
+    
+    /// Bipe: a stored invite that finds a signed-in session still gets the "already signed in" toast.
+    var isBipeInvite: Bool {
+        switch self {
+        case .bipeInvite: true
         default: false
         }
     }

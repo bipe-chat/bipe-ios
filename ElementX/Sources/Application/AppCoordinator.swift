@@ -774,7 +774,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             userSession.clientProxy.roomsToAwait = storedRoomsToAwait
         }
         
-        if storedAppRoute?.isAuthenticationRoute == false,
+        if storedAppRoute?.isAuthenticationRoute == false || storedAppRoute?.isBipeInvite == true,
            let storedAppRoute = storedAppRoute.take() {
             userSessionFlowCoordinator.handleAppRoute(storedAppRoute, animated: false)
         } else if let inviterUserID = appSettings.bipePendingInviterUserID {
