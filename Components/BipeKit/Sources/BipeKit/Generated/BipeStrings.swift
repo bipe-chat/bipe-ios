@@ -572,6 +572,8 @@ public enum BipeStrings {
 
     public static var contactsOpenSettings: String { NSLocalizedString("bipe_contacts_open_settings", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var contactsOpenSettingsAndroid: String { NSLocalizedString("bipe_contacts_open_settings_android", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var contactsNone: String { NSLocalizedString("bipe_contacts_none", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var contactsInvite: String { NSLocalizedString("bipe_contacts_invite", tableName: "Bipe", bundle: .module, comment: "") }
