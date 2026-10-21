@@ -1976,6 +1976,10 @@ public enum BipeStrings {
 
     public static var helpProblemDescription: String { NSLocalizedString("bipe_help_problem_description", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var helpReportSentTitle: String { NSLocalizedString("bipe_help_report_sent_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var helpReportSentBody: String { NSLocalizedString("bipe_help_report_sent_body", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var deviceConfirmAction: String { NSLocalizedString("bipe_device_confirm_action", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var keysConfirmAction: String { NSLocalizedString("bipe_keys_confirm_action", tableName: "Bipe", bundle: .module, comment: "") }
