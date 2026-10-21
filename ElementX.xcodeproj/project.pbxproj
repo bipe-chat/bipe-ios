@@ -688,6 +688,7 @@
 		66C48B5B35C861C2089DBB12 /* ToolbarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 510DA63AB273A68D659CEC95 /* ToolbarButton.swift */; };
 		66E9202BED03B5BB00E812A1 /* URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227AC5D71A4CE43512062243 /* URL.swift */; };
 		66ED2E6F19B0C669EC71D4CA /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFDCAC6CAAD65A2C24EA9C4B /* Dictionary.swift */; };
+		67122561BF42054B2549C3AD /* BipeClearedChats.swift in Sources */ = {isa = PBXBuildFile; fileRef = E666D2DF84BBE58F24E4C6BA /* BipeClearedChats.swift */; };
 		67160204A8D362BB7D4AD259 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 693E16574C6F7F9FA1015A8C /* Search.swift */; };
 		6786C4B0936AC84D993B20BF /* NotificationSettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F06F2F09B2EDD067DC2174 /* NotificationSettingsScreen.swift */; };
 		6793E75E3EBE48EBB8F857AF /* ProcessInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077B01C13BBA2996272C5FB5 /* ProcessInfo.swift */; };
@@ -3233,6 +3234,7 @@
 		E5FDFAA04174CC99FB66391C /* EditRoomAddressScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRoomAddressScreenViewModel.swift; sourceTree = "<group>"; };
 		E63072981793CCA84EE12798 /* ChatsSpaceFiltersScreenViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatsSpaceFiltersScreenViewModelProtocol.swift; sourceTree = "<group>"; };
 		E6372DD10DED30E7AD7BCE21 /* RoomListFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomListFiltersView.swift; sourceTree = "<group>"; };
+		E666D2DF84BBE58F24E4C6BA /* BipeClearedChats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeClearedChats.swift; sourceTree = "<group>"; };
 		E66763BD54A3A1D9C6E6F2F1 /* PinnedItemsIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedItemsIndicatorView.swift; sourceTree = "<group>"; };
 		E68F6E8E18276D8D1F6031C3 /* Untranslated.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Untranslated.strings; path = en.lproj/Untranslated.strings; sourceTree = "<group>"; };
 		E6935A55AB3B0C94BC566DD6 /* EncryptionResetPasswordScreenCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionResetPasswordScreenCoordinator.swift; sourceTree = "<group>"; };
@@ -6646,6 +6648,7 @@
 				B53AC78E49A297AC1D72A7CF /* AppMediator.swift */,
 				05AF58372CA884A789EB9C5A /* AppMediatorProtocol.swift */,
 				93D8388DC0F6DFBF2E2A03F1 /* BipeAccountSignIn.swift */,
+				E666D2DF84BBE58F24E4C6BA /* BipeClearedChats.swift */,
 				9520AA297F6101DAEE47CC78 /* BipeInviteJoinNotifier.swift */,
 				6A39ABDC71FD08DD9D975EDC /* BipeInvitePairs.swift */,
 				B8AA94CD093583F7A5F455A3 /* BipeInviterGreeting.swift */,
@@ -9156,6 +9159,7 @@
 				A4D988DD36E8D9010F0FFAC4 /* BipeAccountSwitcher.swift in Sources */,
 				8AD65735288B84EC8160C23E /* BipeAppLockPlaceholderScreen.swift in Sources */,
 				CDA2BCD4BB5B08511AD9B798 /* BipeArchivedRow.swift in Sources */,
+				67122561BF42054B2549C3AD /* BipeClearedChats.swift in Sources */,
 				A6841764ABCB4FAC964E0A65 /* BipeCompanySeal.swift in Sources */,
 				5F8792688803169E49B709CF /* BipeContactsScreen.swift in Sources */,
 				FEDF12472224DAA2B9796461 /* BipeContactsScreenCoordinator.swift in Sources */,

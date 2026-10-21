@@ -655,6 +655,11 @@
 "bipe_dm_left" = "%1$@ saiu da conversa";
 "bipe_dm_left_by_you" = "Você saiu da conversa";
 "bipe_dm_leaving" = "Saindo da conversa";
+"bipe_dm_delete_action" = "Apagar conversa";
+"bipe_dm_delete_title" = "Apagar esta conversa?";
+"bipe_dm_delete_body" = "As mensagens somem de todos os seus aparelhos. A outra pessoa continua com a conversa.";
+"bipe_dm_delete_confirm" = "Apagar";
+"bipe_dm_delete_error" = "Não deu para apagar a conversa. Tente de novo.";
 "bipe_dm_error_muting" = "Não deu para silenciar a conversa. Tente de novo.";
 "bipe_dm_error_unmuting" = "Não deu para ligar o som da conversa. Tente de novo.";
 "bipe_dm_media_empty" = "As fotos e os vídeos desta conversa aparecem aqui.";
@@ -818,6 +823,9 @@
 "bipe_onboarding_join_with_invite" = "Entrar com o convite";
 "bipe_onboarding_have_invite" = "Tenho um convite";
 "bipe_onboarding_have_account" = "Já tenho conta";
+"bipe_onboarding_paste_invite_hint" = "Copiou o link do convite?";
+"bipe_onboarding_paste_invite" = "Colar convite";
+"bipe_onboarding_paste_invite_none" = "O que você copiou não é um convite do Bipe.";
 "bipe_invite_code_title" = "Código do convite";
 "bipe_invite_code_body" = "Peça o código para quem te chamou para o Bipe.";
 "bipe_invite_code_none" = "Não tem convite?";

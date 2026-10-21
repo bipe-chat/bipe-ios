@@ -1506,6 +1506,16 @@ public enum BipeStrings {
 
     public static var dmLeaving: String { NSLocalizedString("bipe_dm_leaving", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var dmDeleteAction: String { NSLocalizedString("bipe_dm_delete_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteTitle: String { NSLocalizedString("bipe_dm_delete_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteBody: String { NSLocalizedString("bipe_dm_delete_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteConfirm: String { NSLocalizedString("bipe_dm_delete_confirm", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var dmDeleteError: String { NSLocalizedString("bipe_dm_delete_error", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var dmErrorMuting: String { NSLocalizedString("bipe_dm_error_muting", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var dmErrorUnmuting: String { NSLocalizedString("bipe_dm_error_unmuting", tableName: "Bipe", bundle: .module, comment: "") }
@@ -1861,6 +1871,12 @@ public enum BipeStrings {
     public static var onboardingHaveInvite: String { NSLocalizedString("bipe_onboarding_have_invite", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var onboardingHaveAccount: String { NSLocalizedString("bipe_onboarding_have_account", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInviteHint: String { NSLocalizedString("bipe_onboarding_paste_invite_hint", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInvite: String { NSLocalizedString("bipe_onboarding_paste_invite", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var onboardingPasteInviteNone: String { NSLocalizedString("bipe_onboarding_paste_invite_none", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var inviteCodeTitle: String { NSLocalizedString("bipe_invite_code_title", tableName: "Bipe", bundle: .module, comment: "") }
 

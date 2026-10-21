@@ -705,4 +705,7 @@ public enum BipeRegistries {
     public static let badgeKeys: [String: String] = [
         "prod-2026-10": "9j3_slBroZbxa3B6Tdgcm_U-O_LIdrNFXzDgY8oLwxE",
     ]
+
+    /// Cleared DMs (bipe-chat/bipe#464; registries/cleared-chats.json): the global account data event with the markers.
+    public static let clearedChatsEventType = "chat.bipe.cleared_chats"
 }

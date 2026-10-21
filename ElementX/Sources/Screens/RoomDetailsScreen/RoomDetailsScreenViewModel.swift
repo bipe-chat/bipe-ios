@@ -174,6 +174,12 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
     // MARK: - Private
     
     private func processTapToLeave() {
+        // Bipe (bipe#464): in a DM the row is "Apagar conversa".
+        if state.dmRecipientInfo != nil {
+            showBipeDeleteChatAlert()
+            return
+        }
+        
         guard !roomProxy.infoPublisher.value.isSpace else {
             Task { await processLeaveSpace() }
             return
@@ -464,6 +470,34 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             MXLog.error("Failed inviting the DM recipient to a group: \(error)")
             userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
         }
+    }
+    
+    // MARK: Bipe: delete a DM (bipe#464)
+    
+    private static let bipeDeleteChatLoadingID = "BipeDeleteChatLoading"
+    
+    private func showBipeDeleteChatAlert() {
+        state.bindings.alertInfo = .init(id: .alert,
+                                         title: BipeStrings.dmDeleteTitle,
+                                         message: BipeStrings.dmDeleteBody,
+                                         primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
+                                         secondaryButton: .init(title: BipeStrings.dmDeleteConfirm, role: .destructive) { [weak self] in
+                                             Task { await self?.deleteBipeChat() }
+                                         })
+    }
+    
+    /// Writes the marker, then goes back to the room list. The user stays in the room.
+    private func deleteBipeChat() async {
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.bipeDeleteChatLoadingID, type: .modal, title: L10n.commonLoading, persistent: true))
+        let isCleared = await BipeClearedChatsStore.store(for: userSession.clientProxy).clear(roomID: roomProxy.id)
+        userIndicatorController.retractIndicatorWithId(Self.bipeDeleteChatLoadingID)
+        
+        guard isCleared else {
+            state.bindings.alertInfo = .init(id: .alert, title: L10n.commonError, message: BipeStrings.dmDeleteError)
+            return
+        }
+        
+        actionsSubject.send(.leftRoom)
     }
     
     private static let leaveRoomLoadingID = "LeaveRoomLoading"

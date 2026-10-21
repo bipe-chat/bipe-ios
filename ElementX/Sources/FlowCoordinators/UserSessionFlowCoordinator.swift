@@ -748,9 +748,11 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     /// A group invite the user has not opened counts 1 on Grupos. DM invites stay behind the Pedidos row.
     private func updateBipeTabBadges(roomSummaries: [RoomSummary]) {
         let seenInvites = userSession.userSettings.app.seenInvites
+        let clearedChats = BipeClearedChatsStore.store(for: userSession.clientProxy)
         var chatsCount = 0
         var groupsCount = 0
-        for summary in roomSummaries {
+        // Bipe (bipe#464): a cleared DM that the list hides adds nothing.
+        for summary in roomSummaries where !clearedChats.isHidden(summary) {
             switch BipeRoomListScope(summary: summary) {
             case .chats:
                 chatsCount += Int(summary.unreadNotificationsCount)

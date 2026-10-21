@@ -51,6 +51,10 @@ class TimelineController: TimelineControllerProtocol {
     private let bipeHandleChanges: BipeHandleChangeStore?
     private var bipeHandleChangesCancellable: AnyCancellable?
     
+    /// Bipe (bipe#464): the loaded items of a cleared DM go back to the marker, so back pagination stops.
+    private var bipeReachedClearedMarker = false
+    private var bipeClearedChatsCancellable: AnyCancellable?
+    
     init(roomProxy: JoinedRoomProxyProtocol,
          timelineProxy: TimelineProxyProtocol,
          initialFocussedEventID: String?,
@@ -71,6 +75,7 @@ class TimelineController: TimelineControllerProtocol {
         activeTimelineItemProvider = liveTimelineItemProvider
         
         observeBipeHandleChanges()
+        observeBipeClearedChats()
         
         // No need for a detached timeline when the live one has already loaded the event.
         guard let initialFocussedEventID, !liveTimelineItemProvider.containsEvent(initialFocussedEventID) else {
@@ -113,6 +118,8 @@ class TimelineController: TimelineControllerProtocol {
     }
     
     func paginateBackwards(requestSize: UInt16) async -> Result<Void, TimelineControllerError> {
+        guard !bipeReachedClearedMarker else { return .success(()) }
+        
         MXLog.info("Started back pagination request")
         switch await activeTimeline.paginateBackwards(requestSize: requestSize) {
         case .success:
@@ -532,9 +539,15 @@ class TimelineController: TimelineControllerProtocol {
         }.asCancellable()
     }
     
-    private func updateTimelineItems(itemProxies: [TimelineItemProxy], paginationState: TimelinePaginationState) async {
+    private func updateTimelineItems(itemProxies allItemProxies: [TimelineItemProxy], paginationState sdkPaginationState: TimelinePaginationState) async {
         let isNewTimeline = isSwitchingTimelines
         isSwitchingTimelines = false
+        
+        // Bipe (bipe#464): a cleared DM shows only the events after its marker, without the room beginning.
+        let bipeCleared = BipeClearedTimeline.filter(allItemProxies, marker: bipeClearedMarker)
+        let itemProxies = bipeCleared.items
+        bipeReachedClearedMarker = bipeCleared.reachedMarker
+        let paginationState = bipeCleared.reachedMarker ? TimelinePaginationState(backward: .endReached, forward: sdkPaginationState.forward) : sdkPaginationState
         
         let isDM = roomProxy.infoPublisher.value.isDM
         let displayName = roomProxy.infoPublisher.value.displayName
@@ -624,6 +637,25 @@ class TimelineController: TimelineControllerProtocol {
                 await self?.bipeRedrawTimeline()
             }
         }
+    }
+    
+    // MARK: - Bipe cleared DMs (bipe#464)
+    
+    private var bipeClearedMarker: UInt64? {
+        BipeClearedChatsStore.existingStore(userID: roomProxy.ownUserID)?.marker(for: roomProxy.id)
+    }
+    
+    /// A new marker from this device or another one redraws the open timeline.
+    private func observeBipeClearedChats() {
+        guard let store = BipeClearedChatsStore.existingStore(userID: roomProxy.ownUserID) else { return }
+        let roomID = roomProxy.id
+        bipeClearedChatsCancellable = store.publisher
+            .map { $0.marker(for: roomID) }
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] _ in
+                Task { await self?.bipeRedrawTimeline() }
+            }
     }
     
     private func bipeRedrawTimeline() async {

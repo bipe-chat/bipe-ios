@@ -336,10 +336,18 @@ struct RoomDetailsScreen: View {
     
     private var leaveRoomSection: some View {
         Section {
-            ListRow(label: .action(title: context.viewState.dmRecipientInfo != nil ? L10n.screenRoomDetailsLeaveConversationTitle : L10n.screenRoomDetailsLeaveRoomTitle,
-                                   icon: \.leave,
-                                   role: .destructive),
-                    kind: .button { context.send(viewAction: .processTapLeave) })
+            // Bipe (bipe#464): a DM has no room leave. "Apagar conversa" hides it and keeps you in it.
+            if context.viewState.dmRecipientInfo != nil {
+                ListRow(label: .action(title: BipeStrings.dmDeleteAction,
+                                       icon: \.delete,
+                                       role: .destructive),
+                        kind: .button { context.send(viewAction: .processTapLeave) })
+            } else {
+                ListRow(label: .action(title: L10n.screenRoomDetailsLeaveRoomTitle,
+                                       icon: \.leave,
+                                       role: .destructive),
+                        kind: .button { context.send(viewAction: .processTapLeave) })
+            }
         }
     }
     

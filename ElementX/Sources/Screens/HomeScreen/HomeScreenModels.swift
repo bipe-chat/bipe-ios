@@ -39,6 +39,8 @@ enum HomeScreenViewAction {
     case showRoomDetails(roomIdentifier: String)
     case leaveRoom(roomIdentifier: String)
     case confirmLeaveRoom(roomIdentifier: String)
+    /// Bipe (bipe#464): "Apagar conversa" replaces leave in a DM.
+    case bipeDeleteChat(roomIdentifier: String)
     case reportRoom(roomIdentifier: String)
     case showSettings
     case startChat
