@@ -41,5 +41,3 @@ Components/Secrets/vendor/*
 matrix-rust-components-swift
 build/
 
-# Raw App Store captures from appstore/capture.sh (bipe#454)
-appstore/raw/
