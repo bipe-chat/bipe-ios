@@ -190,7 +190,7 @@ Not done (needs the domain, Apple team or brand):
 
 ## Tab bar (bipe ADR 0053)
 
-- **Tabs:** Conversas, Grupos, Você, plus search (`UserSessionFlowCoordinator.HomeTab`). The Spaces tab is not created; `SpacesTabFlowCoordinator` stays in the tree for rebases.
+- **Tabs:** Conversas, Grupos, Você, plus search (`UserSessionFlowCoordinator.HomeTab`). Conversas shows the b mark (`bipe-tab-chats`, outline; `-fill` when selected; template SVGs from `bipe-web/public/brand/mark.svg`) through `TabDetails.bipeImages`, not an SF Symbol. The Spaces tab is not created; `SpacesTabFlowCoordinator` stays in the tree for rebases.
 - **Conversas and Grupos** are two `ChatsTabFlowCoordinator`s with a `BipeRoomListScope`. `clientProxy.roomSummaryProvider` lists Conversas (SDK category `people`, DM invites included); `bipeGroupsRoomSummaryProvider` lists Grupos (category `group`, joined or invited). Group invites show in Grupos, as on Android. `NotificationSettingsEditScreenViewModel` reads `staticRoomSummaryProvider`, because the main provider no longer lists all rooms.
 - **Routing:** `.room`, `.event`, `.roomDetails` and `.thread` open in the tab that lists the room (`bipeRoomTab(for:)`). Other room routes stay in the current tab.
 - **Badges:** each tab sums `unreadNotificationsCount` of its own rooms. A group invite not in `seenInvites` adds 1 to Grupos (`updateBipeTabBadges`). The app icon badge stays the total.

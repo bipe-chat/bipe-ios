@@ -107,6 +107,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
                                                           flowParameters: flowParameters)
         chatsTabDetails = .init(tag: HomeTab.chats, title: BipeStrings.tabChats, icon: \.chat, selectedIcon: \.chatSolid)
+        chatsTabDetails.bipeImages = (Asset.Images.bipeTabChats, Asset.Images.bipeTabChatsFill)
         chatsTabDetails.navigationSplitCoordinator = chatsSplitCoordinator
         
         let groupsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))

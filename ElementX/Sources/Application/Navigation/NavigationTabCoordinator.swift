@@ -32,13 +32,18 @@ import SwiftUI
         var bipeWarning = false
         /// Bipe: the Você tab's double tap and long press menu (ADR 0135).
         var bipeAccountSwitcher: BipeAccountSwitcher?
+        /// Bipe: a brand glyph in place of the Compound icon (the b mark on Conversas).
+        var bipeImages: (normal: ImageAsset, selected: ImageAsset)?
         
-        /// Bipe: the account's avatar on the Você tab (rounded square for a company), else the Compound icon.
+        /// Bipe: the account's avatar on the Você tab (rounded square for a company), else the brand glyph, else the Compound icon.
         @ViewBuilder
         func bipeIcon(isSelected: Bool) -> some View {
             if let avatar = bipeAccountSwitcher?.currentAvatar {
                 Image(uiImage: avatar)
                     .renderingMode(.original)
+            } else if let bipeImages {
+                Image(asset: isSelected ? bipeImages.selected : bipeImages.normal)
+                    .renderingMode(.template)
             } else {
                 CompoundIcon(isSelected ? selectedIcon : icon)
             }
