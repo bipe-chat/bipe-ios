@@ -43,8 +43,6 @@ struct BipeSettingsGroupScreenViewState: BindableState {
     var accountStatus: BipeAccountStatus?
     var waysBack: BipeWaysBack?
     var recoveryKeySet = false
-    /// "Bloquear o app": off by default (ADR 0137).
-    var appLockEnabled = false
     /// "Desbloquear com Face ID / Touch ID": shown when the phone has biometrics and the app lock is on.
     var biometryName: String?
     
@@ -79,6 +77,7 @@ struct BipeSettingsGroupScreenViewStateBindings {
     /// "Baixar meus dados": the file to share.
     var exportFileURL: URL?
     var biometricUnlock = false
+    /// "Bloquear o app": off by default (ADR 0137).
     var appLock = false
     
     /// "Online e digitando": Element's share-presence setting.

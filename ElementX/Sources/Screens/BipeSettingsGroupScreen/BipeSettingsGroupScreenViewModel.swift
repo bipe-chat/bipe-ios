@@ -161,7 +161,6 @@ class BipeSettingsGroupScreenViewModel: BipeSettingsGroupScreenViewModelType, Bi
     }
     
     private func updateAppLockState() {
-        state.appLockEnabled = appLockService.isEnabled
         state.bindings.appLock = appLockService.isEnabled
         state.biometryName = appLockService.isEnabled && appLockService.biometryType != .none ? appLockService.biometryType.localizedString : nil
         state.bindings.biometricUnlock = appLockService.biometricUnlockEnabled

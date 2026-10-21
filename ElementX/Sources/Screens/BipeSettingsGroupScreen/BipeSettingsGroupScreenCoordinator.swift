@@ -18,6 +18,10 @@ struct BipeSettingsGroupScreenCoordinatorParameters {
 enum BipeSettingsGroupScreenCoordinatorAction {
     /// A row that opens another screen or flow.
     case open(BipeSettingsRow)
+    /// "Bloquear o app" switched on: create the app lock PIN (ADR 0137).
+    case turnOnAppLock
+    /// "Bloquear o app" switched off on a phone with no passcode: Element's PIN check, then "Remove PIN".
+    case turnOffAppLockWithPIN
 }
 
 /// Bipe: one settings group from the registry (ADR 0112): Seu perfil, Privacidade, Sua conta, Conversas e mídia, Ajuda e sobre.
@@ -41,6 +45,10 @@ final class BipeSettingsGroupScreenCoordinator: CoordinatorProtocol {
                 switch action {
                 case .open(let row):
                     self?.actionsSubject.send(.open(row))
+                case .turnOnAppLock:
+                    self?.actionsSubject.send(.turnOnAppLock)
+                case .turnOffAppLockWithPIN:
+                    self?.actionsSubject.send(.turnOffAppLockWithPIN)
                 }
             }
             .store(in: &cancellables)
