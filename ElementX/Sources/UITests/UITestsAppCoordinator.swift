@@ -870,7 +870,7 @@ class MockScreen: Identifiable {
             
             return nil
         #if DEBUG
-        case .bipeStoreAvisoGolpe, .bipeStorePedidos, .bipeStoreSeuArroba, .bipeStoreConferirPix,
+        case .bipeStoreAvisoGolpe, .bipeStorePedidos, .bipeStoreSeuArroba, .bipeStoreConferirPix, .bipeStoreConferirPixAlterado,
              .bipeStoreGrupos, .bipeStoreSeloCnpj, .bipeStoreStickers:
             let screens = BipeStoreScreens(windowManager: windowManager,
                                            navigationRootCoordinator: navigationRootCoordinator,

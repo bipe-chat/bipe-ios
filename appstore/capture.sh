@@ -1,24 +1,37 @@
 #!/usr/bin/env bash
 # Captures the raw App Store screenshots (bipe#454) from the UI test StoreScreenshotTests.
 #
-#   appstore/capture.sh <iphone69|ipad13> [light|dark]
+#   appstore/capture.sh <iphone69|ipad13> [light|dark] [--locale pt-BR|en-US]
 #
-# Writes appstore/raw/<device>/<appearance>/<slug>.png (git-ignored). The bipe-web image builder (bipe#455)
+# Writes appstore/raw/<device>/<appearance>/<locale>/<slug>.png (git-ignored). The bipe-web image builder (bipe#455)
 # makes the store panels from them. The screens are mock screens with the sample cast (bipe-shared/product/cast.json)
-# and pt-BR text, so two runs give the same images.
+# and the content of bipe-shared/product/store-fixtures.json in that locale, with the app in that language, so two
+# runs give the same images. Default: light, pt-BR.
 #
 # Needs the simulator named in appstore/devices.mjs and the cast photos in ../bipe-web/src/cast/photos
-# (BIPE_CAST_PHOTOS overrides the folder). DERIVED_DATA_PATH sets xcodebuild's -derivedDataPath.
+# (BIPE_CAST_PHOTOS overrides the folder). DERIVED_DATA_PATH overrides the shared DerivedData
+# (bipe/docs/agents/builds.md).
 # It never downloads a simulator or a runtime: a missing one stops the script.
 set -euo pipefail
 
-usage="usage: appstore/capture.sh <iphone69|ipad13> [light|dark]"
-DEVICE="${1:?$usage}"
-APPEARANCE="${2:-light}"
-case "$APPEARANCE" in
-  light|dark) ;;
+usage="usage: appstore/capture.sh <iphone69|ipad13> [light|dark] [--locale pt-BR|en-US]"
+DEVICE=""
+APPEARANCE="light"
+LOCALE="pt-BR"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --locale) LOCALE="${2:?$usage}"; shift 2 ;;
+    light|dark) APPEARANCE="$1"; shift ;;
+    -*) echo "$usage" >&2; exit 1 ;;
+    *) [ -z "$DEVICE" ] || { echo "$usage" >&2; exit 1; }; DEVICE="$1"; shift ;;
+  esac
+done
+[ -n "$DEVICE" ] || { echo "$usage" >&2; exit 1; }
+case "$LOCALE" in
+  pt-BR|en-US) ;;
   *) echo "$usage" >&2; exit 1 ;;
 esac
+DERIVED_DATA_PATH="${DERIVED_DATA_PATH:-$HOME/Library/Developer/Xcode/DerivedData/Bipe-iOS}"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -57,17 +70,17 @@ xcrun simctl status_bar "$SIM_ID" override \
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/bipe-appstore.XXXXXX")"
 RESULT="$WORK/capture.xcresult"
-OUT="$ROOT/appstore/raw/$DEVICE/$APPEARANCE"
+OUT="$ROOT/appstore/raw/$DEVICE/$APPEARANCE/$LOCALE"
 rm -rf "$OUT"
 mkdir -p "$OUT"
 
 # Export the attachments also when a test fails: the captures it took show what broke.
 set +e
-TEST_RUNNER_BIPE_CAST_PHOTOS="$PHOTOS" xcodebuild test \
+TEST_RUNNER_BIPE_CAST_PHOTOS="$PHOTOS" TEST_RUNNER_BIPE_STORE_LOCALE="$LOCALE" xcodebuild test \
   -project ElementX.xcodeproj \
   -scheme UITests \
   -destination "platform=iOS Simulator,id=$SIM_ID" \
-  ${DERIVED_DATA_PATH:+-derivedDataPath "$DERIVED_DATA_PATH"} \
+  -derivedDataPath "$DERIVED_DATA_PATH" \
   -resultBundlePath "$RESULT" \
   -only-testing:UITests/StoreScreenshotTests \
   -quiet
@@ -108,11 +121,11 @@ if wrong:
 PY
 
 if [ "$TEST_STATUS" -ne 0 ]; then
-  echo "StoreScreenshotTests failed on $DEVICE. appstore/raw/$DEVICE/$APPEARANCE holds what it captured. Do not ship these." >&2
+  echo "StoreScreenshotTests failed on $DEVICE. appstore/raw/$DEVICE/$APPEARANCE/$LOCALE holds what it captured. Do not ship these." >&2
   echo "Result bundle with the failure: $RESULT" >&2
   exit "$TEST_STATUS"
 fi
 
 rm -rf "$WORK"
 
-echo "raw screenshots: appstore/raw/$DEVICE/$APPEARANCE"
+echo "raw screenshots: appstore/raw/$DEVICE/$APPEARANCE/$LOCALE"

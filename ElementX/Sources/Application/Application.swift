@@ -124,7 +124,7 @@ struct Application: App {
     
     /// Hide the status bar so it doesn't interfere with the screenshot tests
     private var shouldHideStatusBar: Bool {
-        ProcessInfo.isRunningUITests
+        ProcessInfo.shouldHideStatusBarForUITests
     }
     
     /// https://github.com/element-hq/element-x-ios/issues/1824
