@@ -30,6 +30,12 @@ nonisolated struct RoomStateEventStringBuilder {
         let member = memberDisplayName ?? memberUserID
         let senderDisplayName = sender.disambiguatedDisplayName ?? sender.id
         
+        // Bipe: a DM has no invite lines, in the timeline or the room list preview. An invite pair's
+        // auto-accept made "You accepted the invite" the preview.
+        if isDM, change == .invited || change == .invitationAccepted {
+            return nil
+        }
+        
         switch change {
         // Bipe: a DM says "conversa", a group says "grupo", never "sala" (bipe#507, bipe#508).
         case .joined:
