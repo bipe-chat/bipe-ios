@@ -159,7 +159,9 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
         case .userProfile(let userID):
             stateMachine.processEvent(.showUserProfileScreen(userID: userID), userInfo: .init(animated: animated))
         case .share(let payload):
-            if let roomID = payload.roomID {
+            // Bipe (ADR 0138 rule 3, bipe#510): a share sheet suggestion can be a chat of another account on this phone.
+            // Only open it when this account has the chat; otherwise pick a chat of the account on screen.
+            if let roomID = payload.roomID, case .joined = await userSession.clientProxy.roomForIdentifier(roomID) {
                 stateMachine.processEvent(.selectRoom(roomID: roomID,
                                                       via: [],
                                                       entryPoint: .share(payload)),
