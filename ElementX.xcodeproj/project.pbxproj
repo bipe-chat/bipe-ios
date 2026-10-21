@@ -1297,6 +1297,7 @@
 		C02DE5F62C81FB9E173C3D2F /* TimelineMediaPreviewDataSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0AD0C652385F69FA90FAF5 /* TimelineMediaPreviewDataSourceTests.swift */; };
 		C02E295B34725A1688FCF5F0 /* DeclineAndBlockScreenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68B31232312AFC844440BFE /* DeclineAndBlockScreenModels.swift */; };
 		C051475DFF4C8EBDDF4DC8E4 /* StartChatScreenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99E13633862847D8B7E2815 /* StartChatScreenModels.swift */; };
+		C05B3ABCC1EE3A2E4C79C4F6 /* ElementNavigationStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03AEAA2F66E796C365EFD58 /* ElementNavigationStack.swift */; };
 		C08AAE7563E0722C9383F51C /* RoomMembersListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8E176484A89BAC389D4076 /* RoomMembersListScreen.swift */; };
 		C097D5453640E27D397943CB /* TargetConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D829FD8958376614504B18 /* TargetConfiguration.swift */; };
 		C0A845AAFEB7E1BEAE04306E /* HomeserverCapabilitiesProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751C3DC87817362097287DCC /* HomeserverCapabilitiesProxy.swift */; };
@@ -8987,6 +8988,7 @@
 				8389254EEC28EBA5EA842410 /* ClientFactoryHook.swift in Sources */,
 				D104B27C5DA0626B41CE78D3 /* CurrentValuePublisher.swift in Sources */,
 				66ED2E6F19B0C669EC71D4CA /* Dictionary.swift in Sources */,
+				C05B3ABCC1EE3A2E4C79C4F6 /* ElementNavigationStack.swift in Sources */,
 				F38D32C1B0232AAFE6A0822C /* ExtensionLogger.swift in Sources */,
 				C022284E2774A5E1EF683B4D /* FileManager.swift in Sources */,
 				16A5D1749A32B91203495EF7 /* FrequentlyUsedEmoji.swift in Sources */,

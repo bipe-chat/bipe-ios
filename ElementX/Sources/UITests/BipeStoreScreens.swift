@@ -388,7 +388,7 @@ private struct BipeStoreProfileScreen: View {
     let mediaProvider: MediaProviderProtocol
     
     var body: some View {
-        NavigationStack {
+        ElementNavigationStack {
             Form {
                 BipeProfileHeaderSection(userProfile: profile, handle: handle, mediaProvider: mediaProvider) { }
             }

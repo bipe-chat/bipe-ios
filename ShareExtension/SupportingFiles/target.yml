@@ -103,6 +103,7 @@ targets:
     - path: ../../ElementX/Sources/Other/Extensions/FileManager.swift
     - path: ../../ElementX/Sources/Other/Extensions/NSItemProvider.swift
     - path: ../../ElementX/Sources/Other/Extensions/ProcessInfo.swift
+    - path: ../../ElementX/Sources/Other/SwiftUI/ElementNavigationStack.swift
     - path: ../../ElementX/Sources/Other/Extensions/UIView.swift
     - path: ../../ElementX/Sources/Other/Extensions/URL.swift
     - path: ../../ElementX/Sources/Other/InfoPlistReader.swift
