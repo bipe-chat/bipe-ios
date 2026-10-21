@@ -72,7 +72,7 @@ nonisolated struct RoomEventStringBuilder {
                 .map(AttributedString.init)
         case .roomMembership(let userID, let displayName, let change, let reason):
             return stateEventStringBuilder
-                .buildString(for: change, reason: reason, memberUserID: userID, memberDisplayName: displayName, sender: sender, isOutgoing: isOutgoing)
+                .buildString(for: change, reason: reason, memberUserID: userID, memberDisplayName: displayName, sender: sender, isOutgoing: isOutgoing, isDM: isDM)
                 .map(AttributedString.init)
         case .profileChange(let displayName, let prevDisplayName, let avatarUrl, let prevAvatarUrl):
             return stateEventStringBuilder

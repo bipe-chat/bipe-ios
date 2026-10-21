@@ -30,6 +30,21 @@ nonisolated struct RoomStateEventStringBuilder {
         let member = memberDisplayName ?? memberUserID
         let senderDisplayName = sender.disambiguatedDisplayName ?? sender.id
         
+        // Bipe: a DM has no invite lines, in the timeline or the room list preview (an invite pair's
+        // auto-accept made "You accepted the invite" the preview), and joins and leaves say "conversa".
+        if isDM {
+            switch change {
+            case .invited, .invitationAccepted:
+                return nil
+            case .joined:
+                return memberIsYou ? BipeStrings.dmJoinedByYou : BipeStrings.dmJoined(senderDisplayName)
+            case .left:
+                return memberIsYou ? BipeStrings.dmLeftByYou : BipeStrings.dmLeft(member)
+            default:
+                break
+            }
+        }
+        
         switch change {
         case .joined:
             return memberIsYou ? L10n.stateEventRoomJoinByYou : L10n.stateEventRoomJoin(senderDisplayName)
