@@ -302,7 +302,6 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Message actions | Native context menu on long press: reaction row, actions, the message as preview | Element's bottom sheet | Platform idiom |
 | Terms screen and a recovery alert due together | Terms screen first, the alert right after Continue | Recovery alert first, then the terms screen | On iOS a root alert cannot show over the full-screen terms cover; on Android the terms screen is an overlay that waits for the alert |
 | Settings: Idioma | Row that opens the iPhone Ajustes | No row | iOS sets the app language in system settings; Android follows the system language |
-| Company avatar shape | Rounded square for a company account, verified or not (ADR 0132) | Circle | Built on iOS first (#397) **Gap** |
 | Warning haptic | Notification warning pattern | One long-press pulse | Android has no warning haptic constant (ADR 0134) |
 
 <!-- /parity:differences -->
