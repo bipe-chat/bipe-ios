@@ -59,6 +59,8 @@ final class BugReportScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.viewLogs)
                 case let .submitStarted(progressPublisher):
                     startLoading(label: L10n.commonSending, progressPublisher: progressPublisher)
+                case .submitUploaded:
+                    stopLoading()
                 case .submitFinished:
                     stopLoading()
                     actionsSubject.send(.finish)

@@ -84,16 +84,30 @@ struct BugReportScreenViewModelTests {
         
         let deferred = deferFulfillment(viewModel.actions) { action in
             switch action {
+            case .submitUploaded:
+                return true
+            default:
+                return false
+            }
+        }
+        let deferredAlert = deferFulfillment(context.observe(\.viewState.bindings.alertInfo)) { $0 != nil }
+        
+        context.sendingLogsEnabled = true
+        context.send(viewAction: .submit)
+        try await deferred.fulfill()
+        try await deferredAlert.fulfill()
+        
+        // Bipe: the confirmation alert's OK closes the screen (bipe#367).
+        let deferredFinish = deferFulfillment(viewModel.actions) { action in
+            switch action {
             case .submitFinished:
                 return true
             default:
                 return false
             }
         }
-        
-        context.sendingLogsEnabled = true
-        context.send(viewAction: .submit)
-        try await deferred.fulfill()
+        context.alertInfo?.primaryButton.action?()
+        try await deferredFinish.fulfill()
         
         #expect(mockService.submitBugReportProgressListenerCallsCount == 1)
         #expect(mockService.submitBugReportProgressListenerReceivedArguments?.bugReport.userID == "@mock.client.com")
