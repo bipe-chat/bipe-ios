@@ -60,7 +60,7 @@ final class BipeStoreScreens {
             return BipeStoreViewCoordinator(BipeStoreProfileScreen(profile: profile, handle: gabi.handle ?? "", mediaProvider: Self.mediaProvider))
         case .bipeStoreConferirPix:
             // The site scene's code is tampered (rafa.blkes, bad CRC). The store panel shows a valid one: bipe-shared buildBrCode.
-            let code = "00020126440014br.gov.bcb.pix0122rafa.bikes@example.com5204000053039865406850.005802BR5915RAFAEL OLIVEIRA6014BELO HORIZONTE62070503***63047466"
+            let code = "00020126440014br.gov.bcb.pix0122rafa.bikes@example.com5204000053039865406850.005802BR5915RAFAEL OLIVEIRA6014BELO HORIZONTE62070503***63044B2D"
             return BipeStoreViewCoordinator(BipePixCheckView(check: .check(code), close: { }, sendToChat: { }))
         case .bipeStoreGrupos:
             startSession(rooms: [
