@@ -2477,4 +2477,36 @@ public enum BipeStrings {
     }
 
     public static var groupStateEventRoomTopicRemovedByYou: String { NSLocalizedString("bipe_group_state_event_room_topic_removed_by_you", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appStartLoading: String { NSLocalizedString("bipe_app_start_loading", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appStartNoAccountTitle: String { NSLocalizedString("bipe_app_start_no_account_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appStartNoAccountBody: String { NSLocalizedString("bipe_app_start_no_account_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appStartError: String { NSLocalizedString("bipe_app_start_error", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRetry: String { NSLocalizedString("bipe_app_retry", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appChatListTitle: String { NSLocalizedString("bipe_app_chat_list_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appChatListEmpty: String { NSLocalizedString("bipe_app_chat_list_empty", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func appChatListUnread(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_app_chat_list_unread", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var appTimelineComposerPlaceholder: String { NSLocalizedString("bipe_app_timeline_composer_placeholder", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appTimelineSend: String { NSLocalizedString("bipe_app_timeline_send", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appTimelineSending: String { NSLocalizedString("bipe_app_timeline_sending", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appTimelineFailed: String { NSLocalizedString("bipe_app_timeline_failed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appTimelineUndecryptable: String { NSLocalizedString("bipe_app_timeline_undecryptable", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appTimelineLoadingHistory: String { NSLocalizedString("bipe_app_timeline_loading_history", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appTimelineStart: String { NSLocalizedString("bipe_app_timeline_start", tableName: "Bipe", bundle: .module, comment: "") }
 }
