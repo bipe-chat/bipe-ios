@@ -444,6 +444,48 @@ public enum BipeStrings {
 
     public static var trustStepGovbrBody: String { NSLocalizedString("bipe_trust_step_govbr_body", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var govbrTitle: String { NSLocalizedString("bipe_govbr_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrIntro: String { NSLocalizedString("bipe_govbr_intro", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrNeedsLevel: String { NSLocalizedString("bipe_govbr_needs_level", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrStepSave: String { NSLocalizedString("bipe_govbr_step_save", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrStepSign: String { NSLocalizedString("bipe_govbr_step_sign", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrStepShare: String { NSLocalizedString("bipe_govbr_step_share", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrStart: String { NSLocalizedString("bipe_govbr_start", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrAlreadySigned: String { NSLocalizedString("bipe_govbr_already_signed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrSafety: String { NSLocalizedString("bipe_govbr_safety", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrChecking: String { NSLocalizedString("bipe_govbr_checking", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func govbrVerified(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_govbr_verified", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var govbrRetry: String { NSLocalizedString("bipe_govbr_retry", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrGetApp: String { NSLocalizedString("bipe_govbr_get_app", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrNoOpenVerification: String { NSLocalizedString("bipe_govbr_no_open_verification", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrReasonNotSigned: String { NSLocalizedString("bipe_govbr_reason_not_signed", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrReasonNotGovbr: String { NSLocalizedString("bipe_govbr_reason_not_govbr", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrReasonWrongDocument: String { NSLocalizedString("bipe_govbr_reason_wrong_document", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrReasonExpired: String { NSLocalizedString("bipe_govbr_reason_expired", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrReasonCpfInUse: String { NSLocalizedString("bipe_govbr_reason_cpf_in_use", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var govbrReasonChangedAfterSigning: String { NSLocalizedString("bipe_govbr_reason_changed_after_signing", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var trustComingSoon: String { NSLocalizedString("bipe_trust_coming_soon", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var trustStepCompanyProfileBody: String { NSLocalizedString("bipe_trust_step_company_profile_body", tableName: "Bipe", bundle: .module, comment: "") }
