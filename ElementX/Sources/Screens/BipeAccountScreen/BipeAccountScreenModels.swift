@@ -13,6 +13,8 @@ enum BipeAccountScreenMode {
     case pin
     /// The recovery email.
     case email
+    /// Apagar conta (ADR 0140): the wait, the cancel, the device owner check and the senha.
+    case deletion
 }
 
 enum BipeAccountScreenViewModelAction {
@@ -27,6 +29,8 @@ struct BipeAccountScreenViewState: BindableState {
     /// The PIN form is open: a change, or the first PIN of a beta account.
     var isEditingPIN = false
     var emailSentTo: String?
+    /// Apagar conta: the device owner check passed, so the senha field shows.
+    var isEnteringDeletionPIN = false
     
     var bindings = BipeAccountScreenViewStateBindings()
     
@@ -34,6 +38,7 @@ struct BipeAccountScreenViewState: BindableState {
         switch mode {
         case .pin: isBetaAccount ? BipeStrings.pinCreateTitle : BipeStrings.pinChangeTitle
         case .email: BipeStrings.emailTitle
+        case .deletion: BipeStrings.accountDeleteTitle
         }
     }
     
@@ -54,6 +59,10 @@ struct BipeAccountScreenViewState: BindableState {
         BipePIN.problem(for: bindings.pin) == nil && bindings.pin == bindings.pinConfirmation
     }
     
+    var canConfirmDeletion: Bool {
+        bindings.deletionPIN.count == BipeRegistries.pinLength
+    }
+    
     var canSaveEmail: Bool {
         BipeSignupRules.isPlausibleEmail(bindings.email.trimmingCharacters(in: .whitespacesAndNewlines))
     }
@@ -63,6 +72,8 @@ struct BipeAccountScreenViewStateBindings {
     var pin = ""
     var pinConfirmation = ""
     var email = ""
+    var deletionPIN = ""
+    var redactMessages = false
     var alertInfo: AlertInfo<BipeAccountScreenAlertType>?
 }
 
@@ -78,4 +89,8 @@ enum BipeAccountScreenViewAction {
     case cancelPIN
     case saveEmail
     case removeEmail
+    case startDeletion
+    case deletionPINChanged
+    case confirmDeletion
+    case cancelDeletion
 }

@@ -152,7 +152,7 @@ struct BipeSettingsGroupScreen: View {
             case .link, .choice, .action:
                 linkRow(row, value: nil)
             case .destructive:
-                ListRow(label: .action(title: row.title, icon: \.signOut, role: .destructive),
+                ListRow(label: .action(title: row.title, icon: row == .accountDelete ? \.delete : \.signOut, role: .destructive),
                         kind: .button { context.send(viewAction: .open(row)) })
             case .switch, .info:
                 EmptyView()

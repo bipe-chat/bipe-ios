@@ -47,6 +47,21 @@ public struct BipeAccountStatus: Decodable, Sendable, Equatable {
     public let maxAccounts: Int?
     /// ADR 0087. Absent from an older server: personal.
     public let accountType: BipeAccountType?
+    /// ADR 0140: the waiting deletion of this account. Absent when none.
+    public let deletion: BipeAccountDeletion?
+}
+
+/// Contract: `AccountDeletion` (ADR 0140). The server deletes the account at `dueAt` unless a device cancels.
+public struct BipeAccountDeletion: Decodable, Sendable, Equatable {
+    public let createdAt: Date
+    public let dueAt: Date
+    public let redactMessages: Bool
+
+    public init(createdAt: Date, dueAt: Date, redactMessages: Bool) {
+        self.createdAt = createdAt
+        self.dueAt = dueAt
+        self.redactMessages = redactMessages
+    }
 }
 
 /// Contract: `Recovery`.

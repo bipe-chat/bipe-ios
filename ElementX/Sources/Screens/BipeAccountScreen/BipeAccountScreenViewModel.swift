@@ -65,6 +65,17 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             closePINForm()
         case .saveEmail:
             Task { await saveEmail() }
+        case .startDeletion:
+            Task { await verifyDeviceOwnerThenEnterDeletionPIN() }
+        case .deletionPINChanged:
+            let pin = BipePIN.sanitize(state.bindings.deletionPIN)
+            if pin != state.bindings.deletionPIN {
+                state.bindings.deletionPIN = pin
+            }
+        case .confirmDeletion:
+            Task { await requestDeletion() }
+        case .cancelDeletion:
+            Task { await cancelDeletion() }
         case .removeEmail:
             state.bindings.alertInfo = AlertInfo(id: .removeEmail,
                                                  title: BipeStrings.emailRemove,
@@ -142,6 +153,68 @@ class BipeAccountScreenViewModel: BipeAccountScreenViewModelType, BipeAccountScr
             actionsSubject.send(.done)
         } catch {
             MXLog.error("Bipe PIN save failed: \(error)")
+            show(error)
+        }
+    }
+    
+    // MARK: - Apagar conta (ADR 0140)
+    
+    /// The device owner check comes first, then the senha. The server checks the senha.
+    private func verifyDeviceOwnerThenEnterDeletionPIN() async {
+        let context = LAContext()
+        var error: NSError?
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
+            MXLog.error("Bipe account deletion: device owner check unavailable: \(error?.localizedDescription ?? "")")
+            state.bindings.alertInfo = AlertInfo(id: .error, title: L10n.commonError, message: BipeStrings.accountDeleteTitle)
+            return
+        }
+        do {
+            guard try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: BipeStrings.accountDeleteTitle) else { return }
+        } catch {
+            MXLog.info("Bipe account deletion: device owner check cancelled or failed")
+            return
+        }
+        state.bindings.deletionPIN = ""
+        state.isEnteringDeletionPIN = true
+    }
+    
+    private func requestDeletion() async {
+        guard state.canConfirmDeletion else { return }
+        let pin = state.bindings.deletionPIN
+        let redact = state.bindings.redactMessages
+        
+        startLoading()
+        defer { stopLoading() }
+        
+        do {
+            let deletion = try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) -> BipeAccountDeletion in
+                try await apiClient.requestDeletion(pin: pin, redactMessages: redact, accessToken: token)
+            }
+            BipeRecoveryAlerts.acknowledgeDeletion(deletion, for: clientProxy.userID)
+            state.bindings.deletionPIN = ""
+            state.isEnteringDeletionPIN = false
+            BipeHaptics.play(.warning)
+            await load()
+        } catch {
+            MXLog.error("Bipe account deletion request failed: \(error)")
+            state.bindings.deletionPIN = ""
+            show(error)
+        }
+    }
+    
+    private func cancelDeletion() async {
+        startLoading()
+        defer { stopLoading() }
+        
+        do {
+            try await withTokenRetry { [apiClient] (token: String) async throws(BipeAPIError) in
+                try await apiClient.cancelDeletion(accessToken: token)
+            }
+            BipeHaptics.play(.success)
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.accountDeleteCancelled, icon: \.checkCircle))
+            await load()
+        } catch {
+            MXLog.error("Bipe account deletion cancel failed: \(error)")
             show(error)
         }
     }

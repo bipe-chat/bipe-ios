@@ -22,6 +22,8 @@ struct BipeAccountScreen: View {
                 }
             case .email:
                 emailSection
+            case .deletion:
+                deletionSections
             }
         }
         .compoundList()
@@ -30,6 +32,7 @@ struct BipeAccountScreen: View {
         .alert(item: $context.alertInfo)
         .onChange(of: context.pin) { context.send(viewAction: .pinChanged) }
         .onChange(of: context.pinConfirmation) { context.send(viewAction: .pinChanged) }
+        .onChange(of: context.deletionPIN) { context.send(viewAction: .deletionPINChanged) }
     }
     
     // MARK: - PIN
@@ -132,6 +135,64 @@ struct BipeAccountScreen: View {
             } footer: {
                 Text(status.email == nil && status.emailPending == nil ? BipeStrings.fallbackReminder : BipeStrings.emailFooter)
                     .compoundListSectionFooter()
+            }
+        }
+    }
+}
+
+// MARK: - Apagar conta (ADR 0140)
+
+private extension BipeAccountScreen {
+    @ViewBuilder
+    var deletionSections: some View {
+        if let deletion = context.viewState.status?.deletion {
+            Section {
+                ListRow(label: .plain(title: BipeStrings.accountDeleteWaitingTitle,
+                                      description: BipeStrings.accountDeleteWaitingBody(deletion.dueAt.formatted(date: .long, time: .shortened)),
+                                      role: .destructive),
+                        kind: .label)
+                ListRow(label: .centeredAction(title: BipeStrings.accountDeleteCancel, icon: \.check),
+                        kind: .button { context.send(viewAction: .cancelDeletion) })
+            }
+        } else if context.viewState.status != nil {
+            Section {
+                ListRow(label: .plain(title: BipeStrings.accountDeleteBody(String(BipeRegistries.deletionCooldownHours),
+                                                                           String(BipeRegistries.handleReleaseHoldDays)),
+                                      description: BipeStrings.accountDeleteGroups),
+                        kind: .label)
+            }
+            Section {
+                ListRow(label: .plain(title: BipeStrings.accountDeleteRedact),
+                        kind: .toggle($context.redactMessages))
+            } footer: {
+                Text(BipeStrings.accountDeleteRedactFooter)
+                    .compoundListSectionFooter()
+            }
+            if context.viewState.isEnteringDeletionPIN {
+                Section {
+                    ListRow(kind: .custom {
+                        PINTextField(pinCode: $context.deletionPIN, isSecure: true, maxLength: BipeRegistries.pinLength, size: .dots)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                    })
+                } header: {
+                    Text(BipeStrings.accountDeletePinTitle)
+                        .compoundListSectionHeader()
+                }
+                Section {
+                    ListRow(label: .centeredAction(title: BipeStrings.accountDeleteConfirm, icon: \.delete, role: .destructive),
+                            kind: .button { context.send(viewAction: .confirmDeletion) })
+                        .disabled(!context.viewState.canConfirmDeletion)
+                }
+            } else {
+                Section {
+                    ListRow(label: .centeredAction(title: BipeStrings.accountDeleteConfirm, icon: \.delete, role: .destructive),
+                            kind: .button { context.send(viewAction: .startDeletion) })
+                }
+            }
+        } else if context.viewState.isLoading {
+            Section {
+                ListRow(label: .plain(title: L10n.commonLoading), kind: .label)
             }
         }
     }

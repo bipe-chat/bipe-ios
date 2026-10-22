@@ -216,6 +216,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
             startLinkNewDeviceFlow()
         case .accountSignOut:
             actionsSubject.send(.runLogoutFlow)
+        case .accountDelete:
+            presentBipeAccountScreen(mode: .deletion)
         case .accountAdd:
             actionsSubject.send(.bipeAddAccount)
         case .helpReportProblem:

@@ -53,6 +53,17 @@ final class BipeRecoveryAlerts {
         defaults.set(true, forKey: acknowledgeTokenRecoveriesKey(for: userID))
     }
     
+    /// ADR 0140: the device that asked for the deletion does not get the cancel alert.
+    static func acknowledgeDeletion(_ deletion: BipeAccountDeletion, for userID: String, defaults: UserDefaults = .standard) {
+        let key = acknowledgedKey(for: userID)
+        let ids = Set(defaults.stringArray(forKey: key) ?? []).union([deletionAlertID(deletion)])
+        defaults.set(ids.sorted(), forKey: key)
+    }
+    
+    private static func deletionAlertID(_ deletion: BipeAccountDeletion) -> String {
+        "deletion:\(Int(deletion.createdAt.timeIntervalSince1970))"
+    }
+    
     private static func acknowledgeTokenRecoveriesKey(for userID: String) -> String {
         "bipe.recoveries.acknowledgeCompletedTokens.\(userID)"
     }
@@ -93,6 +104,16 @@ final class BipeRecoveryAlerts {
         if status.termsVersion != BipeRegistries.legalVersion {
             onTermsOutdated()
             return
+        }
+        
+        // ADR 0140: a waiting deletion that another device asked for comes before the recoveries.
+        if let deletion = status.deletion {
+            let id = Self.deletionAlertID(deletion)
+            if !(acknowledged ?? []).contains(id), !shownThisRun.contains(id) {
+                shownThisRun.insert(id)
+                showDeletion(deletion, id: id)
+                return
+            }
         }
         
         let next = status.recoveries.first { recovery in
@@ -136,6 +157,34 @@ final class BipeRecoveryAlerts {
                                                         secondaryButton: keep)
     }
     
+    private func showDeletion(_ deletion: BipeAccountDeletion, id: String) {
+        let keep = AlertInfoButton(title: BipeStrings.recoveryAlertKeep, role: .cancel) { [weak self] in
+            self?.acknowledge(id)
+        }
+        let cancel = AlertInfoButton(title: BipeStrings.recoveryAlertCancel, role: .destructive) { [weak self] in
+            Task { await self?.cancelDeletion(id: id) }
+        }
+        navigationRootCoordinator.alertInfo = AlertInfo(id: UUID(),
+                                                        title: BipeStrings.accountDeleteAlertTitle,
+                                                        message: BipeStrings.accountDeleteAlertBody(deletion.dueAt.formatted(date: .long, time: .shortened)),
+                                                        primaryButton: cancel,
+                                                        secondaryButton: keep)
+    }
+    
+    private func cancelDeletion(id: String) async {
+        do {
+            try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { [apiClient] (token: String) async throws(BipeAPIError) in
+                try await apiClient.cancelDeletion(accessToken: token)
+            }
+            acknowledge(id)
+            userIndicatorController.submitIndicator(UserIndicator(title: BipeStrings.accountDeleteCancelled, icon: \.checkCircle))
+        } catch {
+            MXLog.error("Bipe account deletion cancel failed: \(error)")
+            shownThisRun.remove(id)
+            userIndicatorController.submitIndicator(UserIndicator(title: error.localizedMessage))
+        }
+    }
+    
     private func cancel(_ recovery: BipeRecovery) async {
         do {
             try await BipeAPIClient.withTokenRetry(accessToken: { [clientProxy] in clientProxy.accessToken }) { [apiClient] (token: String) async throws(BipeAPIError) in
@@ -156,7 +205,11 @@ final class BipeRecoveryAlerts {
     }
     
     private var acknowledgedKey: String {
-        "bipe.recoveries.acknowledged.\(clientProxy.userID)"
+        Self.acknowledgedKey(for: clientProxy.userID)
+    }
+    
+    private static func acknowledgedKey(for userID: String) -> String {
+        "bipe.recoveries.acknowledged.\(userID)"
     }
     
     private func acknowledgedIDs() -> Set<String>? {

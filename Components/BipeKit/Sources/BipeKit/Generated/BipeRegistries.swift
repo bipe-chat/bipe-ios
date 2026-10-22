@@ -693,6 +693,10 @@ public enum BipeRegistries {
     public static let maxPersonalAccounts = 2
     /// Wait between the full-access warning and the biometric check of a web sign-in approval (ADR 0118).
     public static let webLinkCooldownSeconds = 5
+    /// Wait between an account deletion request and the deletion; other devices can cancel (ADR 0140).
+    public static let deletionCooldownHours = 72
+    /// Days a released @ stays held for its last holder, also after an account deletion (ADR 0016, registries/handles.json).
+    public static let handleReleaseHoldDays = 90
 
     /// Terms and privacy accepted at sign-up (ADR 0113; registries/legal.json). Paths are on the public site.
     public static let legalVersion = "2026-10-16"

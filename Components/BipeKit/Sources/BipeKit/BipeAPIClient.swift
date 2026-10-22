@@ -106,6 +106,16 @@ public struct BipeAPIClient: Sendable {
         let _: NoContent = try await send(method: "POST", path: ["v1", "me", "recoveries", id, "cancel"], body: Empty?.none, accessToken: accessToken)
     }
     
+    /// `POST /v1/me/deletion` (ADR 0140). Run the device owner check first. Starts the wait, or returns the waiting one.
+    public func requestDeletion(pin: String, redactMessages: Bool, accessToken: String) async throws(BipeAPIError) -> BipeAccountDeletion {
+        try await send(method: "POST", path: ["v1", "me", "deletion"], body: DeletionRequest(pin: pin, redactMessages: redactMessages), accessToken: accessToken)
+    }
+    
+    /// `POST /v1/me/deletion/cancel`. Any signed-in device of the account can cancel.
+    public func cancelDeletion(accessToken: String) async throws(BipeAPIError) {
+        let _: NoContent = try await send(method: "POST", path: ["v1", "me", "deletion", "cancel"], body: Empty?.none, accessToken: accessToken)
+    }
+    
     /// `POST /v1/recovery/token`. No auth. The synced token, then the PIN. Returns new credentials once.
     public func recoverWithToken(_ token: String, pin: String) async throws(BipeAPIError) -> BipeCredentials {
         try await send(method: "POST", path: ["v1", "recovery", "token"], body: TokenRecoveryRequest(recoveryToken: token, pin: pin))
@@ -427,6 +437,11 @@ public struct BipeAPIClient: Sendable {
     
     private struct PINRequest: Encodable {
         let pin: String
+    }
+    
+    private struct DeletionRequest: Encodable {
+        let pin: String
+        let redactMessages: Bool
     }
     
     private struct RecoveryTokenResponse: Decodable {

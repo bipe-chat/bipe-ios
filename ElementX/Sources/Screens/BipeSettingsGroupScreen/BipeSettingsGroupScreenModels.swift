@@ -155,7 +155,7 @@ extension BipeSettingsRow {
         switch self {
         case .profileHandle, .profilePublicProfile,
              .privacyMessaging, .privacyNumber, .privacyDiscovery, .privacyContacts, .privacyExport,
-             .accountChangePin, .accountEmail, .accountLinkedAccounts:
+             .accountChangePin, .accountEmail, .accountLinkedAccounts, .accountDelete:
             true
         default:
             false

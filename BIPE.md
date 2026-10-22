@@ -227,6 +227,12 @@ Not done (needs the domain, Apple team or brand):
 - **App Store:** plan and open decisions in `docs/app-store-plan.md` (bipe-chat/bipe#419).
 - **Version and build number (ADR 0088):** one build number for iOS and Android, set in `bipe-shared/product/version.json`. Before each upload: `node tools/bump-build.mjs` in bipe-shared (`--version YY.MM.N` for a new version), then commit and push bipe-shared, this repo and bipe-android. `Tools/Bipe/version.env` (read by `testflight.sh`) and `Tools/Bipe/Version.xcconfig` (the project config file for Debug and Release, `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`) are generated. Do not set either value in `project.yml`: it overrides the xcconfig, and the bipe-shared drift check fails when it differs.
 
+## Account deletion (ADR 0140, bipe#528)
+
+- **Apagar conta:** the last row of Sua conta (`account.delete` in bipe-shared `registries/settings.json`) opens `BipeAccountScreen(mode: .deletion)`: what happens (`deletionCooldownHours`, `handleReleaseHoldDays`), the switch "Apagar todas as minhas mensagens", then the device owner check (`LAContext`), the senha, and `POST /v1/me/deletion`. While it waits, the screen shows the due time and "Manter minha conta" (`POST /v1/me/deletion/cancel`).
+- **Other devices:** `BipeRecoveryAlerts` shows `deletion` from `GET /v1/me/account` before the recovery alerts, with "Cancelar, não fui eu". The asking device acknowledges its own request (`acknowledgeDeletion`), so it gets no alert. The server does the deletion after the wait; the app does nothing then.
+- Element's deactivate screen stays in the tree for rebases; no row opens it.
+
 ## Store screenshots (bipe#454)
 
 - One command captures the raw App Store screenshots on the installed `iPhone 17 Pro Max` simulator, in pt-BR with the status bar at 9:41:
@@ -302,7 +308,6 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | Message actions | Native context menu on long press: reaction row, actions, the message as preview | Element's bottom sheet | Platform idiom |
 | Terms screen and a recovery alert due together | Terms screen first, the alert right after Continue | Recovery alert first, then the terms screen | On iOS a root alert cannot show over the full-screen terms cover; on Android the terms screen is an overlay that waits for the alert |
 | Settings: Idioma | Row that opens the iPhone Ajustes | No row | iOS sets the app language in system settings; Android follows the system language |
-| Company avatar shape | Rounded square for a company account, verified or not (ADR 0132) | Circle | Built on iOS first (#397) **Gap** |
 | Warning haptic | Notification warning pattern | One long-press pulse | Android has no warning haptic constant (ADR 0134) |
 
 <!-- /parity:differences -->
