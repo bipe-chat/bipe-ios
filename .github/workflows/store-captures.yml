@@ -1,8 +1,8 @@
 name: Store Captures
 
 # Bipe: runs appstore/capture.sh for the iPhone 6.9" set on a GitHub runner, so no capture runs on a laptop.
-# The artifact holds appstore/raw/iphone69/light/pt-BR: the captures and their element lists. Commit it
-# there; the bipe-web build makes the store panels and their callouts from it (bipe-chat/bipe#463).
+# The artifact holds the captures and their element lists. Commit them under
+# appstore/raw/iphone69/light/pt-BR/; the bipe-web build makes the store panels and their callouts from it (bipe-chat/bipe#463).
 
 on:
   workflow_dispatch:
@@ -67,16 +67,25 @@ jobs:
         env:
           BIPE_CAST_PHOTOS: ${{ github.workspace }}/bipe-web/src/cast/photos
           DERIVED_DATA_PATH: ${{ runner.temp }}/DerivedData
+          TMPDIR: ${{ runner.temp }}/capture
         run: |
+          mkdir -p "$TMPDIR"
           appstore/capture.sh iphone69 light
-          mkdir -p "$RUNNER_TEMP/pt-BR"
-          mv appstore/raw/iphone69/light/*.png appstore/raw/iphone69/light/*.json "$RUNNER_TEMP/pt-BR/"
 
       - name: Upload the captures
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: store-captures-iphone69-light-pt-BR
-          path: ${{ runner.temp }}/pt-BR
+          path: appstore/raw/iphone69/light
           retention-days: 14
           if-no-files-found: error
+
+      - name: Upload the test results
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: store-captures-results
+          path: ${{ runner.temp }}/capture
+          retention-days: 3
+          if-no-files-found: ignore

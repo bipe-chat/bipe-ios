@@ -90,19 +90,32 @@ with open(os.path.join(export, "manifest.json"), encoding="utf-8") as handle:
 wrong = []
 for test in manifest:
     for attachment in test["attachments"]:
-        slug = attachment["suggestedHumanReadableName"].split("_0_")[0].removesuffix(".png").removesuffix(".json")
-        if slug.endswith(".elements") and re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", slug.removesuffix(".elements")):
-            shutil.copyfile(os.path.join(export, attachment["exportedFileName"]), os.path.join(out, f"{slug}.json"))
+        name = attachment["suggestedHumanReadableName"]
+        source = os.path.join(export, attachment["exportedFileName"])
+        # Names come back as "<slug>_0_<uuid>.png" or "<slug>.png"; the element lists as "<slug>.elements...".
+        match = re.match(r"([a-z0-9]+(?:-[a-z0-9]+)*)(\.elements)?(?:_\d+_|\.|$)", name)
+        if not match:
             continue
-        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", slug):
+        slug, is_elements = match.group(1), bool(match.group(2))
+        with open(source, "rb") as handle:
+            head = handle.read(8)
+        kind = "png" if head.startswith(b"\x89PNG") else repr(head[:1])
+        print(f"attachment {name} -> {attachment['exportedFileName']} ({kind})")
+        if is_elements:
+            if not head.lstrip().startswith(b"{"):
+                wrong.append(f"{slug}.elements is not JSON")
+                continue
+            shutil.copyfile(source, os.path.join(out, f"{slug}.elements.json"))
+            continue
+        if not head.startswith(b"\x89PNG"):
             continue
         target = os.path.join(out, f"{slug}.png")
-        shutil.copyfile(os.path.join(export, attachment["exportedFileName"]), target)
+        shutil.copyfile(source, target)
         info = subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", target],
                               capture_output=True, text=True, check=True).stdout
         size = tuple(int(v) for v in re.findall(r"pixel(?:Width|Height): (\d+)", info))
         if size != (width, height):
-            wrong.append(f"{slug}.png is {size[0]}x{size[1]}, expected {width}x{height}")
+            wrong.append(f"{slug}.png is {'x'.join(map(str, size)) or 'unreadable'}, expected {width}x{height}")
 
 names = sorted(os.listdir(out))
 print("captured:", ", ".join(names) if names else "nothing")
