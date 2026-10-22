@@ -92,11 +92,11 @@ for test in manifest:
     for attachment in test["attachments"]:
         name = attachment["suggestedHumanReadableName"]
         source = os.path.join(export, attachment["exportedFileName"])
-        # Names come back as "<slug>_0_<uuid>.png" or "<slug>.png"; the element lists as "<slug>.elements...".
-        match = re.match(r"([a-z0-9]+(?:-[a-z0-9]+)*)(\.elements)?(?:_\d+_|\.|$)", name)
+        # Names come back as "<slug>_0_<uuid>.png" and "<slug>_0_<uuid>.elements" (Xcode 27), or without the "_0_<uuid>".
+        match = re.match(r"([a-z0-9]+(?:-[a-z0-9]+)*)(?:_\d+_[0-9A-F-]+)?(\.elements|\.png)?$", name)
         if not match:
             continue
-        slug, is_elements = match.group(1), bool(match.group(2))
+        slug, is_elements = match.group(1), match.group(2) == ".elements"
         with open(source, "rb") as handle:
             head = handle.read(8)
         kind = "png" if head.startswith(b"\x89PNG") else repr(head[:1])
