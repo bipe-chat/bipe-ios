@@ -103,6 +103,7 @@ struct BipeInviteNoteSender {
         }
         guard let joinedRoomID, case .joined(let room) = await clientProxy.roomForIdentifier(joinedRoomID) else { return nil }
         let info = room.infoPublisher.value
-        return info.isDirect && info.heroes.contains { $0.userId == userID } ? room : nil
+        // Bipe: one DM test, the SDK isDm (bipe#524).
+        return info.isDM && info.heroes.contains { $0.userId == userID } ? room : nil
     }
 }

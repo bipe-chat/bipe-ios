@@ -74,7 +74,7 @@ extension SpaceAddRoomsScreenRoom {
 
 private extension RoomInfoProxyProtocol {
     var roomListDescription: String {
-        if isDirect {
+        if isDM { // Bipe: one DM test (bipe#524)
             return canonicalAlias ?? ""
         }
         

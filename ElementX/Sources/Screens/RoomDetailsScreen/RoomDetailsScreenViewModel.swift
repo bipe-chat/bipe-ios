@@ -63,7 +63,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
         let viewState = RoomDetailsScreenViewState(appHooks: appHooks,
                                                    details: roomProxy.details,
                                                    isEncrypted: roomProxy.infoPublisher.value.isEncrypted,
-                                                   isDirect: roomProxy.infoPublisher.value.isDirect,
+                                                   isDM: roomProxy.infoPublisher.value.isDM, // Bipe: bipe#524
                                                    topic: topic,
                                                    topicSummary: topic?.unattributedStringByReplacingNewlinesWithSpaces(),
                                                    joinedMembersCount: roomProxy.infoPublisher.value.joinedMembersCount,
@@ -280,7 +280,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
     
     private func updateRoomInfo(_ roomInfo: RoomInfoProxyProtocol) {
         state.isEncrypted = roomInfo.isEncrypted
-        state.isDirect = roomInfo.isDirect
+        state.isDM = roomInfo.isDM // Bipe: bipe#524
         state.bindings.isFavourite = roomInfo.isFavourite
         
         state.joinedMembersCount = roomInfo.joinedMembersCount
@@ -323,19 +323,52 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
                     self.state.accountOwner = .init(withProxy: accountOwner)
                 }
                 
-                guard roomProxy.infoPublisher.value.isDM else {
-                    return
-                }
-                
-                if let dmRecipient = members.first(where: { $0.userID != ownUserID }) {
-                    self.state.dmRecipientInfo = .init(member: .init(withProxy: dmRecipient))
-                    
-                    Task { await self.updateMemberIdentityVerificationStates() }
-                }
+                self.updateDMRecipientInfo(members: members)
+            }
+            .store(in: &cancellables)
+        
+        // Bipe (bipe#524): recompute the DM recipient when the SDK isDm or the heroes change.
+        roomProxy.infoPublisher
+            .map { ($0.isDM, $0.heroes.map(\.userId)) }
+            .removeDuplicates { $0 == $1 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                updateDMRecipientInfo(members: roomProxy.membersPublisher.value)
             }
             .store(in: &cancellables)
         
         await roomProxy.updateMembers()
+    }
+    
+    /// Bipe (bipe#524): DM details follow the SDK isDm and keep the DM layout after the other person leaves.
+    /// The recipient is the active other member, else the last known other member, else the room's hero.
+    private func updateDMRecipientInfo(members: [RoomMemberProxyProtocol]) {
+        let roomInfo = roomProxy.infoPublisher.value
+        guard roomInfo.isDM else {
+            state.dmRecipientInfo = nil
+            return
+        }
+        
+        let ownUserID = roomProxy.ownUserID
+        let others = members.filter { $0.userID != ownUserID }
+        let member: RoomMemberDetails
+        if let known = others.first(where: { $0.isActive }) ?? others.first {
+            member = RoomMemberDetails(withProxy: known)
+        } else if let hero = roomInfo.heroes.first(where: { $0.userId != ownUserID }) {
+            let isIgnored = userSession.clientProxy.ignoredUsersPublisher.value?.contains(hero.userId) == true
+            member = RoomMemberDetails(withHero: hero, isIgnored: isIgnored)
+        } else {
+            // Keep the last known recipient, so the DM layout stays.
+            return
+        }
+        
+        guard state.dmRecipientInfo?.member != member else { return }
+        
+        let verificationState = state.dmRecipientInfo?.member.id == member.id ? state.dmRecipientInfo?.verificationState : nil
+        state.dmRecipientInfo = .init(member: member, verificationState: verificationState)
+        
+        Task { await updateMemberIdentityVerificationStates() }
     }
     
     private func updateMemberIdentityVerificationStates() async {
@@ -441,7 +474,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
     private func presentInviteToGroupPicker() {
         let selfChatID = BipeSelfChat(clientProxy: userSession.clientProxy).cachedRoomID
         let groups = userSession.clientProxy.staticRoomSummaryProvider.roomListPublisher.value
-            .filter { $0.isJoined && !$0.isDirect && !$0.isSpace && !$0.isTombstoned && $0.id != selfChatID }
+            .filter { $0.isJoined && !$0.isDM && !$0.isSpace && !$0.isTombstoned && $0.id != selfChatID } // Bipe: one DM test (bipe#524)
             .map { BipeInviteToGroupOption(id: $0.id, name: $0.name, avatar: $0.avatar) }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         state.bindings.inviteToGroupPicker = .init(groups: groups)

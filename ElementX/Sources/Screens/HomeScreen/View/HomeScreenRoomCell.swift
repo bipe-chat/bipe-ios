@@ -264,6 +264,7 @@ struct HomeScreenRoomCell_Previews: PreviewProvider, TestablePreview {
                                   isJoined: true,
                                   name: name,
                                   isDirect: heroes.count == 1,
+                                  isDM: heroes.count == 1,
                                   isSpace: false,
                                   avatarURL: heroes.count == 1 ? nil : .mockMXCAvatar,
                                   heroes: heroes,

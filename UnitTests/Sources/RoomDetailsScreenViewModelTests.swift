@@ -463,7 +463,8 @@ struct RoomDetailsScreenViewModelTests {
     
     @Test
     mutating func cannotEditDirectRoom() async {
-        let mockedMembers: [RoomMemberProxyMock] = [.mockMeAdmin, .mockBob, .mockAlice]
+        // Bipe (bipe#524): a DM is the SDK isDm, so `m.direct` with at most 2 active members.
+        let mockedMembers: [RoomMemberProxyMock] = [.mockMeAdmin, .mockBob]
         roomProxyMock = JoinedRoomProxyMock(.init(name: "Test", isDirect: true, members: mockedMembers))
         viewModel = RoomDetailsScreenViewModel(roomProxy: roomProxyMock,
                                                userSession: UserSessionMock(.init()),

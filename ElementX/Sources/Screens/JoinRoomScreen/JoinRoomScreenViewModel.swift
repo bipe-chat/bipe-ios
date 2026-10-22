@@ -115,7 +115,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                 // Bipe: a DM says "conversa", a group says "grupo", never "sala" (bipe#508).
                 state.bindings.alertInfo = .init(id: .loadingError,
                                                  title: L10n.commonError,
-                                                 message: state.roomDetails?.isDirect == true ? BipeStrings.dmPreviewFailed : BipeStrings.groupScreenJoinRoomLoadingAlertMessage,
+                                                 message: state.roomDetails?.isDM == true ? BipeStrings.dmPreviewFailed : BipeStrings.groupScreenJoinRoomLoadingAlertMessage,
                                                  primaryButton: .init(title: L10n.actionTryAgain) { [weak self] in Task { await self?.loadRoomDetails() }},
                                                  secondaryButton: .init(title: L10n.actionCancel, role: .cancel) { [weak self] in self?.actionsSubject.send(.dismiss) })
             }
@@ -211,7 +211,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                                                       memberCount: info?.joinedMembersCount,
                                                       heroes: [],
                                                       inviter: inviter,
-                                                      isDirect: info?.isDirect,
+                                                      isDM: info?.isDM, // Bipe: bipe#524
                                                       isSpace: info?.isSpace,
                                                       childrenCount: nil,
                                                       spaceVisibility: nil)
@@ -225,7 +225,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                                                       memberCount: spaceServiceRoom.joinedMembersCount,
                                                       heroes: spaceServiceRoom.heroes,
                                                       inviter: inviter,
-                                                      isDirect: spaceServiceRoom.isDirect,
+                                                      isDM: spaceServiceRoom.isDM, // Bipe: bipe#524
                                                       isSpace: spaceServiceRoom.isSpace,
                                                       childrenCount: spaceServiceRoom.childrenCount,
                                                       spaceVisibility: spaceServiceRoom.visibility)
@@ -267,7 +267,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
             
             switch roomPreview.info.membership {
             case .invited:
-                state.mode = .invited(isDM: state.roomDetails?.isDirect == true && state.roomDetails?.memberCount == 1)
+                state.mode = .invited(isDM: state.roomDetails?.isDM == true && state.roomDetails?.memberCount == 1)
             case .knocked:
                 state.mode = .knocked
             case .banned:
@@ -288,7 +288,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
         } else if let room {
             switch room {
             case .invited:
-                state.mode = .invited(isDM: state.roomDetails?.isDirect == true && state.roomDetails?.memberCount == 1)
+                state.mode = .invited(isDM: state.roomDetails?.isDM == true && state.roomDetails?.memberCount == 1)
             case .knocked:
                 state.mode = .knocked
             case .banned:
@@ -319,7 +319,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                 case .invalidInvite:
                     MXLog.error("Failed joining room alias: \(alias) invalid invite")
                     // Bipe: grupo, not sala (bipe#508)
-                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDirect == true ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite) // Bipe: bipe#507
+                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDM == true ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite) // Bipe: bipe#507
                 default:
                     MXLog.error("Failed joining room alias: \(alias) with error: \(error)")
                     userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
@@ -338,7 +338,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                 case .invalidInvite:
                     MXLog.error("Failed joining room id: \(roomID) invalid invite")
                     // Bipe: grupo, not sala (bipe#508)
-                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDirect == true ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite) // Bipe: bipe#507
+                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDM == true ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite) // Bipe: bipe#507
                 default:
                     MXLog.error("Failed joining room id: \(roomID) with error: \(error)")
                     userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
@@ -433,7 +433,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
             // Bipe: grupo, not sala (bipe#508). The DM side keeps upstream until it has its own string.
             state.bindings.alertInfo = .init(id: .declineInviteAndBlock,
                                              title: L10n.screenJoinRoomDeclineAndBlockAlertTitle,
-                                             message: state.roomDetails?.isDirect == true ? BipeStrings.dmDeclineBlockAlert(userID) : BipeStrings.groupScreenJoinRoomDeclineAndBlockAlertMessage(userID),
+                                             message: state.roomDetails?.isDM == true ? BipeStrings.dmDeclineBlockAlert(userID) : BipeStrings.groupScreenJoinRoomDeclineAndBlockAlertMessage(userID),
                                              primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
                                              secondaryButton: .init(title: L10n.screenJoinRoomDeclineAndBlockAlertConfirmation, role: .destructive) { Task { await self.declineAndBlock(userID: userID) } })
         }

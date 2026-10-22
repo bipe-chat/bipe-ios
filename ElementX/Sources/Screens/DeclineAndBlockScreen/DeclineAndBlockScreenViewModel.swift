@@ -31,7 +31,7 @@ class DeclineAndBlockScreenViewModel: DeclineAndBlockScreenViewModelType, Declin
         self.clientProxy = clientProxy
         self.userIndicatorController = userIndicatorController
         // Bipe: a DM invite says "conversa", never "sala" (bipe#507).
-        super.init(initialViewState: DeclineAndBlockScreenViewState(isDM: clientProxy.roomSummaryForIdentifier(roomID)?.isDirect ?? false))
+        super.init(initialViewState: DeclineAndBlockScreenViewState(isDM: clientProxy.roomSummaryForIdentifier(roomID)?.isDM ?? false)) // Bipe: one DM test (bipe#524)
     }
     
     // MARK: - Public

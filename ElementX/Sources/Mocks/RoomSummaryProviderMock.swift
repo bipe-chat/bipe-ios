@@ -58,7 +58,7 @@ extension RoomSummaryProviderMock {
                     // for testing purpose chaining more than one filter will always return an empty state
                     rooms = []
                 } else if let filter = filters.first {
-                    rooms = rooms.filter { filter == .people ? $0.isDirect : !$0.isDirect }
+                    rooms = rooms.filter { filter == .people ? $0.isDM : !$0.isDM }
                 }
                 
                 roomListSubject.send(rooms)
@@ -206,6 +206,7 @@ extension Array where Element == RoomSummary {
                     isJoined: true,
                     name: "Foundation and Earth",
                     isDirect: true,
+                    isDM: true,
                     isSpace: false,
                     avatarURL: nil,
                     heroes: [],
@@ -230,6 +231,7 @@ extension Array where Element == RoomSummary {
                     isJoined: true,
                     name: "Prelude to Foundation",
                     isDirect: true,
+                    isDM: true,
                     isSpace: false,
                     avatarURL: nil,
                     heroes: [],
@@ -359,6 +361,7 @@ extension Array where Element == RoomSummary {
                     isJoined: false,
                     name: "Second room",
                     isDirect: true,
+                    isDM: true,
                     isSpace: false,
                     avatarURL: nil,
                     heroes: [],

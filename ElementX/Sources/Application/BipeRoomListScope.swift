@@ -37,12 +37,8 @@ enum BipeRoomListScope {
     }
     
     /// Swift mirror of `rustFilter` for tab badges and routing.
+    /// Bipe (bipe#524): the SDK `isDm` is the one DM test. The client's `.twoMembers` definition is `m.direct` and at most 2 active members.
     init(summary: RoomSummary) {
-        let isChat = if summary.joinRequestType?.isInvite == true {
-            summary.isDirect
-        } else {
-            summary.isDirect && summary.activeMembersCount <= 2
-        }
-        self = isChat ? .chats : .groups
+        self = summary.isDM ? .chats : .groups
     }
 }

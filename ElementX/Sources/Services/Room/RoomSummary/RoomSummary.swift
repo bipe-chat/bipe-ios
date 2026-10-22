@@ -34,6 +34,8 @@ nonisolated struct RoomSummary {
     
     let name: String
     let isDirect: Bool
+    /// Bipe: the SDK `isDm`, the one DM test on every screen (bipe#524). `isDirect` is only the `m.direct` flag.
+    var isDM = false
     let isSpace: Bool
     let avatarURL: URL?
     
@@ -83,6 +85,7 @@ nonisolated extension RoomSummary: CustomStringConvertible {
         """
         RoomSummary: - id: \(id) \
         - isDirect: \(isDirect) \
+        - isDM: \(isDM) \
         - unreadMessagesCount: \(unreadMessagesCount) \
         - unreadMentionsCount: \(unreadMentionsCount) \
         - unreadNotificationsCount: \(unreadNotificationsCount) \
@@ -93,7 +96,7 @@ nonisolated extension RoomSummary: CustomStringConvertible {
     /// Used where summaries are shown in a list e.g. message forwarding,
     /// global search, share destination list etc.
     var roomListDescription: String {
-        if isDirect {
+        if isDM { // Bipe: one DM test (bipe#524)
             return canonicalAlias ?? ""
         }
         
@@ -152,6 +155,7 @@ nonisolated extension RoomSummary {
         let string = "\(settingsMode) - messages: \(hasUnreadMessages) - mentions: \(hasUnreadMentions) - notifications: \(hasUnreadNotifications)"
         name = string
         isDirect = true
+        isDM = true
         isSpace = false
         avatarURL = nil
         
@@ -180,12 +184,12 @@ nonisolated extension RoomSummary {
     /// This doesn't have to work properly for DM invites, the heroes are always empty
     var avatar: RoomAvatar {
         guard !isTombstoned else {
-            return .tombstoned(isDM: isDirect) // Bipe: bipe#507
+            return .tombstoned(isDM: isDM) // Bipe: bipe#507, bipe#524
         }
         
         if isSpace {
             return .space(id: id, name: name, avatarURL: avatarURL)
-        } else if isDirect, avatarURL == nil, heroes.count == 1 {
+        } else if isDM, avatarURL == nil, heroes.count == 1 { // Bipe: one DM test (bipe#524)
             return .heroes(heroes)
         } else {
             return .room(id: id, name: name, avatarURL: avatarURL)

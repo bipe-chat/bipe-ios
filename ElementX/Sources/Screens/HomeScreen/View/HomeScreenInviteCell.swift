@@ -23,7 +23,7 @@ struct HomeScreenInviteCell: View {
     private var avatar: RoomAvatar {
         // DM invites avatars are broken, this is a workaround
         // https://github.com/matrix-org/matrix-rust-sdk/issues/4825
-        if room.isDirect, let inviter = room.inviter {
+        if room.isDM, let inviter = room.inviter {
             .heroes([.init(userID: inviter.id, displayName: inviter.displayName, avatarURL: hideInviteAvatars ? nil : inviter.avatarURL)])
         } else {
             hideInviteAvatars ? room.avatar.removingAvatar : room.avatar
@@ -87,7 +87,7 @@ struct HomeScreenInviteCell: View {
     @ViewBuilder
     private var inviterView: some View {
         if let inviter = room.inviter,
-           !room.isDirect {
+           !room.isDM {
             RoomInviterLabel(inviter: inviter,
                              shouldHideAvatar: hideInviteAvatars,
                              mediaProvider: context.mediaProvider)
@@ -142,7 +142,7 @@ struct HomeScreenInviteCell: View {
     }
     
     private var subtitle: String? {
-        room.isDirect ? room.inviter.map { bipeHandleResolver?.displayText(for: $0.id) ?? $0.id } : nil
+        room.isDM ? room.inviter.map { bipeHandleResolver?.displayText(for: $0.id) ?? $0.id } : nil
     }
     
     @ViewBuilder
@@ -222,6 +222,7 @@ private extension HomeScreenRoom {
                                   isJoined: false,
                                   name: "Some Guy",
                                   isDirect: true,
+                                  isDM: true,
                                   isSpace: false,
                                   avatarURL: nil,
                                   heroes: [.init(userID: "@someone:somewhere.com")],

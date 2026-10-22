@@ -15,6 +15,7 @@ struct RoomDetails {
     let canonicalAlias: String?
     let isEncrypted: Bool
     let isPublic: Bool
-    let isDirect: Bool
+    /// Bipe: the SDK `isDm`, the one DM test (bipe#524).
+    let isDM: Bool
     var historySharingState: RoomHistorySharingState?
 }

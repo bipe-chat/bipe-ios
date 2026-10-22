@@ -152,6 +152,7 @@ private extension HomeScreenRoom {
                                   isJoined: false,
                                   name: "Some Guy",
                                   isDirect: true,
+                                  isDM: true,
                                   isSpace: false,
                                   avatarURL: nil,
                                   heroes: [.init(userID: "@someone:somewhere.com")],

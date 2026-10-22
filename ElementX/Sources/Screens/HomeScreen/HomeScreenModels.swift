@@ -266,7 +266,8 @@ struct HomeScreenRoom: Identifiable, Equatable {
     
     let name: String
     
-    let isDirect: Bool
+    /// Bipe: the SDK `isDm`, the one DM test (bipe#524).
+    let isDM: Bool
     
     let isHighlighted: Bool
     
@@ -296,7 +297,7 @@ struct HomeScreenRoom: Identifiable, Equatable {
     var displayedLastMessage: AttributedString? {
         if isTombstoned {
             // Bipe: grupo, not sala (bipe#508)
-            AttributedString(isDirect ? BipeStrings.dmTombstonedRow : BipeStrings.groupScreenRoomlistTombstonedRoomDescription) // Bipe: bipe#507
+            AttributedString(isDM ? BipeStrings.dmTombstonedRow : BipeStrings.groupScreenRoomlistTombstonedRoomDescription) // Bipe: bipe#507
         } else if lastMessageState == .failed {
             AttributedString(L10n.commonMessageFailedToSend)
         } else {
@@ -310,7 +311,7 @@ struct HomeScreenRoom: Identifiable, Equatable {
                        type: .placeholder,
                        badges: .init(isDotShown: false, notificationCount: 0, isMentionShown: false, isMuteShown: false, callBadgeType: .none),
                        name: "Placeholder room name",
-                       isDirect: false,
+                       isDM: false,
                        isHighlighted: false,
                        isFavourite: false,
                        timestamp: "Now",
@@ -362,7 +363,7 @@ extension HomeScreenRoom {
                                 isMuteShown: isMuteShown,
                                 callBadgeType: callBadge),
                   name: summary.name,
-                  isDirect: summary.isDirect,
+                  isDM: summary.isDM,
                   isHighlighted: isHighlighted,
                   isFavourite: summary.isFavourite,
                   timestamp: summary.lastMessageDate?.formattedMinimal(),
@@ -372,7 +373,7 @@ extension HomeScreenRoom {
                   statusEmoji: summary.statusEmoji,
                   canonicalAlias: summary.canonicalAlias,
                   isTombstoned: summary.isTombstoned,
-                  dmUserID: summary.isDirect && summary.heroes.count == 1 ? summary.heroes[0].id : nil,
+                  dmUserID: summary.isDM && summary.heroes.count == 1 ? summary.heroes[0].id : nil,
                   isLowPriority: summary.isLowPriority)
     }
 }

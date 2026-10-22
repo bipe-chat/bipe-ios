@@ -103,6 +103,7 @@ struct RoomSummaryTests {
                     isJoined: true,
                     name: roomDetails.name,
                     isDirect: isDirect,
+                    isDM: isDirect,
                     isSpace: isSpace,
                     avatarURL: hasRoomAvatar ? roomDetails.avatarURL : nil,
                     heroes: heroes,

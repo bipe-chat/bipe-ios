@@ -360,7 +360,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
     // MARK: Bipe inviter greeting (ADR 0034)
     
     private func updateBipeInviterHint(_ roomInfo: RoomInfoProxyProtocol) {
-        guard roomInfo.isDirect, let greeting = clientProxy.bipeInviterGreeting else {
+        guard roomInfo.isDM, let greeting = clientProxy.bipeInviterGreeting else { // Bipe: one DM test (bipe#524)
             state.bipeInviterHandle = nil
             return
         }

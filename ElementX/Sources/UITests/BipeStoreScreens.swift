@@ -272,6 +272,7 @@ final class BipeStoreScreens {
                     isJoined: inviter == nil,
                     name: name,
                     isDirect: isDirect,
+                    isDM: isDirect,
                     isSpace: false,
                     avatarURL: avatarURL,
                     heroes: heroes,

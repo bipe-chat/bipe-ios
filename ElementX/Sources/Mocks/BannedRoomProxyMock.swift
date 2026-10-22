@@ -39,6 +39,8 @@ extension RoomInfoProxyMock {
         avatarURL = configuration.avatarURL
         
         isDirect = false
+        
+        isDM = false // Bipe: base info now has isDM (bipe#524)
         isSpace = false
         successor = nil
         isFavourite = false

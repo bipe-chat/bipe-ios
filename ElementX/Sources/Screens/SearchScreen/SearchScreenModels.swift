@@ -79,7 +79,7 @@ struct SearchScreenRoom: Identifiable, Equatable {
     let avatar: RoomAvatar
     
     init(_ summary: RoomSummary) {
-        let identifier = if summary.isDirect {
+        let identifier = if summary.isDM { // Bipe: one DM test (bipe#524)
             summary.heroes.first?.id ?? summary.canonicalAlias
         } else {
             summary.canonicalAlias

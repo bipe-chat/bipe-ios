@@ -221,6 +221,11 @@ nonisolated struct RoomPreviewInfoProxy: BaseRoomInfoProxyProtocol {
         roomPreviewInfo.isDirect ?? false
     }
     
+    /// Bipe: a preview has no SDK `isDm`. Mirror the client's `.twoMembers` DM definition (bipe#524).
+    var isDM: Bool {
+        isDirect && activeMembersCount <= 2
+    }
+    
     var isSpace: Bool {
         roomPreviewInfo.roomType == .space
     }

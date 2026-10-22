@@ -96,7 +96,7 @@ struct JoinRoomScreen: View {
             }
             
             // Bipe: a DM has no topic (bipe#527).
-            if !context.viewState.isDMInvite, context.viewState.roomDetails?.isDirect != true, let topic = context.viewState.roomDetails?.topic {
+            if !context.viewState.isDMInvite, context.viewState.roomDetails?.isDM != true, let topic = context.viewState.roomDetails?.topic {
                 Text(topic)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textPrimary)
