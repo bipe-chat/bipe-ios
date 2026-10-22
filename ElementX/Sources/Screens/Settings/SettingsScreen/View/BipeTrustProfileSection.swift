@@ -70,12 +70,20 @@ struct BipeTrustProfileSection: View {
         .accessibilityElement(children: .combine)
     }
     
+    @ViewBuilder
     private func stepRow(_ step: BipeTrustProfile.Step) -> some View {
-        ListRow(label: .default(title: step.title,
-                                description: step.description(isCompany: profile.isCompany),
-                                icon: statusIcon(step.status)),
-                details: step.status == .comingSoon ? .icon(comingSoonTag) : nil,
-                kind: .label)
+        if step.id == .govbr, step.status == .todo {
+            ListRow(label: .default(title: step.title,
+                                    description: step.description(isCompany: profile.isCompany),
+                                    icon: statusIcon(step.status)),
+                    kind: .navigationLink { send(.bipeGovbr) })
+        } else {
+            ListRow(label: .default(title: step.title,
+                                    description: step.description(isCompany: profile.isCompany),
+                                    icon: statusIcon(step.status)),
+                    details: step.status == .comingSoon ? .icon(comingSoonTag) : nil,
+                    kind: .label)
+        }
     }
     
     private func missingItemRow(_ item: BipeTrustProfile.ProfileItem) -> some View {

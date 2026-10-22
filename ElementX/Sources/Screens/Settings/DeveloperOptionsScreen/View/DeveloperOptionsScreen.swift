@@ -50,6 +50,11 @@ struct DeveloperOptionsScreen: View {
                     Text("Moves search to a separate tab")
                 }
                 
+                Toggle(isOn: $context.bipeGovbrEnabled) {
+                    Text("gov.br verification")
+                    Text("Trust step 5 (bipe#544)")
+                }
+                
                 context.viewState.appHooks
                     .developerOptionsScreenHook
                     .generalSectionRows(isSignedIn: context.viewState.isSignedIn)

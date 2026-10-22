@@ -41,6 +41,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         
         state.bipeIsInTab = bipeIsInTab
         state.bipeAccountType = BipeAccountLabels.isCompany(userSession.clientProxy.userID) ? .company : .personal
+        state.bipeGovbrEnabled = userSettings.app.bipeGovbrEnabled
         
         userSettings.app.developerOptionsEnabledPublisher
             .weakAssign(to: \.state.showDeveloperOptions, on: self)
@@ -147,6 +148,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         case .bipeMessaging:
             actionsSubject.send(.bipeMessaging)
         case .bipeLoadHandle:
+            state.bipeGovbrEnabled = userSettings.app.bipeGovbrEnabled
             Task { await loadBipeHandle() }
             Task { await loadBipeWhoCanMessage() }
             Task { await loadBipeWaysBack() }
@@ -159,6 +161,9 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             actionsSubject.send(.bipeAccount)
         case .bipeGroup(let group):
             actionsSubject.send(.bipeGroup(group))
+        case .bipeGovbr:
+            state.bindings.bipeGovbr = BipeGovbrFlow(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
+                                                     accessToken: { [clientProxy] in clientProxy.accessToken })
         case .bipeCopyDeviceID:
             guard let deviceID = state.deviceID else { return }
             UIPasteboard.general.string = deviceID
@@ -204,6 +209,17 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         }
         if state.bipeAccountType == .company {
             await loadBipeBusiness(apiClient: apiClient)
+        } else {
+            await loadBipePersonBadge(apiClient: apiClient)
+        }
+    }
+    
+    /// The trust card's step 5. The server is the authority; the app reads its own badge level only for the card.
+    private func loadBipePersonBadge(apiClient: BipeAPIClient) async {
+        do {
+            state.bipePersonBadge = try await apiClient.badge(userID: clientProxy.userID).unverifiedLevel
+        } catch {
+            MXLog.error("Bipe badge load failed: \(error)")
         }
     }
     

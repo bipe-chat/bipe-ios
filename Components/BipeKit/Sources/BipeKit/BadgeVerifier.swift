@@ -227,7 +227,7 @@ private nonisolated struct VersionProbe: Decodable {
     let v: Int
 }
 
-private nonisolated extension Data {
+nonisolated extension Data {
     /// Strict base64url without padding (RFC 4648 section 5). Rejects padding and the standard alphabet.
     init?(base64URLEncoded string: String) {
         let allowed = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")

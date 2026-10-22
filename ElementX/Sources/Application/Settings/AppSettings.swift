@@ -451,6 +451,10 @@ final nonisolated class AppSettings: @unchecked Sendable {
     @UserPreference(key: "globalSearchEnabledV2", defaultValue: true)
     var globalSearchEnabled: Bool
     
+    /// Bipe: trust step 5, "Verificar com gov.br" (bipe#544). Off until the legal review of the gov.br signer terms (bipe#17).
+    @UserPreference(defaultValue: false)
+    var bipeGovbrEnabled: Bool
+    
     @UserPreference(defaultValue: false)
     var focusEventOnNotificationTap: Bool
     

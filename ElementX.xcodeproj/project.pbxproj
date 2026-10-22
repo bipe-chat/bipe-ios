@@ -1514,6 +1514,7 @@
 		E0ABA91C467841E9CA2567A2 /* test_voice_message.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 166EE9FAC689FDA7A194C29C /* test_voice_message.m4a */; };
 		E0B6A569AC3E81D233B43D60 /* SettingsScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E625B0EB2F86B37C14EF7E6 /* SettingsScreenViewModel.swift */; };
 		E0C167D41A48EDB30B447DE3 /* VoiceMessageRecordingComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A5C3F7C9C1DA10CAEC6A98 /* VoiceMessageRecordingComposer.swift */; };
+		E110457647F19CFBAD573E61 /* BipeGovbrScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 029721630762AF121224B3C2 /* BipeGovbrScreen.swift */; };
 		E1428612B08ED3030EC1FEC3 /* SpacesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104B7747499487538483FEAF /* SpacesScreen.swift */; };
 		E14E469CD97550D0FC58F3CA /* CancellableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE52983FAFB4E0998C00EE8A /* CancellableTask.swift */; };
 		E184FFAD32342D3D6E2F89AA /* PinnedEventsTimelineScreenCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D53754227CEBD06358956D7 /* PinnedEventsTimelineScreenCoordinator.swift */; };
@@ -1890,6 +1891,7 @@
 		024F7398C5FC12586FB10E9D /* EffectsScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectsScene.swift; sourceTree = "<group>"; };
 		0287793F11C480E242B03DF5 /* UserDiscoveryServiceTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDiscoveryServiceTest.swift; sourceTree = "<group>"; };
 		028CAFDBB60E2DBB24C3F621 /* landscape_test_image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = landscape_test_image.jpg; sourceTree = "<group>"; };
+		029721630762AF121224B3C2 /* BipeGovbrScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BipeGovbrScreen.swift; sourceTree = "<group>"; };
 		029D5701F80A9AF7167BB4D0 /* TimelineModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineModels.swift; sourceTree = "<group>"; };
 		02A84AEC7D5644B3F83B5333 /* NativeCallStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeCallStyle.swift; sourceTree = "<group>"; };
 		02D155E09BF961BBA8F85263 /* InviteUsersScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteUsersScreenViewModel.swift; sourceTree = "<group>"; };
@@ -4003,6 +4005,7 @@
 		26C16326BCCCED74A85A0F48 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				029721630762AF121224B3C2 /* BipeGovbrScreen.swift */,
 				9B72E9E2C666A843F8E9247E /* BipeProfileHeaderSection.swift */,
 				3775C30696C217622E92B5E5 /* BipeSelfChatSection.swift */,
 				962A257BFECF6469B21A2CCA /* BipeSettingsGroupsSection.swift */,
@@ -9176,6 +9179,7 @@
 				81DFB69E008F389CB6C7AB09 /* BipeContactsScreenViewModel.swift in Sources */,
 				CE7694183D7509B899C1D0A5 /* BipeContactsScreenViewModelProtocol.swift in Sources */,
 				C57FBF6F2F54C503B500B5A2 /* BipeEnvironmentCoordinator.swift in Sources */,
+				E110457647F19CFBAD573E61 /* BipeGovbrScreen.swift in Sources */,
 				AF1F84880C1C0D098BA96307 /* BipeHandlePromptRow.swift in Sources */,
 				32190B28486BDAC7AF1E64BC /* BipeHandleScreen.swift in Sources */,
 				FD72FBB4E34BFCC9528168C3 /* BipeHandleScreenCoordinator.swift in Sources */,
