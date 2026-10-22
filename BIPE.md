@@ -247,6 +247,8 @@ Not done (needs the domain, Apple team or brand):
 - Sizes and simulators: `appstore/devices.mjs`. The script fails when a capture has another size, and when the simulator is missing (it never downloads one).
 - Screens: `BipeStoreScreens` (`ElementX/Sources/UITests`, DEBUG only), one `UITestsScreenIdentifier.bipeStore*` case per slug, built from the existing Bipe views on mock proxies. People come from `BipeCast` (generated from `bipe-shared/product/cast.json`); photos from `../bipe-web/src/cast/photos`, passed to the app in `BIPE_CAST_PHOTOS`. `AppSettings.bipeDisableAPIForScreenshots` and `BipeCompanySeals.storeFixture` (both DEBUG only) keep the real API out.
 - Test: `UITests/Sources/StoreScreenshotTests.swift`, one test per slug. It attaches the screen as `<slug>` and does not compare snapshots.
+- Each test also attaches the screen's elements (label, identifier, type, frame in points) as `<slug>.elements`; `capture.sh` writes `<slug>.elements.json` next to the PNG. The bipe-web builder places the panel callouts on them (`scripts/lib/callouts.mjs`): no app code gets store-only identifiers.
+- CI captures: `.github/workflows/store-captures.yml` runs `capture.sh iphone69 light` on the `xcode-27` runner, on `workflow_dispatch` and on PRs that touch the store screens. Its artifact holds the pt-BR set: commit it under `appstore/raw/iphone69/light/pt-BR/`. Agents use this instead of a local simulator run.
 
 ## App Store listing upload (bipe#456)
 

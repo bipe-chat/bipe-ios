@@ -3,7 +3,7 @@
 #
 #   appstore/capture.sh <iphone69|ipad13> [light|dark]
 #
-# Writes appstore/raw/<device>/<appearance>/<slug>.png. Commit them under <locale>/: the bipe-web build (bipe#455, #466)
+# Writes appstore/raw/<device>/<appearance>/<slug>.png and <slug>.elements.json. Commit them under <locale>/: the bipe-web build (bipe#455, #466)
 # makes the store panels on bipe.chat/sobre/marca/ from them. The screens are mock screens with the sample cast (bipe-shared/product/cast.json)
 # and pt-BR text, so two runs give the same images.
 #
@@ -78,7 +78,8 @@ EXPORT="$WORK/attachments"
 mkdir -p "$EXPORT"
 xcrun xcresulttool export attachments --path "$RESULT" --output-path "$EXPORT" >/dev/null
 
-# Keep only the named captures (`<slug>`), renamed to <slug>.png, and check their pixel size.
+# Keep only the named captures (`<slug>`), renamed to <slug>.png, and check their pixel size. The element
+# lists (`<slug>.elements`) become <slug>.elements.json: bipe-web places the panel callouts with them.
 python3 - "$EXPORT" "$OUT" "$WIDTH" "$HEIGHT" <<'PY'
 import json, os, re, shutil, subprocess, sys
 
@@ -89,16 +90,32 @@ with open(os.path.join(export, "manifest.json"), encoding="utf-8") as handle:
 wrong = []
 for test in manifest:
     for attachment in test["attachments"]:
-        slug = attachment["suggestedHumanReadableName"].split("_0_")[0].removesuffix(".png")
-        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", slug):
+        name = attachment["suggestedHumanReadableName"]
+        source = os.path.join(export, attachment["exportedFileName"])
+        # Names come back as "<slug>_0_<uuid>.png" and "<slug>_0_<uuid>.elements" (Xcode 27), or without the "_0_<uuid>".
+        match = re.match(r"([a-z0-9]+(?:-[a-z0-9]+)*)(?:_\d+_[0-9A-F-]+)?(\.elements|\.png)?$", name)
+        if not match:
+            continue
+        slug, is_elements = match.group(1), match.group(2) == ".elements"
+        with open(source, "rb") as handle:
+            head = handle.read(8)
+        kind = "png" if head.startswith(b"\x89PNG") else repr(head[:1])
+        print(f"attachment {name} -> {attachment['exportedFileName']} ({kind})")
+        if is_elements:
+            if not head.lstrip().startswith(b"{"):
+                wrong.append(f"{slug}.elements is not JSON")
+                continue
+            shutil.copyfile(source, os.path.join(out, f"{slug}.elements.json"))
+            continue
+        if not head.startswith(b"\x89PNG"):
             continue
         target = os.path.join(out, f"{slug}.png")
-        shutil.copyfile(os.path.join(export, attachment["exportedFileName"]), target)
+        shutil.copyfile(source, target)
         info = subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", target],
                               capture_output=True, text=True, check=True).stdout
         size = tuple(int(v) for v in re.findall(r"pixel(?:Width|Height): (\d+)", info))
         if size != (width, height):
-            wrong.append(f"{slug}.png is {size[0]}x{size[1]}, expected {width}x{height}")
+            wrong.append(f"{slug}.png is {'x'.join(map(str, size)) or 'unreadable'}, expected {width}x{height}")
 
 names = sorted(os.listdir(out))
 print("captured:", ", ".join(names) if names else "nothing")

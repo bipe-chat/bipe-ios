@@ -1,0 +1,91 @@
+name: Store Captures
+
+# Bipe: runs appstore/capture.sh for the iPhone 6.9" set on a GitHub runner, so no capture runs on a laptop.
+# The artifact holds the captures and their element lists. Commit them under
+# appstore/raw/iphone69/light/pt-BR/; the bipe-web build makes the store panels and their callouts from it (bipe-chat/bipe#463).
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    paths:
+      - appstore/**
+      - UITests/Sources/StoreScreenshotTests.swift
+      - ElementX/Sources/UITests/BipeStoreScreens.swift
+      - .github/workflows/store-captures.yml
+
+permissions: {}
+
+jobs:
+  capture:
+    name: Capture
+    runs-on: xcode-27
+    timeout-minutes: 90
+    if: ${{ github.repository != 'element-hq/element-x-ios' }}
+    permissions:
+      contents: read
+
+    concurrency:
+      group: ${{ format('store-captures-{0}', github.ref) }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Fetch development media from Element LFS
+        run: |
+          git config lfs.url https://github.com/element-hq/element-x-ios.git/info/lfs
+          git lfs pull --include "Components/DevelopmentAssets/Media/**"
+
+      - name: Checkout the cast photos
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: bipe-chat/bipe-web
+          path: bipe-web
+          sparse-checkout: src/cast/photos
+          persist-credentials: false
+
+      - name: Setup environment
+        run: source ci_scripts/ci_common.sh && setup_github_actions_environment
+
+      # The runner image may lack the simulator that appstore/devices.mjs names. Create it from the newest
+      # iOS runtime already on the runner; nothing is downloaded.
+      - name: Create the simulator
+        run: |
+          name=$(node --input-type=module -e 'import { device } from "./appstore/devices.mjs"; console.log(device("iphone69").simulator);')
+          if ! xcrun simctl list devices available | grep -q "$name ("; then
+            runtime=$(xcrun simctl list runtimes available -j | python3 -c 'import json, sys; r = [x for x in json.load(sys.stdin)["runtimes"] if x["platform"] == "iOS"]; print(sorted(r, key=lambda x: x["version"])[-1]["identifier"] if r else "")')
+            type=$(xcrun simctl list devicetypes -j | python3 -c 'import json, sys; n = sys.argv[1]; print(next((t["identifier"] for t in json.load(sys.stdin)["devicetypes"] if t["name"] == n), ""))' "$name")
+            echo "creating $name ($type) on $runtime"
+            xcrun simctl create "$name" "$type" "$runtime"
+          fi
+
+      - name: Capture
+        env:
+          BIPE_CAST_PHOTOS: ${{ github.workspace }}/bipe-web/src/cast/photos
+          DERIVED_DATA_PATH: ${{ runner.temp }}/DerivedData
+          TMPDIR: ${{ runner.temp }}/capture
+        run: |
+          mkdir -p "$TMPDIR"
+          appstore/capture.sh iphone69 light
+
+      - name: Upload the captures
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: store-captures-iphone69-light-pt-BR
+          path: appstore/raw/iphone69/light
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload the test results
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: store-captures-results
+          path: ${{ runner.temp }}/capture
+          retention-days: 3
+          if-no-files-found: ignore
