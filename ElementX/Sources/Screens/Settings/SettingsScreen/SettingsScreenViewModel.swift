@@ -162,8 +162,9 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
         case .bipeGroup(let group):
             actionsSubject.send(.bipeGroup(group))
         case .bipeGovbr:
-            state.bindings.bipeGovbr = BipeGovbrFlow(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL),
-                                                     accessToken: { [clientProxy] in clientProxy.accessToken })
+            state.bindings.bipeGovbr = BipeGovbrFlow(apiClient: BipeAPIClient(baseURL: userSettings.app.bipeAPIBaseURL)) { [clientProxy] in
+                clientProxy.accessToken
+            }
         case .bipeCopyDeviceID:
             guard let deviceID = state.deviceID else { return }
             UIPasteboard.general.string = deviceID

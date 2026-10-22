@@ -26,7 +26,7 @@ struct BipeGovbrScreen: View {
     }
     
     var body: some View {
-        NavigationStack {
+        ElementNavigationStack {
             Form {
                 Section {
                     ListRow(label: .description(BipeStrings.govbrIntro), kind: .label)
@@ -148,7 +148,6 @@ private extension BipeGovbrReason {
 
 struct BipeGovbrScreen_Previews: PreviewProvider {
     static var previews: some View {
-        BipeGovbrScreen(flow: BipeGovbrFlow(apiClient: BipeAPIClient(baseURL: URL(string: "https://api.example.com")!),
-                                            accessToken: { nil }))
+        BipeGovbrScreen(flow: BipeGovbrFlow(apiClient: BipeAPIClient(baseURL: URL(string: "https://api.example.com")!)) { nil })
     }
 }
