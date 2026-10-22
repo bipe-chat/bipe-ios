@@ -52,6 +52,10 @@ struct SettingsScreen: View {
         .compoundList()
         // Bipe: reloads the handle on first show and after returning from a pushed screen.
         .onAppear { context.send(viewAction: .bipeLoadHandle) }
+        // Bipe: trust step 5 (bipe#544). Closing the sheet reloads the trust card.
+        .sheet(item: $context.bipeGovbr, onDismiss: { context.send(viewAction: .bipeLoadHandle) }) { flow in
+            BipeGovbrScreen(flow: flow)
+        }
         .navigationTitle(context.viewState.bipeIsInTab ? BipeStrings.tabYou : L10n.commonSettings)
         .navigationBarTitleDisplayMode(context.viewState.bipeIsInTab ? .large : .inline)
         .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)

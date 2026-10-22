@@ -70,6 +70,10 @@ struct SettingsScreenViewState: BindableState {
     var bipeAccountType = BipeAccountType.personal
     /// Bipe: `GET /v1/me/business` for a company account. `nil` without a claim or until it loads.
     var bipeBusiness: BipeBusinessClaim?
+    /// Bipe: the level of the account's own person badge (Pix or gov.br). `nil` without one or until it loads.
+    var bipePersonBadge: BadgeLevel?
+    /// Bipe: trust step 5 is live (`AppSettings.bipeGovbrEnabled`).
+    var bipeGovbrEnabled = false
     
     /// Bipe: the "Perfil de confiança" card. Same visibility as the username row.
     var bipeTrustProfile: BipeTrustProfile? {
@@ -78,7 +82,9 @@ struct SettingsScreenViewState: BindableState {
                                 hasAvatar: userProfile.avatarURL != nil,
                                 handle: bipeHandle,
                                 accountType: bipeAccountType,
-                                business: bipeBusiness)
+                                business: bipeBusiness,
+                                personBadge: bipePersonBadge,
+                                govbrEnabled: bipeGovbrEnabled)
     }
     
     var securitySectionMode = SettingsScreenSecuritySectionMode.none
@@ -119,6 +125,9 @@ struct SettingsScreenViewStateBindings {
     }
     
     var isPresentingAccountDeactivationConfirmation = false
+    
+    /// Bipe: the open "Verificar com gov.br" sheet (bipe#544).
+    var bipeGovbr: BipeGovbrFlow?
     
     var appAppearance: AppAppearance {
         get { userSettings.app.appAppearance }
@@ -164,6 +173,8 @@ enum SettingsScreenViewAction {
     case bipeSelfChat
     case bipeAccount
     case bipeGroup(BipeSettingsGroup)
+    /// Bipe: trust step 5 opens the gov.br sheet (bipe#544).
+    case bipeGovbr
     /// Bipe: a long press on the version copies the device ID (ADR 0112).
     case bipeCopyDeviceID
     

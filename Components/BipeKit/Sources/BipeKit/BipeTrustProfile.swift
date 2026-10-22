@@ -57,7 +57,15 @@ public nonisolated struct BipeTrustProfile: Sendable, Equatable {
     }
     
     /// `business` is `GET /v1/me/business`: `nil` when the account has no claim or the claim did not load.
-    public init(displayName: String?, hasAvatar: Bool, handle: String?, accountType: BipeAccountType = .personal, business: BipeBusinessClaim? = nil) {
+    /// `personBadge` is the level of the account's own badge from `GET /v1/badges`: `nil` without one or until it loads.
+    /// `govbrEnabled` makes step 5 live (bipe#544); else it shows "Em breve".
+    public init(displayName: String?,
+                hasAvatar: Bool,
+                handle: String?,
+                accountType: BipeAccountType = .personal,
+                business: BipeBusinessClaim? = nil,
+                personBadge: BadgeLevel? = nil,
+                govbrEnabled: Bool = false) {
         var missing: [ProfileItem] = []
         if displayName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
             missing.append(.displayName)
@@ -83,7 +91,7 @@ public nonisolated struct BipeTrustProfile: Sendable, Equatable {
         } else {
             steps = start + [Step(id: .email, status: .comingSoon),
                              Step(id: .pix, status: .comingSoon),
-                             Step(id: .govbr, status: .comingSoon)]
+                             Step(id: .govbr, status: personBadge == .govbr ? .done : govbrEnabled ? .todo : .comingSoon)]
         }
     }
 }

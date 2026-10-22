@@ -70,6 +70,7 @@ protocol DeveloperOptionsProtocol: AnyObject {
     var messageMultiSelectEnabled: Bool { get set }
     
     var globalSearchEnabled: Bool { get set }
+    var bipeGovbrEnabled: Bool { get set }
     
     var nativeCallEnabled: Bool { get set }
 }

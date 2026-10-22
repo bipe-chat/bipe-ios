@@ -270,6 +270,21 @@ public struct BipeAPIClient: Sendable {
         try await send(method: "DELETE", path: ["v1", "me", "profile", "photo"], body: Empty?.none, accessToken: accessToken)
     }
     
+    // MARK: - gov.br verification (bipe#544)
+    
+    /// `POST /v1/verifications/govbr`. A challenge PDF bound to this device, valid 30 minutes.
+    public func startGovbrVerification(accessToken: String) async throws(BipeAPIError) -> BipeGovbrChallenge {
+        try await send(method: "POST", path: ["v1", "verifications", "govbr"], body: Empty?.none, accessToken: accessToken)
+    }
+    
+    /// `PUT /v1/verifications/govbr/{id}/document`. The signed PDF. A rejection is a 200 with a reason, not an error.
+    public func sendGovbrDocument(verificationID: String, pdf: Data, accessToken: String) async throws(BipeAPIError) -> BipeVerificationStatus {
+        try await send(method: "PUT",
+                       path: ["v1", "verifications", "govbr", verificationID, "document"],
+                       rawBody: (data: pdf, contentType: "application/pdf"),
+                       accessToken: accessToken)
+    }
+    
     // MARK: - Badges (ADR 0123, bipe#252)
     
     /// `GET /v1/badges/{userId}`. No auth. The envelope is not verified here: see ``BadgeVerifier``.
