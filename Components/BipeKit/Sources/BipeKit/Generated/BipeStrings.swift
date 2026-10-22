@@ -1844,6 +1844,32 @@ public enum BipeStrings {
 
     public static var linkComputerDone: String { NSLocalizedString("bipe_link_computer_done", tableName: "Bipe", bundle: .module, comment: "") }
 
+    public static var appLinkComputerScanTitle: String { NSLocalizedString("bipe_app_link_computer_scan_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerScanBody: String { NSLocalizedString("bipe_app_link_computer_scan_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerConnecting: String { NSLocalizedString("bipe_app_link_computer_connecting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerCheckCodeTitle: String { NSLocalizedString("bipe_app_link_computer_check_code_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerCheckCodeBody: String { NSLocalizedString("bipe_app_link_computer_check_code_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerNotBipeCode: String { NSLocalizedString("bipe_app_link_computer_not_bipe_code", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerExpired: String { NSLocalizedString("bipe_app_link_computer_expired", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerInsecure: String { NSLocalizedString("bipe_app_link_computer_insecure", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerNeedsRecoveryKey: String { NSLocalizedString("bipe_app_link_computer_needs_recovery_key", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerStopped: String { NSLocalizedString("bipe_app_link_computer_stopped", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerScanAgain: String { NSLocalizedString("bipe_app_link_computer_scan_again", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appLinkComputerFinishing: String { NSLocalizedString("bipe_app_link_computer_finishing", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appClose: String { NSLocalizedString("bipe_app_close", tableName: "Bipe", bundle: .module, comment: "") }
+
     public static var accountSignOut: String { NSLocalizedString("bipe_account_sign_out", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var privacyWhoCanTalk: String { NSLocalizedString("bipe_privacy_who_can_talk", tableName: "Bipe", bundle: .module, comment: "") }
@@ -2519,4 +2545,90 @@ public enum BipeStrings {
     public static var appSignupCreating: String { NSLocalizedString("bipe_app_signup_creating", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var appInviteChecking: String { NSLocalizedString("bipe_app_invite_checking", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appCancel: String { NSLocalizedString("bipe_app_cancel", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appCopy: String { NSLocalizedString("bipe_app_copy", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appCopied: String { NSLocalizedString("bipe_app_copied", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appShare: String { NSLocalizedString("bipe_app_share", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryEmailSend: String { NSLocalizedString("bipe_app_recovery_email_send", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyCreate: String { NSLocalizedString("bipe_app_recovery_key_create", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyCreating: String { NSLocalizedString("bipe_app_recovery_key_creating", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyShowBody: String { NSLocalizedString("bipe_app_recovery_key_show_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyReplace: String { NSLocalizedString("bipe_app_recovery_key_replace", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyReplaceBody: String { NSLocalizedString("bipe_app_recovery_key_replace_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeySavedAction: String { NSLocalizedString("bipe_app_recovery_key_saved_action", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyBiometric: String { NSLocalizedString("bipe_app_recovery_key_biometric", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyEnterTitle: String { NSLocalizedString("bipe_app_recovery_key_enter_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyEnterBody: String { NSLocalizedString("bipe_app_recovery_key_enter_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyChecking: String { NSLocalizedString("bipe_app_recovery_key_checking", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyWrong: String { NSLocalizedString("bipe_app_recovery_key_wrong", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyEnterDone: String { NSLocalizedString("bipe_app_recovery_key_enter_done", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appRecoveryKeyNone: String { NSLocalizedString("bipe_app_recovery_key_none", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyTitle: String { NSLocalizedString("bipe_app_verify_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyBody: String { NSLocalizedString("bipe_app_verify_body", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyWaiting: String { NSLocalizedString("bipe_app_verify_waiting", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyIncomingTitle: String { NSLocalizedString("bipe_app_verify_incoming_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func appVerifyIncomingBody(_ p1: String, _ p2: String) -> String {
+        String(format: NSLocalizedString("bipe_app_verify_incoming_body", tableName: "Bipe", bundle: .module, comment: ""), p1, p2)
+    }
+
+    public static var appVerifyApprove: String { NSLocalizedString("bipe_app_verify_approve", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyBiometric: String { NSLocalizedString("bipe_app_verify_biometric", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyCompare: String { NSLocalizedString("bipe_app_verify_compare", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyMatch: String { NSLocalizedString("bipe_app_verify_match", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyNoMatch: String { NSLocalizedString("bipe_app_verify_no_match", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyMismatch: String { NSLocalizedString("bipe_app_verify_mismatch", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyDone: String { NSLocalizedString("bipe_app_verify_done", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appVerifyCancelled: String { NSLocalizedString("bipe_app_verify_cancelled", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appHistoryBanner: String { NSLocalizedString("bipe_app_history_banner", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appHistoryTitle: String { NSLocalizedString("bipe_app_history_title", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appHistoryApprove: String { NSLocalizedString("bipe_app_history_approve", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appHistoryUseKey: String { NSLocalizedString("bipe_app_history_use_key", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appHistoryNone: String { NSLocalizedString("bipe_app_history_none", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appUtdBeforeJoined: String { NSLocalizedString("bipe_app_utd_before_joined", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appUtdHistory: String { NSLocalizedString("bipe_app_utd_history", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var appUtdNotShared: String { NSLocalizedString("bipe_app_utd_not_shared", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static func appUtdUnapprovedDevice(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_app_utd_unapproved_device", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
+    public static var appUtdHelp: String { NSLocalizedString("bipe_app_utd_help", tableName: "Bipe", bundle: .module, comment: "") }
 }
