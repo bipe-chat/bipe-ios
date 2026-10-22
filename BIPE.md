@@ -302,7 +302,7 @@ Each line is a difference with its reason. A difference not listed here is a bug
 | App lock | Off by default; switch in Sua conta. Element's lock screen, biometrics optional | Off by default; switch in Sua conta. Element's lock screen, biometrics optional | Element X lock screen per platform |
 | Check before a PIN change | Biometrics or the phone's passcode | Biometrics or the phone's screen lock; else the app lock PIN | `LAContext` on iOS, `BiometricPrompt` with `DEVICE_CREDENTIAL` on Android |
 | Invite code input | Paste button | Pasted text collapses to the code in the field | Platform idiom |
-| Voice messages | Sender-side transcription, pause and resume | Shows the transcript and checks it for scams; no sender-side transcription | On-device recognition on low-end Android unmeasured (#80, #81) **Gap** |
+| Voice transcript | Any iPhone with an on-device model for the language | Android 13 and later with an installed on-device model; older phones send without a transcript | Android gives a recogniser an audio stream only from Android 13. Quality on low-end phones is not measured (#81) |
 | Sticker from a photo | Subject cut-out (Vision) | Centred square crop | Cut-out needs ML Kit, not decided (#101) **Undecided** |
 | Sticker import | Chat export ZIP or files | Chat export ZIP or files; picker opens in WhatsApp's stickers folder | iOS apps cannot read WhatsApp's files |
 | Signed-device isolation | User preference, default on | Fixed on | Undecided (#102) **Undecided** |
