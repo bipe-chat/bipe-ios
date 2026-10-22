@@ -291,6 +291,14 @@ struct ChatsTabFlowCoordinatorTests {
         #expect(splitCoordinator.sheetCoordinator == nil, "The media upload sheet shouldn't be shown when sharing text.")
     }
     
+    @Test
+    mutating func shareRouteWithRoomOfAnotherAccount() async throws {
+        // Bipe (bipe#510): a share sheet suggestion for a chat this account doesn't have opens the chat picker.
+        let sharePayload: ShareExtensionPayload = .text(roomID: "!another-account:bipe.chat", text: "Important text")
+        try await process(route: .share(sharePayload),
+                          expectedState: .shareExtensionRoomList(sharePayload: sharePayload))
+    }
+    
     // MARK: - Private
     
     private func process(route: AppRoute, expectedState: ChatsTabFlowCoordinatorStateMachine.State) async throws {

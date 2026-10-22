@@ -58,6 +58,8 @@ nonisolated struct RoomSummary {
     let isTombstoned: Bool
     /// Bipe: archived. The Matrix `m.lowpriority` tag, so other clients see the same state.
     var isLowPriority = false
+    /// Bipe: `origin_server_ts` (ms) of the latest event, for cleared DMs (bipe#464). `lastMessageDate` has whole seconds only.
+    var bipeLatestEventTimestamp: UInt64?
     
     var hasUnreadMessages: Bool {
         unreadMessagesCount > 0
@@ -178,7 +180,7 @@ nonisolated extension RoomSummary {
     /// This doesn't have to work properly for DM invites, the heroes are always empty
     var avatar: RoomAvatar {
         guard !isTombstoned else {
-            return .tombstoned
+            return .tombstoned(isDM: isDirect) // Bipe: bipe#507
         }
         
         if isSpace {

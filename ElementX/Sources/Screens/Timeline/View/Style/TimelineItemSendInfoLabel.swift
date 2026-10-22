@@ -62,6 +62,8 @@ private struct TimelineItemSendInfoModifier: ViewModifier {
 
 /// The label shown for a timeline item with info about it's timestamp and various other indicators.
 private struct TimelineItemSendInfoLabel: View {
+    @Environment(\.timelineContext) private var context // Bipe: bipe#507
+    
     let sendInfo: TimelineItemSendInfo
     
     var statusIcon: KeyPath<CompoundIcons, Image>? {
@@ -77,7 +79,7 @@ private struct TimelineItemSendInfoLabel: View {
         switch sendInfo.status {
         case .sendingFailed: L10n.commonSendingFailed
         case .encryptionAuthenticity(let authenticity): authenticity.message
-        case .encryptionForwarder(let forwarder): forwarder.message
+        case .encryptionForwarder(let forwarder): forwarder.message(isDM: context?.viewState.isDM == true)
         case .none: nil
         }
     }

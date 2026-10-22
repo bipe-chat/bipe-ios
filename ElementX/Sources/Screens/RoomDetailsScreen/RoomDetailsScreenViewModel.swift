@@ -174,6 +174,12 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
     // MARK: - Private
     
     private func processTapToLeave() {
+        // Bipe (bipe#464): in a DM the row is "Apagar conversa".
+        if state.dmRecipientInfo != nil {
+            showBipeDeleteChatAlert()
+            return
+        }
+        
         guard !roomProxy.infoPublisher.value.isSpace else {
             Task { await processLeaveSpace() }
             return
@@ -198,7 +204,8 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             if isLastOwner {
                 state.bindings.alertInfo = .init(id: .lastOwner,
                                                  title: L10n.leaveRoomAlertSelectNewOwnerTitle,
-                                                 message: L10n.leaveRoomAlertSelectNewOwnerSubtitle,
+                                                 // Bipe: grupo, not sala (bipe#508)
+                                                 message: BipeStrings.groupLeaveRoomAlertSelectNewOwnerSubtitle,
                                                  primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
                                                  secondaryButton: .init(title: L10n.leaveRoomAlertSelectNewOwnerAction, role: .destructive) { [weak self] in
                                                      self?.actionsSubject.send(.transferOwnership)
@@ -404,7 +411,8 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             } catch {
                 state.bindings.alertInfo = AlertInfo(id: .alert,
                                                      title: L10n.commonError,
-                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorUnmuting : L10n.screenRoomDetailsErrorUnmuting) // Bipe
+                                                     // Bipe: grupo, not sala (bipe#508)
+                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorUnmuting : BipeStrings.groupScreenRoomDetailsErrorUnmuting) // Bipe
             }
         default:
             do {
@@ -412,7 +420,8 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             } catch {
                 state.bindings.alertInfo = AlertInfo(id: .alert,
                                                      title: L10n.commonError,
-                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorMuting : L10n.screenRoomDetailsErrorMuting) // Bipe
+                                                     // Bipe: grupo, not sala (bipe#508)
+                                                     message: state.dmRecipientInfo != nil ? BipeStrings.dmErrorMuting : BipeStrings.groupScreenRoomDetailsErrorMuting) // Bipe
             }
         }
         state.isProcessingMuteToggleAction = false
@@ -466,10 +475,39 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
         }
     }
     
+    // MARK: Bipe: delete a DM (bipe#464)
+    
+    private static let bipeDeleteChatLoadingID = "BipeDeleteChatLoading"
+    
+    private func showBipeDeleteChatAlert() {
+        state.bindings.alertInfo = .init(id: .alert,
+                                         title: BipeStrings.dmDeleteTitle,
+                                         message: BipeStrings.dmDeleteBody,
+                                         primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
+                                         secondaryButton: .init(title: BipeStrings.dmDeleteConfirm, role: .destructive) { [weak self] in
+                                             Task { await self?.deleteBipeChat() }
+                                         })
+    }
+    
+    /// Writes the marker, then goes back to the room list. The user stays in the room.
+    private func deleteBipeChat() async {
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.bipeDeleteChatLoadingID, type: .modal, title: L10n.commonLoading, persistent: true))
+        let isCleared = await BipeClearedChatsStore.store(for: userSession.clientProxy).clear(roomID: roomProxy.id)
+        userIndicatorController.retractIndicatorWithId(Self.bipeDeleteChatLoadingID)
+        
+        guard isCleared else {
+            state.bindings.alertInfo = .init(id: .alert, title: L10n.commonError, message: BipeStrings.dmDeleteError)
+            return
+        }
+        
+        actionsSubject.send(.leftRoom)
+    }
+    
     private static let leaveRoomLoadingID = "LeaveRoomLoading"
     
     private func leaveRoom() async {
-        let leavingTitle = state.dmRecipientInfo != nil ? BipeStrings.dmLeaving : L10n.commonLeavingRoom // Bipe
+        // Bipe: grupo, not sala (bipe#508)
+        let leavingTitle = state.dmRecipientInfo != nil ? BipeStrings.dmLeaving : BipeStrings.groupCommonLeavingRoom // Bipe
         userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: leavingTitle, persistent: true))
         let result = await roomProxy.leaveRoom()
         userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)

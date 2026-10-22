@@ -259,6 +259,13 @@ final nonisolated class AppSettings: @unchecked Sendable {
     
     /// Bipe API (sign-up, handles). Contract: bipe-shared/api/openapi.yaml.
     private(set) var bipeAPIBaseURL: URL = "https://api.bipe.net.br" // Bipe
+    
+    #if DEBUG
+    /// Bipe store screenshot mode (bipe#454): every Bipe API call fails, so no live data reaches a capture.
+    func bipeDisableAPIForScreenshots() {
+        bipeAPIBaseURL = "http://127.0.0.1:9"
+    }
+    #endif
     /// Bipe: "Create account" for this provider opens the invite sign-up screen instead of MAS registration.
     private(set) var bipeSignupServerName = "bipe.net.br"
     var usesBipeSignup: Bool {

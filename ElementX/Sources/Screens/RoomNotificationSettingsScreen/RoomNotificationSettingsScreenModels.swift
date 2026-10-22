@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 
 enum RoomNotificationSettingsScreenViewModelAction {
@@ -54,13 +55,16 @@ struct RoomNotificationSettingsScreenViewState: BindableState {
     var customSettingsSectionHeader: String
     var deletingCustomSetting = false
     var shouldDisplayMentionsOnlyDisclaimer = true
+    /// Bipe: a DM says "conversa", never "sala" (bipe#507).
+    var isDM = false
     
     func description(mode: RoomNotificationModeProxy) -> String? {
         guard mode == .mentionsAndKeywordsOnly,
               shouldDisplayMentionsOnlyDisclaimer else {
             return nil
         }
-        return L10n.screenRoomNotificationSettingsMentionsOnlyDisclaimer
+        // Bipe: grupo, not sala (bipe#508)
+        return isDM ? BipeStrings.dmNotificationsMentionsDisclaimer : BipeStrings.groupScreenRoomNotificationSettingsMentionsOnlyDisclaimer
     }
     
     func isSelected(mode: RoomNotificationModeProxy) -> Bool {

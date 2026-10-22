@@ -8,11 +8,8 @@
 //   bipe-review-invite (account = bipe): invite code for a second account
 // Key "Bipe CI" (App Manager): ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_PATH as in testflight.sh.
 import { execFileSync } from "node:child_process";
-import { createPrivateKey, sign } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
+import { APP_ID, asc } from "./asc.mjs";
 
-const APP_ID = "6822454419"; // "Bipe Chat", chat.bipe.app.dev
 const DEMO_EMAIL = "app-review@bipe.chat";
 const CONTACT = { contactFirstName: "Michell", contactLastName: "Zappa", contactEmail: "mz@envisioning.com", contactPhone: "+31611118869" };
 
@@ -32,29 +29,6 @@ To test chat between two accounts, create a second account on another device: ta
 The second device must be a real iPhone (sign-up uses App Attest). From the demo account you can also open the "Você" (You) tab > Ajuda (Help) > "Falar com o suporte" (Talk to support) to chat with the Bipe team.
 
 Bipe features: @handles instead of phone numbers, Pedidos (message requests from people you do not know), the trust card on each contact and scam warnings in chats. Servers and data are in Brazil.`;
-
-const keyId = process.env.ASC_KEY_ID || "M2VUX56QAJ";
-const issuer = process.env.ASC_ISSUER_ID || "3cfd203a-f83c-4f1b-8895-2f31c9c02a26";
-const key = createPrivateKey(readFileSync(process.env.ASC_KEY_PATH || `${homedir()}/.config/bipe/AuthKey_${keyId}.p8`));
-
-const b64 = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
-function token() {
-  const now = Math.floor(Date.now() / 1000);
-  const unsigned = `${b64({ alg: "ES256", kid: keyId, typ: "JWT" })}.${b64({ iss: issuer, iat: now, exp: now + 900, aud: "appstoreconnect-v1" })}`;
-  return `${unsigned}.${sign("sha256", Buffer.from(unsigned), { key, dsaEncoding: "ieee-p1363" }).toString("base64url")}`;
-}
-
-async function asc(method, path, body) {
-  const res = await fetch(`https://api.appstoreconnect.apple.com${path}`, {
-    method,
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
-    body: body && JSON.stringify(body),
-  });
-  const text = await res.text();
-  // Never print a response body: it echoes the demo password.
-  if (!res.ok) throw new Error(`${method} ${path}: HTTP ${res.status} ${JSON.parse(text).errors?.map((e) => e.detail).join("; ")}`);
-  return text ? JSON.parse(text) : null;
-}
 
 const demo = { demoAccountRequired: true, demoAccountName: DEMO_EMAIL, demoAccountPassword: password, notes };
 

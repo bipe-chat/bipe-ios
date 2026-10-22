@@ -31,6 +31,8 @@ internal enum Asset {
   internal enum Images {
     internal static let appLogo = ImageAsset(name: "images/app-logo")
     internal static let backgroundBottom = ImageAsset(name: "images/background-bottom")
+    internal static let bipeTabChats = ImageAsset(name: "images/bipe-tab-chats")
+    internal static let bipeTabChatsFill = ImageAsset(name: "images/bipe-tab-chats-fill")
     internal static let launchBackground = ImageAsset(name: "images/launch-background")
     internal static let locationMarkerShape = ImageAsset(name: "images/location-marker-shape")
     internal static let mapBlurred = ImageAsset(name: "images/mapBlurred")

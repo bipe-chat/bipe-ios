@@ -311,6 +311,8 @@ nonisolated struct NotificationContentBuilder {
         // Interaction direction is incoming because the user is
         // receiving this message.
         interaction.direction = .incoming
+        // Bipe (bipe#479): "Apagar conversa" deletes the room's donations by this ID.
+        interaction.groupIdentifier = notificationContent.roomID
         
         // Donate the interaction before updating notification content.
         if !ProcessInfo.isRunningTests {

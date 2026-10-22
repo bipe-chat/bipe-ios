@@ -13,6 +13,8 @@ enum BugReportScreenViewModelAction {
     case cancel
     case viewLogs
     case submitStarted(progressPublisher: CurrentValuePublisher<Double, Never>)
+    /// Bipe: the report is on the server; the screen shows the confirmation (bipe#367).
+    case submitUploaded
     case submitFinished
     case submitFailed(error: Error)
 }
@@ -29,6 +31,7 @@ struct BugReportScreenViewStateBindings {
     var reportText: String
     var sendingLogsEnabled: Bool
     var canContact: Bool
+    var alertInfo: AlertInfo<UUID>?
 }
 
 enum BugReportScreenViewAction {

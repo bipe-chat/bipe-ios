@@ -14,6 +14,8 @@ import SwiftUI
 enum AppLockFlowCoordinatorAction: Equatable {
     /// Display the unlock flow.
     case lockApp
+    /// Bipe: display the placeholder over the app without hiding it, while the app is inactive but not locked.
+    case obscureApp
     /// Hide the unlock flow.
     case unlockApp
     /// Forces a logout of the user.
@@ -190,7 +192,7 @@ class AppLockFlowCoordinator: CoordinatorProtocol {
             
             switch (context.fromState, context.toState) {
             case (_, .appObscured):
-                showPlaceholder()
+                showPlaceholder(isObscuring: true)
             case (_, .backgrounded):
                 appLockService.applicationDidEnterBackground()
                 showPlaceholder() // Double call but just to be safe. Useful at app launch.
@@ -222,11 +224,11 @@ class AppLockFlowCoordinator: CoordinatorProtocol {
     // MARK: - App unlock
     
     /// Displays the unlock flow with the app's placeholder view to hide obscure the view hierarchy in the app switcher.
-    private func showPlaceholder() {
+    private func showPlaceholder(isObscuring: Bool = false) {
         // Bipe: a branded lock screen that says Face ID or Touch ID is running.
         let biometryType = isBiometricUnlockAvailable ? appLockService.biometryType : nil
         navigationCoordinator.setRootCoordinator(BipeAppLockPlaceholderScreenCoordinator(biometryType: biometryType), animated: false)
-        actionsSubject.send(.lockApp)
+        actionsSubject.send(isObscuring ? .obscureApp : .lockApp)
     }
     
     /// Attempts to authenticate the user using Face ID, Touch ID or (possibly) Optic ID.

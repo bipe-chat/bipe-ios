@@ -63,7 +63,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     private let appRouteURLParser: AppRouteURLParser
     
     private var storedAppRoute: AppRoute?
-    @Consumable private var storedInlineReply: (roomID: String, message: String)?
+    @Consumable private var storedInlineReply: (roomID: String, message: String, receiverID: String?)?
     @Consumable private var storedRoomsToAwait: Set<String>?
     
     init(appDelegate: AppDelegate) {
@@ -432,26 +432,38 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         MXLog.info("Tapped Notification")
         
         guard let roomID = content.roomID,
-              content.receiverID != nil else {
+              let receiverID = content.receiverID else {
             return
         }
         
+        // Bipe (ADR 0138 rule 3, bipe#510): a push for another account on this phone opens in that account.
+        let otherAccount = receiverID != userSession?.clientProxy.userID && userSessionManager.userIDs.contains(receiverID)
+        
         let eventID = appSettings.focusEventOnNotificationTap ? content.eventID : nil
+        let route: AppRoute
         if content.categoryIdentifier == NotificationConstants.Category.invite {
-            if let userSession {
+            if let userSession, !otherAccount {
                 userSession.clientProxy.roomsToAwait.insert(roomID)
             } else {
                 storedRoomsToAwait = [roomID]
             }
-            handleAppRoute(.room(roomID: roomID, via: []), windowType: nil)
+            route = .room(roomID: roomID, via: [])
         } else if appSettings.threadsEnabled, let threadRootEventID = content.threadRootEventID {
-            handleAppRoute(.thread(roomID: roomID, threadRootEventID: threadRootEventID, focusEventID: eventID), windowType: nil)
+            route = .thread(roomID: roomID, threadRootEventID: threadRootEventID, focusEventID: eventID)
         } else if let eventID {
             // Only track main timeline event deeplinking
             analyticsService.signpost.startTransaction(.notificationToMessage)
-            handleAppRoute(.event(eventID: eventID, roomID: roomID, via: []), windowType: nil)
+            route = .event(eventID: eventID, roomID: roomID, via: [])
         } else {
-            handleAppRoute(.room(roomID: roomID, via: []), windowType: nil)
+            route = .room(roomID: roomID, via: [])
+        }
+        
+        if otherAccount {
+            // The new session's setup opens the stored route.
+            storedAppRoute = route
+            bipeSwitchAccount(to: receiverID)
+        } else {
+            handleAppRoute(route, windowType: nil)
         }
     }
     
@@ -464,11 +476,11 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         if userSession == nil {
             // Store the data so it can be used after the session is established
-            storedInlineReply = (roomID, replyText)
+            storedInlineReply = (roomID, replyText, content.receiverID)
             return
         }
         
-        await processInlineReply(roomID: roomID, replyText: replyText)
+        await processInlineReply(roomID: roomID, replyText: replyText, receiverID: content.receiverID)
     }
     
     // MARK: - Private
@@ -788,6 +800,11 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             }
         }
         
+        // A greeting stored before bipe#445 can name another account on this phone. Drop it.
+        if let greeting = userSession.clientProxy.bipeInviterGreeting, userSessionManager.userIDs.contains(greeting.userID) {
+            BipeInviteStore(userID: userSession.clientProxy.userID).setInviterGreeting(nil)
+        }
+        
         if userSession.clientProxy.userIDServerName == appSettings.bipeSignupServerName {
             Task {
                 await BipeInviteJoinNotifier(apiBaseURL: appSettings.bipeAPIBaseURL,
@@ -813,7 +830,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
         
         if let storedInlineReply {
-            await processInlineReply(roomID: storedInlineReply.roomID, replyText: storedInlineReply.message)
+            await processInlineReply(roomID: storedInlineReply.roomID, replyText: storedInlineReply.message, receiverID: storedInlineReply.receiverID)
         }
     }
     
@@ -1065,6 +1082,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             switch action {
             case .lockApp:
                 windowManager.switchToAlternate()
+            case .obscureApp:
+                windowManager.bipeCoverMain()
             case .unlockApp:
                 windowManager.switchToMain()
             case .forceLogout:
@@ -1092,28 +1111,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             await userSession.clientProxy.clearCaches()
             stateMachine.processEvent(.startWithExistingSession)
             hideLoadingIndicator()
-        }
-    }
-    
-    private func processInlineReply(roomID: String, replyText: String) async {
-        guard let userSession else {
-            fatalError("User session not setup")
-        }
-        
-        guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID) else {
-            MXLog.error("Tried to reply in an unjoined room: \(roomID)")
-            return
-        }
-        
-        switch await roomProxy.timeline.sendMessage(replyText,
-                                                    html: nil,
-                                                    inReplyToEventID: nil,
-                                                    intentionalMentions: .empty) {
-        case .success:
-            break
-        default:
-            await notificationManager.showLocalNotification(with: "⚠️ " + L10n.commonError,
-                                                            subtitle: L10n.errorSomeMessagesHaveNotBeenSent)
         }
     }
     
@@ -1377,6 +1374,46 @@ extension AppCoordinator {
             BipeCredentialStore.bipeApp.deletePassword(for: userID)
         } else {
             BipeCredentialStore.bipeApp.deleteAllPasswords()
+        }
+    }
+}
+
+// MARK: Inline replies
+
+private extension AppCoordinator {
+    func processInlineReply(roomID: String, replyText: String, receiverID: String?) async {
+        guard let userSession else {
+            fatalError("User session not setup")
+        }
+        
+        // Bipe (ADR 0138 rules 2 and 5, bipe#510): reply from the account the push was for, never from the one on screen.
+        // Fail closed when that account has no live session.
+        let replySession: UserSessionProtocol? = if let receiverID, receiverID != userSession.clientProxy.userID {
+            userSessionManager.session(for: receiverID)
+        } else {
+            userSession
+        }
+        guard let replySession else {
+            MXLog.error("No live session for the account of an inline reply, not sending")
+            await notificationManager.showLocalNotification(with: "⚠️ " + L10n.commonError,
+                                                            subtitle: L10n.errorSomeMessagesHaveNotBeenSent)
+            return
+        }
+        
+        guard case let .joined(roomProxy) = await replySession.clientProxy.roomForIdentifier(roomID) else {
+            MXLog.error("Tried to reply in an unjoined room: \(roomID)")
+            return
+        }
+        
+        switch await roomProxy.timeline.sendMessage(replyText,
+                                                    html: nil,
+                                                    inReplyToEventID: nil,
+                                                    intentionalMentions: .empty) {
+        case .success:
+            break
+        default:
+            await notificationManager.showLocalNotification(with: "⚠️ " + L10n.commonError,
+                                                            subtitle: L10n.errorSomeMessagesHaveNotBeenSent)
         }
     }
 }

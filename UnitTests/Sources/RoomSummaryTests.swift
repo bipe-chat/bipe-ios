@@ -91,7 +91,7 @@ struct RoomSummaryTests {
     func tombstonedAvatar() {
         let details = makeSummary(isDirect: false, isSpace: false, hasRoomAvatar: true, isTombstoned: true)
         
-        #expect(details.avatar == .tombstoned)
+        #expect(details.avatar == .tombstoned(isDM: false))
     }
     
     // MARK: - Helpers

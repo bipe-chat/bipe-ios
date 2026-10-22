@@ -17,7 +17,8 @@ enum RoomAvatar: Equatable {
     /// An avatar generated from a Space's details.
     case space(id: String, name: String?, avatarURL: URL?)
     /// A static avatar for a tombstoned room.
-    case tombstoned
+    /// Bipe: `isDM` picks the DM accessibility label (bipe#507).
+    case tombstoned(isDM: Bool)
     
     var removingAvatar: RoomAvatar {
         switch self {
@@ -27,8 +28,8 @@ enum RoomAvatar: Equatable {
             .heroes(users.map { .init(userID: $0.id, displayName: $0.displayName, avatarURL: nil) })
         case .space(let id, let name, _):
             .space(id: id, name: name, avatarURL: nil)
-        case .tombstoned:
-            .tombstoned
+        case .tombstoned(let isDM):
+            .tombstoned(isDM: isDM)
         }
     }
     
@@ -113,8 +114,8 @@ struct RoomAvatarImage: View {
                                 avatarSize: avatarSize,
                                 mediaProvider: mediaProvider,
                                 onTap: onAvatarTap)
-        case .tombstoned:
-            TombstonedAvatarImage(avatarSize: avatarSize)
+        case .tombstoned(let isDM):
+            TombstonedAvatarImage(avatarSize: avatarSize, isDM: isDM)
         }
     }
 }
@@ -147,7 +148,7 @@ struct RoomAvatarImage_Previews: PreviewProvider, TestablePreview {
                                 avatarSize: .room(on: .chats),
                                 mediaProvider: MediaProviderMock(.init()))
                 
-                RoomAvatarImage(avatar: .tombstoned, avatarSize: .room(on: .chats), mediaProvider: MediaProviderMock(.init()))
+                RoomAvatarImage(avatar: .tombstoned(isDM: false), avatarSize: .room(on: .chats), mediaProvider: MediaProviderMock(.init()))
             }
             
             HStack(spacing: 12) {

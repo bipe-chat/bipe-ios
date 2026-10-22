@@ -107,6 +107,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         chatsTabFlowCoordinator = ChatsTabFlowCoordinator(navigationSplitCoordinator: chatsSplitCoordinator,
                                                           flowParameters: flowParameters)
         chatsTabDetails = .init(tag: HomeTab.chats, title: BipeStrings.tabChats, icon: \.chat, selectedIcon: \.chatSolid)
+        chatsTabDetails.bipeImages = (Asset.Images.bipeTabChats, Asset.Images.bipeTabChatsFill)
         chatsTabDetails.navigationSplitCoordinator = chatsSplitCoordinator
         
         let groupsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.userSession.userSettings.app.hideBrandChrome))
@@ -748,9 +749,11 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     /// A group invite the user has not opened counts 1 on Grupos. DM invites stay behind the Pedidos row.
     private func updateBipeTabBadges(roomSummaries: [RoomSummary]) {
         let seenInvites = userSession.userSettings.app.seenInvites
+        let clearedChats = BipeClearedChatsStore.store(for: userSession.clientProxy)
         var chatsCount = 0
         var groupsCount = 0
-        for summary in roomSummaries {
+        // Bipe (bipe#464): a cleared DM that the list hides adds nothing.
+        for summary in roomSummaries where !clearedChats.isHidden(summary) {
             switch BipeRoomListScope(summary: summary) {
             case .chats:
                 chatsCount += Int(summary.unreadNotificationsCount)
@@ -766,18 +769,12 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         groupsTabDetails.badgeCount = groupsCount
     }
     
-    /// Bipe ADR 0112: the Você tab shows a warning when the account has one way back or none,
-    /// the same count as the badge on the "Sua conta" row.
+    /// Bipe ADR 0112: the ways-back warning shows only on the "Sua conta" row, not on the Você tab icon, so the tab has one
+    /// kind of mark (the other-account dot).
     private func setupBipeWaysBackObserver() {
         let clientProxy = userSession.clientProxy
         let appSettings = userSession.userSettings.app
         guard clientProxy.userIDServerName == appSettings.bipeSignupServerName else { return }
-        
-        BipeWaysBackReader.counted
-            .filter { $0.userID == clientProxy.userID }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.youTabDetails.bipeWarning = $0.waysBack.needsWarning }
-            .store(in: &cancellables)
         
         // A new recovery key changes the count. The first value also does the first count.
         clientProxy.secureBackupController.recoveryState

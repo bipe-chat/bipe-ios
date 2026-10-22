@@ -18,6 +18,7 @@ class MessageForwardingScreenViewModel: MessageForwardingScreenViewModelType, Me
     private let clientProxy: ClientProxyProtocol
     private let roomSummaryProvider: RoomSummaryProviderProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
+    private let bipeClearedChats: BipeClearedChatsStore
     
     private var actionsSubject: PassthroughSubject<MessageForwardingScreenViewModelAction, Never> = .init()
     
@@ -33,10 +34,19 @@ class MessageForwardingScreenViewModel: MessageForwardingScreenViewModelType, Me
         clientProxy = userSession.clientProxy
         self.roomSummaryProvider = roomSummaryProvider
         self.userIndicatorController = userIndicatorController
+        bipeClearedChats = BipeClearedChatsStore.store(for: userSession.clientProxy)
         
         super.init(initialViewState: MessageForwardingScreenViewState(), mediaProvider: userSession.mediaProvider)
         
         roomSummaryProvider.roomListPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateRooms()
+            }
+            .store(in: &cancellables)
+        
+        bipeClearedChats.publisher
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateRooms()
@@ -88,7 +98,8 @@ class MessageForwardingScreenViewModel: MessageForwardingScreenViewModelType, Me
     
     private func updateRooms() {
         state.rooms = roomSummaryProvider.roomListPublisher.value
-            .filter { $0.id != forwardingPayload.roomID && !$0.isTombstoned }
+            // Bipe (bipe#479): a cleared DM stays out until a newer event arrives, as in the room list.
+            .filter { $0.id != forwardingPayload.roomID && !$0.isTombstoned && !bipeClearedChats.isHidden($0) }
             .map(MessageForwardingRoom.init(summary:))
     }
     
@@ -99,7 +110,7 @@ class MessageForwardingScreenViewModel: MessageForwardingScreenViewModelType, Me
         state.suggestedRooms = roomIDs
             .filter { $0 != forwardingPayload.roomID }
             .compactMap(clientProxy.roomSummaryForIdentifier)
-            .filter { $0.isJoined && !$0.isSpace && !$0.isTombstoned }
+            .filter { $0.isJoined && !$0.isSpace && !$0.isTombstoned && !bipeClearedChats.isHidden($0) }
             .prefix(Self.maxSuggestedRoomCount)
             .map(MessageForwardingRoom.init(summary:))
     }

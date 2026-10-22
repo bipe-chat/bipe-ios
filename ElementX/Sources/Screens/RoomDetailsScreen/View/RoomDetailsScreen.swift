@@ -70,7 +70,8 @@ struct RoomDetailsScreen: View {
                 }
             }
         }
-        .navigationTitle(context.viewState.dmRecipientInfo != nil ? BipeStrings.dmDetailsTitle : L10n.screenRoomDetailsTitle) // Bipe: a DM is a conversation
+        // Bipe: grupo, not sala (bipe#508)
+        .navigationTitle(context.viewState.dmRecipientInfo != nil ? BipeStrings.dmDetailsTitle : BipeStrings.groupScreenRoomDetailsTitle) // Bipe: a DM is a conversation
         .navigationBarTitleDisplayMode(.inline)
         .track(screen: .RoomDetails)
         .interactiveQuickLook(item: $context.mediaPreviewItem, allowEditing: false)
@@ -150,12 +151,12 @@ struct RoomDetailsScreen: View {
                         isTopicExpanded.toggle()
                     }
                 } else {
-                    ListRow(label: .plain(title: L10n.screenRoomDetailsAddTopicTitle),
+                    ListRow(label: .plain(title: BipeStrings.groupScreenRoomDetailsAddTopicTitle), // Bipe: "descrição", because "tópico" is a thread (bipe#527)
                             kind: .button { context.send(viewAction: .processTapAddTopic) })
                         .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.addTopic)
                 }
             } header: {
-                Text(L10n.commonTopic)
+                Text(BipeStrings.groupCommonTopic) // Bipe: "descrição", because "tópico" is a thread (bipe#527)
                     .compoundListSectionHeader()
             }
         }
@@ -326,7 +327,9 @@ struct RoomDetailsScreen: View {
     private var reportRoomSection: some View {
         Section {
             if context.viewState.reportRoomEnabled {
-                ListRow(label: .action(title: L10n.actionReportRoom,
+                // Bipe: a DM says "conversa", never "sala" (bipe#507).
+                // Bipe: grupo, not sala (bipe#508)
+                ListRow(label: .action(title: context.viewState.isDirect ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom,
                                        icon: \.chatProblem,
                                        role: .destructive),
                         kind: .button { context.send(viewAction: .processTapReport) })
@@ -336,10 +339,19 @@ struct RoomDetailsScreen: View {
     
     private var leaveRoomSection: some View {
         Section {
-            ListRow(label: .action(title: context.viewState.dmRecipientInfo != nil ? L10n.screenRoomDetailsLeaveConversationTitle : L10n.screenRoomDetailsLeaveRoomTitle,
-                                   icon: \.leave,
-                                   role: .destructive),
-                    kind: .button { context.send(viewAction: .processTapLeave) })
+            // Bipe (bipe#464): a DM has no room leave. "Apagar conversa" hides it and keeps you in it.
+            if context.viewState.dmRecipientInfo != nil {
+                ListRow(label: .action(title: BipeStrings.dmDeleteAction,
+                                       icon: \.delete,
+                                       role: .destructive),
+                        kind: .button { context.send(viewAction: .processTapLeave) })
+            } else {
+                // Bipe: grupo, not sala (bipe#508)
+                ListRow(label: .action(title: BipeStrings.groupScreenRoomDetailsLeaveRoomTitle,
+                                       icon: \.leave,
+                                       role: .destructive),
+                        kind: .button { context.send(viewAction: .processTapLeave) })
+            }
         }
     }
     

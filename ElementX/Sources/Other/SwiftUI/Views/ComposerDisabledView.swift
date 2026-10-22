@@ -6,12 +6,17 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
 struct ComposerDisabledView: View {
+    /// Bipe: a DM says "conversa", never "sala" (bipe#507).
+    var isDM = false
+    
     var body: some View {
-        Text(L10n.screenRoomTimelineNoPermissionToPost)
+        // Bipe: grupo, not sala (bipe#508)
+        Text(isDM ? BipeStrings.dmNoPermissionToPost : BipeStrings.groupScreenRoomTimelineNoPermissionToPost)
             .font(.compound.bodyLG)
             .foregroundStyle(.compound.textDisabled)
             .multilineTextAlignment(.center)

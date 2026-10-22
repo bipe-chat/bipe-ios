@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 @testable import ElementX
 import MatrixRustSDK
 import Testing
@@ -98,20 +99,31 @@ struct RoomStateEventStringBuilderTests {
         
         let newTopic = "New topic"
         var string = stringBuilder.buildString(for: .roomTopic(topic: newTopic), sender: you, isOutgoing: true)
-        #expect(string == L10n.stateEventRoomTopicChangedByYou(newTopic))
+        #expect(string == BipeStrings.groupStateEventRoomTopicChangedByYou(newTopic))
         string = stringBuilder.buildString(for: .roomTopic(topic: newTopic), sender: other, isOutgoing: false)
-        #expect(string == L10n.stateEventRoomTopicChanged(other.displayName ?? "", newTopic))
+        #expect(string == BipeStrings.groupStateEventRoomTopicChanged(other.displayName ?? "", newTopic))
         
         let emptyTopic = ""
         string = stringBuilder.buildString(for: .roomTopic(topic: emptyTopic), sender: you, isOutgoing: true)
-        #expect(string == L10n.stateEventRoomTopicRemovedByYou)
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemovedByYou)
         string = stringBuilder.buildString(for: .roomTopic(topic: emptyTopic), sender: other, isOutgoing: false)
-        #expect(string == L10n.stateEventRoomTopicRemoved(other.displayName ?? ""))
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemoved(other.displayName ?? ""))
         
         string = stringBuilder.buildString(for: .roomTopic(topic: nil), sender: you, isOutgoing: true)
-        #expect(string == L10n.stateEventRoomTopicRemovedByYou)
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemovedByYou)
         string = stringBuilder.buildString(for: .roomTopic(topic: nil), sender: other, isOutgoing: false)
-        #expect(string == L10n.stateEventRoomTopicRemoved(other.displayName ?? ""))
+        #expect(string == BipeStrings.groupStateEventRoomTopicRemoved(other.displayName ?? ""))
+    }
+    
+    @Test
+    func dmTopicChangesHaveNoLine() {
+        let you = TimelineItemSender(id: userID, displayName: "Alice")
+        let other = TimelineItemSender(id: "@bob:matrix.org", displayName: "Bob")
+        
+        for topic in ["New topic", "", nil] {
+            #expect(stringBuilder.buildString(for: .roomTopic(topic: topic), sender: you, isOutgoing: true, isDM: true) == nil)
+            #expect(stringBuilder.buildString(for: .roomTopic(topic: topic), sender: other, isOutgoing: false, isDM: true) == nil)
+        }
     }
     
     // MARK: - Room Membership

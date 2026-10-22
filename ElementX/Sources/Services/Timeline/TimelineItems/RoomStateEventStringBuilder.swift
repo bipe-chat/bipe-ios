@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import MatrixRustSDK
 import UIKit
 
@@ -17,7 +18,8 @@ nonisolated struct RoomStateEventStringBuilder {
                      memberUserID: String,
                      memberDisplayName: String?,
                      sender: TimelineItemSender,
-                     isOutgoing: Bool) -> String? {
+                     isOutgoing: Bool,
+                     isDM: Bool = false) -> String? {
         guard let change else {
             MXLog.verbose("Filtering timeline item for membership change that is nil")
             return nil
@@ -28,11 +30,24 @@ nonisolated struct RoomStateEventStringBuilder {
         let member = memberDisplayName ?? memberUserID
         let senderDisplayName = sender.disambiguatedDisplayName ?? sender.id
         
+        // Bipe: a DM has no invite lines, in the timeline or the room list preview. An invite pair's
+        // auto-accept made "You accepted the invite" the preview.
+        if isDM, change == .invited || change == .invitationAccepted {
+            return nil
+        }
+        
         switch change {
+        // Bipe: a DM says "conversa", a group says "grupo", never "sala" (bipe#507, bipe#508).
         case .joined:
-            return memberIsYou ? L10n.stateEventRoomJoinByYou : L10n.stateEventRoomJoin(senderDisplayName)
+            if isDM {
+                return memberIsYou ? BipeStrings.dmJoinedByYou : BipeStrings.dmJoined(senderDisplayName)
+            }
+            return memberIsYou ? BipeStrings.groupStateEventRoomJoinByYou : BipeStrings.groupStateEventRoomJoin(senderDisplayName)
         case .left:
-            return memberIsYou ? L10n.stateEventRoomLeaveByYou : L10n.stateEventRoomLeave(member)
+            if isDM {
+                return memberIsYou ? BipeStrings.dmLeftByYou : BipeStrings.dmLeft(member)
+            }
+            return memberIsYou ? BipeStrings.groupStateEventRoomLeaveByYou : BipeStrings.groupStateEventRoomLeave(member)
         case .banned, .kickedAndBanned:
             return switch (senderIsYou, reason) {
             case (true, .some(let reason)): L10n.stateEventRoomBanByYouWithReason(member, reason)
@@ -62,7 +77,12 @@ nonisolated struct RoomStateEventStringBuilder {
         case .invitationRejected:
             return memberIsYou ? L10n.stateEventRoomRejectByYou : L10n.stateEventRoomReject(senderDisplayName)
         case .invitationRevoked:
-            return senderIsYou ? L10n.stateEventRoomThirdPartyRevokedInviteByYou(member) : L10n.stateEventRoomThirdPartyRevokedInvite(senderDisplayName, member)
+            // Bipe: a DM says "conversa", never "sala" (bipe#507).
+            if isDM {
+                return senderIsYou ? BipeStrings.dmThirdPartyRevokedInviteByYou(member) : BipeStrings.dmThirdPartyRevokedInvite(senderDisplayName, member)
+            }
+            // Bipe: grupo, not sala (bipe#508)
+            return senderIsYou ? BipeStrings.groupStateEventRoomThirdPartyRevokedInviteByYou(member) : BipeStrings.groupStateEventRoomThirdPartyRevokedInvite(senderDisplayName, member)
         case .knocked:
             return memberIsYou ? L10n.stateEventRoomKnockByYou : L10n.stateEventRoomKnock(member)
         case .knockAccepted:
@@ -149,35 +169,49 @@ nonisolated struct RoomStateEventStringBuilder {
         }
     }
     
-    func buildString(for state: OtherState, sender: TimelineItemSender, isOutgoing: Bool) -> String? {
+    func buildString(for state: OtherState, sender: TimelineItemSender, isOutgoing: Bool, isDM: Bool = false) -> String? {
         let displayName = sender.disambiguatedDisplayName ?? sender.id
         
+        // Bipe: a DM has no topic, so it has no line about one (bipe#527).
+        if isDM, case .roomTopic = state {
+            return nil
+        }
+        
+        // Bipe: a DM says "conversa", never "sala" (bipe#507).
+        if isDM, let text = buildDMString(for: state, displayName: displayName, isOutgoing: isOutgoing) {
+            return text
+        }
+        
+        // Bipe: grupo, not sala (bipe#508)
         switch state {
         case .roomAvatar(let url):
             switch (url, isOutgoing) {
             case (.some, false):
-                return L10n.stateEventRoomAvatarChanged(displayName)
+                return BipeStrings.groupStateEventRoomAvatarChanged(displayName)
             case (nil, false):
-                return L10n.stateEventRoomAvatarRemoved(displayName)
+                return BipeStrings.groupStateEventRoomAvatarRemoved(displayName)
             case (.some, true):
-                return L10n.stateEventRoomAvatarChangedByYou
+                return BipeStrings.groupStateEventRoomAvatarChangedByYou
             case (nil, true):
-                return L10n.stateEventRoomAvatarRemovedByYou
+                return BipeStrings.groupStateEventRoomAvatarRemovedByYou
             }
         case .roomCreate:
-            return isOutgoing ? L10n.stateEventRoomCreatedByYou : L10n.stateEventRoomCreated(displayName)
+            if isDM { // Bipe: a DM says "conversa" (bipe#508)
+                return isOutgoing ? BipeStrings.dmCreatedByYou : BipeStrings.dmCreated(displayName)
+            }
+            return isOutgoing ? BipeStrings.groupStateEventRoomCreatedByYou : BipeStrings.groupStateEventRoomCreated(displayName)
         case .roomEncryption:
             return L10n.commonEncryptionEnabled
         case .roomName(let name):
             switch (name, isOutgoing) {
             case (.some(let name), false):
-                return L10n.stateEventRoomNameChanged(displayName, name)
+                return BipeStrings.groupStateEventRoomNameChanged(displayName, name)
             case (nil, false):
-                return L10n.stateEventRoomNameRemoved(displayName)
+                return BipeStrings.groupStateEventRoomNameRemoved(displayName)
             case (.some(let name), true):
-                return L10n.stateEventRoomNameChangedByYou(name)
+                return BipeStrings.groupStateEventRoomNameChangedByYou(name)
             case (nil, true):
-                return L10n.stateEventRoomNameRemovedByYou
+                return BipeStrings.groupStateEventRoomNameRemovedByYou
             }
         case .roomThirdPartyInvite(let displayName):
             guard let displayName else {
@@ -186,20 +220,20 @@ nonisolated struct RoomStateEventStringBuilder {
             }
             
             if isOutgoing {
-                return L10n.stateEventRoomThirdPartyInviteByYou(displayName)
+                return BipeStrings.groupStateEventRoomThirdPartyInviteByYou(displayName)
             } else {
-                return L10n.stateEventRoomThirdPartyInvite(displayName, displayName)
+                return BipeStrings.groupStateEventRoomThirdPartyInvite(displayName, displayName)
             }
-        case .roomTopic(let topic):
+        case .roomTopic(let topic): // Bipe: "descrição", because "tópico" is a thread (bipe#527)
             switch (topic, isOutgoing) {
             case (.some(let topic), false) where !topic.isBlank:
-                return L10n.stateEventRoomTopicChanged(displayName, topic)
+                return BipeStrings.groupStateEventRoomTopicChanged(displayName, topic)
             case (_, false):
-                return L10n.stateEventRoomTopicRemoved(displayName)
+                return BipeStrings.groupStateEventRoomTopicRemoved(displayName)
             case (.some(let topic), true) where !topic.isBlank:
-                return L10n.stateEventRoomTopicChangedByYou(topic)
+                return BipeStrings.groupStateEventRoomTopicChangedByYou(topic)
             case (_, true):
-                return L10n.stateEventRoomTopicRemovedByYou
+                return BipeStrings.groupStateEventRoomTopicRemovedByYou
             }
         case .roomPinnedEvents(let change):
             switch change {
@@ -232,5 +266,26 @@ nonisolated struct RoomStateEventStringBuilder {
         
         MXLog.verbose("Filtering timeline item for state: \(state)")
         return nil
+    }
+    
+    /// Bipe: the DM variants of the state lines that say "sala" upstream (bipe#507). `nil` means use the upstream line.
+    private func buildDMString(for state: OtherState, displayName: String, isOutgoing: Bool) -> String? {
+        switch state {
+        case .roomAvatar(let url):
+            if url != nil {
+                return isOutgoing ? BipeStrings.dmAvatarChangedByYou : BipeStrings.dmAvatarChanged(displayName)
+            }
+            return isOutgoing ? BipeStrings.dmAvatarRemovedByYou : BipeStrings.dmAvatarRemoved(displayName)
+        case .roomName(let name):
+            if let name {
+                return isOutgoing ? BipeStrings.dmNameChangedByYou(name) : BipeStrings.dmNameChanged(displayName, name)
+            }
+            return isOutgoing ? BipeStrings.dmNameRemovedByYou : BipeStrings.dmNameRemoved(displayName)
+        case .roomThirdPartyInvite(let invitee):
+            guard let invitee else { return nil }
+            return isOutgoing ? BipeStrings.dmThirdPartyInviteByYou(invitee) : BipeStrings.dmThirdPartyInvite(displayName, invitee)
+        default:
+            return nil
+        }
     }
 }

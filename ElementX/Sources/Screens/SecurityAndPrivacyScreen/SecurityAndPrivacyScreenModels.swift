@@ -273,7 +273,8 @@ struct SecurityAndPrivacyScreenStrings {
     init(historySharingDetailsURL: URL?) {
         let linkPlaceholder = "{link}"
         
-        var accessFooterString = AttributedString(L10n.screenSecurityAndPrivacyRoomAccessFooter(linkPlaceholder))
+        // Bipe: grupo, not sala (bipe#508)
+        var accessFooterString = AttributedString(BipeStrings.groupScreenSecurityAndPrivacyRoomAccessFooter(linkPlaceholder))
         var accessLinkString = AttributedString(L10n.screenSecurityAndPrivacyRoomAccessFooterManageSpacesAction)
         accessLinkString.link = .init(stringLiteral: "action://manageSpace") // The link address doesn't matter
         accessLinkString.bold()

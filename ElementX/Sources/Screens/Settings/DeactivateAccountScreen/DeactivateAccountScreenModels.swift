@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Foundation
 
 enum DeactivateAccountScreenViewModelAction {
@@ -15,7 +16,8 @@ enum DeactivateAccountScreenViewModelAction {
 struct DeactivateAccountScreenViewState: BindableState {
     let info: AttributedString
     let infoPoint1: AttributedString
-    let infoPoint2 = AttributedString(L10n.screenDeactivateAccountListItem2)
+    // Bipe: grupo, not sala (bipe#508)
+    let infoPoint2 = AttributedString(BipeStrings.groupScreenDeactivateAccountListItem2)
     let infoPoint3 = AttributedString(L10n.screenDeactivateAccountListItem3)
     let infoPoint4 = AttributedString(L10n.screenDeactivateAccountListItem4)
     

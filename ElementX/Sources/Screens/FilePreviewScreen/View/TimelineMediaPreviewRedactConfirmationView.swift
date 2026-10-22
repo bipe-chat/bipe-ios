@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 import UniformTypeIdentifiers
@@ -52,7 +53,9 @@ struct TimelineMediaPreviewRedactConfirmationView: View {
                     .foregroundStyle(.compound.textPrimary)
                     .multilineTextAlignment(.center)
                 
-                Text(L10n.screenMediaBrowserDeleteConfirmationSubtitle)
+                // Bipe: a DM says "conversa", never "sala" (bipe#507).
+                // Bipe: grupo, not sala (bipe#508)
+                Text(context.viewState.isDM ? BipeStrings.dmMediaDeleteBody : BipeStrings.groupScreenMediaBrowserDeleteConfirmationSubtitle)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textSecondary)
                     .multilineTextAlignment(.center)

@@ -40,3 +40,4 @@ Components/Secrets/vendor/*
 # Local SDK development override
 matrix-rust-components-swift
 build/
+

@@ -39,6 +39,8 @@ enum HomeScreenViewAction {
     case showRoomDetails(roomIdentifier: String)
     case leaveRoom(roomIdentifier: String)
     case confirmLeaveRoom(roomIdentifier: String)
+    /// Bipe (bipe#464): "Apagar conversa" replaces leave in a DM.
+    case bipeDeleteChat(roomIdentifier: String)
     case reportRoom(roomIdentifier: String)
     case showSettings
     case startChat
@@ -293,7 +295,8 @@ struct HomeScreenRoom: Identifiable, Equatable {
     
     var displayedLastMessage: AttributedString? {
         if isTombstoned {
-            AttributedString(L10n.screenRoomlistTombstonedRoomDescription)
+            // Bipe: grupo, not sala (bipe#508)
+            AttributedString(isDirect ? BipeStrings.dmTombstonedRow : BipeStrings.groupScreenRoomlistTombstonedRoomDescription) // Bipe: bipe#507
         } else if lastMessageState == .failed {
             AttributedString(L10n.commonMessageFailedToSend)
         } else {

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -96,7 +97,8 @@ struct RoomDetailsEditScreen: View {
     private var topicSection: some View {
         Section {
             if context.viewState.canEditTopic {
-                ListRow(label: .plain(title: isSpace ? L10n.commonSpaceTopicPlaceholder : L10n.commonTopicPlaceholder),
+                // Bipe: grupo, not sala (bipe#508)
+                ListRow(label: .plain(title: isSpace ? L10n.commonSpaceTopicPlaceholder : BipeStrings.groupCommonTopicPlaceholder),
                         kind: .textField(text: $context.topic, axis: .vertical))
                     .focused($focus, equals: .topic)
                     .lineLimit(3...)
@@ -107,7 +109,7 @@ struct RoomDetailsEditScreen: View {
                 })
             }
         } header: {
-            Text(L10n.commonTopic)
+            Text(BipeStrings.groupCommonTopic) // Bipe: "descrição", because "tópico" is a thread (bipe#527)
                 .compoundListSectionHeader()
         }
     }

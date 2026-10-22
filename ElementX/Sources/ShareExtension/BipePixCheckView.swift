@@ -16,7 +16,7 @@ struct BipePixCheckView: View {
     let sendToChat: () -> Void
     
     var body: some View {
-        NavigationStack {
+        ElementNavigationStack {
             Form {
                 if let code = check.code {
                     codeSection(code)

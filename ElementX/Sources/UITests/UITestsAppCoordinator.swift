@@ -241,6 +241,8 @@ class MockScreen: Identifiable {
                     switch action {
                     case .lockApp:
                         windowManager.switchToAlternate()
+                    case .obscureApp:
+                        windowManager.bipeCoverMain()
                     case .unlockApp:
                         windowManager.switchToMain()
                     case .forceLogout:
@@ -869,6 +871,16 @@ class MockScreen: Identifiable {
             retainedState.append(flowCoordinator)
             
             return nil
+        #if DEBUG
+        case .bipeStoreAvisoGolpe, .bipeStorePedidos, .bipeStoreSeuArroba, .bipeStoreConferirPix,
+             .bipeStoreGrupos, .bipeStoreSeloCnpj, .bipeStoreStickers:
+            let screens = BipeStoreScreens(windowManager: windowManager,
+                                           navigationRootCoordinator: navigationRootCoordinator,
+                                           appSettings: appSettings,
+                                           analytics: analytics)
+            retainedState.append(screens)
+            return screens.coordinator(for: id)
+        #endif
         }
     }()
     

@@ -49,6 +49,17 @@ enum UITestsScreenIdentifier: String {
     case userSessionScreenReply
     case userSessionSpacesFlow
     case autoUpdatingTimeline
+    
+    #if DEBUG
+    // Bipe store screenshots (bipe#454): `bipeStore` + the panel slug in bipe-shared/product/appstore.md.
+    case bipeStoreAvisoGolpe
+    case bipeStorePedidos
+    case bipeStoreSeuArroba
+    case bipeStoreConferirPix
+    case bipeStoreGrupos
+    case bipeStoreSeloCnpj
+    case bipeStoreStickers
+    #endif
 }
 
 extension UITestsScreenIdentifier: CustomStringConvertible {

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import Foundation
 import SwiftUI
@@ -63,7 +64,8 @@ class ManageRoomMemberSheetViewModel: ManageRoomMemberSheetViewModelType, Manage
         case .kick:
             state.bindings.alertInfo = .init(id: alertType,
                                              title: L10n.screenBottomSheetManageRoomMemberKickMemberConfirmationTitle,
-                                             message: roomProxy.infoPublisher.value.isSpace ? L10n.screenBottomSheetManageRoomMemberKickMemberFromSpaceConfirmationDescription : L10n.screenBottomSheetManageRoomMemberKickMemberConfirmationDescription,
+                                             // Bipe: grupo, not sala (bipe#508)
+                                             message: roomProxy.infoPublisher.value.isSpace ? BipeStrings.groupScreenBottomSheetManageRoomMemberKickMemberFromSpaceConfirmationDescription : BipeStrings.groupScreenBottomSheetManageRoomMemberKickMemberConfirmationDescription,
                                              primaryButton: .init(title: L10n.actionCancel, role: .cancel) { },
                                              secondaryButton: .init(title: L10n.screenBottomSheetManageRoomMemberKickMemberConfirmationAction) { [weak self] in Task { await self?.kickMember(id: memberID, name: memberName, reason: reason) } },
                                              textFields: [.init(placeholder: L10n.commonReason,
@@ -73,7 +75,8 @@ class ManageRoomMemberSheetViewModel: ManageRoomMemberSheetViewModelType, Manage
         case .ban:
             state.bindings.alertInfo = .init(id: alertType,
                                              title: L10n.screenBottomSheetManageRoomMemberBanMemberConfirmationTitle,
-                                             message: roomProxy.infoPublisher.value.isSpace ? L10n.screenBottomSheetManageRoomMemberBanMemberFromSpaceConfirmationDescription : L10n.screenBottomSheetManageRoomMemberBanMemberConfirmationDescription,
+                                             // Bipe: grupo, not sala (bipe#508)
+                                             message: roomProxy.infoPublisher.value.isSpace ? BipeStrings.groupScreenBottomSheetManageRoomMemberBanMemberFromSpaceConfirmationDescription : BipeStrings.groupScreenBottomSheetManageRoomMemberBanMemberConfirmationDescription,
                                              primaryButton: .init(title: L10n.actionCancel, role: .cancel) { },
                                              secondaryButton: .init(title: L10n.screenBottomSheetManageRoomMemberBanMemberConfirmationAction) { [weak self] in Task { await self?.banMember(id: memberID, name: memberName, reason: reason) } },
                                              textFields: [.init(placeholder: L10n.commonReason,
@@ -83,7 +86,8 @@ class ManageRoomMemberSheetViewModel: ManageRoomMemberSheetViewModelType, Manage
         case .unban:
             state.bindings.alertInfo = .init(id: alertType,
                                              title: L10n.screenBottomSheetManageRoomMemberUnbanMemberConfirmationTitle,
-                                             message: L10n.screenBottomSheetManageRoomMemberUnbanMemberConfirmationDescription,
+                                             // Bipe: grupo, not sala (bipe#508)
+                                             message: BipeStrings.groupScreenBottomSheetManageRoomMemberUnbanMemberConfirmationDescription,
                                              primaryButton: .init(title: L10n.actionCancel, role: .cancel) { },
                                              secondaryButton: .init(title: L10n.screenBottomSheetManageRoomMemberUnbanMemberConfirmationAction) { [weak self] in Task { await self?.unbanMember(id: memberID, name: memberName) } })
         }

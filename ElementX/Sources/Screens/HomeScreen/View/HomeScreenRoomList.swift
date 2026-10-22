@@ -118,14 +118,26 @@ struct HomeScreenRoomList: View {
                             Button(role: .destructive) {
                                 context.send(viewAction: .reportRoom(roomIdentifier: room.id))
                             } label: {
-                                Label(L10n.actionReportRoom, systemImage: "exclamationmark.bubble")
+                                // Bipe: a DM says "conversa", never "sala" (bipe#507).
+                                // Bipe: grupo, not sala (bipe#508)
+                                Label(room.isDirect ? BipeStrings.dmReport : BipeStrings.groupActionReportRoom, systemImage: "exclamationmark.bubble")
                             }
                         }
                         
-                        Button(role: .destructive) {
-                            context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
-                        } label: {
-                            Label(room.isDirect ? L10n.actionLeaveConversation : L10n.actionLeaveRoom, systemImage: "rectangle.portrait.and.arrow.right") // Bipe: a DM is a conversation
+                        // Bipe (bipe#464): a DM has no room leave. "Apagar conversa" hides it and keeps you in it.
+                        if room.isDirect {
+                            Button(role: .destructive) {
+                                context.send(viewAction: .bipeDeleteChat(roomIdentifier: room.id))
+                            } label: {
+                                Label(BipeStrings.dmDeleteAction, systemImage: "trash")
+                            }
+                        } else {
+                            Button(role: .destructive) {
+                                context.send(viewAction: .leaveRoom(roomIdentifier: room.id))
+                            } label: {
+                                // Bipe: grupo, not sala (bipe#508)
+                                Label(BipeStrings.groupActionLeaveRoom, systemImage: "rectangle.portrait.and.arrow.right")
+                            }
                         }
                     }
             }

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import MatrixRustSDK
 import SwiftUI
@@ -119,7 +120,8 @@ class InviteUsersScreenViewModel: InviteUsersScreenViewModelType, InviteUsersScr
     }
     
     private func createDraftRoom(mandatoryUserIDs: [String]) {
-        showLoadingIndicator(title: L10n.commonCreatingRoom)
+        // Bipe: grupo, not sala (bipe#508)
+        showLoadingIndicator(title: BipeStrings.groupCommonCreatingRoom)
         
         Task {
             defer { hideLoadingIndicator() }

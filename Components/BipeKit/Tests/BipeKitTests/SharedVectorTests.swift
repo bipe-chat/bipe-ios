@@ -134,6 +134,56 @@ struct SharedVectorTests {
             #expect(outcome == vector["expect"] as? String, "badge \(name)")
         }
     }
+    
+    @Test
+    func clearedChats() throws {
+        let file = try SharedVectors.object("cleared-chats.json")
+        #expect(file["event_type"] as? String == ClearedChats.eventType)
+        
+        let markers = try #require(file["marker"] as? [[String: Any]])
+        #expect(!markers.isEmpty)
+        for vector in markers {
+            let roomID = try #require(vector["room_id"] as? String)
+            let marker = ClearedChats(content: vector["content"]).marker(for: roomID)
+            #expect(marker == SharedVectors.timestamp(vector["expected"]), "marker \(vector["name"] ?? "")")
+        }
+        
+        let hidden = try #require(file["hidden"] as? [[String: Any]])
+        #expect(!hidden.isEmpty)
+        for vector in hidden {
+            let isHidden = ClearedChats.isHidden(marker: SharedVectors.timestamp(vector["marker"]),
+                                                 latestTs: SharedVectors.timestamp(vector["latest_ts"]))
+            #expect(isHidden == vector["expected"] as? Bool, "hidden \(vector["name"] ?? "")")
+        }
+        
+        let keeps = try #require(file["keeps"] as? [[String: Any]])
+        #expect(!keeps.isEmpty)
+        for vector in keeps {
+            let eventTs = try #require(SharedVectors.timestamp(vector["event_ts"]))
+            let keepsEvent = ClearedChats.keepsEvent(marker: SharedVectors.timestamp(vector["marker"]), eventTs: eventTs)
+            #expect(keepsEvent == vector["expected"] as? Bool, "keeps \(vector["name"] ?? "")")
+        }
+        
+        let clears = try #require(file["clear"] as? [[String: Any]])
+        #expect(!clears.isEmpty)
+        for vector in clears {
+            let name = vector["name"] ?? ""
+            let roomID = try #require(vector["room_id"] as? String)
+            let ts = try #require(SharedVectors.timestamp(vector["ts"]))
+            let expected = try #require(vector["expected"] as? [String: Any])
+            let content = ClearedChats.content(clearing: vector["content"], roomID: roomID, at: ts)
+            #expect(NSDictionary(dictionary: content).isEqual(to: expected), "clear \(name)")
+            
+            // The JSON string round trip that the app writes to account data.
+            var input: String?
+            if let raw = vector["content"] {
+                input = try String(data: JSONSerialization.data(withJSONObject: raw, options: [.fragmentsAllowed]), encoding: .utf8)
+            }
+            let json = try #require(ClearedChats.json(clearing: input, roomID: roomID, at: ts), "clear json \(name)")
+            let written = try #require(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+            #expect(NSDictionary(dictionary: written).isEqual(to: expected), "clear json \(name)")
+        }
+    }
 }
 
 /// Loads bipe-shared/test-vectors next to this repo. BIPE_SHARED overrides the bipe-shared path.
@@ -156,6 +206,11 @@ enum SharedVectors {
     
     static func array(_ name: String, key: String) throws -> [[String: Any]] {
         try #require(try object(name)[key] as? [[String: Any]])
+    }
+    
+    /// A millisecond time from a vector. JSON `null` (NSNull) and a missing key are `nil`.
+    static func timestamp(_ value: Any?) -> UInt64? {
+        (value as? NSNumber)?.uint64Value
     }
 }
 

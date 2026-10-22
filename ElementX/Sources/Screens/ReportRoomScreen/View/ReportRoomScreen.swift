@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Compound
 import SwiftUI
 
@@ -18,7 +19,9 @@ struct ReportRoomScreen: View {
             leaveRoomSection
         }
         .compoundList()
-        .navigationTitle(L10n.screenReportRoomTitle)
+        // Bipe: a DM says "conversa", never "sala" (bipe#507).
+        // Bipe: grupo, not sala (bipe#508)
+        .navigationTitle(context.viewState.isDM ? BipeStrings.dmReport : BipeStrings.groupScreenReportRoomTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
         .alert(item: $context.alert)
@@ -30,14 +33,16 @@ struct ReportRoomScreen: View {
                     kind: .textField(text: $context.reason, axis: .vertical))
                 .lineLimit(4, reservesSpace: true)
         } footer: {
-            Text(L10n.screenReportRoomReasonFooter)
+            // Bipe: grupo, not sala (bipe#508)
+            Text(context.viewState.isDM ? BipeStrings.dmReportFooter : BipeStrings.groupScreenReportRoomReasonFooter)
                 .compoundListSectionFooter()
         }
     }
     
     private var leaveRoomSection: some View {
         Section {
-            ListRow(label: .plain(title: L10n.actionLeaveRoom),
+            // Bipe: grupo, not sala (bipe#508)
+            ListRow(label: .plain(title: context.viewState.isDM ? BipeStrings.dmReportLeave : BipeStrings.groupActionLeaveRoom),
                     kind: .toggle($context.shouldLeaveRoom))
         }
     }

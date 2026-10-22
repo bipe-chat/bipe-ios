@@ -5,6 +5,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import MatrixRustSDK
 import SwiftUI
 
@@ -28,11 +29,21 @@ nonisolated struct TimelineItemKeyForwarder: Identifiable, Hashable {
         }
     }
     
-    var message: String {
-        if let displayName {
-            L10n.cryptoEventKeyForwardedKnownProfileDialogContent(displayName, id)
+    /// Bipe: a DM says "conversa", never "sala" (bipe#507).
+    func message(isDM: Bool) -> String {
+        if isDM {
+            return if let displayName {
+                BipeStrings.dmKeyForwardedKnown(displayName, id)
+            } else {
+                BipeStrings.dmKeyForwardedUnknown(id)
+            }
+        }
+        
+        // Bipe: grupo, not sala (bipe#508)
+        return if let displayName {
+            BipeStrings.groupCryptoEventKeyForwardedKnownProfileDialogContent(displayName, id)
         } else {
-            L10n.cryptoEventKeyForwardedUnknownProfileDialogContent(id)
+            BipeStrings.groupCryptoEventKeyForwardedUnknownProfileDialogContent(id)
         }
     }
 }

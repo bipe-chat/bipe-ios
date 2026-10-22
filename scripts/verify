@@ -2,6 +2,7 @@
 # Fast check before a push: SwiftFormat lint (as in CI) and a build of the UnitTests scheme, app and tests.
 # The pre-push hook in .bipe-hooks calls it. The unit tests themselves run only in CI ("Tests"): locally
 # they take over an hour and the media suites need git-lfs files.
+# All checkouts and worktrees share one DerivedData (../bipe/docs/agents/builds.md); the xcodebuild lock keeps builds serial.
 # Usage: scripts/verify [--all]
 set -eu
 cd "$(git rev-parse --show-toplevel)"
@@ -13,5 +14,6 @@ fi
 export PATH="$PATH:/opt/homebrew/bin"
 swiftformat --lint .
 xcodebuild build-for-testing -project ElementX.xcodeproj -scheme UnitTests \
+  -derivedDataPath "$HOME/Library/Developer/Xcode/DerivedData/Bipe-iOS" \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO -quiet
 echo "verify: ok"

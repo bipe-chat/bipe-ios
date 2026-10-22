@@ -81,7 +81,7 @@ extension BaseRoomInfoProxyProtocol {
     /// The room's avatar info for use in a ``RoomAvatarImage``.
     var avatar: RoomAvatar {
         guard successor == nil else {
-            return .tombstoned
+            return .tombstoned(isDM: isDirect) // Bipe: bipe#507
         }
         
         if isSpace {

@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import MatrixRustSDK
 import SwiftUI
@@ -66,7 +67,8 @@ class SecurityAndPrivacyScreenViewModel: SecurityAndPrivacyScreenViewModelType, 
             if updatedValue {
                 state.bindings.alertInfo = .init(id: .enableEncryption,
                                                  title: L10n.screenSecurityAndPrivacyEnableEncryptionAlertTitle,
-                                                 message: L10n.screenSecurityAndPrivacyEnableEncryptionAlertDescription,
+                                                 // Bipe: grupo, not sala (bipe#508)
+                                                 message: BipeStrings.groupScreenSecurityAndPrivacyEnableEncryptionAlertDescription,
                                                  primaryButton: .init(title: L10n.screenSecurityAndPrivacyEnableEncryptionAlertConfirmButtonTitle) { [weak self] in self?.state.bindings.desiredSettings.isEncryptionEnabled = true },
                                                  secondaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil))
             } else {

@@ -407,6 +407,11 @@ Skill clash this file? This file win. Build settings, entitlements, Info.plist k
 | `codecov.yml` | Codecov config |
 | `.periphery.yml` | Periphery dead-code detection |
 
+## Builds and disk
+
+- Follow `../bipe/docs/agents/builds.md`: one build at a time on this Mac, no parallel tracks, no new worktree per task.
+- Every `xcodebuild` call passes `-derivedDataPath ~/Library/Developer/Xcode/DerivedData/Bipe-iOS`, as `scripts/verify` does. Never build into `build/` or another folder inside the checkout.
+
 ## Before you push
 
 - CI must stay green. `scripts/verify` is the fast check: format, lint and compile, app and test sources. Unit tests run only in CI. Run it before every push; the pre-push hook runs it when this clone has `git config core.hooksPath .bipe-hooks` (set it once per clone; worktrees share it).

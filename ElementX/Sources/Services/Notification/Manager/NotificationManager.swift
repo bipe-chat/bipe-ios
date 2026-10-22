@@ -131,7 +131,7 @@ final class NotificationManager: NSObject, NotificationManagerProtocol {
     func removeDeliveredMessageNotifications(for roomID: String) async {
         let notificationsIdentifiers = await notificationCenter
             .deliveredNotifications()
-            .filter { $0.request.content.roomID == roomID }
+            .filter { $0.request.content.roomID == roomID && isForCurrentAccount($0) }
             .map(\.request.identifier)
         notificationCenter.removeDeliveredNotifications(withIdentifiers: notificationsIdentifiers)
     }
@@ -146,7 +146,8 @@ final class NotificationManager: NSObject, NotificationManagerProtocol {
         let notificationsIdentifiers = await notificationCenter
             .deliveredNotifications()
             .filter { notification in
-                guard let roomID = notification.request.content.roomID,
+                guard isForCurrentAccount(notification),
+                      let roomID = notification.request.content.roomID,
                       let lastMessageDate = roomsToLastMessageDates[roomID] else {
                     return false
                 }
@@ -173,6 +174,13 @@ final class NotificationManager: NSObject, NotificationManagerProtocol {
         } catch {
             MXLog.error("Failed updating the app badge count with error: \(error)")
         }
+    }
+    
+    /// Bipe: two accounts on the phone can share a room. Reading it in one account keeps the other account's notifications,
+    /// which drive the dot on the Você tab.
+    private func isForCurrentAccount(_ notification: UNNotification) -> Bool {
+        guard let receiverID = notification.request.content.receiverID, let userSession else { return true }
+        return receiverID == userSession.clientProxy.userID
     }
     
     private func removeReceivedWhileOfflineNotification() {
@@ -246,6 +254,10 @@ extension NotificationManager: UNUserNotificationCenterDelegate {
             return []
         }
         
+        // Bipe: the Você tab dot for another account. Notification Center lists the notification only after this returns.
+        if let receiverID = notification.request.content.receiverID {
+            NotificationCenter.default.post(name: .bipeOtherAccountNotification, object: receiverID)
+        }
         return [.badge, .sound, .list, .banner]
     }
     

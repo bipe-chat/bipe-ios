@@ -23,6 +23,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
     private let userSettings: UserSettings
     private let bipeInvitePairs: BipeInvitePairs
     private let bipeSelfChat: BipeSelfChat
+    private let bipeClearedChats: BipeClearedChatsStore
     private let notificationManager: NotificationManagerProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     
@@ -60,6 +61,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         bipeInvitePairs = BipeInvitePairs(clientProxy: userSession.clientProxy, apiBaseURL: userSettings.app.bipeAPIBaseURL)
         bipeSelfChat = BipeSelfChat(clientProxy: userSession.clientProxy)
+        bipeClearedChats = BipeClearedChatsStore.store(for: userSession.clientProxy)
         
         super.init(initialViewState: .init(userProfile: userSession.clientProxy.userProfilePublisher.value,
                                            bipeScope: bipeScope,
@@ -71,6 +73,12 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             await self?.bipeSelfChat.refresh()
         }
         NotificationCenter.default.publisher(for: BipeSelfChat.cachedRoomIDDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateRooms() }
+            .store(in: &cancellables)
+        // Bipe (bipe#464): a new marker hides a cleared DM, from this device or another one.
+        bipeClearedChats.publisher
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateRooms() }
             .store(in: &cancellables)
@@ -258,6 +266,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             startLeaveRoomProcess(roomID: roomIdentifier)
         case .confirmLeaveRoom(let roomIdentifier):
             Task { await leaveRoom(roomID: roomIdentifier) }
+        case .bipeDeleteChat(let roomIdentifier):
+            showBipeDeleteChatAlert(roomID: roomIdentifier)
         case .reportRoom(let roomIdentifier):
             actionsSubject.send(.presentReportRoom(roomIdentifier: roomIdentifier))
         case .showSettings:
@@ -492,6 +502,11 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                 continue
             }
             
+            // Bipe (bipe#464): a cleared DM stays out of every tab and filter until a newer event arrives.
+            if bipeClearedChats.isHidden(summary) {
+                continue
+            }
+            
             if summary.isDirect, case .invite(let inviter) = summary.joinRequestType {
                 // Bipe ADR 0034: a chat from an invite pair skips Pedidos and is accepted without a tap.
                 if bipeInvitePairs.contains(inviter?.userID) {
@@ -640,6 +655,7 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                 let selfChatRoomID = bipeSelfChat.cachedRoomID
                 state.bipeArchivedCount = summaries.count(where: { summary in
                     summary.isJoined && summary.isLowPriority && summary.id != selfChatRoomID && BipeRoomListScope(summary: summary) == state.bipeScope
+                        && !bipeClearedChats.isHidden(summary)
                 })
             }
             .store(in: &cancellables)
@@ -667,7 +683,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                                              title: L10n.commonError,
                                              message: roomProxy.infoPublisher.value.isDM // Bipe: a DM is a conversation
                                                  ? (isMuted ? BipeStrings.dmErrorMuting : BipeStrings.dmErrorUnmuting)
-                                                 : (isMuted ? L10n.screenRoomDetailsErrorMuting : L10n.screenRoomDetailsErrorUnmuting))
+                                                 // Bipe: grupo, not sala (bipe#508)
+                                                 : (isMuted ? BipeStrings.groupScreenRoomDetailsErrorMuting : BipeStrings.groupScreenRoomDetailsErrorUnmuting))
         }
     }
     
@@ -707,7 +724,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
                     if isLastOwner {
                         state.bindings.alertInfo = .init(id: UUID(),
                                                          title: L10n.leaveRoomAlertSelectNewOwnerTitle,
-                                                         message: L10n.leaveRoomAlertSelectNewOwnerSubtitle,
+                                                         // Bipe: grupo, not sala (bipe#508)
+                                                         message: BipeStrings.groupLeaveRoomAlertSelectNewOwnerSubtitle,
                                                          primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
                                                          secondaryButton: .init(title: L10n.leaveRoomAlertSelectNewOwnerAction, role: .destructive) { [weak self] in
                                                              self?.actionsSubject.send(.transferOwnership(roomIdentifier: roomID))
@@ -726,7 +744,8 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
             userIndicatorController.retractIndicatorWithId(Self.leaveRoomLoadingID)
         }
         let isDirect = state.rooms.first { $0.roomID == roomID }?.isDirect == true // Bipe: a DM is a conversation
-        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDirect ? BipeStrings.dmLeaving : L10n.commonLeavingRoom, persistent: true))
+        // Bipe: grupo, not sala (bipe#508)
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.leaveRoomLoadingID, type: .modal, title: isDirect ? BipeStrings.dmLeaving : BipeStrings.groupCommonLeavingRoom, persistent: true))
         
         guard case let .joined(roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID),
               case .success = await roomProxy.leaveRoom() else {
@@ -736,8 +755,39 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         
         userIndicatorController.submitIndicator(UserIndicator(id: UUID().uuidString,
                                                               type: .toast,
-                                                              title: isDirect ? BipeStrings.dmLeftByYou : L10n.commonCurrentUserLeftRoom,
+                                                              // Bipe: grupo, not sala (bipe#508)
+                                                              title: isDirect ? BipeStrings.dmLeftByYou : BipeStrings.groupCommonCurrentUserLeftRoom,
                                                               icon: \.check))
+        actionsSubject.send(.roomLeft(roomIdentifier: roomID))
+    }
+    
+    // MARK: Bipe: delete a DM (bipe#464)
+    
+    private static let bipeDeleteChatLoadingID = "BipeDeleteChatLoading"
+    
+    private func showBipeDeleteChatAlert(roomID: String) {
+        state.bindings.alertInfo = AlertInfo(id: UUID(),
+                                             title: BipeStrings.dmDeleteTitle,
+                                             message: BipeStrings.dmDeleteBody,
+                                             primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
+                                             secondaryButton: .init(title: BipeStrings.dmDeleteConfirm, role: .destructive) { [weak self] in
+                                                 Task { await self?.deleteBipeChat(roomID: roomID) }
+                                             })
+    }
+    
+    /// Writes the marker. The user stays in the room, so the other person sees no change.
+    private func deleteBipeChat(roomID: String) async {
+        userIndicatorController.submitIndicator(UserIndicator(id: Self.bipeDeleteChatLoadingID, type: .modal, title: L10n.commonLoading, persistent: true))
+        let isCleared = await bipeClearedChats.clear(roomID: roomID)
+        userIndicatorController.retractIndicatorWithId(Self.bipeDeleteChatLoadingID)
+        
+        guard isCleared else {
+            displayError(message: BipeStrings.dmDeleteError)
+            return
+        }
+        
+        await notificationManager.removeDeliveredMessageNotifications(for: roomID)
+        // Closes the room when it is open next to the list.
         actionsSubject.send(.roomLeft(roomIdentifier: roomID))
     }
     
@@ -761,7 +811,9 @@ class HomeScreenViewModel: HomeScreenViewModelType, HomeScreenViewModelProtocol 
         case .failure(let error):
             switch error {
             case .invalidInvite:
-                displayError(title: L10n.dialogTitleError, message: L10n.errorInvalidInvite)
+                // Bipe: a DM invite says "conversa", never "sala" (bipe#507).
+                // Bipe: grupo, not sala (bipe#508)
+                displayError(title: L10n.dialogTitleError, message: roomProxy.info.isDirect ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite)
             default:
                 displayError()
             }

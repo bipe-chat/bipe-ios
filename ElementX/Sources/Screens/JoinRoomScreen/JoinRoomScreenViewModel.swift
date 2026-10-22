@@ -6,6 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+import BipeKit
 import Combine
 import MatrixRustSDK
 import SwiftUI
@@ -111,9 +112,10 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                 isLoadingPreview = false
             case .failure:
                 hideLoadingIndicator()
+                // Bipe: a DM says "conversa", a group says "grupo", never "sala" (bipe#508).
                 state.bindings.alertInfo = .init(id: .loadingError,
                                                  title: L10n.commonError,
-                                                 message: L10n.screenJoinRoomLoadingAlertMessage,
+                                                 message: state.roomDetails?.isDirect == true ? BipeStrings.dmPreviewFailed : BipeStrings.groupScreenJoinRoomLoadingAlertMessage,
                                                  primaryButton: .init(title: L10n.actionTryAgain) { [weak self] in Task { await self?.loadRoomDetails() }},
                                                  secondaryButton: .init(title: L10n.actionCancel, role: .cancel) { [weak self] in self?.actionsSubject.send(.dismiss) })
             }
@@ -316,7 +318,8 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                     state.mode = .forbidden
                 case .invalidInvite:
                     MXLog.error("Failed joining room alias: \(alias) invalid invite")
-                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: L10n.errorInvalidInvite)
+                    // Bipe: grupo, not sala (bipe#508)
+                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDirect == true ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite) // Bipe: bipe#507
                 default:
                     MXLog.error("Failed joining room alias: \(alias) with error: \(error)")
                     userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
@@ -334,7 +337,8 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
                     state.mode = .forbidden
                 case .invalidInvite:
                     MXLog.error("Failed joining room id: \(roomID) invalid invite")
-                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: L10n.errorInvalidInvite)
+                    // Bipe: grupo, not sala (bipe#508)
+                    state.bindings.alertInfo = .init(id: .invalidInvite, title: L10n.dialogTitleError, message: state.roomDetails?.isDirect == true ? BipeStrings.dmInviteInvalid : BipeStrings.groupErrorInvalidInvite) // Bipe: bipe#507
                 default:
                     MXLog.error("Failed joining room id: \(roomID) with error: \(error)")
                     userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
@@ -416,7 +420,8 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
     private func showCancelKnockConfirmationAlert() {
         state.bindings.alertInfo = .init(id: .cancelKnock,
                                          title: L10n.screenJoinRoomCancelKnockAlertTitle,
-                                         message: L10n.screenJoinRoomCancelKnockAlertDescription,
+                                         // Bipe: grupo, not sala (bipe#508)
+                                         message: BipeStrings.groupScreenJoinRoomCancelKnockAlertDescription,
                                          primaryButton: .init(title: L10n.actionNo, role: .cancel, action: nil),
                                          secondaryButton: .init(title: L10n.screenJoinRoomCancelKnockAlertConfirmation, role: .destructive) { Task { await self.cancelKnock() } })
     }
@@ -425,9 +430,10 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
         if await clientProxy.isReportRoomSupported {
             actionsSubject.send(.presentDeclineAndBlock(userID: userID))
         } else {
+            // Bipe: grupo, not sala (bipe#508). The DM side keeps upstream until it has its own string.
             state.bindings.alertInfo = .init(id: .declineInviteAndBlock,
                                              title: L10n.screenJoinRoomDeclineAndBlockAlertTitle,
-                                             message: L10n.screenJoinRoomDeclineAndBlockAlertMessage(userID),
+                                             message: state.roomDetails?.isDirect == true ? BipeStrings.dmDeclineBlockAlert(userID) : BipeStrings.groupScreenJoinRoomDeclineAndBlockAlertMessage(userID),
                                              primaryButton: .init(title: L10n.actionCancel, role: .cancel, action: nil),
                                              secondaryButton: .init(title: L10n.screenJoinRoomDeclineAndBlockAlertConfirmation, role: .destructive) { Task { await self.declineAndBlock(userID: userID) } })
         }

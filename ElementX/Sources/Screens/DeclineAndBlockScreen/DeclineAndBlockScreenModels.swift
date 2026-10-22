@@ -14,6 +14,8 @@ enum DeclineAndBlockScreenViewModelAction: Equatable {
 
 struct DeclineAndBlockScreenViewState: BindableState {
     var bindings = DeclineAndBlockScreenViewStateBindings()
+    /// Bipe: a DM invite says "conversa", never "sala" (bipe#507).
+    var isDM = false
     
     var isDeclineDisabled: Bool {
         if bindings.shouldReport {

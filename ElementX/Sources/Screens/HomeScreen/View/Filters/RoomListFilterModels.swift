@@ -34,7 +34,8 @@ enum RoomListFilter: Int, CaseIterable, Identifiable {
         case .people:
             return L10n.screenRoomlistFilterPeople
         case .rooms:
-            return L10n.screenRoomlistFilterRooms
+            // Bipe: grupo, not sala (bipe#508)
+            return BipeStrings.groupScreenRoomlistFilterRooms
         case .unreads:
             return L10n.screenRoomlistFilterUnreads
         case .mentions:
