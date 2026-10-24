@@ -42,6 +42,10 @@ public enum BipeStrings {
         String(format: NSLocalizedString("bipe_warning_not_your_contact", tableName: "Bipe", bundle: .module, comment: ""), p1)
     }
 
+    public static func warningPhotoMatch(_ p1: String) -> String {
+        String(format: NSLocalizedString("bipe_warning_photo_match", tableName: "Bipe", bundle: .module, comment: ""), p1)
+    }
+
     public static var deviceApprovalNeverForOthers: String { NSLocalizedString("bipe_device_approval_never_for_others", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var badgeVerifiedContact: String { NSLocalizedString("bipe_badge_verified_contact", tableName: "Bipe", bundle: .module, comment: "") }
@@ -487,6 +491,8 @@ public enum BipeStrings {
     public static var govbrReasonChangedAfterSigning: String { NSLocalizedString("bipe_govbr_reason_changed_after_signing", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var trustComingSoon: String { NSLocalizedString("bipe_trust_coming_soon", tableName: "Bipe", bundle: .module, comment: "") }
+
+    public static var trustStepDone: String { NSLocalizedString("bipe_trust_step_done", tableName: "Bipe", bundle: .module, comment: "") }
 
     public static var trustStepCompanyProfileBody: String { NSLocalizedString("bipe_trust_step_company_profile_body", tableName: "Bipe", bundle: .module, comment: "") }
 

@@ -14,6 +14,7 @@
 "bipe_warning_receipt_image" = "Isso é uma imagem, não um comprovante de pagamento.";
 "bipe_warning_reserved_name" = "Este nome é reservado para instituições verificadas.";
 "bipe_warning_not_your_contact" = "Não é o seu contato %1$@.";
+"bipe_warning_photo_match" = "Esta conta usa a mesma foto de %1$@, que está nas suas conversas.";
 "bipe_device_approval_never_for_others" = "O Bipe nunca pede para você aprovar o celular de outra pessoa.";
 "bipe_badge_verified_contact" = "Contato confirmado pessoalmente";
 "bipe_badge_suspended_body" = "Esta conta entrou num aparelho novo. O selo volta quando a pessoa verificar de novo nesse aparelho.";
@@ -212,6 +213,7 @@
 "bipe_govbr_reason_cpf_in_use" = "Esse CPF já verificou outra conta no Bipe.";
 "bipe_govbr_reason_changed_after_signing" = "O arquivo mudou depois da assinatura. Assine de novo o documento original.";
 "bipe_trust_coming_soon" = "Em breve";
+"bipe_trust_step_done" = "Concluída";
 "bipe_trust_step_company_profile_body" = "Nome da empresa, nome de usuário e logo.";
 "bipe_trust_step_profile_add_company_name" = "Adicionar nome da empresa";
 "bipe_trust_step_profile_add_logo" = "Adicionar logo";

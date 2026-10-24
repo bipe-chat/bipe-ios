@@ -14,6 +14,7 @@
 "bipe_warning_receipt_image" = "Image, not a payment receipt.";
 "bipe_warning_reserved_name" = "This name is reserved for verified organisations.";
 "bipe_warning_not_your_contact" = "Not your contact %1$@.";
+"bipe_warning_photo_match" = "This account uses the same photo as %1$@, who is in your chats.";
 "bipe_device_approval_never_for_others" = "Bipe never asks you to approve someone else's phone.";
 "bipe_badge_verified_contact" = "Confirmed in person";
 "bipe_badge_suspended_body" = "This account signed in on a new device. The seal comes back when the person verifies again on that device.";
@@ -212,6 +213,7 @@
 "bipe_govbr_reason_cpf_in_use" = "This CPF already verified another Bipe account.";
 "bipe_govbr_reason_changed_after_signing" = "The file changed after it was signed. Sign the original document again.";
 "bipe_trust_coming_soon" = "Coming soon";
+"bipe_trust_step_done" = "Done";
 "bipe_trust_step_company_profile_body" = "Company name, username and logo.";
 "bipe_trust_step_profile_add_company_name" = "Add the company name";
 "bipe_trust_step_profile_add_logo" = "Add a logo";
