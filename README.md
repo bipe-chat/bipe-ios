@@ -1,3 +1,5 @@
+> **Frozen.** Bipe no longer works on this fork. Bipe for iOS and Android now lives in [bipe-app](https://github.com/bipe-chat/bipe-app). This repo stays public under the AGPL because the current store builds come from it. We archive it once bipe-app replaces it in the stores.
+
 > **Bipe fork.** This is [Bipe](https://bipe.chat)'s fork of Element X iOS, a Brazilian messenger built on Matrix. Bipe's own code lives in `Components/BipeKit`. Fork rules: [BIPE.md](BIPE.md). Contributing: [Bipe guide](https://github.com/bipe-chat/.github/blob/main/CONTRIBUTING.md) (DCO sign-off). Security: [SECURITY.md](https://github.com/bipe-chat/.github/blob/main/SECURITY.md). The Bipe name and logo are not covered by the licence: [TRADEMARKS.md](https://github.com/bipe-chat/.github/blob/main/TRADEMARKS.md). Everything below this note is Element's original README.
 
 [![Element iOS Matrix room #element-x-ios:matrix.org](https://img.shields.io/matrix/element-x-ios:matrix.org.svg?label=%23element-x-ios:matrix.org&logo=matrix&server_fqdn=matrix.org)](https://matrix.to/#/#element-x-ios:matrix.org)
